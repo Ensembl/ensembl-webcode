@@ -693,9 +693,6 @@ sub _init {
     'length'   => $container_length
   };
 
-  warn "USE STYLE ... ", $configuration->{ 'use_style' };
-  warn $Config->get($das_config_key, 'stylesheet');
-  warn $Extra->{'stylesheet'};
   my $dsn = $Extra->{'dsn'};
   my $url = defined($Extra->{'url'}) ? $Extra->{'url'}."/$dsn" :  $Extra->{'protocol'}.'://'. $Extra->{'domain'} ."/$dsn";
 

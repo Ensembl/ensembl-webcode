@@ -267,6 +267,7 @@ sub stats {
 
   for my $stat (@orderlist){
     my $value = $chr->thousandify( $chr_stats{$stat} );
+    next if !$value;
     my $bps_label = ($stat eq "Length") ? 'bps' : '&nbsp;';
     $stat = "Genes (known and novel)" if $stat eq 'Gene Count';
     $stat =~ s/ Count$/s/;

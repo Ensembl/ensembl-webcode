@@ -13,6 +13,8 @@ use EnsEMBL::Web::Configuration;
 
 sub exonview {
   my $self   = shift;
+  $self->{object}->param( 'oexon', 'no' ) unless $self->{object}->input_param( 'oexon' ) eq 'yes';
+  $self->{object}->param( 'fullseq', 'no' ) unless $self->{object}->input_param( 'fullseq' ) eq 'yes';
   my @common = (
     'object' => $self->{object},
     'params' => { 'db' => $self->{object}->get_db, 'transcript' => $self->{object}->stable_id }

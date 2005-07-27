@@ -32,9 +32,10 @@ sub render {
   } else {
     $site_section = 'all Ensembl';
   }
+  my $script = $SD->ENSEMBL_SEARCH;
   $self->print( qq(
 <div id="search">
-  <form action="/@{[$species||'perl']}/textview" method="get" style="font-size: 0.9em">
+  <form action="/@{[$species||'perl']}/$script" method="get" style="font-size: 0.9em">
     <input type="hidden" name="species" value="@{[$species||'all']}" />
     Search $site_section:
     <select name="idx" style="font-size: 0.9em">

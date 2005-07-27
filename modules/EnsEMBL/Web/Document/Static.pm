@@ -58,7 +58,7 @@ sub _initialize {
 ## Now the links on the left hand side....
   $self->menu->add_block( 'whattodo', 'bulleted', 'Use Ensembl to...' );
   $self->menu->add_entry( 'whattodo', 'href' => "/multi/blastview", 'text'=>'Run a BLAST search' );
-  $self->menu->add_entry( 'whattodo', 'href'=>"/default/textview", 'text'=>'Search Ensembl' );
+  $self->menu->add_entry( 'whattodo', 'href'=>"/perl/".$SD->ENSEMBL_SEARCH, 'text'=>'Search Ensembl' );
   $self->menu->add_entry( 'whattodo', 'href'=>"/multi/martview", 'text'=>'Data mining [BioMart]', 'icon' => '/img/biomarticon.gif' );
   $self->menu->add_entry( 'whattodo', 'href'=>"javascript:void(window.open('/perl/helpview?se=1;kw=upload','helpview','width=700,height=550,resizable,scrollbars'))", 'text'=>'Upload your own data' );
   $self->menu->add_entry( 'whattodo', 'href'=>"/info/data/download.html",

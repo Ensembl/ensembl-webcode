@@ -140,7 +140,7 @@ sub date_format {
 
 sub location_string {
   my $self = shift;
-  return sprintf( "%s:%s-%s", $self->seq_region_name, $self->seq_region_start-5e3, $self->seq_region_end+5e3 );
+  return sprintf( "%s:%s-%s", $self->seq_region_name, $self->seq_region_start, $self->seq_region_end );
 }
 
 sub readable_location {

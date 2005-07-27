@@ -276,6 +276,7 @@ sub _location_from_SeqRegion {
 
 sub expand {
   my( $self, $slice ) = @_;
+  warn $self->param('context' );
   return $slice->expand( $self->param('context'), $self->param('context') );
 }
 

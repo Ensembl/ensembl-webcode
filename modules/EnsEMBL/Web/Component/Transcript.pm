@@ -389,6 +389,50 @@ sub protein_features {
   return 1;
 }
 
+sub exonview_options_form {
+  my( $panel, $object ) = @_;
+  my $form = EnsEMBL::Web::Form->new( 'exonview_options', "/@{[$object->species]}/exonview", 'get' );
+
+  # make array of hashes for dropdown options
+  $form->add_element( 'type' => 'Hidden', 'name' => 'db',   'value' => $object->get_db    );
+  $form->add_element( 'type' => 'Hidden', 'name' => 'exon', 'value' => $object->param('exon') );
+  $form->add_element( 'type' => 'Hidden', 'name' => 'transcript', 'value' => $object->stable_id );
+  $form->add_element(
+    'type' => 'NonNegInt', 'required' => 'no',
+    'label' => "Flanking sequence at either end of transcript",  'name' => 'flanking',
+    'value' => $object->param('flanking')
+  );
+  $form->add_element(
+    'type' => 'NonNegInt', 'required' => 'no',
+    'label' => "Intron base pairs to show at splice sites",  'name' => 'sscon',
+    'value' => $object->param('sscon')
+  );
+  $form->add_element(
+    'type' => 'CheckBox',
+    'label' => "Show full intronic sequence",  'name' => 'fullseq',
+    'value' => 'yes', 'checked' => $object->param('fullseq') eq 'yes'
+  );
+  $form->add_element(
+    'type' => 'CheckBox',
+    'label' => "Show exons only",  'name' => 'oexon',
+    'value' => 'yes', 'checked' => $object->param('oexon') eq 'yes'
+  );
+  $form->add_element( 'type' => 'Submit', 'value' => 'Go', 'spanning' => 'center' );
+  return $form ;
+}
+
+sub exonview_options {
+  my ( $panel, $object ) = @_;
+  my $label = 'Rendering options';
+  my $html = qq(
+   <div>
+     @{[ $panel->form( 'exonview_options' )->render() ]}
+  </div>);
+
+  $panel->add_row( $label, $html );
+  return 1;
+}
+
 sub spreadsheet_exons {
   my( $panel, $object ) = @_;
   $panel->add_columns(
@@ -864,7 +908,10 @@ sub supporting_evidence_image {
       <a href="/@{[$object->species]}/exonview?transcript=@{[$object->stable_id]};db=@{[$object->get_db]};showall=1">Click to view all $hits
       supporting evidence hits<a/>.
     </p>) );
-    return 1;
+    my @T = sort keys %{$evidence->{ 'hits' }};
+    for(my $i=10;$i<$hits;$i++) {
+      delete $evidence->{'hits'}{$T[$i]};
+    }  
   }
 
   my $wuc = $object->get_userconfig( 'exonview' );

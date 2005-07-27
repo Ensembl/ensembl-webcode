@@ -693,7 +693,7 @@ sub das_wizard_3 {
     $form->add_element('select'=>'select',
                        'type'=>'DropDown',
                        'name'=>'DASdepth',
-                       'label'=>'Max raws to display:',
+                       'label'=>'Max rows to display:',
                        'values'=>\@dvalues,
                        'value' => $option
                        );

@@ -11,7 +11,9 @@ use EnsEMBL::Web::Proxy::Factory;
 @EnsEMBL::Web::Object::Gene::ISA = qw(EnsEMBL::Web::Object);
 
 sub get_slice_object {
-  return new EnsEMBL::Web::Proxy::Object( 'Slice', $_[0]->Obj->feature_Slice, $_[0]->__data );
+  my $self = shift;
+  my $slice = $self->Obj->feature_Slice->expand( $self->param('flank5_display'), $self->param('flank3_display') );
+  return new EnsEMBL::Web::Proxy::Object( 'Slice', $slice, $self->__data );
 }
 
 sub get_Slice {

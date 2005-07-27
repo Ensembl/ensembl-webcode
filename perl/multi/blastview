@@ -177,7 +177,7 @@ MAIN:{
     $page->add_body_attr( 'onload', $_ );
   }
   $page->stylesheet->add_sheet( 'all', '/css/blastview.css' );
-  $page->javascript->add_source( '/js/zmenu.js' );
+  $page->javascript->add_source( '/js/zmenu_32.js' );
 
   $| = 1;
   warn "HEADER.................";

@@ -531,6 +531,8 @@ sub merge {
     $start = $o->seq_region_start if $o->seq_region_start < $start;
     $end   = $o->seq_region_end   if $o->seq_region_end   > $end;
   }
+  $start -= $self->param('downstream');
+  $end   += $self->param('upstream');
   $self->clearDataObjects();
   $self->DataObjects( EnsEMBL::Web::Proxy::Object->new( 'Location', {
     'type'              => 'merge',

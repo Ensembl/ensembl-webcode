@@ -491,7 +491,7 @@ sub synteny_map {
     );
     $image->imagemap           = 'yes';
     $image->cacheable          = 'yes';
-    $image->image_name         = 'syntenyview-'.$species.'-'.$chr;
+    $image->image_name         = 'syntenyview-'.$species.'-'.$chr.'-'.$other;
 
     $panel->add_image( $image->render, $image->{'width'} );
     return 1;

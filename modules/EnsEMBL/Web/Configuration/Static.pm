@@ -60,7 +60,7 @@ sub links {
   $self->add_block( 'links', 'bulleted', 'Other links' );
   $self->add_entry( 'links', 'href' => '/', 'text' => 'Home' );
   my $map_link = '/sitemap.html';
-  if (my $species = $ENV{'ENSEMBL_SPECIES'}) {
+  if (my $species = $ENV{'ENSEMBL_SPECIES'} && !$species =~ /multi/i) {
     $map_link = '/'.$species.$map_link;
   }
   $self->add_entry( 'links', 'href' => $map_link, 'text' => 'Sitemap' );

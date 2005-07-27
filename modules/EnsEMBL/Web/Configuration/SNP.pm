@@ -118,6 +118,7 @@ sub context_menu {
   my $species = $obj->species;
   my $name = $obj->name;
   my $menu = $self->{page}->menu;
+  return unless $menu;
   $menu->add_block( "snp$self->{flag}", 'bulleted',
                                   $obj->source.': '.$name );
 

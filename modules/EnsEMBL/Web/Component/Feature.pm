@@ -169,7 +169,7 @@ sub show_karyotype {
   my( $panel, $object ) = @_;
   # sanity check - does this species have chromosomes?
   my $SD = EnsEMBL::Web::SpeciesDefs->new();
-  my $status = $SD->user_config($object->species, 'ASSEMBLY_STATUS');
+  my $status = $SD->get_config($object->species, 'ASSEMBLY_STATUS');
   if ($status eq 'FULL') { 
     my $karyotype = create_karyotype($panel, $object);
     $panel->print($karyotype->render);

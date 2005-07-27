@@ -119,8 +119,10 @@ warn "This page is ".$ENV{'REQUEST_URI'};
     $map_link = '/'.$species.$map_link;
   }
   $self->menu->add_entry( 'links', 'href' => $map_link, 'text' => 'Sitemap' );
-  $self->menu->add_entry( 'links', 'href' => 'http://vega.sanger.ac.uk', 'text' => 'Vega', 'icon' => '/img/vegaicon.gif', 
+  $self->menu->add_entry( 'links', 'href' => 'http://vega.sanger.ac.uk/', 'text' => 'Vega', 'icon' => '/img/vegaicon.gif', 
 	'title' => "Vertebrate Genome Annotation" );
+  $self->menu->add_entry( 'links', 'href' => 'http://trace.ensembl.org/', 'text' => 'Trace server', 
+	'title' => "trace.ensembl.org - trace server" );
 
   if ($SD->ENSEMBL_SITE_NAME eq 'Ensembl') { # only want archive link on live Ensembl!
   $self->menu->add_entry( 'links', 'href' => 'http://archive.ensembl.org', 'text' => 'Archive! sites' );

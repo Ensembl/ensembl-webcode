@@ -402,10 +402,10 @@ sub spreadsheet_exons {
     {'key' => 'Sequence', 'title' => 'Sequence', 'width' => '20%', 'align' => 'left' } 
   );
   
-  my $sscon      = $object->param('sscon') ;         # no of bp to show either side of a splice site
-  my $flanking   = $object->param('flanking') || 50; # no of bp up/down stream of transcript
-  my $full_seq   = $object->param('fullseq');        # flag to display full sequence (introns and exons)
-  my $only_exon  = $object->param('oexon');
+  my $sscon      = $object->param('sscon') ;            # no of bp to show either side of a splice site
+  my $flanking   = $object->param('flanking') || 50;    # no of bp up/down stream of transcript
+  my $full_seq   = $object->param('fullseq') eq 'yes';  # flag to display full sequence (introns and exons)
+  my $only_exon  = $object->param('oexon')   eq 'yes';
   my $entry_exon = $object->param('exon');
 
   # display only exons flag

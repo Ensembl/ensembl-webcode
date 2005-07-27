@@ -366,7 +366,7 @@ sub diseases {
     for my $omim (sort @{$omim_list->{$description}}){
       $html.= sprintf( qq(
           <li>[Omim ID: %d] - 
-            <a href="/@{[$gene->species]}/diseaseview?omimid=%d">View disease information</a>
+            <a href="/@{[$gene->species]}/featureview?type=Disease;id=%d">View disease information</a>
           </li>), $omim, $omim );
     }
     $html.= qq(

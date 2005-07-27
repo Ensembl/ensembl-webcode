@@ -688,11 +688,14 @@ sub _init {
     'cmap'     => $Config->colourmap(),
     'colour'   => $Config->get($das_config_key, 'col') || $Extra->{'col'} || 'contigblue1',
     'depth'    => $Config->get($das_config_key, 'dep') || $Extra->{'depth'} || 4,
-    'use_style'=> ( $Config->get($das_config_key, 'stylesheet') || $Extra->{'stylesheet'} ) eq 'Y',
+    'use_style'=> uc( $Config->get($das_config_key, 'stylesheet') || $Extra->{'stylesheet'} ) eq 'Y',
     'labelling'=> $Extra->{'labelflag'} =~ /^[ou]$/i ? 1 : 0,
     'length'   => $container_length
   };
 
+  warn "USE STYLE ... ", $configuration->{ 'use_style' };
+  warn $Config->get($das_config_key, 'stylesheet');
+  warn $Extra->{'stylesheet'};
   my $dsn = $Extra->{'dsn'};
   my $url = defined($Extra->{'url'}) ? $Extra->{'url'}."/$dsn" :  $Extra->{'protocol'}.'://'. $Extra->{'domain'} ."/$dsn";
 

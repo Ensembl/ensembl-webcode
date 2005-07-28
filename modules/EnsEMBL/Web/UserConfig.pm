@@ -791,7 +791,9 @@ sub ADD_ALL_EST_FEATURES {
   my @EST_DB_ESTS = (
     [ 'bee_est',               'Bee EST' ],
     [ 'chicken_est_exonerate', 'Chicken EST (ex.)' ],
+    [ 'human_est_exonerate',   'Human EST (ex.)' ],
     [ 'ciona_est',             'Ciona EST' ],
+    [ 'drosophila_est',        'Fly EST' ],
     [ 'drosophila_est',        'Fly EST' ],
     [ 'fugu_est',              'Fugu EST' ],
     [ 'RNA',                   'Mosquito EST' ],

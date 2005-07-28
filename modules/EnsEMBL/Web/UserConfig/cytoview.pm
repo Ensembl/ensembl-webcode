@@ -258,11 +258,11 @@ $self->{'general'}->{'cytoview'} = {
   'fosmid_map' => {
     'on' => 'on',
     'pos' => '994',
-    'col' => 'blue',
+    'col' => 'violet3',
     'lab' => 'black',
     'available' => 'features mapset_fosmid_map',
     'colours' => {
-      'col' => 'blue',
+      'col' => 'violet3',
       'lab' => 'black'
     },
     'str' => 'r',

@@ -40,7 +40,7 @@ sub dotterview {
   my $T = $img->render_image_tag;
   $panel->print( $img->render_image_tag );
   $panel->print( $img->render_image_map );
-  warn( $dotter_bin_file );
+  unlink( $dotter_bin_file );
   return 1;
 }
 

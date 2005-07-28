@@ -596,11 +596,11 @@ sub init {
   'fosmid_map' => {
     'on' => 'on',
     'pos' => '8028',
-    'col' => 'violet3',
+    'col' => 'purple2',
     'lab' => 'black',
     'available' => 'features mapset_fosmid_map',
     'colours' => {
-      'col' => 'violet3',
+      'col' => 'purple2',
       'lab' => 'black'
     },
     'str' => 'r',

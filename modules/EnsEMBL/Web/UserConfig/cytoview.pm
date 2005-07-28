@@ -10,7 +10,7 @@ $self->{'_userdatatype_ID'} = 20;
 $self->{'_das_offset'} = '5080';
 
 $self->{'general'}->{'cytoview'} = {
- '_artefacts' => [qw(chr_band scalebar ruler stranded_contig gene_legend marker ntcontigs
+ '_artefacts' => [qw(chr_band scalebar ruler stranded_contig gene_legend marker ntcontigs fosmid_map
       bac_map supercontigs tilepath cloneset_37k cloneset_1mb cloneset_32k encode
       bacends bacs nod_bacs bac_bands qtl
       repeat_lite  tilepath2 missing 
@@ -45,6 +45,7 @@ $self->{'general'}->{'cytoview'} = {
       # [ 'decipher'     =>  'DECIPHER'    ],
     ],
     'options' => [
+      [ 'fosmid_map'     => 'Fosmid map' 		],
       [ 'bac_map'     => 'BAC map' 		],
       [ 'nod_bacs'    => 'Nod BACs'       ],
       [ 'bac_bands'     => 'Band BACs'       ],
@@ -254,6 +255,22 @@ $self->{'general'}->{'cytoview'} = {
 	  'outline_threshold'  => '350000'
     },
 	 
+  'fosmid_map' => {
+    'on' => 'on',
+    'pos' => '994',
+    'col' => 'blue',
+    'lab' => 'black',
+    'available' => 'features mapset_fosmid_map',
+    'colours' => {
+      'col' => 'blue',
+      'lab' => 'black'
+    },
+    'str' => 'r',
+    'dep' => '9999999',
+    'threshold_navigation' => '100000',
+    'full_threshold'     => '50000',
+    'outline_threshold'  => '350000'
+  },
   'bac_map' => {
     'on'  => "on",
     'pos' => '995',

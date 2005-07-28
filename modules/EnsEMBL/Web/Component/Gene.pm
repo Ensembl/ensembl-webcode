@@ -233,8 +233,7 @@ sub method {
       $text   = $gene->species_defs->$confkey;
     }
   }
-  $panel->add_row( $label, sprintf(qq(
-    <p>%s</p>), CGI::escapeHTML( $text ))
+  $panel->add_row( $label, sprintf(qq(<p>%s</p>), $text )
   );
   return 1;
 }

@@ -315,7 +315,7 @@ sub createObjects {
                    $self->param( 'wvc_end' )   || $self->param( 'fpos_end' )   ||
                    $self->param( 'end' );
   if( defined $self->param('l') ) {
-    ($seq_region,$start,$end) = $self->param('l') =~ /^(\w+):(-?[.\w]+)-([.\w]+)$/;
+    ($seq_region,$start,$end) = $self->param('l') =~ /^([\w\.]+):(-?[.\w]+)-([.\w]+)$/;
     $start = $self->evaluate_bp($start);
     $end   = $self->evaluate_bp($end);
   } 

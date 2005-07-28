@@ -282,7 +282,7 @@ sub analysis {
 
 sub stable_id{
   my $self = shift;
-  return $self->translation ? $self->translation->stable_id :undef;
+  return $self->translation ? $self->translation->stable_id : undef;
 }
 
 #----------------------------------------------------------------------

@@ -35,6 +35,7 @@ sub _common_HTML {
   $self->stylesheet->add_sheet( 'all', $SD->ENSEMBL_TMPL_CSS );
   $self->stylesheet->add_sheet( 'all', $SD->ENSEMBL_PAGE_CSS );
   $self->stylesheet->add_sheet( 'print', '/css/printer-styles.css' );
+  $self->stylesheet->add_sheet( 'screen', '/css/screen-styles.css' );
 
 ## Set up the version information etc for the title of the page, masthead etc
 

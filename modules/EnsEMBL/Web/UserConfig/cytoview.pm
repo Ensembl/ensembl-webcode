@@ -42,7 +42,7 @@ $self->{'general'}->{'cytoview'} = {
     'features' => [
       [ 'marker'       =>  'Markers'      ],
       [ 'qtl'          =>  'QTLs'        ],
-      [ 'decipher'     =>  'DECIPHER'    ],
+      # [ 'decipher'     =>  'DECIPHER'    ],
     ],
     'options' => [
       [ 'bac_map'     => 'BAC map' 		],
@@ -486,12 +486,12 @@ $self->{'general'}->{'cytoview'} = {
     'str'       => 'r',
     'outline_threshold'  => '350000'
   },
-  'decipher' => {
-    'on'     => "on",
-    'pos'    => '4000',
-    'dep'    => 9999,
-    'str'    => 'r'
-  },
+  #'decipher' => {
+  #  'on'     => "on",
+  #  'pos'    => '4000',
+  #  'dep'    => 9999,
+  #  'str'    => 'r'
+  #},
     'assemblyexception' => {
       'on'      => "on",
       'pos'       => '9998',

@@ -721,7 +721,7 @@ sub spreadsheet_exons {
     } else {
       $downstream = $exon->slice()->subseq( ($exon->start)-($flanking),   ($exon->start)-1 , $strand);
     }
-    $downstream =  lc(('.'x $flanking_dot_length).$downstream);
+    $downstream =  lc($downstream). ('.'x $flanking_dot_length);
     $upstream =~ s/([\.\w]{60})/$1<br \/>/g;
     $exon_info = { 'exint'    => qq(3\' downstream sequence),
                    'Sequence' => qq(<font face="courier" color="green">$downstream</font>) };

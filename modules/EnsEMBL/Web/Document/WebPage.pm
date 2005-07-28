@@ -3,6 +3,9 @@ package EnsEMBL::Web::Document::WebPage;
 use EnsEMBL::Web::Root;
 use EnsEMBL::Web::Proxy::Factory;
 use EnsEMBL::Web::Timer;
+use EnsEMBL::Web::SpeciesDefs;
+
+our $SD = EnsEMBL::Web::SpeciesDefs->new();
 
 use CGI qw(header escapeHTML);
 use SiteDefs;
@@ -23,7 +26,8 @@ sub new {
   my $self = {
     'page'    => undef,
     'factory' => undef,
-    'timer'   => new EnsEMBL::Web::Timer()
+    'timer'   => new EnsEMBL::Web::Timer(),
+    'species_defs' => $SD
   };
   bless $self, $class;
   my %parameters = @_;
@@ -49,7 +53,8 @@ sub new {
     $doc_module = "EnsEMBL::Web::Document::".DEFAULT_DOCUMENT;
     $self->dynamic_use( $doc_module ); 
   }
-  $self->page = new $doc_module( $rend, $self->{'timer'} );          $self->_prof("Page object compiled and initialized");
+  warn $self->{'species_defs'};
+  $self->page = new $doc_module( $rend, $self->{'timer'}, $self->{'species_defs'} );          $self->_prof("Page object compiled and initialized");
 
 ## Initialize output type! [ HTML, XML, Excel, Txt ]
   $self->{'format'} = $input->param('_format') || DEFAULT_OUTPUTTYPE;

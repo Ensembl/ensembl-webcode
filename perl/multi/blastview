@@ -33,6 +33,12 @@ use EnsEMBL::Web::BlastView::PanelMain;
 use EnsEMBL::Web::BlastView::PanelTop;
 use EnsEMBL::Web::BlastView::PanelStatus;
 
+use EnsEMBL::Web::Document::Renderer::Apache;
+use EnsEMBL::Web::Document::Static;
+use EnsEMBL::Web::Document::Dynamic;
+use EnsEMBL::Web::Configuration::Static;
+use EnsEMBL::Web::Document::Panel;
+
 use vars qw( $SPECIES_DEFS $META_DATA $CGI $BLAST $PAGE $TICKET $DBCONNECTION );
 use vars qw( @JSCRIPT_EXTRA @ON_LOAD_EXTRA %CACHE_ON_LOAD_EXTRA); # Jscript 
 use vars qw( %ERRORS ); # Errors per-stage
@@ -79,7 +85,7 @@ MAIN:{
 
   # Create a new Page object
   my $renderer = new EnsEMBL::Web::Document::Renderer::Apache( );
-  my $page     = new EnsEMBL::Web::Document::Dynamic( $renderer );
+  my $page     = new EnsEMBL::Web::Document::Dynamic( $renderer, undef, $SPECIES_DEFS );
   $page->_initialize_HTML;
   $page->masthead->sp_bio    ||= 'Multi';
   $page->masthead->sp_common ||= 'Multi';
@@ -354,16 +360,10 @@ sub is_script_suspended{
 #----------------------------------------------------------------------
 # 
 
-use EnsEMBL::Web::Document::Renderer::Apache;
-use EnsEMBL::Web::Document::Static;
-use EnsEMBL::Web::Document::Dynamic;
-use EnsEMBL::Web::Configuration::Static;
-use EnsEMBL::Web::Document::Panel;
-
 sub get_suspend_page{
   my $msg = shift;
   my $renderer = new EnsEMBL::Web::Document::Renderer::Apache( );
-  my $page     = new EnsEMBL::Web::Document::Static( $renderer );
+  my $page     = new EnsEMBL::Web::Document::Static( $renderer, undef, $SPECIES_DEFS );
   my $T = new EnsEMBL::Web::Configuration::Static($page);
   $T->links();
   my $page->content->add_panel(

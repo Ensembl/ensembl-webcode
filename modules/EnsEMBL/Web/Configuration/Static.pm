@@ -10,6 +10,7 @@ our @ISA = qw( EnsEMBL::Web::Configuration );
 sub links {
   my $self = shift;
   my $species = $ENV{'ENSEMBL_SPECIES'};
+  my $species_2 = $species eq 'Multi' ? 'default' : $species;
   $self->add_block( 'whattodo', 'bulleted', 'Use Ensembl to...' );
  $self->add_entry( 'whattodo', 'href' => "/multi/blastview", 'text'=>'Run a BLAST search' );
   $self->add_entry( 'whattodo', 'href'=>"/default/textview", 'text'=>'Search Ensembl' );
@@ -17,7 +18,7 @@ sub links {
   $self->add_entry( 'whattodo', 'href'=>"javascript:void(window.open('/perl/helpview?se=1;kw=upload','helpview','width=700,height=550,resizable,scrollbars'))", 'text'=>'Upload your own data' );
   $self->add_entry( 'whattodo', 'href'=>"/info/data/download.html",
 			'text' => 'Download data');
-  $self->add_entry( 'whattodo', 'href'=>"/$species/exportview",
+  $self->add_entry( 'whattodo', 'href'=>"/$species_2/exportview",
 			'text' => 'Export data');
 
  # do species popups from config

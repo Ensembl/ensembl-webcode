@@ -14,7 +14,6 @@ no warnings "uninitialized";
 
 sub tn_external {
   my( $panel, $object ) = @_;
-  warn "CALLED";
   my $DO = $object->Obj;
   my $data_type;
   my $URL_KEY;
@@ -29,8 +28,6 @@ sub tn_external {
     $data_type = 'Genewise';
     $URL_KEY   = 'TETRAODON_GENEWISE';
   }
-  warn "ADDED ROW...";
-  warn qq(<p>$data_type @{[$object->get_ExtURL_link( $DO->stable_id, $URL_KEY, $DO->stable_id )]}</p>);
   $panel->add_row( 'External links',
     qq(<p><strong>$data_type:</strong> @{[$object->get_ExtURL_link( $DO->stable_id, $URL_KEY, $DO->stable_id )]}</p>)
   );
@@ -870,7 +867,6 @@ sub do_markedup_pep_seq {
   if($number eq 'on') {
     $NUMBER = sprintf("%6d ",$pos);
     $PEPNUM = ( $pos>=$cd_start && $pos<=$cd_end ) ? sprintf("%6d ",int( ($pos-$cd_start-1)/3 +1) ) : $SPACER ;
-#       warn( $NUMBER, " - ", $PEPNUM );
     $pos += $wrap;
   }
   $output .= ($show eq 'snps' ? "$SPACER$ambiguities\n" : '' ).

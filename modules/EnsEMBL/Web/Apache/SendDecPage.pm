@@ -64,7 +64,7 @@ sub handler {
   #  $pageContent =~ s/<!--#include\s+virtual\s*=\s*\"(.*)\"\s*-->/template_INCLUDE($r, $1)/eg;
 
   my $renderer = new EnsEMBL::Web::Document::Renderer::Apache( $r );
-  my $page     = new EnsEMBL::Web::Document::Static( $renderer );
+  my $page     = new EnsEMBL::Web::Document::Static( $renderer, undef, $SD );
 
   $page->_initialize();
 

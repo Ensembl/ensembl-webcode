@@ -127,6 +127,7 @@ sub go {
   <dt><strong>The following GO terms have been mapped to this entry via UniProt:</strong></dt>);
 
   foreach my $go (sort keys %{$go_hash}){
+    warn ">>>> GO";
     my @go_data = @{$go_hash->{$go}||[]};
     my( $evidence, $description ) = @go_data;
     my $link_name = $description;
@@ -719,7 +720,7 @@ sub spreadsheet_exons {
       $downstream = $exon->slice()->subseq( ($exon->start)-($flanking),   ($exon->start)-1 , $strand);
     }
     $downstream =  lc($downstream). ('.'x $flanking_dot_length);
-    $upstream =~ s/([\.\w]{60})/$1<br \/>/g;
+    $downstream =~ s/([\.\w]{60})/$1<br \/>/g;
     $exon_info = { 'exint'    => qq(3\' downstream sequence),
                    'Sequence' => qq(<font face="courier" color="green">$downstream</font>) };
     $panel->add_row( $exon_info );

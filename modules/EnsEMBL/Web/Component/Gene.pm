@@ -866,7 +866,6 @@ sub genesnpview {
       ]
     } sort { $a->[0] <=> $b->[0] } @{$object->__data->{'SNPS'}};
 ## Cache data so that it can be retrieved later...
-    warn "SIZE OF SNPS2 = ".@snps2." SIZE OF SNPS ".@{$object->__data->{'SNPS'}};
     $object->__data->{'gene_snps'} = \@snps2;
     foreach my $trans_obj ( @{$object->get_all_transcripts} ) {
       $trans_obj->__data->{'transformed'}{'gene_snps'} = \@snps2;

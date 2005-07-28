@@ -699,7 +699,6 @@ sub pep_snps{
     return [];
   }
   $self->database('variation');
-  warn "GETTING SNPS....";
   my $source = "variation";  # only defined if glovar
   if ($self->species_defs->databases->{'ENSEMBL_GLOVAR'}) {
     $source = "glovar";

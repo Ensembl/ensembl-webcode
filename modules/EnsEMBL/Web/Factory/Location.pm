@@ -276,7 +276,6 @@ sub _location_from_SeqRegion {
 
 sub expand {
   my( $self, $slice ) = @_;
-  warn $self->param('context' );
   return $slice->expand( $self->param('context'), $self->param('context') );
 }
 
@@ -361,7 +360,6 @@ sub createObjects {
   if( @anchorview ) {
     foreach my $O ( @anchorview ) {
       my( $ftype, $temp_id ) = @$O;
-      warn "{{{{ $ftype -- $temp_id }}}}";
       if( $ftype eq 'gene' ) {
         $location = $self->_location_from_Gene( $temp_id );
       } elsif( $ftype eq 'transcript' ) { 
@@ -532,8 +530,8 @@ sub merge {
     $start = $o->seq_region_start if $o->seq_region_start < $start;
     $end   = $o->seq_region_end   if $o->seq_region_end   > $end;
   }
-  $start -= $self->param('downstream');
-  $end   += $self->param('upstream');
+  $start -= $self->param('downstream') || 0;
+  $end   += $self->param('upstream') || 0;
   $self->clearDataObjects();
   $self->DataObjects( EnsEMBL::Web::Proxy::Object->new( 'Location', {
     'type'              => 'merge',

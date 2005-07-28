@@ -934,7 +934,6 @@ sub spreadsheet_variationTable {
   my $tr_end   = $object->__data->{'transformed'}{'end'};
   my $extent   = $object->__data->{'transformed'}{'extent'};
   my $coding_start = $object->__data->{'transformed'}{'coding_start'};
-  warn "TRANS: @{[$object->stable_id]} START $tr_start END $tr_end EXTENT $extent cSTART $coding_start\m";
   return unless %snps;
   $panel->add_columns(
     { 'key' => 'ID', 'align' => 'center' },
@@ -951,7 +950,6 @@ sub spreadsheet_variationTable {
   foreach my $gs ( @gene_snps ) {
     my $raw_id = $gs->[2]->dbID;
     my $ts     = $snps{$raw_id};
-    warn "$ts $gs->[5] @{[$tr_start-$extent]} $gs->[4] @{[$tr_end+$extent]}\n";
     if( $ts && $gs->[5] >= $tr_start-$extent && $gs->[4] <= $tr_end+$extent ) {
       my $ROW = {
         'ID'        =>  qq(<a href="/@{[$object->species]}/snpview?snp=@{[$gs->[2]->variation_name]};source=@{[$gs->[2]->source]};chr=$gs->[3];vc_start=$gs->[4]">@{[$gs->[2]->variation_name]}</a>),
@@ -967,7 +965,6 @@ sub spreadsheet_variationTable {
            'aacoord'   => $ts->translation_start.' ('.(($ts->cdna_start-$coding_start)%3+1).')'
         ) : ( 'aachange' => '-', 'aacoord' => '-' )
       };
-      warn keys %{$ROW};
       $panel->add_row( $ROW );
     }
   }

@@ -197,10 +197,6 @@ sub add_error_panels {
   my( $self, @problems ) = @_;
   @problems = @{$self->problem} if !@problems && $self->factory;
   foreach my $problem ( sort { $b->isFatal <=> $a->isFatal } @problems ) {
-    warn ">>",$self->{'show_fatal_only'};
-    warn ">>",$problem->name;
-    warn ">>",!$problem->isFatal;
-
     next if !$problem->isFatal && $self->{'show_fatal_only'};
     my $desc = $problem->description;
     $desc = "<p>$desc</p>" unless $desc =~ /<p/;

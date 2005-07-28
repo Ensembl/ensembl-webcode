@@ -837,7 +837,7 @@ sub do_markedup_pep_seq {
       $fasta ='';
     }
     my $bg = $bg_color{"$_->{'snp'}$_->{'bg'}"};
-    my $style = qq(style="color: #$_->{'fg'};). ( $bg ? qq( background-color: #$bg;) : '' ) .qq(");
+    my $style = qq(style="color: $_->{'fg'};). ( $bg ? qq( background-color: #$bg;) : '' ) .qq(");
     my $pep_style = '';
     if( $show eq 'snps') {
       if($_->{'snp'} ne '') {

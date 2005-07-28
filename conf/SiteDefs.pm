@@ -396,7 +396,7 @@ $BIOMART_URL = 'Multi';
 $MART_HELP_DESK = "$ENSEMBL_PROTOCOL://$ENSEMBL_SERVERNAME".
   ( $ENSEMBL_PROXY_PORT==80  && $ENSEMBL_PROTOCOL eq 'http' ||
     $ENSEMBL_PROXY_PORT==443 && $ENSEMBL_PROTOCOL eq 'https' ?'' : ":$ENSEMBL_PROXY_PORT" ).
-    '/perl/helpdesk';
+    '/perl/helpview';
 $ENSEMBL_TEMPLATE_ROOT = $ENSEMBL_SERVERROOT.'/biomart-web/conf';
 
 ####################

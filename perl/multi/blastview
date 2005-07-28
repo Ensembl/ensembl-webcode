@@ -1157,7 +1157,7 @@ sub get_main_panel{
         if($status eq 'DISPATCHED'){ $status_label = "Job Queued" }
         if($status eq 'FAILED' ){
           $status_label = "System error; please <A href='/Multi/blastview'>resubmit</A> job. <BR>".
-            "If problem persists, file a <A href='/helpdesk'>report</A>";
+            "If problem persists, file a report using the help link above";
           my $token = $runnable->token;
           my $msg = "Blast job resulted in $failfile file:\n";
           open FAIL, $failfile;

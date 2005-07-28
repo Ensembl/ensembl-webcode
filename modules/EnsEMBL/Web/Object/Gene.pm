@@ -13,7 +13,9 @@ use EnsEMBL::Web::Proxy::Factory;
 sub get_slice_object {
   my $self = shift;
   my $slice = $self->Obj->feature_Slice->expand( $self->param('flank5_display'), $self->param('flank3_display') );
-  return new EnsEMBL::Web::Proxy::Object( 'Slice', $slice, $self->__data );
+  my $T = new EnsEMBL::Web::Proxy::Object( 'Slice', $slice, $self->__data );
+  $T->highlight_display( $self->Obj->get_all_Exons );
+  return $T;
 }
 
 sub get_Slice {

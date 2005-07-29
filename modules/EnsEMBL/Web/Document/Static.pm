@@ -53,13 +53,18 @@ sub _initialize {
   }
 
 ## Now the links on the left hand side....
+  my $species = $ENV{'ENSEMBL_SPECIES'} && $ENV{'ENSEMBL_SPECIES'} ne 'Multi' ? $ENV{'ENSEMBL_SPECIES'} : 'default';
+  my $species_m  = $species eq 'default' ? 'Multi' : $species;
   $self->menu->add_block( 'whattodo', 'bulleted', 'Use Ensembl to...' );
-  $self->menu->add_entry( 'whattodo', 'href' => "/multi/blastview", 'text'=>'Run a BLAST search' );
-  $self->menu->add_entry( 'whattodo', 'href'=>"/perl/".$self->species_defs->ENSEMBL_SEARCH, 'text'=>'Search Ensembl' );
-  $self->menu->add_entry( 'whattodo', 'href'=>"/multi/martview", 'text'=>'Data mining [BioMart]', 'icon' => '/img/biomarticon.gif' );
-  $self->menu->add_entry( 'whattodo', 'href'=>"javascript:void(window.open('/perl/helpview?se=1;kw=upload','helpview','width=700,height=550,resizable,scrollbars'))", 'text'=>'Upload your own data' );
+  $self->menu->add_entry( 'whattodo', 'href' => "/$species_m/blastview", 'text'=>'Run a BLAST search' );
+  $self->menu->add_entry( 'whattodo', 'href'=>"/$species/".$self->species_defs->ENSEMBL_SEARCH, 'text'=>'Search Ensembl' );
+  $self->menu->add_entry( 'whattodo', 'href'=>"/$species_m/martview", 'text'=>'Data mining [BioMart]', 'icon' => '/img/biomarticon.gif' );
+  $self->menu->add_entry( 'whattodo', 'href'=>"javascript:void(window.open('/default/helpview?se=1;kw=upload','helpview','width=700,height=550,resizable,scrollbars'))", 'text'=>'Upload your own data' );
   $self->menu->add_entry( 'whattodo', 'href'=>"/info/data/download.html",
 			'text' => 'Download data');
+  if( $species ne 'default' ) {
+    $self->menu->add_entry( 'whattodo', 'href'=>"/$species/exportview", 'text' => 'Export data');
+  }
 #  $self->menu->add_entry( 'whattodo', 'href'=>"javascript:void(window.open('/perl/helpview?se=1;kw=karyoview','helpview','width=700,height=550,resizable,scrollbars'))", 'text'=>'Display your data on a karyotype diagram' );
 
   $self->menu->add_block( 'docs', 'bulleted', 'Docs and downloads' );

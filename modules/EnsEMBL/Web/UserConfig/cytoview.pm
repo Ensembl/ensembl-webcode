@@ -11,7 +11,7 @@ $self->{'_das_offset'} = '5080';
 
 $self->{'general'}->{'cytoview'} = {
  '_artefacts' => [qw(chr_band scalebar ruler stranded_contig gene_legend marker ntcontigs fosmid_map
-      bac_map supercontigs tilepath cloneset_37k cloneset_1mb cloneset_32k encode
+      bac_map supercontigs tilepath cloneset_37k cloneset_1mb cloneset_32k encode cloneset
       bacends bacs nod_bacs bac_bands qtl
       repeat_lite  tilepath2 missing 
       haplotype_links gap 
@@ -58,6 +58,7 @@ $self->{'general'}->{'cytoview'} = {
       [ 'stranded_contig' => 'Contigs'       ],
       [ 'ruler'       => 'Ruler'       ],
       [ 'scalebar'    => 'Scale Bar'     ],
+      [ 'cloneset'     => '1Mb Cloneset'    ],
       [ 'cloneset_1mb' => '1Mb Cloneset'    ],
       [ 'cloneset_37k' => '37k Cloneset'    ],
       [ 'cloneset_32k' => '32k Cloneset'    ],
@@ -255,8 +256,25 @@ $self->{'general'}->{'cytoview'} = {
 	  'outline_threshold'  => '350000'
     },
 	 
+  'cloneset' => {
+    'on' => 'on',
+    'pos' => '993',
+    'col' => 'gold',
+    'lab' => 'black',
+    'available' => 'features mapset_cloneset',
+    'colours' => {
+      'col' => 'gold',
+      'lab' => 'black'
+    },
+    'str' => 'r',
+    'dep' => '9999999',
+    'threshold_navigation' => '100000',
+    'full_threshold'     => '50000',
+    'outline_threshold'  => '350000'
+  },
   'fosmid_map' => {
     'on' => 'on',
+    'height' => 5,
     'pos' => '994',
     'col' => 'purple2',
     'lab' => 'black',

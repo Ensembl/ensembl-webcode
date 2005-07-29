@@ -843,6 +843,7 @@ sub misc_set_form {
       { 'value' => 'acc_bac_map' , 'name' => 'Accessioned clones' },
       { 'value' => 'bac_map'     , 'name' => 'BAC clones'         },
       { 'value' => 'cloneset'    , 'name' => '1mb clone set'      },
+      { 'value' => 'fosmid_map'    , 'name' => 'Fosmid map'      },
     ];
   }
 

@@ -6,8 +6,7 @@ use EnsEMBL::Web::SpeciesDefs;
                                                                                 
 our $SD = EnsEMBL::Web::SpeciesDefs->new();
 
-
-@EnsEMBL::Web::Document::HTML::SearchBox::ISA = qw(EnsEMBL::Web::Document::HTML);
+our @ISA = qw(EnsEMBL::Web::Document::HTML);
 
 sub new    { return shift->SUPER::new( 'links' => [], 'indexes' => [] ); }
 

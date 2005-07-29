@@ -595,6 +595,7 @@ sub init {
     },
   'fosmid_map' => {
     'on' => 'on',
+    'height' => 5,
     'pos' => '8028',
     'col' => 'purple2',
     'lab' => 'black',

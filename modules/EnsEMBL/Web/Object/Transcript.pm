@@ -22,6 +22,7 @@ sub default_track_by_gene {
   );
   my %mappings_logic_name = qw(
     genscan          genscan
+    fgenesh          fgenesh
     genefinder       genefinder
     snap             snap
     gsc              gsc

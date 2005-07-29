@@ -155,7 +155,6 @@ MAIN:{
   $blast_adpt->ticket( $TICKET );
   use Apache;
   my $r = Apache->request();
-  warn "SETTING $TICKET";
   $ENV{'ticket'} = $TICKET;
   $r->subprocess_env->{'ticket'} = $TICKET;
   if( $CGI->param('format') eq 'raw' ){
@@ -191,7 +190,6 @@ MAIN:{
 
 
   $| = 1;
-  warn "HEADER.................";
   CGI::header;
   $page->render_start;
 
@@ -279,8 +277,6 @@ MAIN:{
     }
     # Store
     if( $BLAST->modified or @run_list ){
-      warn( "STORING BLAST: $TICKET [PID=$$ TIME=".(time()-1060600000)."]" );
-      map{ warn( "STORING RUNER: ".ref($_)." to ".$_->token) } $BLAST->runnables;
       $BLAST->store;
     }
     # Run

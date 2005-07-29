@@ -62,9 +62,6 @@ sub _initialize {
 			'text' => 'Download data');
 #  $self->menu->add_entry( 'whattodo', 'href'=>"javascript:void(window.open('/perl/helpview?se=1;kw=karyoview','helpview','width=700,height=550,resizable,scrollbars'))", 'text'=>'Display your data on a karyotype diagram' );
 
-warn "This page is ".$ENV{'REQUEST_URI'};
-
-
   $self->menu->add_block( 'docs', 'bulleted', 'Docs and downloads' );
   $self->menu->add_entry( 'docs', 'href' => '/info/', 
 			  'text'  => 'Information',

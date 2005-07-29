@@ -127,7 +127,6 @@ sub go {
   <dt><strong>The following GO terms have been mapped to this entry via UniProt:</strong></dt>);
 
   foreach my $go (sort keys %{$go_hash}){
-    warn ">>>> GO";
     my @go_data = @{$go_hash->{$go}||[]};
     my( $evidence, $description ) = @go_data;
     my $link_name = $description;

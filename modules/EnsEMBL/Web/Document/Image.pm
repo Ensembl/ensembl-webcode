@@ -118,7 +118,6 @@ sub do_chr_layout {
         $h_spacing += $max_label * 5;
         $h_padding = '4';
     }
-   warn "Rows now $rows!"; 
     $config->{'general'}->{$config_name}->{'_settings'}->{'width'} =
                 $chr_length + $v_padding;
     $config->{'general'}->{$config_name}->{'Videogram'}->{'padding'} =

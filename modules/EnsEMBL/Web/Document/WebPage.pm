@@ -53,7 +53,6 @@ sub new {
     $doc_module = "EnsEMBL::Web::Document::".DEFAULT_DOCUMENT;
     $self->dynamic_use( $doc_module ); 
   }
-  warn $self->{'species_defs'};
   $self->page = new $doc_module( $rend, $self->{'timer'}, $self->{'species_defs'} );          $self->_prof("Page object compiled and initialized");
 
 ## Initialize output type! [ HTML, XML, Excel, Txt ]

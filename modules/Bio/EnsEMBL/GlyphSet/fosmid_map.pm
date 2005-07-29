@@ -14,6 +14,7 @@ sub features {
         map { $_->[1] }
         sort { $a->[0] <=> $b->[0] }
         map { [$_->seq_region_start , $_] }
+        grep { $_->seq_region_end - $_->seq_region_start > 3e4 }
         @{$self->{'container'}->get_all_MiscFeatures( 'fosmid_map' )};
     return \@sorted;
 }

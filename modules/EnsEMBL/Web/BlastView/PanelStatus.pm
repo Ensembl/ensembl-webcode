@@ -19,72 +19,67 @@ my %cells;
 
 # Horizontal padding (VDARK_BG_COLOR)
 $cells{H} = qq(
-    <TD height=1 width=10 bgcolor="<TMPL_VAR VDARK_BG_COLOR>" colspan=1
-    ><IMG src="/img/blank.gif" height=1 width=5 /></TD>);
+    <td height="1" width="10" bgcolor="<TMPL_VAR VDARK_BG_COLOR>" colspan="1"
+    ><img alt="" src="/img/blank.gif" height="1" width="5" /></td>);
 
 # Small Horizontal padding (VDARK_BG_COLOR)
 $cells{h} = qq(
-    <TD height=1 width=5 bgcolor='<TMPL_VAR VDARK_BG_COLOR>' colspan=1
-    ><IMG src='/img/blank.gif' height=1 width=5 /></TD>);
+    <td height="1" width="5" bgcolor="<TMPL_VAR VDARK_BG_COLOR>" colspan="1"
+    ><img alt="" src="/img/blank.gif" height="1" width="5" /></td>);
 
 # Vertical padding (VDARK_BG_COLOR)
 $cells{V} = qq(
-    <TD height=5 width=1 bgcolor='<TMPL_VAR VDARK_BG_COLOR>' colspan=1
-    ><IMG src='/img/blank.gif' height=5 width=1 /></TD>);
+    <td height="5" width="1" bgcolor="<TMPL_VAR VDARK_BG_COLOR>" colspan="1"
+    ><img alt="" src="/img/blank.gif" height="5" width="1" /></td>);
 $cells{v} = qq(
-    <TD height=5 width=1 bgcolor='<TMPL_VAR VDARK_BG_COLOR>' colspan=1
-    ><IMG src='/img/blank.gif' height=5 width=1 /></TD>);
+    <td height="5" width="1" bgcolor="<TMPL_VAR VDARK_BG_COLOR>" colspan="1"
+    ><img alt="" src="/img/blank.gif" height="5" width="1" /></td>);
 
 # 1-pixel border
 $cells{_}= qq(
-    <TD height=1 width=1 bgcolor='<TMPL_VAR BORDER_COLOR>' colspan=1
-    ><IMG src='/img/blank.gif' height=1 width=1 /></TD>);
+    <td height="1" width="1" bgcolor="<TMPL_VAR BORDER_COLOR>" colspan="1"
+    ><img alt="" src="/img/blank.gif" height="1" width="1" /></td>);
 
 # Status header cell
 $cells{S}= qq(
-    <TD class='status_panel_head' colspan=1 nowrap align='center' valign='bottom'
-    >%s</TD>);
+    <td class="status_panel_head" colspan="1" nowrap="nowrap" align="center" valign="bottom"
+    >%s</td>);
 
 
 # Bold text cell
 $cells{T}= qq(
-    <TD class='status_block_head' colspan=1
-    >%s</TD>);
+    <td class="status_block_head" colspan="1">%s</td>);
 
 # Normal text cell
 $cells{t}= qq(
-    <TD class='status_entry' colspan=1
-    >%s</TD>);
+    <td class="status_entry" colspan="1">%s</td>);
 
 # Big bullet
 $cells{B}= qq(
-    <TD class='status_entry' colspan=1 width=12 height=12 valign='middle'
-    ><IMG src='/img/blastview/bullet1.gif' height=12 width=12 /></TD>);
+    <td class="status_entry" colspan="1" width="12" height="12" valign="middle"><img alt="" src="/img/blastview/bullet1.gif" height="12" width="12" /></td>);
 
 # Small bullet
 $cells{b}= qq(
-    <TD class='status_entry' colspan=1 width=7 height=7 valign='middle'
-    ><IMG src='/img/blastview/bullet2.gif' height=7 width=7 /></TD>);
+    <td class="status_entry" colspan="1" width="7" height="7" valign="middle"
+    ><img alt="" src="/img/blastview/bullet2.gif" height="7" width="7" /></td>);
 
 # Warn image
 $cells{W} = qq(
-    <TD height=12 width=12 colspan=1
-    ><IMG src='/img/blastview/warn.gif' height=12 width=12 /></TD>);
+    <td height="12" width="12" colspan="1"
+    ><img alt="" src="/img/blastview/warn.gif" height="12" width="12" /></td>);
 
 # Info image
 $cells{I} = qq(
-    <TD height=12 width=12 colspan=1
-    ><IMG src='/img/blastview/info.gif' height=12 width=12 /></TD>);
+    <td height="12" width="12" colspan="1"
+    ><img alt="" src="/img/blastview/info.gif" height="12" width="12" /></td>);
 
 # Warn text
 $cells{w} = qq(
-    <TD height=20 width=20 colspan=1 class='status_warning'
-    >%s</TD>);
+    <td height="20" width="20" colspan="1" class="status_warning">%s</td>);
 
 # Info text
 $cells{i} = qq(
-    <TD colspan=1 class='status_entry'
-    ><I><SMALL>%s</SMALL></I></TD>);
+    <td colspan="1" class="status_entry"><i><small>%s</small></i></td>);
 
 
 my %rows;
@@ -197,7 +192,7 @@ sub add_panel_button{
 					 -src  =>$meta->{SRC} );
       }
       elsif( $meta->{HREF} ){
-	my $tmpl = qq(<A HREF="%s" %s><IMG src="%s" border=0 %s /></A>);
+	my $tmpl = qq(<a href="%s" %s><img alt="" src="%s" border="0" %s /></a>);
 	my $ahr_extra = '';
 	my $img_extra = '';
 	if( $meta->{TARGET} ){ $ahr_extra.=" target='$meta->{TARGET}'"}
@@ -208,7 +203,7 @@ sub add_panel_button{
 			   $meta->{SRC},  $img_extra );
       }
       else{
-	my $tmpl = qq(<IMG src="%s" border=0 %s />);
+	my $tmpl = qq(<img alt="" src="%s" border="0" %s />);
 	my $extra = '';
 	if( $meta->{HEIGHT} ){ $extra.="height='$meta->{HEIGHT}'"} 
 	if( $meta->{WIDTH}  ){ $extra.="width ='$meta->{WIDTH}'"} 
@@ -221,7 +216,7 @@ sub add_panel_button{
     $html .= sprintf( $self->get_row('panel_header'),
 		      join( 
 			   #'&nbsp;',
-			   '<IMG src="/img/blank.gif" height=1 width=10 />',
+			   '<img alt="" src="/img/blank.gif" height="1" width="10" />',
 			    @buttons ) );
   }
   $self->add_block( $html );

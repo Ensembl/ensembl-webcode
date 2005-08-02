@@ -67,7 +67,7 @@ STAGE_SETUP:{
 	$entry->set_cgi_rows( 4 );
 	$entry->set_cgi_cols( 57 );
 	$entry->set_label
-	  ( "<B>Either</B> Paste sequences (max 30) in FASTA or plain text:" );
+	  ( "<strong>Either</strong> Paste sequences (max 30) in FASTA or plain text:" );
 	#$entry->set_label_summary( $callback );
 	$entry->set_cgi_onchange('javascript:changedQuerySequence()');
       }
@@ -75,13 +75,13 @@ STAGE_SETUP:{
     ENTRY_UPLOAD:{
 	my $entry = $form->addobj_form_entry();
 	$entry->set_cgi_name('_uploadfile');
-	$entry->set_label( "<B>Or</B> Upload a file containing one or more FASTA sequences" );
+	$entry->set_label( "<strong>Or</strong> Upload a file containing one or more FASTA sequences" );
       }
 
     ENTRY_ACCESSION:{
         my $entry = $form->addobj_form_entry();
         $entry->set_cgi_name('_pfetch_accession');
-        $entry->set_label( "<B>Or</B> Enter a sequence ID or accession ".
+        $entry->set_label( "<strong>Or</strong> Enter a sequence ID or accession ".
                            "(EMBL, UniProt, RefSeq)" );
         my $sp = $SiteDefs::ENSEMBL_PERL_SPECIES;
         # Only enabled if an ENSEMBL_PFETCH_SERVER is configured
@@ -101,7 +101,7 @@ STAGE_SETUP:{
         $entry->set_label
           (sub{
              return $blastview::CGI->param('stage_initialised') ? '' :
-               '<B>Or</B> Enter an existing ticket ID:' 
+               '<strong>Or</strong> Enter an existing ticket ID:' 
              } );
         #$entry->set_label_summary('Ticket ID: %s');
       }
@@ -162,7 +162,7 @@ STAGE_SETUP:{
     SPECIES_SELECT:{
         my $entry = $form->addobj_form_entry();
         $entry->set_type('SELECT');
-        $entry->set_label('Select species:<BR /><SMALL>Use \'ctrl\' key to select multiple species</SMALL>');
+        $entry->set_label('Select species:<br /><small>Use \'ctrl\' key to select multiple species</small>');
         $entry->set_options([@species]);
         $entry->set_default( $def_sp );
         $entry->set_cgi_size(3);
@@ -326,9 +326,9 @@ STAGE_SETUP:{
     SENSITIVITIES_SELECT:{
         my $entry = $form->addobj_form_entry();
         $entry->set_type('SELECT');
-        $entry->set_label('Search sensitivity:<BR /><SMALL>'.
+        $entry->set_label('Search sensitivity:<br /><small>'.
                           'Optimise search parameters to find '.
-                          'the following alignments</SMALL>');
+                          'the following alignments</small>');
         $entry->set_options # Callback to add CUSTOM to list
           ( sub{ 
               my @extra = ();
@@ -359,8 +359,8 @@ STAGE_SETUP:{
 	my $entry = $form->addobj_form_entry();
         my $sitetype = ucfirst(lc($SiteDefs::ENSEMBL_SITETYPE));
 	$entry->set_label( qq(
-<SMALL>BlastView provides an integrated platform for sequence similarity searches against $sitetype databases, offering access to both BLAST and SSAHA programs. <A href='/Homo_sapiens/helpview?se=1&kw=blastview' target='onlinehelp'>[More]</A><BR /><IMG src="/img/blank.gif" height=5 /><BR />
-We would like to hear your impressions of BlastView, especially regarding functionality that you would like to see provided in the future. Many thanks for your time. <A href='/helpdesk/index.html' target='feedback'>[Feedback&nbsp;Form]</SMALL></A>) );
+<small>BlastView provides an integrated platform for sequence similarity searches against $sitetype databases, offering access to both BLAST and SSAHA programs. <a href="/Homo_sapiens/helpview?se=1;kw=blastview" target="onlinehelp">[More]</a><br /><img src="/img/blank.gif" height="5" alt="" width="1" /><br />
+We would like to hear your impressions of BlastView, especially regarding functionality that you would like to see provided in the future. Many thanks for your time. <a href="/Homo_sapiens/helpview" target="onlinehelp">[Feedback&nbsp;Form]</a></small>) );
       }
     }
   }
@@ -428,7 +428,7 @@ STAGE_CONFIGURE:{
           $entry->set_cgi_name( $param );
           my $label = $param_data->{label} || $param;
           if( my $desc = $param_data->{description} ){
-            $label .= "<BR /><I><SMALL>$desc</SMALL></I>";
+            $label .= "<br /><i><small>$desc</small></i>";
           }
           $entry->set_label( $label );
 
@@ -525,8 +525,8 @@ STAGE_RESULTS:{
     ENTRY_USAGE:{
 	my $entry = $form->addobj_form_entry();
 	$entry->set_label( qq( 
-<SMALL>'Job pending' results can be retrieved by clicking on the button above. Alternatively, this page can be bookmarked for later, or the ID noted and entered on the BLAST page.<br/><IMG src="/img/blank.gif" height=5 /><br/>
-Results are retained for 7 days. After this, they must be re-submitted.) );
+<small>'Job pending' results can be retrieved by clicking on the button above. Alternatively, this page can be bookmarked for later, or the ID noted and entered on the BLAST page.<br /><img src="/img/blank.gif" alt="" height="5" width="1" /><br />
+Results are retained for 7 days. After this, they must be re-submitted.</small>) );
       }
     }
   }
@@ -1066,8 +1066,8 @@ sensitivityConf[\"%s\"][\"%s\"] = 1;";
 #                                  $db, ( $db_labels{$db} || $db ) );
 #  }
 
-return "
-    <SCRIPT LANGUAGE=\"JavaScript\">
+return qq( 
+    <script type="text/javascript"><![CDATA[ 
 //----------------------------------------------------------------------
 // Define global constants
 
@@ -1600,7 +1600,7 @@ function setDatabase(){
   setSelectOptions( protTargetDB, optProtValues, dbPeptideLabels, lastDatabasePeptide );
 
 }
-    </SCRIPT>
-";
+]]></script>
+);
 
 }

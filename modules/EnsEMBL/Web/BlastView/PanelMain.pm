@@ -18,137 +18,137 @@ my %cells;
 
 # 20 by 20 spacer
 #$cells{X}= qq(
-#    <TD height=20 width=20 bgcolor='<TMPL_VAR MAIN_BG_COLOR>' colspan=1
-#    ><IMG src="/img/blank.gif" height="20" width="20" /></TD>);
+#    <td height="20" width="20" bgcolor="<TMPL_VAR MAIN_BG_COLOR>" colspan="1"
+#    ><img alt="" src="/img/blank.gif" height="20" width="20" /></td>);
 
 # 1 by 10 spacer (BG)
 $cells{V}= qq(
-    <TD height=10 width=1 class="main_panel_bg" colspan=1
-    ><IMG src="/img/blank.gif" height=7 width=1 /></TD>);
+    <td height="10" width="1" class="main_panel_bg" colspan="1"
+    ><img alt="" src="/img/blank.gif" height="7" width="1" /></td>);
 
 # 1 by 5 spacer (BG)
 $cells{W}= qq(
-    <TD height=5 width=1 class="main_panel_bg" colspan=1
-    ><IMG src="/img/blank.gif" height=5 width=1 /></TD>);
+    <td height="5" width="1" class="main_panel_bg" colspan="1"
+    ><img alt="" src="/img/blank.gif" height="5" width="1" /></td>);
 
 # 20 by 1 spacer (BG)
 $cells{H}= qq(
-    <TD height=1 width=10 class="main_panel_bg" colspan=1
-    ><IMG src="/img/blank.gif" height=1 width=10 /></TD>);
+    <td height="1" width="10" class="main_panel_bg" colspan="1"
+    ><img alt="" src="/img/blank.gif" height="1" width="10" /></td>);
 
 # 5 by 1 spacer (BG)
 $cells{i}= qq(
-    <TD height=1 width=5 class="main_panel_bg" colspan=1
-      ><IMG src="/img/blank.gif" height=1 width=5 /></TD>);
+    <td height="1" width="5" class="main_panel_bg" colspan="1"
+      ><img alt="" src="/img/blank.gif" height="1" width="5" /></td>);
 
 # 5 by 1 spacer (FG)
 $cells{x}= qq(
-    <TD height=1 width=5 class="main_panel_fg" colspan=1
-    ><IMG src="/img/blank.gif" height=1 width=5 /></TD>);
+    <td height="1" width="5" class="main_panel_fg" colspan="1"
+    ><img alt="" src="/img/blank.gif" height="1" width="5" /></td>);
 
 # 1 by 5 spacer (FG)
 $cells{v}= qq(
-    <TD height=5 width=1 class="main_panel_fg" colspan=1
-    ><IMG src="/img/blank.gif" height=5 width=1 /></TD>);
+    <td height="5" width="1" class="main_panel_fg" colspan="1"
+    ><img alt="" src="/img/blank.gif" height="5" width="1" /></td>);
 
 # 10 by 1 spacer  (FG)
 $cells{g}= qq(
-    <TD height=1 width=10 class="main_panel_fg" colspan=1
-    ><IMG src="/img/blank.gif" height=1 width=10 /></TD>);
+    <td height="1" width="10" class="main_panel_fg" colspan="1"
+    ><img alt="" src="/img/blank.gif" height="1" width="10" /></td>);
 
 # 5 by 1 spacer  (FG)
 $cells{h}= qq(
-    <TD height=1 width=5 class="main_panel_fg"  colspan=1
-    ><IMG src="/img/blank.gif" height=1 width=5 /></TD>);
+    <td height="1" width="5" class="main_panel_fg"  colspan="1"
+    ><img alt="" src="/img/blank.gif" height="1" width="5" /></td>);
 
 # 1-pixel border
 $cells{_}= qq(
-    <TD height=1 width=1 class="main_panel_border" colspan=1
-    ><IMG src="/img/blank.gif" height=1 width=1 /></TD>);
+    <td height="1" width="1" class="main_panel_border" colspan="1"
+    ><img alt="" src="/img/blank.gif" height="1" width="1" /></td>);
 
 # Label cell (yellow bg)
 $cells{T}= qq(
-    <TD class='block_head' colspan=1>%s</TD>);
+    <td class="block_head" colspan="1">%s</td>);
 
 # Text cell (yellow bg)
 $cells{d}= qq(
-    <TD class='panel_text' colspan=1>%s</TD>);
+    <td class="panel_text" colspan="1">%s</td>);
 
 # Left align Label cell (yellow bg)
 $cells{L}= qq(
-    <TD class='panel_big_head' colspan=1>%s</TD>);
+    <td class="panel_big_head" colspan="1">%s</td>);
 
 # Right align Label cell (yellow bg)
 $cells{R}= qq(
-    <TD class='panel_head' align='right' colspan=1>%s</TD>);
+    <td class="panel_head" align="right" colspan="1">%s</td>);
 
 # Description Label cell (yellow bg)
 $cells{D}= qq(
-    <TD class='panel_head' colspan=1>%s</TD>);
+    <td class="panel_head" colspan="1">%s</td>);
 
 # Label cell (white bg left align 50%)
 $cells{t}= qq(
-    <TD class="main_panel_fg" width='50%%' valign="top" colspan=1>%s</TD>);
+    <td class="main_panel_fg" width="50%%" valign="top" colspan="1">%s</td>);
 
 # Label cell (white bg left align 1% ) - Checkbox/radio cell
 $cells{o}= qq(
-    <TD class="main_panel_fg" width='1%%' valign="top" colspan=1>%s</TD>);
+    <td class="main_panel_fg" width="1%%" valign="top" colspan="1">%s</td>);
 
 # Label cell (white bg left align 25%)
 $cells{a}= qq(
-    <TD class="main_panel_fg" width='25%%' colspan=1>%s</TD>);
+    <td class="main_panel_fg" width="25%%" colspan="1">%s</td>);
 
 # Label cell (white bg left align - unsized)
 $cells{u}= qq(
-    <TD class="main_panel_fg" nowrap colspan=1>%s</TD>);
+    <td class="main_panel_fg" nowrap="nowrap" colspan="1">%s</td>);
 
 # Label cell (white bg left align unsized 2 placeholders)
 $cells{y}= qq(
-    <TD class="main_panel_fg"  colspan=1>%s&nbsp;%s</TD>);
+    <td class="main_panel_fg"  colspan="1">%s&nbsp;%s</td>);
 
 # Label cell (white bg right align)
 $cells{r}= qq(
-    <TD class="main_panel_fg" align='right' colspan=1>%s</TD>);
+    <td class="main_panel_fg" align="right" colspan="1">%s</td>);
 
 # Label cell (white bg center align)
 $cells{c}= qq(
-    <TD class="main_panel_fg" align='center' width='50%%' colspan=1>%s</TD>);
+    <td class="main_panel_fg" align="center" width="50%%" colspan="1">%s</td>);
 # Label cell (yellow bg left align)
 $cells{Z}= qq(
-    <TD class="main_panel_fg" colspan=1>%s</TD>);
+    <td class="main_panel_fg" colspan="1">%s</td>);
 # Label cell (bg color left align
 $cells{Y}= qq(
-    <TD class="main_panel_bg_left" colspan=1>%s</TD>);
-# Cell with 2 elems separated by a <BR /> (white bg)
+    <td class="main_panel_bg_left" colspan="1">%s</td>);
+# Cell with 2 elems separated by a <br /> (white bg)
 $cells{B}= qq(
-    <TD class="main_panel_fg" colspan=1>%s&nbsp;%s<BR />%s&nbsp;%s</TD>);
+    <td class="main_panel_fg" colspan="1">%s&nbsp;%s<br />%s&nbsp;%s</td>);
 
 # Warning text cell
 $cells{p} = qq(
-    <TD class='entry_warning' colspan=1>%s</TD>);
+    <td class="entry_warning" colspan="1">%s</td>);
 
 # Info text
 $cells{q} = qq(
-    <TD class='main_panel_fg_bold' colspan=1>%s</TD>);
+    <td class="main_panel_fg_bold" colspan="1">%s</td>);
 
 # Warning image cell
 #$cells{P} = qq(
-#    <TD height=20 width=20 colspan=1
-#    ><A name='warning'
-#    ><IMG src='/img/blastview/warn.gif' height=20 width=20></TD>);
+#    <td height="20" width="20" colspan="1"
+#    ><A name="warning"
+#    ><img alt="" src="/img/blastview/warn.gif" height="20" width="20" /></td>);
 
 # Info image
 #$cells{I} = qq(
-#    <TD height=20 width=20 colspan=1
-#    ><A name='info'
-#    ><IMG src='/img/blastview/info.gif' height=20 width=20></TD>);
+#    <td height="20" width="20" colspan="1"
+#    ><A name="info"
+#    ><img alt="" src="/img/blastview/info.gif" height="20" width="20" /></td>);
 #cells for line under tabs
 #$cells{Z}=qq(
- #   <TD height=1 width=10 bgcolor='#999999' colspan=1
-  #  ><IMG src='' height=1 width=10></TD>);
+ #   <td height="1" width="10" bgcolor='#999999' colspan="1"
+  #  ><img alt="" src='' height="1" width="10"></td>);
 #$cells{l}=qq(
- #   <TD height=1 width=1 bgcolor='#FFFFE7' colspan=1
-  #  ><IMG src='' height=1 width=1></TD>);
+ #   <td height="1" width="1" bgcolor='#FFFFE7' colspan="1"
+  #  ><img alt="" src='' height="1" width="1"></td>);
 
 my %rows;
 
@@ -344,7 +344,7 @@ sub add_panel_image{
 				   -value=>$_->{-value}, 
 				   -src  =>$_->{-src} ) );
     }
-    else{ push( @buttons, '&nbsp' ) }
+    else{ push( @buttons, '&nbsp;' ) }
   }
   my $form = sprintf( $self->get_row('panel_image'),
 		      $title_meta->{LABEL} || '&nbsp;',
@@ -398,7 +398,7 @@ sub get_entry_result{
   my $self = shift;
   my @data = @_;
   my $tmpl = $self->get_row('entry_info4');
-  return sprintf( $tmpl, map{ "<SMALL>$_</SMALL>" } @data );
+  return sprintf( $tmpl, map{ "<small>$_</small>" } @data );
 
 }
 #----------------------------------------------------------------------
@@ -491,8 +491,8 @@ sub _gen_specified_group{
       $i++;
     }
     $html .= sprintf( $tmpl, 
-		      shift @bases || '&nbsp', shift @labels || '&nbsp',
-		      shift @bases || '&nbsp', shift @labels || '&nbsp', );
+		      shift @bases || '&nbsp;', shift @labels || '&nbsp;',
+		      shift @bases || '&nbsp;', shift @labels || '&nbsp;', );
   }
   
   return $html;
@@ -676,10 +676,10 @@ sub gen_4control_group{
       $i++;
     }
     $html .= sprintf( $tmpl, 
-		      (shift @bases || '&nbsp') . (shift @labels || '&nbsp'),
-		      (shift @bases || '&nbsp') . (shift @labels || '&nbsp'),
-		      (shift @bases || '&nbsp') . (shift @labels || '&nbsp'),
-		      (shift @bases || '&nbsp') . (shift @labels || '&nbsp'),
+		      (shift @bases || '&nbsp;') . (shift @labels || '&nbsp;'),
+		      (shift @bases || '&nbsp;') . (shift @labels || '&nbsp;'),
+		      (shift @bases || '&nbsp;') . (shift @labels || '&nbsp;'),
+		      (shift @bases || '&nbsp;') . (shift @labels || '&nbsp;'),
 		    );
   }
   return $html;
@@ -742,7 +742,7 @@ sub _gen_specified_group_vertical{
       $i++;
     }
     $html .= sprintf( $tmpl, 
-		      shift @bases || '&nbsp', shift @labels || '&nbsp',);
+		      shift @bases || '&nbsp;', shift @labels || '&nbsp;',);
   }
   return $html;
 }
@@ -800,9 +800,9 @@ sub gen_tab_group{
   my $src = EnsEMBL::Web::BlastView::Panel::IMG_ROOT_ROVER;
   #With Will's tab images
   #$html .= sprintf( $tmpl, 
-	#	    "<IMG src=${src}/tab_left.gif />".
+	#	    "<img alt="" src=${src}/tab_left.gif />".
 		#    join( $spacer, @bases ). 
-		 #   "<IMG src=${src}/tab_right.gif />");
+		 #   "<img alt="" src=${src}/tab_right.gif />");
   $html .= sprintf( $tmpl, 
 		  ( join( $spacer, @bases ) ) );
   #$html .= $finalline;
@@ -926,7 +926,7 @@ sub gen_seq_type_group{
 
   my $src  = EnsEMBL::Web::BlastView::Panel::IMG_ROOT_ROVER.'/'.$image_obj->get_src;
   my $name =  $image_obj->get_cgi_name;
-  my $image = "<IMG src=\"$src\" name=\"$name\" border=\"0\" />";
+  my $image = qq(<img alt="" src="$src" name="$name" border="0" />);
 
   my @labels;
   my @text_box;
@@ -1000,7 +1000,7 @@ sub gen_chrom_start_end_filter{
 sub gen_proteome_region_filter{
   my $self = shift;
   #my $check_with_label  = $self->gen_check_with_label( shift );
-  my $check =  sprintf( $self->get_row('entry_filter2'),$self->_gen_element( 'CHECKBOX',shift ),'&nbsp');
+  my $check =  sprintf( $self->get_row('entry_filter2'),$self->_gen_element( 'CHECKBOX',shift ),'&nbsp;');
   my $label_with_select1 = $self->gen_label_with_select( shift );
   my $hidden = $self->gen_hidden(shift);
   my $label_with_text1 = $self->gen_label_with_text( shift );
@@ -1154,7 +1154,7 @@ sub gen_label_with_file{
 
   return sprintf( $tmpl, 
 		  '&nbsp;',
-		  $entry_objs[0]->get_label() || '&nbsp',
+		  $entry_objs[0]->get_label() || '&nbsp;',
 		  $text.$hidden);
 
 }
@@ -1170,7 +1170,7 @@ sub gen_label_with_text_and_submit{
 
   my $text = $self->_gen_text( $entry_objs[0] );
 
-  my $submit = "<INPUT type='submit' name='%s', value='%s' />";
+  my $submit = qq(<input type="submit" name="%s" value="%s" />);
   $submit = sprintf( $submit, 
 		     $entry_objs[1]->get_cgi_name, 
 		     $entry_objs[1]->get_value );
@@ -1188,7 +1188,7 @@ sub gen_text_and_submit{
   my $tmpl = $self->get_row('entry_filter3');
   my $text = $self->_gen_text( $entry_objs[0] );
   
-  my $submit = "<INPUT type='submit' name='%s', value='%s' />";
+  my $submit = qq(<input type="submit" name="%s" value="%s" />);
   $submit = sprintf( $submit, 
 		     $entry_objs[1]->get_cgi_name, 
 		     $entry_objs[1]->get_value );
@@ -1459,7 +1459,7 @@ sub gen_check_with_select_and_textarea{
   my $select = $self->_gen_select( $entry_objs[1] );
 				      
   my $label = $entry_objs[1]->get_label || '';
-  $label &&= $label.'<br>';
+  $label &&= $label.'<br />';
 
   my $text = $self->_gen_textarea( $entry_objs[2] );
 

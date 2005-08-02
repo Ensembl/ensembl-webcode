@@ -832,7 +832,7 @@ sub get_status_panel{
                              VALUE => $CGI->param( 'stage' ),
                              SRC   => gen_button_src('refresh', 'on') },
 
-                           { HREF  => qq(javascript:void(window.open(\'/perl/helpview?se=1&kw=$VIEW_SCRIPT\',\'$VIEW_SCRIPT\',\'width=400,height="5"00,resizable,scrollbars\'));),
+                           { HREF  => qq(javascript:void(window.open(\'/perl/helpview?se=1;kw=$VIEW_SCRIPT\',\'$VIEW_SCRIPT\',\'width=400,height=500,resizable,scrollbars\'));),
                              SRC   => gen_button_src('help', 'on') }
                           );
 
@@ -923,7 +923,7 @@ sub get_status_panel{
   # BLAST
   #elsif( $stage eq 'results' ){
   #    #$BLAST->run;      
-  #    my $tmpl = "%s %s quer%s Vs. <br> %s species";
+  #    my $tmpl = "%s %s quer%s Vs. <br /> %s species";
   #    my $num_q = scalar( $BLAST->seqs );
   #    my @dbs = $BLAST->databases;
   #    my $num_s = scalar( @dbs );
@@ -1157,7 +1157,7 @@ sub get_main_panel{
         my $failfile = $runnable->errorfile;
         if($status eq 'DISPATCHED'){ $status_label = "Job Queued" }
         if($status eq 'FAILED' ){
-          $status_label = "System error; please <A href='/Multi/blastview'>resubmit</A> job. <BR>".
+          $status_label = "System error; please <A href='/Multi/blastview'>resubmit</A> job. <br />".
             "If problem persists, file a report using the help link above";
           my $token = $runnable->token;
           my $msg = "Blast job resulted in $failfile file:\n";
@@ -1169,8 +1169,8 @@ sub get_main_panel{
           log_blast_error( $token, $msg );
         }
         
-        my $raw_link = '&nbsp';
-        my $exp_link = '&nbsp';
+        my $raw_link = '&nbsp;';
+        my $exp_link = '&nbsp;';
         my $result   = $runnable->result;
         my $species  = $result->database_species;
         my $num_aligns = 0;
@@ -1181,12 +1181,12 @@ sub get_main_panel{
         my $res_id   = $result->token;
         my $hits_txt = ( $status eq "COMPLETED" ? 
                          $num_aligns."&nbsp;alignments,&nbsp;".
-                         $num_hits."&nbsp;hits" : '&nbsp' );
+                         $num_hits."&nbsp;hits" : '&nbsp;' );
 
         my $run_token = $runnable->token =~ /(\w+)$/ ? $1 : '';
         if( -e $runnable->reportfile ){
           my $raw_href = ("/Multi/$VIEW_SCRIPT?".
-                          join( '&',
+                          join( ';',
                                 'format=raw',
                                 "ticket=$TICKET",
                                 "runnable=$run_token",
@@ -1210,12 +1210,12 @@ sub get_main_panel{
           else{ $status_label = 'No Hits' }
 
           my $exp_href = ('/Multi/martview?'. 
-                          join( '&',
+                          join( ';',
                                 "_blast_ticket=$TICKET",
                                 "_blast_result=$res_id" ) );
 
 #          my $exp_href_tmpl = ('/Multi/martview?'. 
-#                               join( '&',
+#                               join( ';',
 #                                     'stage=output',
 #                                     'stage_initialised=start',
 #                                     'stage_initialised=filter',
@@ -1630,10 +1630,10 @@ sub update_selection{
   foreach my $p( $t->query() ){
     my( $name, $value, $action ) = split( '!!', $p );
     $action=$value if ! $action;
-    $action = uc($action);
-    if( $action eq 'SELECTED' or $action eq 'CHECKED'  ){
+    $action = lc($action);
+    if( $action eq 'selected' or $action eq 'checked'  ){
       if( grep{ uc($value) eq uc($_)} $CGI->param($name) ){
-        $params{$p} = uc( $action );
+        $params{$p} = qq($action="$action");
       }
     }
     elsif( uc( $action  ) eq 'VALUE' ){
@@ -1646,7 +1646,7 @@ sub update_selection{
       foreach( $CGI->param('_'.$p) ){
         push @warns, get_panel_warning( $_ );
       }
-      $params{$p} = join '<BR>', @warns;
+      $params{$p} = join '<br />', @warns;
     }
   }
   $t->param( %params );
@@ -1695,16 +1695,16 @@ sub populate_karyotype{
   my %highlights2     = ( 'style' => 'outbox' );
     
   my $karyo_tmpl = qq(
-<TABLE align="center" border="0" cellspacing="0" cellpadding="2">
- <TR valign="top">
-  <TD nowrap align="center" colspan="2"
-  ><IMG SRC="%s" BORDER="0" usemap="#karyo"></TD>
- </TR>
- <TR><TD colspan="2" height="5"><img src="/img/blank.gif" height="5" /></TD></TR>
- <TR>
-  <TD  colspan="2" align="center">%s</TD>
- </TR>
-</TABLE>
+<table align="center" border="0" cellspacing="0" cellpadding="2">
+ <tr valign="top">
+  <td nowrap align="center" colspan="2"
+  ><IMG SRC="%s" BORDER="0" usemap="#karyo"></td>
+ </tr>
+ <tr><td colspan="2" height="5"><img src="/img/blank.gif" height="5" /></td></tr>
+ <tr>
+  <td  colspan="2" align="center">%s</td>
+ </tr>
+</table>
 <MAP name="karyo">
 %s</<MAP>);
 
@@ -1722,7 +1722,7 @@ sub populate_karyotype{
 <td width="8"><small>&nbsp;</small></td>);
 
   my $link_href_tmpl    = ("/Multi/$VIEW_SCRIPT?".
-                           join( '&',
+                           join( ';',
                                  "ticket=$TICKET",
                                  "run_id=$run_id",
                                  'hit_id=%s',
@@ -1730,7 +1730,7 @@ sub populate_karyotype{
                                  '_display=%s' ) );
 
   my $ctgview_href_tmpl = ('/%s/contigview?'.
-                           join( '&',
+                           join( ';',
                                  'chr=%s',
                                  'vc_start=%s',
                                  'vc_end=%s',
@@ -1841,10 +1841,10 @@ sub populate_karyotype{
      $fi->{'img_map'} = 1;
 
   $main_panel->add_entry();
-  my $html = qq(<TABLE align="center" border="0" cellspacing="0" cellpadding="2">
-   <TR valign="top">
-     <TD nowrap align="center" colspan="2"
-       >).$fi->render_image_tag().qq(</TD></TR></TABLE>).$fi->render_image_map();
+  my $html = qq(<table align="center" border="0" cellspacing="0" cellpadding="2">
+   <tr valign="top">
+     <td nowrap align="center" colspan="2"
+       >).$fi->render_image_tag().qq(</td></tr></table>).$fi->render_image_map();
   $main_panel->add_form( $main_panel->get_form_label( $html ) );
   return 1;
 }
@@ -1858,16 +1858,16 @@ sub draw_hsp_vs_query{
   my $aligns     = shift;
 
   my $image_tmpl = qq(
-<TABLE align="center" border="0" cellspacing="0" cellpadding="2">
- <TR valign="top">
-  <TD nowrap align="center" colspan=2
-  ><IMG SRC="%s" BORDER="0" usemap="#hsp_query_plot"></TD>
- </TR>
- <TR><TD colspan="2" height="5"><img src="/img/blank.gif" height="5" /></TD></TR>
- <TR>
-  <TD colspan="2" align="center">%s</TD>
- </TR>
-</TABLE>
+<table align="center" border="0" cellspacing="0" cellpadding="2">
+ <tr valign="top">
+  <td nowrap align="center" colspan=2
+  ><IMG SRC="%s" BORDER="0" usemap="#hsp_query_plot"></td>
+ </tr>
+ <tr><td colspan="2" height="5"><img src="/img/blank.gif" height="5" /></td></tr>
+ <tr>
+  <td colspan="2" align="center">%s</td>
+ </tr>
+</table>
 <MAP name="hsp_query_plot">
 %s</<MAP>);
 
@@ -1903,10 +1903,10 @@ sub draw_hsp_vs_query{
   }
   my $colour_key_str = sprintf( $colours_tmpl,
                                 join( $colour_row_spacer, @col_tds ) );
-  my $html = qq(<TABLE align="center" border="0" cellspacing="0" cellpadding="2">
-   <TR valign="top">
-     <TD nowrap align="center" colspan="2"
-       >).$fi->render_image_tag().qq(</TD></TR></TABLE>).$fi->render_image_map();
+  my $html = qq(<table align="center" border="0" cellspacing="0" cellpadding="2">
+   <tr valign="top">
+     <td nowrap align="center" colspan="2"
+       >).$fi->render_image_tag().qq(</td></tr></table>).$fi->render_image_map();
 
   $main_panel->add_entry();
   $main_panel->add_form( $main_panel->get_form_label( $html ) );
@@ -1929,18 +1929,18 @@ sub populate_navigation{
   my @row_data   = @_;
 
   my $table_tmpl = qq(
-<TABLE cellspacing=0 cellpadding=0 align='center'>%s
-</TABLE> );
+<table cellspacing=0 cellpadding=0 align='center'>%s
+</table> );
 
     my $row_tmpl = qq(
- <TR>
-  <TD align='right'>%s</TD>
-  <TD align='center'>&nbsp;%s</TD>
-  <TD align='center'>&nbsp;%s</TD>
-  <TD align='center'>&nbsp;of </TD>
-  <TD align='center'>&nbsp;%s</TD>
-  <TD align='left'  >&nbsp;%s</TD>
- </TR> );
+ <tr>
+  <td align='right'>%s</td>
+  <td align='center'>&nbsp;%s</td>
+  <td align='center'>&nbsp;%s</td>
+  <td align='center'>&nbsp;of </td>
+  <td align='center'>&nbsp;%s</td>
+  <td align='left'  >&nbsp;%s</td>
+ </tr> );
 
   my $nav_table = '';
   foreach( @row_data ){
@@ -1977,17 +1977,17 @@ sub populate_result_summary{
  CONTROLLER:{
 
     my $TABLE = qq(
-<TABLE cellspacing=0 cellpadding=0 border=0 width="100%%">%s
-</TABLE> );
+<table cellspacing=0 cellpadding=0 border=0 width="100%%">%s
+</table> );
         my $ROW = qq(
- <TR>%s
- </TR> );
+ <tr>%s
+ </tr> );
         my $CELL = qq(
-  <TD>%s
-  </TD> );
+  <td>%s
+  </td> );
 
     my @label_cells = 
-      ("<b><small>Select rows to include in table, and type of sort</small></b><br>".
+      ("<b><small>Select rows to include in table, and type of sort</small></b><br />".
        "<small>(Use the 'ctrl' key to select multiples)</small>",
        gen_button( 'stage', 'display', 'refresh' ) );
 
@@ -2022,7 +2022,7 @@ sub populate_result_summary{
                    -size    =>3, );
       my $select = $main_panel->_gen_base_form(%args);
       my $label = ucfirst($view_type);
-      push @cells, "<b><small>$label</small></b><BR>$select";
+      push @cells, "<b><small>$label</small></b><br />$select";
       push @sort_opts, ["${view_type}_asc"=>"&lt;$label"];
       push @sort_opts, ["${view_type}_dsc"=>"&gt;$label"];
     }
@@ -2039,7 +2039,7 @@ sub populate_result_summary{
                        -multiple=>1,
                        -size    =>3, );
     my $stats_select = $main_panel->_gen_base_form(%stats_args);
-    push @cells, "<b><small>Stats</small></b><BR>$stats_select";
+    push @cells, "<b><small>Stats</small></b><br />$stats_select";
 
     foreach my $s( @stats_opts ){
       push @sort_opts, [$s->[0]."_asc","&lt;$s->[1]"];
@@ -2052,7 +2052,7 @@ sub populate_result_summary{
                       -multiple=>0,
                       -size=>3 );
     my $sort_select = $main_panel->_gen_base_form(%sort_args);
-    push @cells, "<b><small>Sort By</small></b><BR>$sort_select";
+    push @cells, "<b><small>Sort By</small></b><br />$sort_select";
 
     my $row = join( '', map{sprintf( $CELL, $_ )} @cells );
     my $table = sprintf( $TABLE, sprintf( $ROW, $row ) ); 
@@ -2094,7 +2094,7 @@ sub populate_result_summary{
 
   # Define templates
   my $ahref_t = ("/Multi/$VIEW_SCRIPT?".
-                 join( '&',
+                 join( ';',
                        "ticket=$TICKET",
                        "run_id=$run_id",
                        "result_id=$result_id",
@@ -2103,14 +2103,14 @@ sub populate_result_summary{
                        '_display=%s' ) );
 
   my $chref_t = ("/$species/contigview?".
-                 join( '&',
+                 join( ';',
                        'chr=%s',
                        'vc_start=%s',
                        'vc_end=%s',
                        "highlights=BLAST_NEW:$TICKET!!$use_date" ) );
 
-  my $sort_t  = qq(<A href="/Multi/$VIEW_SCRIPT?ticket=$TICKET&sort=%s" title="Sort Descending"><IMG src="/img/blastview/sort_descending.gif" border=0 height=11 width="1"1></A>);
-  my $rsort_t = qq(<A href="/Multi/$VIEW_SCRIPT?ticket=$TICKET&sort=%s" title="Sort Ascending"><IMG src="/img/blastview/sort_ascending.gif" border=0 height=11 width="1"1></A>);
+  my $sort_t  = qq(<A href="/Multi/$VIEW_SCRIPT?ticket=$TICKET;sort=%s" title="Sort Descending"><IMG src="/img/blastview/sort_descending.gif" border=0 height=11 width="1"1></A>);
+  my $rsort_t = qq(<A href="/Multi/$VIEW_SCRIPT?ticket=$TICKET;sort=%s" title="Sort Ascending"><IMG src="/img/blastview/sort_ascending.gif" border=0 height=11 width="1"1></A>);
 
   my $link_t = qq(<A href="%s" target="%s$TICKET" title="%s">%s</A>);  
   my $alink_t = sprintf( $link_t, $ahref_t, "BV_A_", "Alignment",      "[A]" );
@@ -2127,13 +2127,13 @@ sub populate_result_summary{
 
   my $ctgview_link_t = sprintf
     ( $link_t, "/$species/contigview?".
-      join( '&', "region=%s",
+      join( ';', "region=%s",
             "highlights=BLAST_NEW:$TICKET!!$use_date"), 
       "BV_N_", "contigview", "%s" );
 
   my $cytoview_link_t = sprintf
     ( $link_t, "/$species/cytoview?".
-      join( '&', "region=%s",
+      join( ';', "region=%s",
             "highlights=BLAST_NEW:$TICKET!!$use_date"), 
       "BV_N_", "cytoview", "%s" );
 
@@ -2142,7 +2142,7 @@ sub populate_result_summary{
   }
   elsif( $database =~ /(CDNA)|(RNA)/i ){
     my $nhref_t = ("/$species/transview?".
-                   join( '&',
+                   join( ';',
                          'transcript=%s',
                          #"highlights=BLAST_NEW:$TICKET" 
                        ) );     
@@ -2152,7 +2152,7 @@ sub populate_result_summary{
     my $id_type = 'peptide';
     if(  $database =~ /(ABINITIO)|(PREDICTION)/io ){ $id_type = 'transcript' }
     my $nhref_t = ("/$species/protview?".
-                   join( '&',
+                   join( ';',
                          "$id_type=%s",
                          #"highlights=BLAST_NEW:$TICKET" 
                        ) );         
@@ -2239,24 +2239,24 @@ sub populate_result_summary{
 
   # Define HTML templates
   my $table_tmpl = qq(
-<TABLE cellspacing=0 cellpadding=0>%s</TABLE>);
+<table cellspacing="0" cellpadding="0">%s</table>);
   my $row_tmpl = qq(
-<TR>%s</TR>);
+<tr>%s</tr>);
   my $spacer_cell = qq(
-<TD height="5" width="5"><IMG src="/img/blank.gif" height="5" width="5" /></TD>);
+<td height="5" width="5"><IMG src="/img/blank.gif" height="5" width="5" /></td>);
   my $big_spacer_cell = qq(
-<TD height="5" width="15"><IMG src="/img/blank.gif" height="5" width="15" /></TD>);
+<td height="5" width="15"><IMG src="/img/blank.gif" height="5" width="15" /></td>);
   my $vert_spacer_cell = qq(
-<TD colspan="%s" height="5" width="1"><IMG src="/img/blank.gif" height="5" /></TD>);
+<td colspan="%s" height="5" width="1"><IMG src="/img/blank.gif" height="5" /></td>);
   my $header_cell = qq(
-<TD nowrap colspan="%s"><B><SMALL>%s</SMALL><B></TD> );
+<td nowrap colspan="%s"><b><small>%s</small></b></td> );
   my $header2_cell = qq(
-<TD nowrap><I><SMALL>%s</SMALL><I></TD>);
+<td nowrap><i><small>%s</small></i></td>);
   my $data_cell = qq(
-<TD nowrap><SMALL>%s</SMALL></TD> );
+<td nowrap><small>%s</small></td> );
 
   # Initialise 
-  my @sections = ( ['Links','&nbsp'] );
+  my @sections = ( ['Links','&nbsp;'] );
   my @view_types = ( 'links' );
   my %view_labels = (orientation => 'Ori',
                      identity    => '%ID',
@@ -2349,7 +2349,7 @@ sub populate_result_summary{
 #                   $ch ? sprintf( $clink_t, $ch->seq_region_name, 
 #                                  $ch->start-$context,
 #                                  $ch->end  +$context, ) : '' );
-    return join( "&nbsp", $A_link, $S_link, $G_link, $C_link );
+    return join( "&nbsp;", $A_link, $S_link, $G_link, $C_link );
   };
 
   $code{query_name}        = sub{ $_[1]->query->seq_id };
@@ -2512,7 +2512,7 @@ sub populate_hit_summary{
       $hit_name = sprintf( $link_tmpl, 
                            $ENV{ENSEMBL_SPECIES},
                            $ENV{ENSEMBL_SCRIPT},
-                           join( '&', ( map{$_."=".$link_args{$_}} 
+                           join( ';', ( map{$_."=".$link_args{$_}} 
                                     keys %link_args ) ),
                            $hit_name );
     }                           
@@ -2705,11 +2705,11 @@ sub query_markup_string{
   my $html;
 
   $html .= qq( 
-<span style="font-family: 'Courier new', monospace; font-size:small; color:$colour_map{'S'}">THIS STYLE:</span> Matching bases for selected HSP<BR> );
+<span style="font-family: 'Courier new', monospace; font-size:small; color:$colour_map{'S'}">THIS STYLE:</span> Matching bases for selected HSP<br /> );
 
   if( @hsps > 1 ){
     $html .= qq( 
-<span style="font-family: 'Courier new', monospace; font-size:small; color:$colour_map{'M'}">THIS STYLE:</span></FONT> Matching bases for other HSPs in selected hit<BR> );
+<span style="font-family: 'Courier new', monospace; font-size:small; color:$colour_map{'M'}">THIS STYLE:</span></FONT> Matching bases for other HSPs in selected hit<br /> );
   }
   $html .= qq(
 <PRE><span style="font-family: 'Courier new', monospace; font-size:small">);
@@ -2986,7 +2986,7 @@ sub genome_markup_string{
                   exon   =>'Location of Exons',
                   snp    =>'Location of SNPs',
                   snpexon=>'Location of exonic SNPs');
-  my $key_tmpl = qq(<span style="font-family: 'Courier new', monospace; font-size:small"> $style_tmpl</span> %s<br>);
+  my $key_tmpl = qq(<span style="font-family: 'Courier new', monospace; font-size:small"> $style_tmpl</span> %s<br />);
   foreach my $key( @keys ){
     if( ! $alignmenttype ){
        next if $key eq 'blast_s';
@@ -3017,9 +3017,15 @@ sub genome_markup_string{
   my $feature    = $hsp->genomic_hit($csystem);
   my $tlslice    = $tlfeature->feature_Slice();
   my $slice      = $feature->feature_Slice();
+  warn ">>> $slice <<<";
   $tlslice->adaptor( $sl_adaptor );
   $slice->adaptor( $sl_adaptor );
-
+  eval { 
+    my $T = $slice->get_seq_region_id;
+  };
+  if($@) {
+    return "<p><b>Ill defined slice</b> - this slice does not belong to the current assembly - perhaps you are using an old blast ticket</p>";
+  }
   # Apply orientation
   if( $orientation eq 'fwd' and $slice->strand < 0 ){
     $slice = $slice->invert;
@@ -3068,7 +3074,7 @@ sub genome_markup_string{
   # Get all exons for this slice
   my @exons = ();
   my @snps  = ();
-  #warn( $exontype );
+  warn( "$sp - $exontype ", $slice->name );
   if( $exontype eq 'core'){
     @exons = @{$slice->get_all_Exons};
   } elsif( $exontype eq 'prediction' ){

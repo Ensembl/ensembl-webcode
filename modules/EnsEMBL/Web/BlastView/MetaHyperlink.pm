@@ -47,7 +47,7 @@ sub gen_hyperlink{
   my $href = $self->gen_href(@_);
   my $type = $self->get_type();
   if( $type eq 'geneid' ){$type = 'exturl'};
-  my $html_tmpl = '<A href="%s" class="%s" target="%s">%s</A>';
+  my $html_tmpl = '<a href="%s" class="%s" target="%s">%s</a>';
   my $html = sprintf( $html_tmpl, $href, $type, $type, "%s" );
 #  warn( $html );
   return $html;

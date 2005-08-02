@@ -20,33 +20,27 @@ my %cells;
 
 # Horizontal padding (VDARK_BG_COLOR)
 $cells{H} = qq(
-    <TD height=1 width=20 bgcolor='<TMPL_VAR VDARK_BG_COLOR>' colspan=1
-    ><IMG src='/img/blank.gif' height=1 width=5 /></TD>);
+    <td height="1" width="20" bgcolor="<TMPL_VAR VDARK_BG_COLOR>" colspan="1"><img alt="" src="/img/blank.gif" height="1" width="5" /></td>);
 
 # Vertical padding (VDARK_BG_COLOR)
 $cells{V} = qq(
-    <TD height=5 width=1 bgcolor='<TMPL_VAR VDARK_BG_COLOR>' colspan=1
-    ><IMG src='/img/blank.gif' height=5 width=1 /></TD>);
+    <td height="5" width="1" bgcolor="<TMPL_VAR VDARK_BG_COLOR>" colspan="1"><img alt="" src="/img/blank.gif" height="5" width="1" /></td>);
 
 # 1-pixel border
 $cells{_}= qq(
-    <TD height=1 width=1 bgcolor='<TMPL_VAR BORDER_COLOR>' colspan=1
-    ><IMG src='/img/blank.gif' height=1 width=1 /></TD>);
+    <td height="1" width="1" bgcolor="<TMPL_VAR BORDER_COLOR>" colspan="1"><img alt="" src="/img/blank.gif" height="1" width="1" /></td>);
 
 # Arrow cell
 $cells{a}= qq(
-    <TD width=20 height=20 bgcolor="<TMPL_VAR VDARK_BG_COLOR>" colspan=1
-    align="center"><IMG src='%s' width=20 height=20 /></TD>);
+    <td width="20" height="20" bgcolor="<TMPL_VAR VDARK_BG_COLOR>" colspan="1" align="center"><img alt="" src="%s" width="20" height="20" /></td>);
 
 # Spacer cell
 $cells{s}= qq(
-    <TD width=20 height=20 bgcolor='<TMPL_VAR VDARK_BG_COLOR>' colspan=1
-    ><IMG src='%s' width=10 height=20 /></TD>);
+    <td width="20" height="20" bgcolor="<TMPL_VAR VDARK_BG_COLOR>" colspan="1"><img alt="" src="%s" width="10" height="20" /></td>);
 
 # Image button cell
 $cells{b}= qq(
-    <TD width=90 height=20 bgcolor='<TMPL_VAR VDARK_BG_COLOR>' colspan=1
-    align="center">%s</TD>);
+    <td width="90" height="20" bgcolor="<TMPL_VAR VDARK_BG_COLOR>" colspan="1" align="center">%s</td>);
 
 
 my %rows;
@@ -126,7 +120,7 @@ sub add_top_form{
 				     -src     => $srcs{$key} || '', ) ); 
       }
       else{
-	push( @forms, "<IMG src='$srcs{$key}' />" );
+	push( @forms, qq(<img alt="" src="$srcs{$key}" />) );
       }
       push( @forms, shift @spacers || '/img/blank.gif' );
     }

@@ -67,16 +67,16 @@ $DARK_BG_COLOR  = $palette{background0} || '#FFFFFF';
 $VDARK_BG_COLOR = $palette{background0} || '#FFFFFF';
 
 use constant TABLE => qq(
-<TABLE cellspacing=0 cellpadding=0 border=0>%s
-</TABLE> );
+<table cellspacing="0" cellpadding="0" border="0">%s
+</table> );
 
 use constant ROW => qq(
- <TR>%s
- </TR> );
+ <tr>%s
+ </tr> );
 
 use constant CELL => qq(
-  <TD>%s
-  </TD> );
+  <td>%s
+  </td> );
 
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
@@ -151,9 +151,9 @@ sub generate_rows{
       }
       else{ # 'same as last' => add to colspan
 	$span_counter ++;
-	unless( $cells[$#cells] =~ s/colspan=\d+/colspan=$span_counter/ ){
+	unless( $cells[$#cells] =~ s/colspan="?\d+"?/colspan="$span_counter"/ ){
 	  # Could not find colspan - add one after <TD 
-	  unless( $cells[$#cells] =~ s/<TD /<TD colspan=$span_counter/ ){
+	  unless( $cells[$#cells] =~ s/<td /<td colspan="$span_counter"/i ){
 	    # Give up - this ain't a table cell!
 	    croak("Cell referenced by '$_' is not a table cell!");
 	  }
@@ -225,73 +225,52 @@ sub get_row{
 #
 sub _gen_base_form{
 
-  use constant FORMS => 
+  use constant FORMS =>
     {
      CHECKBOX => qq(
-        <INPUT type='checkbox'
-               name='%s'
-	       value='%s'
-               <TMPL_VAR %s!!%s!!checked> %s /> ),
+        <input type="checkbox" name="%s" value="%s" <TMPL_VAR %s!!%s!!checked> %s /> ),
 
      CHECKBOX_OFF => qq(
-	<IMG SRC='/img/blastview/checkbox_off.gif' 
-             ALT='This selection is unavailable' onClick="javascript:alert(This selection is unavailable)" /> ),		
+        <img src="/gfx/MartView/checkbox_off.gif"
+             alt="This selection is unavailable" onClick="javascript:alert(This selection is unavailable)" /> ),        
 
      RADIO => qq(
-        <INPUT type='radio'
-               name='%s'
-	       value='%s'
-               <TMPL_VAR %s!!%s!!checked> %s /> ),
+        <input type="radio" name="%s" value="%s" <TMPL_VAR %s!!%s!!checked> %s /> ),
 
      RADIO_OFF => qq(
-	<IMG SRC='/img/blastview/radio_off.gif' ALT='This selection is unavailable' onClick="javascript:alert(This selection is unavailable)" /> ),		
+        <img src="/gfx/MartView/radio_off.gif" alt="This selection is unavailable"
+             onClick="javascript:alert(This selection is unavailable)" /> ),
 
      BUTTON => qq(
-        <INPUT type='button'
-               name='%s'
-	       value='%s' %s />),
+        <input type="button" name="%s" value="%s" %s />),
 
      SELECT => qq(
-	<SELECT name='%s' %s> %s
-        </SELECT> ),
+        <select name="%s" %s> %s
+        </select> ),
 
      TEXT => qq(
-        <INPUT type='text'
-               name='%s'
-               value='<TMPL_VAR %s!!value>' %s />),
+        <input type="text" name="%s" value="<TMPL_VAR %s!!value>" %s />),
 
      FILE => qq(
-        <INPUT type='file'
-               name='%s'
-               value='<TMPL_VAR %s!!value>' %s />),
+        <input type="file" name="%s" value="<TMPL_VAR %s!!value>" %s />),
 
      TEXTAREA => qq(
-        <TEXTAREA type='textarea'
-               name='%s' wrap='off' %s ><TMPL_VAR %s!!value></TEXTAREA>),
+        <textarea name="%s" %s><TMPL_VAR %s!!value></textarea>),
 
      OPTION => qq(
-          <OPTION value='%s' <TMPL_VAR %s!!%s!!selected> > %s </OPTION> ),
+          <option value="%s" <TMPL_VAR %s!!%s!!selected>> %s </option> ),
 
-     IMAGE => qq(<INPUT type='image' 
-                        name='%s_%s' 
-                        src='%s' 
-                        border=0 %s />),
+     IMAGE => qq(<input type="image" name="%s_%s" src="%s" style="border: 0" %s />),
 
-     IMAGE2 => "<INPUT type='image' 
-		       name='%s_%s' 
-		       src = '".IMG_ROOT_ROVER."/%s_%s<TMPL_VAR %s!!%s!!selected>.gif' border=0 %s />",
+     IMAGE2 => qq(<input type="image" name="%s_%s" src=").IMG_ROOT_ROVER.qq(/%s_%s<TMPL_VAR %s!!%s!!selected>.gif" style="border:0" %s />),
 
 
      WARNING => qq(<TMPL_VAR %s!!warning>%s),
 
-     HIDDEN  => qq(<INPUT type='hidden', 
-		          name='%s', 
-                          value='%s' %s />),
+     HIDDEN  => qq(<input type="hidden" name="%s" value="%s" %s />),
 
-     HIDDEN2 => qq(<INPUT type='hidden', 
-		          name='%s', 
-		          value='<TMPL_VAR %s!!value>' %s />),
-     
+     HIDDEN2 => qq(<input type="hidden" name="%s" value="<TMPL_VAR %s!!value>" %s />),
+
     };
 
   my $self = shift;
@@ -308,9 +287,9 @@ sub _gen_base_form{
   if( $args{-multiple} ){ $multiple = 'MULTIPLE' }
   delete( @args{qw(-type -name -value -src -options -option -multiple ) } );
   my $extra = ( join ' ', 
-                map{ /^-(.+)/ ? uc($1). "='$args{$_}'" : '' } 
+                map{ /^-(.+)/ ? lc($1). "='$args{$_}'" : '' } 
                 keys %args );
-  $extra .= ' MULTIPLE="MULTIPLE"' if $multiple;
+  $extra .= ' multiple="multiple"' if $multiple;
   my $tmpl = FORMS->{uc($type)} || croak( "Don't have a form of type '$type'" );
 
   if( uc( $type ) eq 'TEXTAREA' ){
@@ -339,25 +318,31 @@ sub _gen_base_form{
   }
 
   if( uc( $type ) eq 'RADIO' ){
-    return sprintf( $tmpl, $name, $value, $name, $value, $extra );
+    my $check = sprintf( $tmpl, $name, $value, $name, $value, $extra );
+    $check =~ s/ checked / checked="checked" /gi;
+    return $check;
   }
   if( uc( $type ) eq 'CHECKBOX' ){
     my $check = sprintf( $tmpl, $name, $value, $name, $value, $extra );
-    #my $maintain = $self->_gen_base_form( -type=>'HIDDEN', 
-	#				  -name=>'_RECOVER', 
-	#				  -value=>$name );
-    my $maintain = $self->_gen_base_form( -type=>'HIDDEN', 
-					  -name=>"_DEF_$name", 
-					  -value=>0 );
+    #my $maintain = $self->_gen_base_form( -type=>'HIDDEN',
+        #                                 -name=>'_RECOVER',
+        #                                 -value=>$name );
+    my $maintain = $self->_gen_base_form( -type=>'HIDDEN',
+                                          -name=>"_DEF_$name",
+                                          -value=>0 );
+    $check =~ s/ checked / checked="checked" /gi;
     return $check.$maintain;
   }
-  
+
   if( uc( $type ) eq 'BUTTON' ){
     return sprintf( $tmpl, $name, $value, $extra );
   }
   if( uc( $type ) eq 'OPTION' ){
     $value =~ s/\s+//g;
-    return sprintf( $tmpl, $value, $name, $value, $option );
+    my $opt = sprintf( $tmpl, $value, $name, $value, $option );
+    warn $opt;
+    $opt =~ s/ selected>/ selected="selected">/gi;
+    return $opt;
   }
   if( uc( $type ) eq 'IMAGE' ){
     return sprintf( $tmpl, $name, $value, $src, $extra );
@@ -620,12 +605,12 @@ sub output_simple{
 		      $self->{block_base_row});
   }
   
-  return( "<TABLE cellspacing=0 cellpadding=0 border=0>\n".
+  return( qq(<table cellspacing="0" cellpadding="0" border="0">\n).
 	  $self->{panel_top_row}.
 	  join( $self->{panel_padding_row},
 		@{$self->{data}} ).
 	  $self->{panel_base_row}.
-	  "</TABLE>" );
+	  "</table>" );
 }
 
 #----------------------------------------------------------------------
@@ -726,7 +711,7 @@ sub output(){
 =cut
 
 sub get_panel_warning {
-  my $tmpl = qq(<IMG src='%s' height=15 width=15> %s);
+  my $tmpl = qq(<img src="%s" height="15" width="15" /> %s);
   my $text = shift || 'Unknown';
   return sprintf( $tmpl, IMG_WARN, $text );
   

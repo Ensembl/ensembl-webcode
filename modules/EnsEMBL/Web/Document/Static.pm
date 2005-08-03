@@ -15,8 +15,8 @@ sub _initialize {
     title      EnsEMBL::Web::Document::HTML::Title
     stylesheet EnsEMBL::Web::Document::HTML::Stylesheet
     meta       EnsEMBL::Web::Document::HTML::Meta
-    iehover    EnsEMBL::Web::Document::HTML::IEHoverHack
   );
+    #iehover    EnsEMBL::Web::Document::HTML::IEHoverHack
 
   $self->add_body_elements qw(
     masthead     EnsEMBL::Web::Document::HTML::MastHead

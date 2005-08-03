@@ -95,10 +95,11 @@ $VERSION=32;
 # directory that contains htdocs, modules, perl, ensembl, etc
 # DO NOT LEAVE A TRAILING '/' ON ENSEMBL_SERVERROOT
 ##########################################################################
-use FindBin qw($Bin);
-use File::Basename qw( dirname );
+# use FindBin qw($Bin);
+# use File::Basename qw( dirname );
 
-$ENSEMBL_SERVERROOT     = dirname( $Bin );            # Local Ensembl dir
+# $ENSEMBL_SERVERROOT     = dirname( $Bin );            # Local Ensembl dir
+($ENSEMBL_SERVERROOT = __FILE__ ) =~ s/[\\\/]+conf[\\\/]+SiteDefs.pm$//;
 
 ## Define Plugin directories....
 (my $plugin_file = __FILE__) =~s/SiteDefs/Plugins/;

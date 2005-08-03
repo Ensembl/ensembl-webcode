@@ -52,7 +52,12 @@ eval{
   $runnable->store;
 };
 (my $FN2 = $filename) =~ s/parsing/done/;
-# warn "Renaming $filename -> $FN2";
-if( $@ ){ die( $@ ) }
+if( $@ ){ 
+  open F, ">>$filename";
+  print F "$$ Died at ".localtime()." -----------------------------------", $@,
+          "\n-------------------------------------------------------------\n\n";
+  close F;
+  die( $@ );
+}
 rename $filename, $FN2;
 exit 0;

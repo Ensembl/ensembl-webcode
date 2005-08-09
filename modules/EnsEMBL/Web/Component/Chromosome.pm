@@ -115,6 +115,7 @@ sub config_tracks {
         'label'  => $box->{'name'},
         'name'   => $box->{'value'},
         'id'     => $box->{'value'},
+        'value'  => 'on',
     );
   }
   $form->add_element(

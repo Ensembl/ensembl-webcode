@@ -400,7 +400,7 @@ sub cytoview {
 sub contigviewbottom_text {
   my($panel, $object) = @_;
   my $width = $object->param('image_width') - 2;
-  $panel->print( qq(<div style="background-color: #ffffe7; width: ${width}px; border: solid 1px black;" class="print_hide autocenter">
+  $panel->print( qq(<div style="background-color: #ffffe7; width: ${width}px; border: solid 1px black;" class="print_hide_block autocenter">
     <p style="padding: 2px; margin: 0px;">
       The region you are trying to display is too large. To zoom into a
       viewable region use the zoom buttons above - or click on the top
@@ -524,7 +524,7 @@ sub nav_box_frame {
   my( $content, $width ) = @_;
   return sprintf
 qq(
-<div style="background-color: #ffffe7; width: %dpx; border: solid 1px black; border-width: 1px 1px 0px 1px; padding: 0px;" class="print_hide autocenter"><div style="padding: 2px; margin: 0px;">
+<div style="background-color: #ffffe7; width: %dpx; border: solid 1px black; border-width: 1px 1px 0px 1px; padding: 0px;" class="print_hide_block autocenter"><div style="padding: 2px; margin: 0px;">
   $content
 </div></div>
  ), $width-2;

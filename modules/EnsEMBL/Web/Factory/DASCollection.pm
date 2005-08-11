@@ -41,8 +41,8 @@ use EnsEMBL::Web::ExternalDAS;
 use EnsEMBL::Web::Proxy::Object;
 use SOAP::Lite;
 use Data::Dumper;
-use vars qw( @ISA );
-@ISA = qw(  EnsEMBL::Web::Factory );
+
+our @ISA = qw(  EnsEMBL::Web::Factory );
 
 #----------------------------------------------------------------------
 
@@ -578,3 +578,5 @@ sub getSourceData {
 	$dasconf->{type} = scalar(@{$dasconf->{mapping}}) > 1 ? 'mixed' : $smap;
     }
 }
+
+1;

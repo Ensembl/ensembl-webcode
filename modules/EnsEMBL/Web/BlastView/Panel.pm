@@ -231,14 +231,14 @@ sub _gen_base_form{
         <input type="checkbox" name="%s" value="%s" <TMPL_VAR %s!!%s!!checked> %s /> ),
 
      CHECKBOX_OFF => qq(
-        <img src="/gfx/MartView/checkbox_off.gif"
+        <img src="/img/blastview/checkbox_off.gif"
              alt="This selection is unavailable" onClick="javascript:alert(This selection is unavailable)" /> ),        
 
      RADIO => qq(
         <input type="radio" name="%s" value="%s" <TMPL_VAR %s!!%s!!checked> %s /> ),
 
      RADIO_OFF => qq(
-        <img src="/gfx/MartView/radio_off.gif" alt="This selection is unavailable"
+        <img src="/img/blastview/radio_off.gif" alt="This selection is unavailable"
              onClick="javascript:alert(This selection is unavailable)" /> ),
 
      BUTTON => qq(

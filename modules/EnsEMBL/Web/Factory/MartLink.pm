@@ -87,11 +87,26 @@ sub _createObjects_family {
   my $self = shift;
   my( $DB, $TYPE ) = $self->_dataset( 'core' );
   return unless $DB;
+  my @EXTRA = ();
+  if( $self->param('seq') ) {
+    @EXTRA = (
+      '_export_1.x'               => [ 1 ],
+      'outtype'                   => [ 'sequences' ], 
+      'collection_seq_scope_type' => [ 'peptide' ],
+      'collection_transcript'     => [ 'gene_stable_id', 'transcript_stable_id', 'translation_stable_id' ]
+    );
+  } else {
+    @EXTRA = (
+      'outtype'                   => [ 'feature_page' ] 
+    );
+  }
+
   return $self->_link( 
     'schema'            => [ 'defaultSchema' ],
     'dataset'           => [ $DB ],
     'stage_initialised' => [ 'start', 'filter' ],
     'stage'             => [ 'output' ],
+    @EXTRA,
     $DB.'_collection_family_domain_id_list' => [ 1 ],
     $DB.'_protein_fam_id_filters'     => [ 'family_ids' ],
     $DB.'_protein_fam_id_filters_list' => [ $self->param('family_id') ]

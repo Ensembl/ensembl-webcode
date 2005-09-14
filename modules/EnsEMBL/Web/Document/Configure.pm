@@ -24,7 +24,7 @@ sub common_menu_items {
     );
   }
 ## Check martview is available...
-  if( $doc->species_defs->multi('marts') ) {
+  if( 1 || $doc->species_defs->multi('marts') ) {
     $doc->menu->add_entry( 'whattodo',
       'href'=>"/$species_m/martview",
       'text'=>'Data mining [BioMart]',
@@ -32,7 +32,7 @@ sub common_menu_items {
     );
   }
   $doc->menu->add_entry( 'whattodo',
-    'href'=>"javascript:void(window.open('/$species_d/helpview?se=1;kw=upload','helpview','width=700,height=550,resizable,scrollbars'))",
+    'href'=>"/info/data/external_data/index.html",
     'text'=>'Upload your own data'
   );
   $doc->menu->add_entry(
@@ -50,6 +50,7 @@ sub common_menu_items {
   );
 
   $doc->menu->add_entry( 'docs',
+    'code'  => "whatsnew",
     'href' => '/whatsnew.html',
     'text'  => "What's New",
     'title' => "Latest changes in Ensembl"

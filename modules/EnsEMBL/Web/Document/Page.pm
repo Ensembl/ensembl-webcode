@@ -33,7 +33,7 @@ sub child_objects {
   my $self = shift;
   unless( $self->{'children'} ) {
     $self->{'children'} = [];
-    foreach my $root( 'EnsEMBL::Web', @{$self->species_defs->ENSEMBL_PLUGIN_ROOTS} ) {
+    foreach my $root( 'EnsEMBL::Web', reverse @{$self->species_defs->ENSEMBL_PLUGIN_ROOTS} ) {
       my $class_name = $root. '::Document::Configure';
       if( $self->dynamic_use( $class_name ) ) {
         push @{$self->{'children'}}, new $class_name;
@@ -53,6 +53,7 @@ sub call_child_functions {
   return unless @fns;
   foreach my $child ( $self->child_objects ) {
     foreach my $fn ( @fns ) {
+      warn ref($child)," $fn";
       $child->$fn( $self ) if $child->can( $fn );
     }
   }

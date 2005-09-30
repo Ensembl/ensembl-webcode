@@ -12,6 +12,7 @@ sub common_menu_items {
 ## Check blastview is available...
   if( 1 ) {
     $doc->menu->add_entry( 'whattodo',
+      'code' => 'blast',
       'href' => "/$species_m/blastview",
       'text'=>'Run a BLAST search'
     );

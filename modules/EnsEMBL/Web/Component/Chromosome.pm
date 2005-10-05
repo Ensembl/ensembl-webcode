@@ -583,8 +583,8 @@ sub image_choice {
     <p>Click on one of the images below to select a display type:</p>
     <table cellspacing="20" style="width:100%">
     <tr>
-    <th class="center">Show location of features</th>
-    <th class="center">Show density of features</th>
+      <th class="center"><a href="/$species/karyoview?display=location;chr=$chr_name">Show location of features</a></th>
+      <th class="center"><a href="/$species/karyoview?display=density;chr=$chr_name">Show density of features</a></th>
     </tr>
     <tr>
     <td class="center"><a href="/$species/karyoview?display=location;chr=$chr_name"><img src="/img/misc/display_location.png" alt="Chromosome with location pointers" width="332" height="495" /></a></td>
@@ -663,7 +663,7 @@ sub show_karyotype {
         $max_length = $object->length;
     }
     my $config = $object->user_config_hash($config_name);
-   warn "Configuration is $config_name"; 
+# warn "Configuration is $config_name"; 
     # PARSE DATA
     my $parser;
     if ($object->param('display') eq 'density') {
@@ -691,7 +691,7 @@ warn "Parsing location data";
         $image->add_tracks($object, $config_name, $parser);
     }
     else {
-        $pointers = $image->add_pointers($object, $config_name, '', $parser);
+        $pointers = $image->add_pointers($object, {'config_name'=>$config_name, 'parser'=>$parser, 'color'=>$object->param('col_0'), 'style'=>$object->param('style_0')});
     }
     # create image file and render HTML
     $image->karyotype($object, [$pointers], $config_name);

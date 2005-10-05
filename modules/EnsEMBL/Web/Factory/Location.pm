@@ -106,6 +106,17 @@ sub _location_from_Transcript {
       }
     }
   }
+  foreach my $db ( @dbs ) {
+    eval {
+      my $TF = $self->_predtranscript_adaptor( $db )->fetch_by_stable_id( $ID );
+     warn $TF;
+      $TS = $self->_slice_adaptor->fetch_by_Feature( $TF );
+    }; warn $@;
+    if( $TS ) {
+      $self->param('db', $db );
+      return $self->_create_from_slice( 'Transcript', $ID, $self->expand($TS), $ID );
+    }
+  }
 
   $self->problem( "fatal", "Unknown transcript", "Could not find transcript $ID" );
   return undef;
@@ -577,6 +588,12 @@ sub _gene_adaptor {
   my $db   = shift || 'core';
   return $self->__species_hash->{'adaptors'}{"gene_$db"} ||=
     $self->database($db,$self->__species)->get_GeneAdaptor();
+}
+sub _predtranscript_adaptor {
+  my $self = shift;
+  my $db   = shift || 'core';
+  return $self->__species_hash->{'adaptors'}{"predtranscript_$db"} ||=
+    $self->database($db,$self->__species)->get_PredictionTranscriptAdaptor();
 }
 sub _transcript_adaptor {
   my $self = shift;

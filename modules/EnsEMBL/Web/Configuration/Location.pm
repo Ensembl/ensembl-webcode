@@ -72,7 +72,7 @@ sub context_menu {
     my %shash2 = ( $obj->species_defs->multi($type, $species) );
     if (%shash2) {
       my $KEY = lc($species).'_compara_'.lc($type);
-      my $label = sprintf("$type (+%d species)", scalar(keys(%shash2)));
+      my $label = sprintf("%d Mammals ($type)", scalar(keys(%shash2)) + 1);
       push @options_as, {
         'text' => "... $label", 'raw' => 1,
         'href' =>  sprintf( "/%s/alignsliceview?c=%s:%s;w=%s;align=%s", $species,  $obj->seq_region_name, $obj->centrepoint, $obj->length, $KEY )

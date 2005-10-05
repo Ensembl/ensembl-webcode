@@ -190,7 +190,8 @@ sub add_pointers {
     }
     else { # get features for this object
         my $ftype = $extra->{'feature_type'};
-        $data = $object->retrieve_features($ftype);
+#warn $ftype;
+$data = $object->retrieve_features($ftype);
         foreach my $row (
             map { $_->[0] }
             sort { $a->[1] <=> $b->[1] || $a->[2] cmp $b->[2] || $a->[3] <=> $b->[3] }

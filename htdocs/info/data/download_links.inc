@@ -14,24 +14,24 @@
 
 <tr>
 <td>
-<a target="ftp" href="ftp://ftp.ensembl.org/pub/current_mosquito/"><i>Anopheles gambiae</i></a> (mosquito)</td>
-<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_mosquito/data/fasta/dna/">FTP</a></td>
-<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_mosquito/data/fasta/cdna/">FTP</a></td>
-<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_mosquito/data/fasta/pep/">FTP</a></td>
-<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_mosquito/data/flatfiles/embl/">FTP</a></td>
-<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_mosquito/data/flatfiles/genbank/">FTP</a></td>
-<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_mosquito/data/mysql/">FTP</a></td>
+<a target="ftp" href="ftp://ftp.ensembl.org/pub/current_anopheles/"><i>Anopheles gambiae</i></a> (mosquito)</td>
+<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_anopheles/data/fasta/dna/">FTP</a></td>
+<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_anopheles/data/fasta/cdna/">FTP</a></td>
+<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_anopheles/data/fasta/pep/">FTP</a></td>
+<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_anopheles/data/flatfiles/embl/">FTP</a></td>
+<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_anopheles/data/flatfiles/genbank/">FTP</a></td>
+<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_anopheles/data/mysql/">FTP</a></td>
 </tr>
 	    
 <tr>
 <td>
-<a target="ftp" href="ftp://ftp.ensembl.org/pub/current_bee/"><i>Apis mellifera</i></a> (honey bee)</td>
-<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_bee/data/fasta/dna/">FTP</a></td>
-<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_bee/data/fasta/cdna/">FTP</a></td>
-<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_bee/data/fasta/pep/">FTP</a></td>
-<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_bee/data/flatfiles/embl/">FTP</a></td>
-<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_bee/data/flatfiles/genbank/">FTP</a></td>
-<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_bee/data/mysql/">FTP</a></td>
+<a target="ftp" href="ftp://ftp.ensembl.org/pub/current_honeybee/"><i>Apis mellifera</i></a> (honey bee)</td>
+<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_honeybee/data/fasta/dna/">FTP</a></td>
+<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_honeybee/data/fasta/cdna/">FTP</a></td>
+<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_honeybee/data/fasta/pep/">FTP</a></td>
+<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_honeybee/data/flatfiles/embl/">FTP</a></td>
+<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_honeybee/data/flatfiles/genbank/">FTP</a></td>
+<td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_honeybee/data/mysql/">FTP</a></td>
 </tr>
 	    
 <tr>

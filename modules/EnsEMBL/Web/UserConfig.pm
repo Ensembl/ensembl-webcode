@@ -938,6 +938,14 @@ sub ADD_ALL_TRANSCRIPTS {
   $self->add_new_track_transcript( 'rna',       'ncRNA genes',     'rna_gene',       $POS++, 'available' => 'features NCRNA',            @_ );
   $self->add_new_track_transcript( 'erna',       'e! ncRNA genes',     'rna_gene',       $POS++, 'available' => 'features ensembl_ncRNA',            @_ );
   $self->add_new_track_transcript( 'est',       'EST genes',       'est_gene',       $POS++, 'available' => 'databases ENSEMBL_EST', @_ );
+  $self->add_new_track_transcript( 'ciona_dbest_ncbi', "3/5' EST genes (dbEST)", 'estgene', $POS++, @_) ;
+  $self->add_new_track_transcript( 'ciona_est_seqc',   "3' EST genes (Kyoto)", 'estgene', $POS++, @_) ;
+  $self->add_new_track_transcript( 'ciona_est_seqn',   "5' EST genes (Kyoto)",  'estgene',$POS++, @_) ;
+  $self->add_new_track_transcript( 'ciona_est_seqs',   "full insert cDNA clone",  'estgene',$POS++, @_) ;
+  $self->add_new_track_transcript( 'ciona_jgi_v1',     "JGI 1.0 models", 'ciona_gene',  $POS++, @_) ;
+  $self->add_new_track_transcript( 'ciona_kyotograil_2004',  "Kyotograil '04 model", 'ciona_gene',  $POS++, @_) ;
+  $self->add_new_track_transcript( 'ciona_kyotograil_2005',  "Kyotograil '05 model",  'ciona_gene', $POS++, @_) ;
+
   $self->add_new_track_transcript( 'rprot',     'Rodent proteins', 'prot_gene',      $POS++, @_ );
   $self->add_new_track_transcript( 'refseq',    'Refseq proteins', 'refseq_gene',    $POS++, @_ );
   $self->add_new_track_transcript( 'cow_proteins',   'Cow genes',   'cow_protein',   $POS++, @_ );

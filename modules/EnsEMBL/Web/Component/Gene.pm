@@ -693,6 +693,7 @@ sub transcripts {
   my $wuc        = $gene->user_config_hash( 'altsplice' ); 
 ## We now need to select the correct track to turn on....
   ## We need to do the turn on turn off for the checkboxes here!!
+  warn ">>>> ", $trans[0]->default_track_by_gene;
   foreach( $trans[0]->default_track_by_gene ) {
     $wuc->set( $_,'on','on');
   }

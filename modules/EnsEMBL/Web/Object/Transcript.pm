@@ -16,6 +16,7 @@ sub default_track_by_gene {
   my $db    = $self->get_db;
   my $logic = $self->logic_name;
 
+  warn "$db - $logic";
   my %mappings_db = qw(
     vega evega_transcript
     est est_transcript
@@ -26,13 +27,15 @@ sub default_track_by_gene {
       gsc gid slam gws_h gws_s )
     ),
     map( {($_, $_.'_transcript')} qw(
+      cdna_all targettedgenewise
       genebuilderbeeflymosandswall gsten flybase wormbase
-      ensembl sgd homology_low cow_proteins
+      ensembl sgd homology_low cow_proteins refseq mouse_protein
       ciona_dbest_ncbi ciona_est_seqc ciona_est_seqn
       ciona_est_seqs ciona_jgi_v1 ciona_kyotograil_2004
       ciona_kyotograil_2005 )
     ),
     qw(
+      rodent_protein   rprot_transcript
       hox              gsten_transcript
       cyt              gsten_transcript
       ncrna            rna_transcript

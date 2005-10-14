@@ -810,6 +810,11 @@ sub ADD_ALL_EST_FEATURES {
 							$POS++, 'URL_KEY' => 'XTROP_CLUSTER',
 							'SUBTYPE' => 'default',
 							@_);
+  $self->add_new_track_est( 'xtrop_EST_clusters','X.trop EST clust',
+                                                        $POS++, 'URL_KEY' => 'XTROP_CLUSTER',
+                                                        'SUBTYPE' => 'default',
+                                                        @_);
+
   $self->add_new_track_est( 'ciona_dbest_align',     'dbEST align', $POS++, @_ );
   $self->add_new_track_est( 'ciona_est_3prim_align', "3' EST-align. (Kyoto)", $POS++, @_ );
   $self->add_new_track_est( 'ciona_est_5prim_align', "5' EST-align. (Kyoto)", $POS++, @_ );
@@ -952,6 +957,9 @@ sub ADD_ALL_TRANSCRIPTS {
   $self->add_new_track_transcript( 'targettedgenewise',    'Targetted genewise genes', 'prot_gene',    $POS++, @_ );
   $self->add_new_track_transcript( 'cdna_all',             'cNDA genes', 'prot_gene',    $POS++, @_ );
   $self->add_new_track_transcript( 'refseq',    'Refseq proteins', 'refseq_gene',    $POS++, @_ );
+  $self->add_new_track_transcript( 'rprot',     'Rodent proteins', 'prot_gene',      $POS++, @_ );
+  $self->add_new_track_transcript( 'jamboree_cdnas',   'X.trop. jambo. genes',   'prot_gene',   $POS++, @_ );
+
   $self->add_new_track_transcript( 'cow_proteins',   'Cow genes',   'cow_protein',   $POS++, @_ );
   $self->add_new_track_transcript( 'homology_low', 'Bee genes',    'bee_pre_gene',   $POS++, @_ );
 #trancripts for Vega
@@ -1070,6 +1078,9 @@ sub ADD_GENE_TRACKS {
     'gene_label'           => sub { return $_[0]->stable_id },
     'gene_col'             => 'cow_protein' 
   );
+  $self->add_new_track_gene( 'jamboree_cdnas',  "X.trop. Jambo",  'prot_gene', $POS++,
+                             'gene_label' => sub { return $_[0]->stable_id }, 'gene_col' => sub { return $_[0]->biotype }, @_ );
+
   $self->add_new_track_gene( 'ncrna', 'ncRNA Genes', 'rna_gene', $POS++,
                              'gene_col' => sub { return $_[0]->type =~ /pseudo/i ? 'rna-pseudo' : 'rna-real' }, @_ );
   $self->add_new_track_gene( 'ensembl_ncrna', 'e! ncRNA Genes', 'rna_gene', $POS++,

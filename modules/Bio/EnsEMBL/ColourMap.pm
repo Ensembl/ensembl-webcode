@@ -130,6 +130,8 @@ sub new {
     'tge_gw'        => [ 'orchid4', 'Aligned protein' ],
     'targettedgenewise' => [ 'orchid4', 'Aligned protein' ],
     'protein_coding'  => [ 'orchid4', 'Aligned protein' ], 
+    'xtrop_cdna'      => [ 'orchid2', 'Aligned cDNA' ],
+    'xtrop_cDNA'      => [ 'orchid2', 'Aligned cDNA' ],
     '_col'            => [ 'orchid4', 'Aligned protein' ], 
   );
   $self->colourSet( 'refseq_gene',

@@ -133,6 +133,7 @@ sub _generic_create {
       }
     }
                                                                                    
+    warn @$features;
     return $features if $features && @$features; # Return if we have at least one feature
     # We have no features so return an error....
     $self->problem( 'no_match', 'Invalid Identifier', "$object_type $id was not found" );

@@ -5,7 +5,6 @@ package EnsEMBL::Web::Component::Feature;
 # - karyotypes, spreadsheets of data, etc.
 #-------------------------------------------------------------------
 
-use EnsEMBL::Web::SpeciesDefs;
 use EnsEMBL::Web::Component;
 use EnsEMBL::Web::Component::Chromosome;
 use Bio::EnsEMBL::GlyphSet::Videogram;
@@ -94,7 +93,6 @@ sub select_feature_form {
 
 sub spreadsheet_featureTable {
   my( $panel, $object ) = @_;
-
   # get feature data
   my( $data, $extra_columns, $initial_columns, $options ) = $object->retrieve_features;
   my @data = [];
@@ -236,8 +234,9 @@ sub key_to_pointers {
 sub show_karyotype {
   my( $panel, $object ) = @_;
   # sanity check - does this species have chromosomes?
-  my $SD = EnsEMBL::Web::SpeciesDefs->new();
-  my @chr = @{ $SD->get_config($object->species, 'ENSEMBL_CHROMOSOMES') || [] };
+warn "HERE";
+  my @chr = @{ $object->species_defs->get_config($object->species, 'ENSEMBL_CHROMOSOMES') || [] };
+warn "HERE";
   if (@chr) { 
     my $karyotype = create_karyotype($panel, $object);
     $panel->print($karyotype->render);

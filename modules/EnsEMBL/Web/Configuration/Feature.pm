@@ -31,6 +31,7 @@ sub featureview {
 
     $self->{page}->set_title( "FeatureView: $type $id");
     # do key
+    if( $object->species_defs->ENSEMBL_CHROMOSOMES && @{$object->species_defs->ENSEMBL_CHROMOSOMES} ) {
     my $key_panel = new EnsEMBL::Web::Document::Panel::Image(
         'code'    => "info$self->{flag}",
         'caption' => "$type: $id",
@@ -44,18 +45,18 @@ sub featureview {
         'object'  => $self->{object},
     );
     $karyo_panel->add_components(qw(image EnsEMBL::Web::Component::Feature::show_karyotype));
+    #$self->{page}->content->add_panel($key_panel);
+    $self->{page}->content->add_panel($karyo_panel);
+    $self->initialize_zmenu_javascript;
+    }
     # do feature information table
     my $ss_panel = new EnsEMBL::Web::Document::Panel::SpreadSheet(
         'code'    => "info$self->{flag}",
         'caption' => '', 
         'object'  => $self->{object},
     );
-    $ss_panel->add_components( qw(features
-      EnsEMBL::Web::Component::Feature::spreadsheet_featureTable));
+    $ss_panel->add_components( qw(features EnsEMBL::Web::Component::Feature::spreadsheet_featureTable));
 
-    $self->initialize_zmenu_javascript;
-    #$self->{page}->content->add_panel($key_panel);
-    $self->{page}->content->add_panel($karyo_panel);
     $self->{page}->content->add_panel($ss_panel);
   }
   else {

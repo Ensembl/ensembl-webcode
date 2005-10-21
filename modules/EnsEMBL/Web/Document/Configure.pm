@@ -52,13 +52,15 @@ sub common_menu_items {
     'icon' => '/img/infoicon.gif',
   );
 
-  $doc->menu->add_entry( 'docs',
-    'code'  => "whatsnew",
-    'href' => "/$species_m/newsview?rel=$release",
-    'text'  => "What's New",
-    'title' => "Latest changes in Ensembl",
-    'icon' => '/img/infoicon.gif',
-  );
+  if( $doc->species_defs->databases->{'ENSEMBL_WEBSITE'} ) { 
+    $doc->menu->add_entry( 'docs',
+      'code'  => "whatsnew",
+      'href' => "/$species_m/newsview?rel=$release",
+      'text'  => "What's New",
+      'title' => "Latest changes in Ensembl",
+      'icon' => '/img/infoicon.gif',
+    );
+  }
   $doc->menu->add_entry( 'docs',
     'href' => '/info/about/',
     'text'  => 'About Ensembl',

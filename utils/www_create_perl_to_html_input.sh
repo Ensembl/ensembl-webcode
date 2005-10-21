@@ -111,6 +111,11 @@ echo "Running $P2WDOC_LOC/make_html_docs.sh";
 cd $P2WDOC_LOC
 ./make_html_docs.sh
 
+echo "Deleting generated index $PDOC_LOC/index.html file in favour of cvs version"
+cd $PDOC_LOC
+rm index.html
+cvs -q up 
+
 # cd back into server root directory:
 echo "Change back to server root directory";
 cd $PERLMOD_LOC

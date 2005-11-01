@@ -119,7 +119,7 @@ sub new {
 
   $URL = sprintf qq(/%s/%s?%sscript=%s), $self->{'species'}, 'urlsource', $self->{'LINK'}, $script;
   $self->add_link( "URL based data...",  qq(javascript:X=window.open('$URL','urlsources','left=10,top=10,scrollbars=yes');X.focus()),'');
-  $self->add_link( 'Server directory...', '/Docs/wiki/html/EnsemblDocs/DASdirectory.html', 'server' );
+#  $self->add_link( 'Server directory...', '/Docs/wiki/html/EnsemblDocs/DASdirectory.html', 'server' );
   return $self;
 }
 

@@ -1,90 +1,5 @@
 #!/usr/local/bin/perl
 
-=head1 SYNOPSIS
-
-update_static_content.pl [options]
-
-Options:
-  --help, --info, --species --update
-
-B<-h,--help>
-  Prints a brief help message and exits.
-
-B<-i,--info>
-  Prints man page and exits.
-
-B<-s, --species>
-  Species to dump
-
-B<--site_type>
-  Optional.  Default is main site.  Use this to set type to 'mirror' or 'archive' or 'pre'. 
- 
-B<--update>
-  What to update
-
-e.g.
-   ./update_static_content.pl --species Tetraodon_nigroviridis --update new_release --site_type mirror
-
-=head1 DESCRIPTION
-
-B<This program:>
-
-Updates the static content for the website
-
-The current version  is specified in Ensembl web config file:
-  ../conf/<SPECIES>.ini in the ENSEMBL_FTP_BASEDIR variable
-
-=head1 OPTIONS
-
-More on --update: Valid options are:
-
-B< new_species:>
-   Use the -site_type 'pre' flag if you are setting up pre.
-
-   Runs generic_species_homepage, SSI (SSIabout, SSIexample, SSIentry),
-   downloads, species_table
-
-B< archive: >
-    Runs copy_species_table and assembly_table
-
-B<  generic_species_homepage:>;
-    Creates a generic homepage as a first pass for the species.  
-    This file needs /$species/ssi/stats.html too.  
-    Run stats script separately.
-    You need to create a file: htdocs/$species/ssi/karyotype.html 
-    if the species has chromosomes
-
-B<  downloads:>; 
-    Creates a new FTP downloads section (htdocs/info/data/download_links.inc)
-    If the site-type is archive, the links are to the versionned directories.
-    If the site-type is main, the links are to current-species directories.
-
-B<  SSI:>; 
-    Creates a new ssi/about.html page template
-    Creates a new ssi/examples.html page template
-    Creates a new ssi/entry.html drop down form for entry points
-
-B<  species_table:>; 
-    Creates a first pass at the home page species table:
-    htdocs/ssi/species_table.html
-
-
-B< copy_species_table:>
-   simply copies: $SERVERROOT/public-plugins/ensembl/htdocs/ssi/species_table.html to $SERVERROOT/sanger-plugins/archive/htdocs/ssi/species_table.html
-
-B< assembly_table>;
-    Updates htdocs/Docs/archive/homepage_SSI/assembly_table.html or 
-    creates new one.  This file is included in htdocs/Docs/assemblies.html 
-    and lists all the archived sites and which assemblies they show.
-
-B< branch_versions:>
-   Creates a new page with updated versions for the current cvs branch
-   (i.e. for the API, webcode etc)
-
-    Maintained by Fiona Cunningham <fc1@sanger.ac.uk>
-
-=cut
-
 use strict;
 use warnings;
 use Carp;
@@ -106,11 +21,12 @@ BEGIN{
 use utils::Tool;
 use EnsEMBL::Web::DBSQL::NewsAdaptor;
 use EnsEMBL::Web::SpeciesDefs;
+require SiteDefs;
 my $SD = EnsEMBL::Web::SpeciesDefs->new;
 
 our $VERBOSITY = 1;
 our $site_type = "main";
-our $FIRST_ARCHIVE = 26;   # Release number for oldest archive site
+our $FIRST_ARCHIVE = 25;   # Release number for oldest archive site
 
 my @species;
 my @UPDATES;
@@ -125,10 +41,12 @@ my @UPDATES;
 pod2usage(-verbose => 2) if $info;
 pod2usage(1) if $help;
 
+
 # Test validity of update requests ------------------------------------------
 @UPDATES or  pod2usage("[*DIE] Need an update argument" );
 my %updates = %{ check_types(\@UPDATES) };
 
+my $version =   $SiteDefs::ENSEMBL_VERSION;
 
 # Only do once
 if ($updates{species_table} ) {
@@ -136,7 +54,7 @@ if ($updates{species_table} ) {
   delete $updates{species_table};
 }
 if ($updates{downloads} ) {
-  downloads($SERVERROOT);
+  downloads($SERVERROOT, $version);
   delete $updates{downloads};
 }
 if ( $updates{assembly_table} ) {
@@ -157,24 +75,23 @@ if (@species) {
   @species = @{ utils::Tool::all_species()};
 }
 
+utils::Tool::info ("Using Ensembl root $SERVERROOT");
+utils::Tool::info ("Version from ini file is $version");
+
 # Species specific ones
 foreach my $sp (@species) {
-  my $version_ini = utils::Tool::get_config({species =>$sp, values => "ENSEMBL_FTP_BASEDIR"})|| $sp;
+  utils::Tool::info ("Using Ensembl species $sp");
   my $common_name = utils::Tool::get_config({species =>$sp, values => "SPECIES_COMMON_NAME"})|| $sp;
   my $chrs        = utils::Tool::get_config({species =>$sp, values => "ENSEMBL_CHROMOSOMES"});
-
-  my @search      = utils::Tool::get_config({species =>$sp, values => "ENSEMBL_SEARCH_IDXS"});
-  $version_ini    =~ s/(\w+)-//;
-
-  info ("Using Ensembl root $SERVERROOT");
-  info ("Using Ensembl species $sp");
-  info ("Version from ini file is $version_ini");
 
   if ($updates{generic_species_homepage} ) { # KEEP!
     generic_species_homepage($SERVERROOT, $common_name, $sp, $chrs);
   }
   if ($updates{SSI} ) {
     SSI($SERVERROOT, $common_name, $sp, $chrs);
+  }
+  if ($updates{blast_db} ) {
+    blast_db($SERVERROOT, $sp);
   }
 }
 
@@ -187,64 +104,27 @@ exit;
 
    my %valid_types = map{ $_ => 1 }
      qw(
-	new_species      generic_species_homepage downloads SSI archive
-                         species_table assembly_table copy_species_table 
+	new_species      generic_species_homepage downloads SSI 
+                         species_table 
+	archive          assembly_table copy_species_table
+        release          blast_db
        );
 
    my %compound_types = 
      ( new_species       => [ qw(generic_species_homepage downloads
 				  SSI species_table
 				 )],
+      release            => [ qw ( blast_db ) ],
       archive            => [ qw (assembly_table copy_species_table ) ],
      );
 
    # Validate types
-   return utils::Tool::validate_types(\%valid_types, \%compound_types, $types);
+   my $tmp = utils::Tool::validate_types(\%valid_types, \%compound_types, $types);
+   my %return;
+   map { $return{$_} = 1} @$tmp;
+   return \%return;
  }
 
-#----------------------------------------------------------------------
-sub get_date {
-  my $month = localtime->mon;
-  my @months = qw (January February March April May June July August September October November December);
-  return localtime->mday ." $months[$month] ". (localtime->year+1900);
-}
-
-#---------------------------------------------------------------------
-sub check_dir {
-  my $dir = shift;
-  if( ! -e $dir ){
-    info(1, "Creating $dir" );
-    eval { mkpath($dir) };
-    if ($@) {
-      print "Couldn't create $dir: $@";
-    }
-  }
-  return;
-}
-
-#----------------------------------------------------------------------
-sub info{
-  my $v   = shift;
-  my $msg = shift;
-  if( ! defined($msg) ){ $msg = $v; $v = 0 }
-  $msg || ( carp("Need a warning message" ) && return );
-
-  if( $v > $VERBOSITY ){ return 1 }
-  warn( "[INFO] ".$msg."\n" );
-  return 1;
-}
-
-#----------------------------------------------------------------------
-sub warning{
-  my $v   = shift;
-  my $msg = shift;
-  if( ! defined($msg) ){ $msg = $v; $v = 0 }
-  $msg || ( carp("Need a warning message" ) && return );
-
-  if( $v > $VERBOSITY ){ return 1 }
-  warn( "[WARN] ".$msg."\n" );
-  return 1;
-}
 
 ##############################################################################
 
@@ -252,19 +132,20 @@ sub species_table {
   return unless $site_type eq 'pre';
 
   my $dir = shift;
+
+  my $ssi_dir = $dir;
   my $title;
   if ($site_type eq 'pre') {
-    $dir .= "/sanger-plugins/pre/htdocs/ssi";
+    $ssi_dir .= "/sanger-plugins/pre/htdocs/ssi";
     $title = "Browse a genome";
-    &check_dir($dir);
   }
   else {
-    $dir .= "/htdocs/ssi";
+    $ssi_dir .= "/htdocs/ssi";
     $title = "Species";
-    &check_dir($dir);
   }
+  utils::Tool::check_dir($ssi_dir);
 
-  my $file = $dir ."/species_table.html.new";
+  my $file = $ssi_dir ."/species_table.html.new";
   open (my $fh, ">$file") or die "Cannot create $file: $!";
 
   my %vega_spp = ( Homo_sapiens     => 1,
@@ -287,6 +168,7 @@ sub species_table {
     my $assembly = utils::Tool::get_config({species =>$spp,
 					  values => "ASSEMBLY_ID"});
 
+
     print $fh qq(
  <dt>
     <a href="/$spp">
@@ -308,29 +190,31 @@ sub species_table {
 
 );
 
-  if (-e "$dir/species_table.html") {
-    system ("cp $dir/species_table.html $dir/species_table.html.bck")==0 or die "Couldn't copy files";
+  if (-e "$ssi_dir/species_table.html") {
+    system ("cp $ssi_dir/species_table.html $ssi_dir/species_table.html.bck")==0 or die "Couldn't copy files";
   }
-  system ("mv $dir/species_table.html.new $dir/species_table.html") ==0 or die "Couldn't copy files";
-  info (1, "Updated species table file $dir/species_table.html");
+  system ("mv $ssi_dir/species_table.html.new $ssi_dir/species_table.html") ==0 or die "Couldn't copy files";
+  utils::Tool::info (1, "Updated species table file $ssi_dir/species_table.html");
 return;
 }
 #---------------------------------------------------------------------
 
 sub generic_species_homepage {
   my ($dir, $common_name, $species, $chrs) = @_;
+    system ("cp $dir/public-plugins/ensembl/htdocs/img/species/thumb_$species.png $dir/sanger-plugins/pre/htdocs/img/species/");
+    system ("cp $dir/public-plugins/ensembl/htdocs/img/species/pic_$species.png $dir/sanger-plugins/pre/htdocs/img/species/");
 
   if ($site_type eq 'pre') {
     $dir .= "/sanger-plugins/pre/htdocs/$species";
-    &check_dir($dir);
+    utils::Tool::check_dir($dir);
   }
   else {
     $dir .= "/public-plugins/ensembl/htdocs/$species";
-    &check_dir($dir);
+    utils::Tool::check_dir($dir);
   }
   my $file = $dir ."/index.html";
   if (-e $file) {
-    info (1, "File $file already exists");
+    utils::Tool::info (1, "File $file already exists");
     return;
   }
   open (my $fh, ">$file") or die "Cannot create $file: $!";
@@ -383,31 +267,31 @@ print $fh qq(
 </body>
 </html>
   );
-  info (1, "Created a generic $species homepage: $file");
+  utils::Tool::info (1, "Created a generic $species homepage: $file");
   return;
 }
 
 ##############################################################################
 sub SSI {
   my ($dir, $common_name, $species, $chrs) = @_;
+  my $ssi_dir = $dir;
 
   if ($site_type eq 'pre') {
-    $dir .= "/sanger-plugins/pre/htdocs/$species/ssi";
-    &check_dir($dir);
+    $ssi_dir .= "/sanger-plugins/pre/htdocs/$species/ssi";
   }
   else {
-    $dir .= "/public-plugins/ensembl/htdocs/$species/ssi";
-    &check_dir($dir);
+    $ssi_dir .= "/public-plugins/ensembl/htdocs/$species/ssi";
   }
-  &SSIabout($dir, $common_name, $species);
+  utils::Tool::check_dir($ssi_dir);
+  &SSIabout($ssi_dir, $common_name, $species);
 
   if ( (scalar @$chrs) > 0 ) {
-    &SSIentry($dir, $species, $chrs);
-    &SSIkaryomap($dir, $species, $common_name);
+    &SSIentry($ssi_dir, $species, $chrs);
+    &SSIkaryomap($ssi_dir, $species, $common_name, $dir);
   }
   else {
-    &SSIexamples($dir, $species);
-    &SSIentry($dir, $species, 0);
+    &SSIexamples($ssi_dir, $species);
+    &SSIentry($ssi_dir, $species, 0);
   }
   return;
 }
@@ -476,7 +360,7 @@ sub SSIentry {
 </form>
 );
 }
-  info (1, "Template for species entry page $file");
+  utils::Tool::info (1, "Template for species entry page $file");
   return;
 }
 
@@ -486,8 +370,10 @@ sub SSIabout {
   my $file = $dir ."/about.html";
   return if -e $file;
   open (my $fh, ">$file") or die "Cannot create $file: $!";
+  (my $nice_species = $species) =~ s/_/ /;
+
   print $fh qq(
-  <h3 class="boxed">About the $common_name genome</h3>
+  <h3 class="boxed">About the <i>$nice_species</i> genome</h3>
 
 <h4>Assembly</h4>
 
@@ -499,8 +385,11 @@ sub SSIabout {
 <p>
 
 </p>
+
+<h4>Full gene build</h4>
+<p>A full Ensembl gene build for <i>$nice_species</i> [VERSION!!!!] is available on the main <a href="http://www.ensembl.org/$species">Ensembl <i>$nice_species</i></a> site.</p>
 );
-  info (1, "Template for about page $file");
+  utils::Tool::info (1, "Template for about page $file");
   return;
 }
 
@@ -511,11 +400,12 @@ sub SSIexamples {
   my $entry = $dir ."/examples.html";
   return if -e $entry;
   open (my $fh2, ">$entry") or die "Cannot create $entry: $!";
+  (my $nice_species = $species) =~ s/_/ /;
   print $fh2 qq(
 <h3 class="boxed">Example Data Points</h3>
 
 <p>
-This release of <i>$species</i> data is assembled into scaffolds, so there are no chromosomes available to browse.
+This release of <i>$nice_species</i> data is assembled into scaffolds, so there are no chromosomes available to browse.
 </p>
 
 <p>A few example data points :</p>
@@ -528,15 +418,30 @@ This release of <i>$species</i> data is assembled into scaffolds, so there are n
     </li>
 </ul>
 );  
-  info (1, "Template for example page $entry ");
+  utils::Tool::info (1, "Template for example page $entry ");
   return;
 }
 #---------------------------------------------------------------------------
 
 sub SSIkaryomap {
-  my ($dir, $species, $common_name) = @_;
-  my $karyomap = $dir ."/karyomap.html";
+  my ( $ssi_dir, $species, $common_name, $dir ) = @_;
+  my $karyomap = $ssi_dir ."/karyomap.html";
   return if -e $karyomap;
+
+  utils::Tool::info (1, "Template for karyomap page $karyomap");
+
+  if ( $site_type eq 'pre' ) { # check to see if already karyotype for this sp
+    my $exists_karyomap = "$dir/public-plugins/ensembl/htdocs/$species/ssi/karyomap.html";
+    if ( -e $exists_karyomap ) {
+      utils::Tool::info (1, "Copying existing karyomap from public-plugins file");
+      system ("cp $dir/public-plugins/ensembl/htdocs/img/species/karyotype_$species.png $dir/sanger-plugins/pre/htdocs/img/species/");
+      system ("cp $exists_karyomap $karyomap");
+      return;
+    }
+    else {
+      utils::Tool::warning (1, "Need to create a karyomap for the karyotype image");
+    }
+  }
   open (my $fh2, ">$karyomap") or die "Cannot create $karyomap: $!";
   print $fh2 qq(
 <h3 class="boxed">Karyotype</h3>
@@ -545,25 +450,27 @@ sub SSIkaryomap {
 
 <img src="/img/species/karyotype_$species.png" width="245" height="355" usemap="#karyotypes" alt="$common_name karyotype selector" />
 );
-  info (1, "Template for karyomap page $karyomap");
   return;
 }
 
 #############################################################################
 sub downloads {
   my $dir = shift;
+  my $version = shift;
   return if $site_type eq 'pre';
-  do_downloads("$dir/sanger-plugins/archive", "archive");
-  #do_downloads("$dir", 0);
+  do_downloads("$dir/sanger-plugins/archive", $version, "archive");
+  do_downloads("$dir/sanger-plugins/pre", $version);
+  do_downloads("$dir", $version, 0);
   return;
 }
 #----------------------------------------------------------------------------
 sub do_downloads {
   my $dir     = shift;
+  my $version = shift;
   my $archive = shift;
-  &check_dir($dir);
+  utils::Tool::check_dir($dir);
   $dir .= "/htdocs/info/data";
-  &check_dir($dir);
+  utils::Tool::check_dir($dir);
 
   my $new_file = "$dir/download_links.inc.new";
   open (NEW, ">",$new_file) or die "Couldn't open file $new_file: $!";
@@ -583,15 +490,12 @@ sub do_downloads {
 );
 
   foreach my $spp (@{[@{ utils::Tool::all_species()}] }) {
-    my $description = utils::Tool::get_config({species =>$spp, values => "SPECIES_DESCRIPTION" });
-    my $common = lc(utils::Tool::get_config({species =>$spp, values => "ENSEMBL_FTP_BASEDIR" }));
-    $common = 'ciona' if $common eq 'c.intestinalis';
-    $common =~ s/\.//;
-    $common =~ s/fruit//;
-
-my $sp_release = utils::Tool::get_config( { species=>$spp, values => "SPECIES_RELEASE_VERSION" });
+    my $sp_release = utils::Tool::get_config( { species=>$spp, values => "SPECIES_RELEASE_VERSION" });
     $sp_release =~ s/\.//g;
-    my $url = "$common-34.$sp_release";
+    my $sp_dir = join "_", ( lc($spp), $version, $sp_release);
+    my $description = utils::Tool::get_config({species =>$spp, values => "SPECIES_DESCRIPTION" });   
+
+    my $url = $archive ? $sp_dir : "current_".lc($spp);
     $spp =~ s/_/ /;
     print NEW qq(
 <tr>
@@ -613,31 +517,77 @@ my $sp_release = utils::Tool::get_config( { species=>$spp, values => "SPECIES_RE
     system ("cp $dir/download_links.inc $dir/download_links.inc.bck")==0 or die "Couldn't copy files";
   }
   system ("mv $dir/download_links.inc.new $dir/download_links.inc") ==0 or die "Couldn't copy files";
-  info (1, "Created downloads pages $dir ");
+  utils::Tool::info (1, "Created downloads pages $dir ");
   return;
+}
+
+#---------------------------------------------------------------------------
+sub blast_db {
+  my ($serverroot, $spp) = @_;
+  utils::Tool::info(1, "Updating BLAST_DATASOURCES");
+
+  my $ini_file = $SERVERROOT."/public-plugins/ensembl/conf/ini-files/$spp".".ini";   
+  $ini_file = $SERVERROOT."/public-plugins/ensembl/conf/ini-files/MULTI.ini" if $spp eq 'Multi';
+  open (INI, "<",$ini_file) or die "Couldn't open ini file $ini_file: $!";
+  my $contents = [<INI>];
+  close INI;
+
+  my $out_ini = $ini_file . ".out";
+  open (my $fh_out, ">",$out_ini) or die "Couldn't open ini file $out_ini: $!";
+
+  my $month = utils::Tool::release_month();
+  my $golden_path = utils::Tool::get_config( {species => $spp, values => "ENSEMBL_GOLDEN_PATH"});
+
+  # Continue until blast databases section
+  utils::Tool::print_next($contents, "BLAST\\w_DATASOURCES\\]", $fh_out) ;
+
+  foreach my $line (@$contents) {
+    if ($line =~ /
+		  (.*\w+)        # source
+		  (\s+=        # whitespace =
+		  \s+)
+		  $spp\.       # species
+		  (\w+\.?\d?)\. # golden_path
+		  \w{3}\.       # month
+		  (.*)/x ) {   # type of file
+     my $source = $1;
+     my $new_file =  $1.$2.$spp. ".$golden_path.$month.$4";
+     die "False positive in pattern match: $line" unless $source =~ /^CDNA|^PEP|^RNA|^LATE/;
+     print $fh_out "$new_file\n";
+    }
+    else {
+      print $fh_out $line;
+    }
+  }
+  system ("mv $ini_file $ini_file.bck") && die "Couldn't backup original file";
+  system ("mv $out_ini $ini_file") && die "Couldn't move new file to $ini_file";
+  return 1;
 }
 
 ##############################--  ARCHIVE --################################
 
 sub assembly_table {
   my ( $dir ) = @_;
-  &check_dir($dir);
+  utils::Tool::check_dir($dir);
 
   # Connect to web database and get news adaptor
   my $web_db = $SD->databases->{'ENSEMBL_WEBSITE'};
-  warning (1, "ENSEMBL_WEBSITE not defined in INI file") unless $web_db;
+  utils::Tool::warning (1, "ENSEMBL_WEBSITE not defined in INI file") unless $web_db;
   my $wa = EnsEMBL::Web::DBSQL::NewsAdaptor->new($web_db);
 
   my $file  = $dir."/assembly_table.inc";
-  my $this_release = utils::Tool::species_defs("ENSEMBL_VERSION");
+  my $this_release = $SD->ENSEMBL_VERSION;
+
   my $header_row = qq(<th>Species</th>\n);
   my %info;
 
   foreach my $data ( @{$wa->fetch_releases()} ) {
     my $release_id = $data->{release_id};
-    last if $release_id == 25;
+    last if $release_id == ($FIRST_ARCHIVE - 1 );
    (my $link = $data->{short_date}) =~ s/\s+//;
+
     $header_row .=qq(<th><a href="http://$link.archive.ensembl.org">$data->{short_date}</a><br />v$release_id</th>);
+
 
     # If the assembly name spans several releases,%info stores its first release only
     # %info{species}{assembly name} = release num
@@ -648,13 +598,12 @@ sub assembly_table {
   }
 
   my $table;
-  my @tint = qw(class="bg4" class="bg2");
   foreach my $species (sort keys %info) {
+    my @tint = qw(class="bg4" class="bg2");
     (my $display_spp = $species) =~ s/_/ /;
     $table .=qq(<tr>\n   <th><a href="http://www.ensembl.org/$species">$display_spp</a></th>\n);
 
     my %assemblies = reverse %{ $info{$species} };
-
     my $release_counter = $this_release;
     foreach my $release (sort {$b <=> $a} keys %assemblies  ) {
 
@@ -669,62 +618,111 @@ sub assembly_table {
 
   # Update the file ..
   open (my $fh, ">$file") or die "Cannot create $file: $!";
-  print $fh qq(\n<table style="margin:auto; width:95%" border="1" class="spreadsheet archive">\n<tr>$header_row</tr>\n);
+  print $fh qq(\n<table style="margin:auto; width:95%" border="1" class="spreadsheet">\n<tr>$header_row</tr>\n);
   print $fh qq($table</table>\n);
   return;
 }
 
 
+#---------------------------------------------------------------------
 sub copy_species_table {
   my ( $dir ) = @_;
   my $dir2 = $dir."/sanger-plugins/archive/htdocs/ssi/";
-  &check_dir($dir2);
+  utils::Tool::check_dir($dir2);
   system("cp $dir/public-plugins/ensembl/htdocs/ssi/species_table.html $dir2");
   return;
 }
 #############################################################################
-sub branch_versions {
-  my ($dir, $version_ini, $common_name,$species) = @_;
 
-  $dir .= "whatsnew/";
-  &check_dir($dir);
 
-  (my $api = $version_ini) =~ s/(\d+)\.(.*)/$1/;
-  my $date = &get_date;
 
-  my $file = $dir."current.html";
-  open (CURR, ">$file") or die "Cannot create $file: $! ";
+__END__
 
-  print CURR qq(
-<html>
-<head>
-<meta name="navigation" content="Ensembl" />
-<title>Ensembl $common_name Current Version</title>
-</head>
-<body>
+=head1 SYNOPSIS
 
-<h2 class="boxed">Current Status</h2>
+update_static_content.pl [options]
 
-<h3>Versions in Ensembl $common_name v$version_ini</h3>
+Options:
+  --help, --info, --species --update
 
-<ul>
-    <li><p><strong>Ensembl Release version&nbsp;-&nbsp;v$api</strong><br />
-        cvs tag : branch-ensembl-$api</p></li>
+B<-h,--help>
+  Prints a brief help message and exits.
 
-    <li><p><strong>Data&nbsp;-&nbsp;v$version_ini </strong></p></li>
+B<-i,--info>
+  Prints man page and exits.
 
-    <li><p><strong>BioPerl&nbsp;-&nbsp;v1.2.3</strong></p></li>
-    <li><p><strong>BioMart&nbsp;-&nbsp;v0.2</strong><br />
-        cvs tag : release-0_2</p></li>
-</ul>
+B<-s, --species>
+  Species to dump
 
-<p><a href="/$species/whatsnew/versions.html">Further information about Ensembl versioning</a>.
+B<--site_type>
+  Optional.  Default is main site.  Use this to set type to 'mirror' or 'archive' or 'pre'. 
+ 
+B<--update>
+  What to update
 
-</body>
-</html> 
-		);
-  close CURR;
-  return;
-}
+e.g.
+   ./update_static_content.pl --species Tetraodon_nigroviridis --update new_release --site_type mirror
 
+=head1 DESCRIPTION
+
+B<This program:>
+
+Updates the static content for the website
+
+=head1 OPTIONS
+
+More on --update: Valid options are:
+
+B< new_species:>
+   Use the -site_type 'pre' flag if you are setting up pre.
+
+   Runs generic_species_homepage, SSI (SSIabout, SSIexample, SSIentry),
+   downloads, species_table
+
+B< archive: >
+    Runs copy_species_table and assembly_table
+
+B< release: >
+    Runs blast_db
+
+B<  generic_species_homepage:>;
+    Creates a generic homepage as a first pass for the species.  
+    This file needs /$species/ssi/stats.html too.  
+    Run stats script separately.
+    You need to create a file: htdocs/$species/ssi/karyotype.html 
+    if the species has chromosomes
+
+B<  downloads:>; 
+    Creates a new FTP downloads section (htdocs/info/data/download_links.inc)
+    If the site-type is archive, the links are to the versionned directories.
+    If the site-type is main, the links are to current-species directories.
+
+B<  SSI:>; 
+    Creates a new ssi/about.html page template
+    Creates a new ssi/examples.html page template
+    Creates a new ssi/entry.html drop down form for entry points
+
+B<  species_table:>; 
+    Creates a first pass at the home page species table:
+    htdocs/ssi/species_table.html
+
+B<  blast_db:>; 
+    Updates public-plugins/ensembl/conf/ini-files so the blast
+    database names match the month of release
+
+B< copy_species_table:>
+   simply copies: $SERVERROOT/public-plugins/ensembl/htdocs/ssi/species_table.html to $SERVERROOT/sanger-plugins/archive/htdocs/ssi/species_table.html
+
+B< assembly_table>;
+    Updates htdocs/Docs/archive/homepage_SSI/assembly_table.html or 
+    creates new one.  This file is included in htdocs/Docs/assemblies.html 
+    and lists all the archived sites and which assemblies they show.
+
+B< branch_versions:>
+   Creates a new page with updated versions for the current cvs branch
+   (i.e. for the API, webcode etc)
+
+    Maintained by Fiona Cunningham <fc1@sanger.ac.uk>
+
+=cut
 

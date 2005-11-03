@@ -7,25 +7,19 @@ use FindBin qw($Bin);
 use File::Basename qw( dirname );
 use DBI;
 use Time::localtime;
+use File::Path;
 
 use vars qw( $SERVERROOT );
 our $VERBOSITY = 1;
 
-BEGIN{
+BEGIN {
   $SERVERROOT = dirname( $Bin );
   unshift @INC, "$SERVERROOT/conf";
-  unshift @INC, "$SERVERROOT";
   eval{ require SiteDefs };
   if ($@){ die "Can't use SiteDefs.pm - $@\n"; }
-  map{ unshift @INC, $_ } @SiteDefs::ENSEMBL_LIB_DIRS;
+  map{ unshift @INC, $_ } @SiteDefs::ENSEMBL_LIB_DIRS;  
 }
-
-use EnsEMBL::Web::SpeciesDefs;
-our $SPECIES_DEFS = EnsEMBL::Web::SpeciesDefs->new();
-sub species_defs {
-  my $query = shift;
-  return $SPECIES_DEFS->$query;
-}
+require EnsEMBL::Web::SpeciesDefs; 
 
 #----------------------------------------------------------------------
 
@@ -44,6 +38,32 @@ sub all_species {
 }
 
 #----------------------------------------------------------------------
+
+=head 2 check_dir
+
+  Arg[1]     : directory name and path
+  Example    : utils::Tool::check_dir($dir);
+  Description: checks to see if directory exists. If yes, returns, if no, 
+               it creates all the necessary directories in the path for the 
+               directory to exist
+  Return type: 1
+
+=cut
+
+sub check_dir {
+  my $dir = shift;
+  if( ! -e $dir ){
+    info(1, "Creating $dir" );
+    eval { mkpath($dir) };
+    if ($@) {
+      print "Couldn't create $dir: $@";
+    }
+  }
+  return 1;
+}
+
+#------------------------------------------------------------------------
+
 =head2 check_species
 
   Arg1        : arrayref of species to check
@@ -80,7 +100,8 @@ sub check_species {
 
 sub get_config {
   my $args = shift;
-  my $values = $SPECIES_DEFS->get_config($args->{species}, $args->{values});
+  my $species_defs = &species_defs;
+  my $values = $species_defs->get_config($args->{species}, $args->{values});
   return $values || {};
 }
 
@@ -119,7 +140,8 @@ sub info{
 
 sub mysql_db {
   my $release = shift || "";
-  my $dsn = "DBI:mysql:host=". $SPECIES_DEFS->ENSEMBL_HOST .";port=" . $SPECIES_DEFS->ENSEMBL_HOST_PORT;
+  my $species_defs = &species_defs;
+  my $dsn = "DBI:mysql:host=". $species_defs->ENSEMBL_HOST .";port=" . $species_defs->ENSEMBL_HOST_PORT;
   my $dbh = DBI->connect($dsn, 'ensro') or die "\n[*DIE] Can't connect to database '$dsn'";
   my $mysql = $dbh->selectall_arrayref("show databases like '%$release%'");
   $dbh->disconnect;
@@ -180,8 +202,7 @@ sub release_month {
   my @months = qw (jan feb mar apr may jun jul aug sep oct nov dec);
   my $day      = localtime->mday;
   my $curr_mth = localtime->mon;
-  #return  $day <15 ? $months[$curr_mth] : $months[$curr_mth +1];
-  return $months[$curr_mth];
+  return  $day <15 ? $months[$curr_mth] : $months[$curr_mth +1];
 }
 #--------------------------------------------------------------------
 =head2 site_logo
@@ -194,13 +215,30 @@ sub release_month {
 =cut
 
 sub site_logo {
+  my $species_defs = &species_defs;
   return
-      { src    => $SPECIES_DEFS->SITE_LOGO,          
-        height => $SPECIES_DEFS->SITE_LOGO_HEIGHT,
-        width  => $SPECIES_DEFS->SITE_LOGO_WIDTH,
-        alt    => $SPECIES_DEFS->SITE_LOGO_ALT, 
-        href   => $SPECIES_DEFS->SITE_LOGO_HREF}
-  or die "no Site logo defined: $SPECIES_DEFS->SITE_LOGO";
+      { src    => $species_defs->SITE_LOGO,          
+        height => $species_defs->SITE_LOGO_HEIGHT,
+        width  => $species_defs->SITE_LOGO_WIDTH,
+        alt    => $species_defs->SITE_LOGO_ALT, 
+        href   => $species_defs->SITE_LOGO_HREF}
+  or die "no Site logo defined: $species_defs->SITE_LOGO";
+}
+
+#----------------------------------------------------------------------
+=head2 species_defs
+
+  Arg[1]      : none  
+  Example     : utils::Tool::species_defs
+  Description : 
+  Return type : $species_defs
+
+=cut
+
+sub species_defs {
+  my $SPECIES_DEFS = EnsEMBL::Web::SpeciesDefs->new(); 
+  $SPECIES_DEFS || pod2usage("$0: SpeciesDefs config not found");
+  return $SPECIES_DEFS;
 }
 
 #----------------------------------------------------------------------
@@ -222,7 +260,7 @@ sub validate_types {
    my $compound_types = shift;
    my $user_types     = shift;
 
-   my %types;
+   my @types;
    foreach my $type( @$user_types ){  # user's input types
      # If it is a compound type, add the individual types to @$user_types array
      if( $compound_types->{$type} ){
@@ -231,12 +269,12 @@ sub validate_types {
      }
      $valid_types->{$type} or pod2usage("[*DIE] Invalid update type: $type\n\n" ) 
 && next;
-     $types{$type} = 1;  # add to %types if valid update
+     push @types, $type;
    }
 
-   scalar( keys %types ) or pod2usage("[*DIE] Need a valid type to dump" );
-   info (1, "Dumping types: ".(join  " ", keys %types));
-   return \%types;
+   scalar( @types ) or pod2usage("[*DIE] Need a valid type to dump" );
+   info (1, "Dumping types: ".(join  " ", @types));
+   return \@types;
  }
 #-------------------------------------------------------------------------
 
@@ -261,4 +299,88 @@ sub warning{
   return 1;
 }
 #----------------------------------------------------------------------
+
+
+__END__
+           
+=head1 NAME
+                                                                                
+Tool
+
+=head1 SYNOPSIS
+
+    use <path>::Tool;
+    # Brief but working code example(s) here showing the most common usage
+
+    # This section will be as far as many users bother reading,
+    # so make it as educational and exemplary as possible!
+
+=head1 DESCRIPTION
+
+A full description of the module and its features.
+May include numerous subsections (i.e. =head2, =head3, etc).
+
+=head1 METHODS
+
+An object of this class represents...
+
+Below is a list of all public methods:
+
+
+
+=head1 BUGS AND LIMITATIONS
+
+A list of known problems with the module, together with some indication of 
+whether they are likely to be fixed in an upcoming release.
+
+=head1 AUTHOR
+                                                                                
+[name], Ensembl Web Team
+Support enquiries: helpdesk@ensembl.org
+                                                                                
+=head1 COPYRIGHT
+                                                                                
+See http://www.ensembl.org/info/about/code_licence.html
+
+
+__END__
+           
+=head1 NAME
+                                                                                
+Tool
+
+=head1 SYNOPSIS
+
+    use <path>::Tool;
+    # Brief but working code example(s) here showing the most common usage
+
+    # This section will be as far as many users bother reading,
+    # so make it as educational and exemplary as possible!
+
+=head1 DESCRIPTION
+
+A full description of the module and its features.
+May include numerous subsections (i.e. =head2, =head3, etc).
+
+=head1 METHODS
+
+An object of this class represents...
+
+Below is a list of all public methods:
+
+
+
+=head1 BUGS AND LIMITATIONS
+
+A list of known problems with the module, together with some indication of 
+whether they are likely to be fixed in an upcoming release.
+
+=head1 AUTHOR
+                                                                                
+[name], Ensembl Web Team
+Support enquiries: helpdesk@ensembl.org
+                                                                                
+=head1 COPYRIGHT
+                                                                                
+See http://www.ensembl.org/info/about/code_licence.html
 1;

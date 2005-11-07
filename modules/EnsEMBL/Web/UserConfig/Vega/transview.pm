@@ -56,6 +56,7 @@ sub init {
             'abbrev' => 'on',
 	},
     };
+	$self->ADD_ALL_PREDICTIONTRANSCRIPTS( 1000, 'on' => 'off' );
 
 }
 1;

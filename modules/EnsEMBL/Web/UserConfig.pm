@@ -911,8 +911,6 @@ sub ADD_ALL_PREDICTIONTRANSCRIPTS {
   $self->add_new_track_predictiontranscript( 'gws_s','Genewise (Mouse)','orange',$POS ++, { 'Genoscope' => 'TETRAODON_GENEWISE' }, @_ );
 #for vega 
   $self->add_new_track_predictiontranscript( 'fgenesh', 'Fgenesh', 'darkkhaki', $POS ++, {}, @_ ); # 'available' => 'features Fgenesh', @_ ); # , 'glyphset'=>'fgenesh', @_);
-  $self->add_new_track_predictiontranscript( 'vega_genscan', 'Genscan', 'lightseagreen', $POS ++, {}, 
-											 'glyphset'=>'genscan', @_);
   return $POS;
 }
 

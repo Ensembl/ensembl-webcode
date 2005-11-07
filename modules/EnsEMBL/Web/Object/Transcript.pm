@@ -29,7 +29,7 @@ sub default_track_by_gene {
     map( {($_, $_.'_transcript')} qw(
       cdna_all targettedgenewise
       genebuilderbeeflymosandswall gsten flybase wormbase
-      ensembl sgd homology_low cow_proteins refseq mouse_protein
+      ensembl sgd homology_low cow_proteins refseq mouse_protein dog_protein
       jamboree_cdnas ciona_dbest_ncbi ciona_est_seqc ciona_est_seqn
       ciona_est_seqs ciona_jgi_v1 ciona_kyotograil_2004
       ciona_kyotograil_2005 )

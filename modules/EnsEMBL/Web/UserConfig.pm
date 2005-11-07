@@ -960,6 +960,7 @@ sub ADD_ALL_TRANSCRIPTS {
   $self->add_new_track_transcript( 'rprot',     'Rodent proteins', 'prot_gene',      $POS++, @_ );
   $self->add_new_track_transcript( 'jamboree_cdnas',   'X.trop. jambo. genes',   'prot_gene',   $POS++, @_ );
 
+  $self->add_new_track_transcript( 'dog_protein',   'Dog genes',   'dog_protein',   $POS++, @_ );
   $self->add_new_track_transcript( 'cow_proteins',   'Cow genes',   'cow_protein',   $POS++, @_ );
   $self->add_new_track_transcript( 'homology_low', 'Bee genes',    'bee_pre_gene',   $POS++, @_ );
 #trancripts for Vega
@@ -1074,10 +1075,15 @@ sub ADD_GENE_TRACKS {
     'gene_col'             => sub { return $_[0]->type eq 'Genoscope_predicted' ? '_GSTEN'    : '_HOX' },
     'logic_name'           => 'gsten hox cyt', @_
   );
+  $self->add_new_track_gene( 'dog_protein', 'Dog proteins', 'dog_protein', $POS++,
+    'gene_label'           => sub { return $_[0]->stable_id },
+    'gene_col'             => 'dog_protein' 
+  );
   $self->add_new_track_gene( 'Cow_proteins', 'Cow proteins', 'cow_protein', $POS++,
     'gene_label'           => sub { return $_[0]->stable_id },
-    'gene_col'             => 'cow_protein' 
+    'gene_col'             => 'cow_protein'
   );
+
   $self->add_new_track_gene( 'jamboree_cdnas',  "X.trop. Jambo",  'prot_gene', $POS++,
                              'gene_label' => sub { return $_[0]->stable_id }, 'gene_col' => sub { return $_[0]->biotype }, @_ );
 

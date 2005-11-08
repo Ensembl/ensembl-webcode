@@ -488,8 +488,9 @@ sub update_dsn {
 
     $self->dsn($dsn);
     
-    if ($action =~ /overwrite/i) {
-	$sql = qq{delete from $dsn};
+    if ($action eq 'overwrite') {
+	(my $tname = $dsn) =~ s/hydraeuf_/euf_/;
+	$sql = qq{delete from $tname};
 	eval {
 	    $self->{_dbh}->do($sql);
 	};

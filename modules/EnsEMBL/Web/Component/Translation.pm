@@ -141,16 +141,8 @@ sub marked_up_seq {
   my $show      = $object->param('show');
   
   my $image_key;
-  if( $object->param('show_vega_markup') ) {
-    if($show eq 'exons') {
-      $HTML .= qq(<p><img src="/img/help/protview_key1.png" alt="[Key]" border="0" /></p>);
-    } elsif ($show eq 'snps') {
-      $HTML .= qq(<p><img src="/img/help/protview_key2.png" alt="[Key]" border="0" /></p>);
-    }
-  } else {
-    if( $show eq 'exons' || $show eq 'snps' ) {
+  if( $show eq 'exons' || $show eq 'snps' ) {
       $HTML .= qq(<img src="/img/help/protview_key1.gif" alt="[Key]" border="0" />);
-    }
   }
   $HTML .= "<div>@{[ $panel->form( 'markup_up_seq' )->render ]}</div>";
   $panel->add_row( $label, $HTML );

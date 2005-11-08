@@ -769,6 +769,7 @@ sub ADD_ALL_DNA_FEATURES {
 ## now the tetraodon tracks...
   $self->add_new_track_cdna( 'cdm', 'Tetraodon cDNAs',   $POS++, 'SUBTYPE'     => 'genoscope', 'on' => 'off', @_ );
   $self->add_new_track_cdna( 'xlaevis_cDNA', 'X.laevis cDNAs',   $POS++, @_ );
+  $self->add_new_track_cdna( 'xlaev_cDNA', 'X.laevis cDNAs',   $POS++, @_ );
   $self->add_new_track_cdna( 'xtrop_cDNA', 'X.trop cDNAs',   $POS++, @_ );
   $self->add_new_track_cdna( 'ep3_h', 'Ecotig (Human prot)',   $POS++, 'SUBTYPE'     => 'genoscope_ecotig', 'on' => 'off', @_ );
   $self->add_new_track_cdna( 'ep3_s', 'Ecotig (Mouse prot)',   $POS++, 'SUBTYPE'     => 'genoscope_ecotig', 'on' => 'off', @_ );
@@ -806,6 +807,8 @@ sub ADD_ALL_EST_FEATURES {
   $self->add_new_track_est( 'Cow_ESTs',    'B.taurus ESTs',    $POS++, @_ );
   $self->add_new_track_est( 'Exonerate_EST_083',    'Ciona ESTs',    $POS++, @_ );
   $self->add_new_track_est( 'xlaevis_EST', 'X.laevis ESTs',   $POS++, @_ );
+  $self->add_new_track_est( 'xlaev_EST', 'X.laevis ESTs',   $POS++, @_ );
+  $self->add_new_track_est( 'xtrop_EST', 'X.tropicalis ESTs',   $POS++, @_ );
   $self->add_new_track_est( 'xtrop_cluster','X.trop EST clust', 
 							$POS++, 'URL_KEY' => 'XTROP_CLUSTER',
 							'SUBTYPE' => 'default',

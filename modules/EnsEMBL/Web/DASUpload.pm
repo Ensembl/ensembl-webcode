@@ -488,7 +488,7 @@ sub update_dsn {
 
     $self->dsn($dsn);
     
-    if ($action eq 'overwrite') {
+    if ($action =~ /overwrite/i) {
 	$sql = qq{delete from $dsn};
 	eval {
 	    $self->{_dbh}->do($sql);

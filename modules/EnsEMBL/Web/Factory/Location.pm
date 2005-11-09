@@ -110,7 +110,6 @@ sub _location_from_Transcript {
     eval {
       my $TF = $self->_predtranscript_adaptor( $db )->fetch_by_stable_id( $ID );
       $TS = $self->_slice_adaptor->fetch_by_Feature( $TF );
-	  warn ref($TS);
     };
     if( $TS ) {
       $self->param('db', $db );

@@ -666,7 +666,7 @@ sub container_width {
         $self->{'_containerlength'} = $val;
 	
 	my $width = $self->image_width();
-	$self->scalex($width/$val);
+	$self->scalex($width/$val) if $val;
     }
     return $self->{'_containerlength'};
 }

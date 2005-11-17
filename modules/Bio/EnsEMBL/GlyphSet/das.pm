@@ -263,7 +263,7 @@ sub RENDER_grouped {
     my $END   = $end > $configuration->{'length'} ? $configuration->{'length'} : $end;
 
     # Compute the length of the label...
-    my $ID    = $f->das_group_id || $f->das_id;
+    my $ID    = $f->das_group_id || $f->das_feature_label || $f->das_feature_id;
     my $label = $f->das_group_label || $ID;
     $f->{grouped_by} = $label;
     # append number of features in group
@@ -283,7 +283,7 @@ sub RENDER_grouped {
 
     my $groupsize = scalar @feature_group;
 
-    my( $href, $zmenu ) = $self->gmenu( $f, $groupsize );
+    my( $href, $zmenu ) = $f->das_group_id ? $self->gmenu( $f, $groupsize ) : $self->zmenu( $f);
 
 
     my $Composite = new Sanger::Graphics::Glyph::Composite({

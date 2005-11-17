@@ -134,7 +134,7 @@ sub init {
 	    'width' => 40,
             'glyphset' => 'Vgenedensity_vega',
             'label' => ["To_Ps"],
-            'colour' => [qw(pseudogene_NOVEL)],
+            'colour' => [qw(pseudogene_)],
     	    'logicname' => [qw(pseudoGeneDensity)],
 	},
 
@@ -144,7 +144,7 @@ sub init {
 	    'width' => 40,
             'glyphset' => 'Vgenedensity_vega',
             'label' => ["No_IgS", "No_IgP"],
-            'colour' => [qw(Ig_segment_NOVEL Ig_pseudogene_segment_NOVEL)],
+            'colour' => [qw(Ig_segment_NOVEL Ig_pseudogene_segment_)],
     	    'logicname' => [qw(IgSegDensity IgPseudoSegDensity)],
 	},
       

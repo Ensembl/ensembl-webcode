@@ -21,6 +21,7 @@ sub init {
             Vannotation_status_left
             Vannotation_status_right
     	    Vannot_knownPCod
+   	        Vannot_knownPTrans
     	    Vannot_novelPCod
 	        Vannot_novelPTrans
 			Vannot_putativePTrans

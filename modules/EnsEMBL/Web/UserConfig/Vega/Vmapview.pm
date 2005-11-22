@@ -120,25 +120,25 @@ sub init {
             'colour' => [qw(processed_transcript_NOVEL)],
     	    'logicname' => [qw(novelPTransDensity)],
     	},	
-		     
-	    'Vannot_putativePTrans' => {
-	    'on' => 'on',
-	    'pos' => '15',
-	    'width' => 40,
-            'glyphset' => 'Vgenedensity_vega',
-            'label' => ["Pu_Pt"],
-            'colour' => [qw(processed_transcript_PUTATIVE)],
-    	    'logicname' => [qw(putativePTransDensity)],
-    	},
 
 	    'Vannot_predictedPCod' => {
 	    'on' => 'on',
-	    'pos' => '16',
+	    'pos' => '15',
 	    'width' => 40,
             'glyphset' => 'Vgenedensity_vega',
             'label' => ["Pr_Pc"],
             'colour' => [qw(protein_coding_PREDICTED)],
     	    'logicname' => [qw(predictedPCodDensity)],
+    	},
+
+	    'Vannot_putativePTrans' => {
+	    'on' => 'on',
+	    'pos' => '16',
+	    'width' => 40,
+            'glyphset' => 'Vgenedensity_vega',
+            'label' => ["Pu_Pt"],
+            'colour' => [qw(processed_transcript_PUTATIVE)],
+    	    'logicname' => [qw(putativePTransDensity)],
     	},
 
     	'Vannot_pseudo' => {
@@ -156,7 +156,7 @@ sub init {
 	    'pos' => '18',
 	    'width' => 40,
             'glyphset' => 'Vgenedensity_vega',
-            'label' => ["No_IgS", "No_IgP"],
+            'label' => ["IgS", "IgP"],
             'colour' => [qw(Ig_segment_NOVEL Ig_pseudogene_segment_)],
     	    'logicname' => [qw(IgSegDensity IgPseudoSegDensity)],
 	    },

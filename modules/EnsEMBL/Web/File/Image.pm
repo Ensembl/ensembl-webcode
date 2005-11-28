@@ -145,6 +145,7 @@ sub render {
   $format ||= $DEFAULT_FORMAT;
   my $file = $self->filename( $format );
   if( $self->{'cache'} && -e $file && -f $file ) {
+warn ">>>> CACHE HIT $file";
       ## If cached image required and it exists return it!
     if( $format eq 'imagemap' ) {
       my $gz = gzopen( $file, 'rb' );

@@ -950,8 +950,8 @@ sub add_das_file {
     'name'   => 'DASuser_action',
     'label'  => 'Action',
     'values' => [
-      { 'name' => 'Overwrite', 'value' => 'Overwrite' },
-      { 'name' => 'Append',    'name'  => 'Append'    }
+      { 'name' => 'Overwrite', 'value' => 'overwrite' },
+      { 'name' => 'Append',    'name'  => 'append'    }
     ]
   );
   $form->add_element(

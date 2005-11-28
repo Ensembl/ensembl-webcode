@@ -489,11 +489,14 @@ sub _get_glovar_database{
 =cut
 
 sub _get_fasta_database{
-    my $self = shift;
-    my $db_info =  $self->_get_database_info( shift, 'ENSEMBL_FASTA' ) ||
-        die( "No fasta database for this species" );
-    my $adpt =  $self->_get_database( $db_info, 'Bio::EnsEMBL::DBSQL::DBAdaptor' );    $self->dynamic_use('Bio::EnsEMBL::ExternalData::FASTA::FASTAAdaptor');
-    return Bio::EnsEMBL::ExternalData::FASTA::FASTAAdaptor->new($adpt);
+  warn ">>> @_";
+  my $self = shift;
+  my $db_info =  $self->_get_database_info( shift, 'ENSEMBL_FASTA' ) || die( "No fasta database for this species" );
+  warn ">>> $db_info";
+  my $adpt =  $self->_get_database( $db_info, 'Bio::EnsEMBL::DBSQL::DBAdaptor' );
+  warn ">>> ",$self->dynamic_use('Bio::EnsEMBL::ExternalData::FASTA::FASTAAdaptor');
+  warn ">>> ",$adpt;
+  return Bio::EnsEMBL::ExternalData::FASTA::FASTAAdaptor->new($adpt);
 }
 
 =head2 _get_vega_database

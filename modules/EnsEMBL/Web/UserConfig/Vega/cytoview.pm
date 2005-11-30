@@ -23,6 +23,7 @@ sub init {
         vega_gene_zfish
         gene_legend
         marker
+		encode
         ntcontigs
         cloneset
         bac_map
@@ -72,6 +73,7 @@ sub init {
         [ 'qtl'          =>  'QTLs'        ], 
       ],
       'options' => [
+  		[ 'encode'              => 'Encode regions' ],
         [ 'bac_map'     => 'BAC map' 		],
         [ 'nod_bacs'    => 'Nod BACs'       ],
         [ 'bac_bands'     => 'Band BACs'       ],
@@ -218,6 +220,7 @@ sub init {
       'fish' => 'FISH',
       'available' => 'features mapset_cloneset',
     },
+
     'haplotype_links' => {
       'on'  => "on",
       'pos' => '999',
@@ -229,6 +232,18 @@ sub init {
       'threshold_navigation' => '10000000',
       'outline_threshold'  => '35000000'
     },
+
+    'encode' => {
+      'on' => 'on',
+      'pos' => '4000',
+      'colour' => 'salmon',
+      'label'  => 'black',
+      'str' => 'r',
+      'dep' => '9999',
+      'threshold_navigation' => '10000000',
+      'available' => 'features mapset_encode'
+    },
+
     'nod_bacs' => {
       'on'  => "on",
       'pos' => '997',

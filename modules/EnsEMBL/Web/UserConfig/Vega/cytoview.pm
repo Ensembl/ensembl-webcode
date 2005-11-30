@@ -532,5 +532,6 @@ sub init {
 
 
   };
+$self->ADD_GENE_TRACKS();
 }
 1;

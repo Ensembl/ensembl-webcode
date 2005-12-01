@@ -56,6 +56,7 @@ F13=modules
 F14=conf
 
 rm -f $P2WDOC_LOC/make_html_docs.*
+setenv CVS_RSH 'ssh'
 
 cd $PERLMOD_LOC
 (
@@ -65,7 +66,7 @@ cd $PERLMOD_LOC
 ) > $P2WDOC_LOC/make_html_docs.sh
 
 echo "Check out ensembl-pipeline and ensembl analysis"
-cvs co ensembl-pipeline ensembl-analysis
+cvs -d cvs.sanger.ac.uk:/cvsroot/ensembl co ensembl-pipeline ensembl-analysis
 
 for i in bioperl-live ensembl ensembl-analysis ensembl-compara ensembl-draw ensembl-external ensembl-variation perl modules conf biomart-web biomart-plib public-plugins ensembl-pipeline
 do
@@ -114,7 +115,7 @@ cd $P2WDOC_LOC
 echo "Deleting generated index $PDOC_LOC/index.html file in favour of cvs version"
 cd $PDOC_LOC
 rm index.html
-cvs -q up 
+cvs -d cvs.sanger.ac.uk:/cvsroot/ensembl -q up 
 
 # cd back into server root directory:
 echo "Change back to server root directory";

@@ -9,7 +9,7 @@ sub init {
     $self->{'_userdatatype_ID'} = 2;
     $self->{'general'}->{'contigviewtop'} = {
         '_artefacts' => [qw(
-        annotation_status
+        annotation_status encode
 
 	) ],
 					    
@@ -48,6 +48,8 @@ sub init {
 	$self->add_track( 'redbox', 'on'=>'off', 'col' => 'red', 'zindex' => -20, 'pos' => 1000100 );
 
 	$POS = 100000;
+	$self->add_track( 'encode', 'on' => 'on', 'pos' => $POS++, 'colour' => 'salmon', 'label'  => 'Encode regions',
+                      'str' => 'r', 'available' => 'features mapset_encode');
 	$self->add_track( 'gene_legend', 'str' => 'r', 'on'=>'on', 'pos' => $POS++ );
 }
 

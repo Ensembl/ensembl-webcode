@@ -9,7 +9,7 @@ sub init {
     $self->{'_userdatatype_ID'} = 11; 
 
     $self->{'general'}->{'geneview'} = {
-	'_artefacts' => [qw( ruler vega_transcript )],
+	'_artefacts' => [qw( ruler )],
 	
 	'_options'  => [qw(pos col known unknown)],
 
@@ -23,16 +23,6 @@ sub init {
 	        'bgcolour2' => 'background1',
 	},
 
-	'vega_transcript' => {
-	    'on'      => "on",
-	    'pos'     => '23',
-	    'str'     => 'b',
-	    'src'     => 'all', # 'ens' or 'all
-            'colours' => {$self->{'_colourmap'}->colourSet( 'vega_gene' )},
-            'label'   => "Vega trans.",
-            'zmenu_caption' => "Vega Gene",
-	},
-
         'ruler' => {
             'on' => 'on',
 	    'str'   => 'r',
@@ -40,6 +30,8 @@ sub init {
             'col' => 'black',
         },
     };
-	$self->ADD_ALL_PREDICTIONTRANSCRIPTS( 1000, 'on' => 'off' );
+    
+    $self->ADD_ALL_TRANSCRIPTS( 0, 'on' => 'on' );
+    $self->ADD_ALL_PREDICTIONTRANSCRIPTS( 1000, 'on' => 'off' );
 }
 1;

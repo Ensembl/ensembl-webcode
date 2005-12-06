@@ -16,11 +16,6 @@ sub init {
         ruler
         stranded_contig
         annotation_status
-        vega_gene_havana
-        vega_gene_genoscope
-        vega_gene_sanger
-        vega_gene_washu
-        vega_gene_zfish
         gene_legend
         marker
 		encode
@@ -64,11 +59,6 @@ sub init {
       },
       'navigation_options' => [ '2mb', '1mb', 'window', 'half', 'zoom' ],
       'features' => [
-        [ 'vega_gene_havana'    => "Havana Gene"      ],
-        [ 'vega_gene_genoscope' => "Genoscope Gene"   ],
-        [ 'vega_gene_sanger'    => "Sanger Gene"      ],
-        [ 'vega_gene_washu'     => "WashU. Gene"      ],
-        [ 'vega_gene_zfish'     => "Zfish Gene"       ],
         [ 'marker'       =>  'Markers'      ],
         [ 'qtl'          =>  'QTLs'        ], 
       ],
@@ -104,91 +94,6 @@ sub init {
       'col' => 'black',
       'threshold_navigation' => '10000'
     },
-    'vega_gene_havana' => {
-      'on'      => "on",
-      'pos'     => '3001',
-      'threshold' => 2e6,
-      'navigation_threshold' => 1e4,
-      'navigation' => 'on',
-      'colours' => {
-        $self->{'_colourmap'}->colourSet( 'vega_gene' ),
-      },
-      'available' => 'features LITE_TRANSCRIPT_HAVANA',
-      'databases' => 'vega',
-      'glyphset' => 'vega_gene',
-      'logic_name' => 'otter',
-      'author'  => 'Havana',
-      'label'   => "Havana Genes",
-    },
-
-    'vega_gene_genoscope' => {
-      'on'      => "on",
-      'pos'     => '3011',
-      'threshold' => 2e6,
-      'navigation_threshold' => 1e4,
-      'navigation' => 'on',
-      'colours' => {
-        $self->{'_colourmap'}->colourSet( 'vega_gene' ),
-      },
-      'available' => 'features LITE_TRANSCRIPT_GENOSCOPE',
-      'databases' => 'vega',
-      'glyphset' => 'vega_gene',
-      'logic_name' => 'otter',
-      'author'  => 'Genoscope',
-      'label'   => "Genoscope Genes",
-    },
-
-    'vega_gene_sanger' => {
-      'on'      => "on",
-      'pos'     => '3021',
-      'threshold' => 2e6,
-      'navigation_threshold' => 1e4,
-      'navigation' => 'on',
-      'colours' => {
-        $self->{'_colourmap'}->colourSet( 'vega_gene' ),
-      },
-      'available' => 'features LITE_TRANSCRIPT_SANGER',
-      'databases' => 'vega',
-      'glyphset' => 'vega_gene',
-      'logic_name' => 'otter',
-      'author'  => 'Sanger',
-      'label'   => "Sanger Genes",
-    },
-
-    'vega_gene_washu' => {
-      'on'      => "on",
-      'pos'     => '3031',
-      'threshold' => 2e6,
-      'navigation_threshold' => 1e4,
-      'navigation' => 'on',
-      'colours' => {
-        $self->{'_colourmap'}->colourSet( 'vega_gene' ),
-      },
-      'available' => 'features LITE_TRANSCRIPT_WASHU',
-      'databases' => 'vega',
-      'glyphset' => 'vega_gene',
-      'logic_name' => 'otter',
-      'author'  => 'WashU',
-      'label'   => "WashU Genes",
-    },
-
-    'vega_gene_zfish' => {
-      'on'      => "on",
-      'pos'     => '3041',
-      'threshold' => 2e6,
-      'navigation_threshold' => 1e4,
-      'navigation' => 'on',
-      'colours' => {
-        $self->{'_colourmap'}->colourSet( 'vega_gene' ),
-      },
-      'available' => 'features LITE_TRANSCRIPT_ZFISH',
-      'databases' => 'vega',
-      'glyphset' => 'vega_gene',
-      'logic_name' => 'otter',
-      'author'  => 'Zfish',
-      'label'   => "Zfish Genes",
-    },
-
     'cloneset' => {
       'on'  => "on",
       'pos' => '1005',
@@ -532,6 +437,7 @@ sub init {
 
 
   };
-$self->ADD_GENE_TRACKS();
+  
+  $self->ADD_GENE_TRACKS();
 }
 1;

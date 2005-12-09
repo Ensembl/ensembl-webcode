@@ -233,7 +233,14 @@ sub status {
 
 sub alleles {
  my @alleles = @{$_[0]->vari->get_all_Alleles};
- return join '/', map { $_->allele } @alleles;
+ my %X=();
+ my @A=();
+ foreach(@alleles) {
+   next if $X{$_->allele};
+   push @A, $_->allele;
+   $X{$_->allele}=1;
+ }
+ return join '/', @A;
 }
 
 
@@ -537,11 +544,10 @@ sub extra_pop {
 
 sub individual_table {
   my $self = shift;
-  my @individual_genotypes = $self->individual_genotypes_obj;
-  return {} unless @individual_genotypes; 
-
+  my $individual_genotypes = $self->individual_genotypes_obj;
+  return {} unless @$individual_genotypes; 
   my %data;
-  foreach my $ind_gt_obj ( @individual_genotypes ) { 
+  foreach my $ind_gt_obj ( @$individual_genotypes ) { 
     my $ind_obj   = $ind_gt_obj->individual;
     next unless $ind_obj;
     my $ind_id    = $ind_obj->dbID;
@@ -811,7 +817,7 @@ sub get_variation_features {
    my $vari_f_adaptor = $dbs->get_VariationFeatureAdaptor;
    my $vari_features = $vari_f_adaptor->fetch_all_by_Variation($self->vari);
    #   warn Data::Dumper::Dumper($vari_features);
-   return $vari_features;
+   return $vari_features || [];
 }
 
 =head2 add_variation_feature
@@ -920,9 +926,9 @@ sub transcript_variation {
 
 sub ld_pops_for_snp {
   my $self = shift;
-  my  @vari_mappings = @{ $self->get_variation_features };
-  return {} unless @vari_mappings;
-
+  my @vari_mappings = @{ $self->get_variation_features };
+  return [] unless @vari_mappings;
+  
   my @pops;
   foreach ( @vari_mappings ) {
     my $ldcontainer = $_->get_all_LD_values;

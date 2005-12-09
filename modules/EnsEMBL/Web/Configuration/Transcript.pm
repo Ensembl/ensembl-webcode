@@ -50,7 +50,7 @@ sub exonview {
 
   my $panel3 = new EnsEMBL::Web::Document::Panel::Image(
     'code'    => "exons$self->{flag}",
-    'caption' => 'Support Evidence',
+    'caption' => 'Supporting Evidence',
     @common,
     'status'  => 'panel_supporting'
   );

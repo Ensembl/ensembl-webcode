@@ -166,7 +166,6 @@ sub init {
       'on' => 'off',
       'pos' => '1000000',
       'col' => 'red',
-      'zindex' => -20,
     },
 
 

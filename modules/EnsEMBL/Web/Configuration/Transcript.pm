@@ -161,7 +161,7 @@ sub context_menu {
   ) if $obj->translation_object;
   $self->add_entry( $flag,
     'code' => 'exp_data',
-    'text' => "Export data",
+    'text' => "Export transcript data",
     'href' => "/$species/exportview?type1=transcript;anchor1=@{[$obj->stable_id]}"
   );
 }

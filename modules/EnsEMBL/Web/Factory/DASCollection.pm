@@ -388,7 +388,7 @@ sub createObjects {
 	    }
 
 	    foreach my $das_data (@das_sources) {
-		my $das_name = $das_data->{'id'};
+		my $das_name = $das_data->{'id'} or next;
 
 		if( exists( $sources_conf{$das_name} ) and  (! defined($sources_conf{$das_name}->{conftype}) or $sources_conf{$das_name}->{conftype} ne 'external_editing' )){ 
 		    my $das_name_ori = $das_name;

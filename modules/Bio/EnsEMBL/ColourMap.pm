@@ -46,6 +46,16 @@ sub new {
     'superhi'    => 'highlight2',
     'cow_protein' => [ 'blue', 'Cow protein' ]
   );
+  $self->colourSet( 'vectorbase_0_5',
+    'hi'         => 'highlight1',
+    'superhi'    => 'highlight2',
+    'vectorbase_0_5' => [ 'black', 'VectorBase protein' ]
+  );
+  $self->colourSet( 'tigr_0_5',
+    'hi'         => 'highlight1',
+    'superhi'    => 'highlight2',
+    'tigr_0_5' => [ 'blue', 'TIGR protein' ]
+  );
   $self->colourSet( 'ensembl_gene',
     'hi'         => 'highlight1',
     'superhi'    => 'highlight2',

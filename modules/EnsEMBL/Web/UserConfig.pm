@@ -858,6 +858,7 @@ sub ADD_ALL_EST_FEATURES {
 							'FEATURES' => 'Est2genome_human Est2genome_mouse Est2genome_other Est2genome_fish',
                             'src' => 'all', 
 							@_);
+  $self->add_new_track_est( 'cDNA_exonerate',    'ESTs',      $POS++, @_ );
   return $POS;
 }
 
@@ -903,6 +904,20 @@ sub ADD_ALL_PROTEIN_FEATURES {
   $self->add_new_track_protein( 'human_ensembl_peptides', 'Human e! peptides',  $POS++, 'URL_KEY' => 'HUMAN_PROTVIEW', @_ );
   $self->add_new_track_protein( 'kyotograil_2004',   "Kyotograil '04 model", $POS++, @_ );
   $self->add_new_track_protein( 'kyotograil_2005',   "Kyotograil '05 model", $POS++, @_ );
+#/* aedes additions */
+  $self->add_new_track_protein( 'Similarity_Diptera',   "Similarity Diptera", $POS++, @_ );
+  $self->add_new_track_protein( 'Similarity_Arthropoda',"Similarity Arthropoda", $POS++, @_ );
+  $self->add_new_track_protein( 'Similarity_Metazoa',   "Similarity Metazoa", $POS++, @_ );
+  $self->add_new_track_protein( 'Similarity_Eukaryota', "Similarity Eukaryota", $POS++, @_ );
+
+  $self->add_new_track_protein( 'DrosophilaBlast', "BLAST Drosophila", $POS++, @_ );
+  $self->add_new_track_protein( 'UniprotBlast',    "BLAST Uniprot", $POS++, @_ );
+
+  $self->add_new_track_protein( 'DipteraBlast',    "BLAST Diptera", $POS++, @_ );
+  $self->add_new_track_protein( 'ArthropodaBlast', "BLAST Arthropoda", $POS++, @_ );
+  $self->add_new_track_protein( 'MetazoaBlast',    "BLAST Metazoa", $POS++, @_ );
+  $self->add_new_track_protein( 'EukaryotaBlast',  "BLAST Eukaryota", $POS++, @_ );
+  $self->add_new_track_protein( 'EverythingBlast', "BLAST All", $POS++, @_ );
   return $POS;
 }
 
@@ -965,6 +980,8 @@ sub ADD_ALL_TRANSCRIPTS {
 
   $self->add_new_track_transcript( 'dog_protein',   'Dog genes',   'dog_protein',   $POS++, @_ );
   $self->add_new_track_transcript( 'cow_proteins',   'Cow genes',   'cow_protein',   $POS++, @_ );
+  $self->add_new_track_transcript( 'vectorbase_0_5',   'VectorBase genes',   'vectorbase_0_5',   $POS++, @_ );
+  $self->add_new_track_transcript( 'tigr_0_5',   'TIGR genes',   'tigr_0_5',   $POS++, @_ );
   $self->add_new_track_transcript( 'homology_low', 'Bee genes',    'bee_pre_gene',   $POS++, @_ );
 #trancripts for Vega
   $self->add_new_track_transcript('vega_havana', 'Havana trans.', 'vega_gene', $POS++,
@@ -1080,11 +1097,21 @@ sub ADD_GENE_TRACKS {
   );
   $self->add_new_track_gene( 'dog_protein', 'Dog proteins', 'dog_protein', $POS++,
     'gene_label'           => sub { return $_[0]->stable_id },
-    'gene_col'             => 'dog_protein' 
+    'gene_col'             => 'dog_protein' , @_
   );
   $self->add_new_track_gene( 'Cow_proteins', 'Cow proteins', 'cow_protein', $POS++,
     'gene_label'           => sub { return $_[0]->stable_id },
-    'gene_col'             => 'cow_protein'
+    'gene_col'             => 'cow_protein', @_
+  );
+
+  $self->add_new_track_gene( 'VectorBase_0_5', 'VectorBase proteins', 'vectorbase_0_5', $POS++,
+    'gene_label'           => sub { return $_[0]->stable_id },
+    'gene_col'             => 'vectorbase_0_5', @_
+  );
+
+  $self->add_new_track_gene( 'TIGR_0_5', 'TIGR proteins', 'tigr_0_5', $POS++,
+    'gene_label'           => sub { return $_[0]->stable_id },
+    'gene_col'             => 'tigr_0_5', @_
   );
 
   $self->add_new_track_gene( 'jamboree_cdnas',  "X.trop. Jambo",  'prot_gene', $POS++,

@@ -255,8 +255,10 @@ sub _location_from_SeqRegion {
     $strand ||= 1;
     $start = 1 if $start < 1;     ## Truncate slice to start of seq region
     ($start,$end) = ($end, $start) if $start > $end;
+warn ">>>>>>>>>>>>>>>>>>>>>>>>>>>> XXXXXXXXX";
     foreach my $system ( @{$self->__coord_systems} ) {
       my $slice;
+      warn $system->name, " $chr $start $end $strand";
       eval { $slice = $self->_slice_adaptor->fetch_by_region( $system->name, $chr, $start, $end, $strand ); };
       warn $@ if $@;
       next if $@;
@@ -342,7 +344,7 @@ sub createObjects {
   }
   if( defined $self->param('c') ) {
     my($cp,$t_strand);
-    ($seq_region,$cp,$t_strand) = $self->param('c') =~ /^(\w+):(-?[.\w]+)(:-?1)?$/;
+    ($seq_region,$cp,$t_strand) = $self->param('c') =~ /^([\w\.]+):(-?[.\w]+)(:-?1)?$/;
     $cp = $self->evaluate_bp( $cp );
     my $w = $self->evaluate_bp( $self->param('w') );
     $start = $cp - ($w-1)/2;

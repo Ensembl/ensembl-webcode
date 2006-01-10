@@ -101,6 +101,8 @@ sub get_server_dsns {
     $object->param('DASdomain', $domain);
     my $protocol = $object->param('DASprotocol') || 'http';
 
+warn $domain;
+warn $object->species_defs->ENSEMBL_WWW_PROXY;
     if( $domain && $protocol ){
         use Bio::EnsEMBL::ExternalData::DAS::DASAdaptor;
         my $adaptor = Bio::EnsEMBL::ExternalData::DAS::DASAdaptor->new
@@ -110,9 +112,13 @@ sub get_server_dsns {
           -proxy_url => $object->species_defs->ENSEMBL_WWW_PROXY 
           );
 
+warn "H2";
         use Bio::EnsEMBL::ExternalData::DAS::DAS;
+warn "H3";
         my $das = Bio::EnsEMBL::ExternalData::DAS::DAS->new ( $adaptor );
+warn "H4";
         my @dsns = @{ $das->fetch_dsn_info };
+warn "H5";
         if( @dsns ){
             return @dsns;
         } else{
@@ -128,6 +134,7 @@ sub get_server_dsns {
 
 sub add_das_server {
     my ($form, $source_conf, $object) = @_;
+warn( "ADS _ 1" );
     my @protocols = ( 'http','https' );
     $object->param("DASprotocol") || $object->param("DASprotocol", $protocols[0]);
 
@@ -158,7 +165,9 @@ sub add_das_server {
                );
 
     } else {
+warn( "ADS _ 1.1" );
     my @das_servers = &get_das_domains($object);
+warn( "ADS _ 1.2" );
     $object->param("DASdomain") or $object->param("DASdomain", $das_servers[0]);
     my $default = $object->param("DASdomain");
     $default =~ s/^http(s?)\:\/\///;
@@ -180,7 +189,9 @@ sub add_das_server {
                'value' => 1
                );
 
+warn( "ADS _ 1.3" );
     my @server_dsns = &get_server_dsns($object);
+warn( "ADS _ 1.4" );
 
     my @dsn_values;
     foreach my $dsn ( sort{$a->{dsn} cmp $b->{dsn}} @server_dsns ){
@@ -197,6 +208,7 @@ sub add_das_server {
 
     }
 
+warn( "ADS _ 2" );
 
 
     $form->add_element(
@@ -212,6 +224,9 @@ sub add_das_server {
 sub das_wizard_1 {
     my ($form, $source_conf, $object, $step_ref, $error) = @_;
     my $das_type = $source_conf->{sourcetype};
+warn ">>>>> $das_type";
+warn ">>>>> $DASWizard{$das_type}";
+warn ">>>>> ", $DASWizard{$das_type}->{FUNC};
     return $DASWizard{$das_type}->{FUNC}($form, $source_conf, $object, $step_ref, $error);
 }
 
@@ -223,6 +238,7 @@ sub das_wizard {
         $html .= "$p => ".join('*', $object->param($p))."<br />";
     }
 
+warn "HERE";
     return if (defined($object->param('_das_submit')));
 
     my %source_conf = ();        
@@ -265,19 +281,19 @@ sub das_wizard {
 
     @{$source_conf{registry_selection}} = $object->param("DASregistry") ? $object->param("DASregistry") : ();
 
-    if (my $scount = scalar(@{$source_conf{registry_selection}})) {
-	my $dreg = $object->getRegistrySources();
-	my %das_list = ();
-	my ($prot, $url, $dsn, $dname);
-    foreach my $src (@{$source_conf{registry_selection}}) {
+    if( my $scount = scalar(@{$source_conf{registry_selection}}) ) {
+      my $dreg = $object->getRegistrySources();
+      my %das_list = ();
+      my ($prot, $url, $dsn, $dname);
+      foreach my $src (@{$source_conf{registry_selection}}) {
         my $dassource = $dreg->{$src};
         $dname = $dassource->{nickname};
         if ($dassource->{url} =~ /(https?:\/\/)(.+das)\/(.+)/) {
-        ($prot, $url, $dsn) = ($1, $2, $3);
-        $dsn =~ s/\///;
-        $das_list{$url}->{$dsn} = $dname;
+          ($prot, $url, $dsn) = ($1, $2, $3);
+          $dsn =~ s/\///;
+          $das_list{$url}->{$dsn} = $dname;
         }
-    }
+      }
     $source_conf{shash} = \%das_list;
     $source_conf{scount} = $scount;
     if ($scount > 1) {
@@ -315,9 +331,11 @@ sub das_wizard {
     no strict 'refs';
     my $fname = "das_wizard_".$step;
 
+warn "$fname...";
     if (defined (my $error = &{$fname}($form, \%source_conf, $object, \$step))) {
 	$step --;
 	$fname = "das_wizard_".$step;
+warn "$fname...";
 	&{$fname}($form, \%source_conf, $object, \$step, $error);
     }
 
@@ -345,6 +363,7 @@ sub das_wizard {
     #$panel->add_row( {"info"=>$html} );
     $panel->add_row( {"info"=> $form->render()} );
 
+warn "THERE";
     return 1;
 }
 

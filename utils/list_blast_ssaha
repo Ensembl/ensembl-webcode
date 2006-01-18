@@ -64,7 +64,7 @@ B<  blast>; Lists all the files in use for these sources:
   BLASTP_DATASOURCES 
   BLASTX_DATASOURCE
 
-B<  ssaha>; Lists all the ssaha servers in use: SSAHA_DATASOURCES
+B<  ssaha>; Lists all the ssaha servers in use: SSAHA2_DATASOURCES
 
 
 =head1 LICENCE
@@ -113,7 +113,7 @@ pod2usage1(-verbose => 2) if $info;
 pod2usage(-verbose => 1) if $help;
 @sources = qw(BLASTN_DATASOURCES TBLASTX_DATASOURCES 
 		   TBLASTN_DATASOURCES BLASTP_DATASOURCES 
-		   BLASTX_DATASOURCES SSAHA_DATASOURCES) unless @sources;
+		   BLASTX_DATASOURCES SSAHA2_DATASOURCES) unless @sources;
 
 
 my $search_db;

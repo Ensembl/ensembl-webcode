@@ -988,6 +988,8 @@ sub ADD_ALL_TRANSCRIPTS {
 
   $self->add_new_track_transcript( 'rprot',     'Rodent proteins', 'prot_gene', $POS++, 'available' => 'features rodent_protein', @_ );
   $self->add_new_track_transcript( 'mouse_protein',    'Refseq proteins', 'prot_gene',    $POS++, @_ );
+  $self->add_new_track_transcript( 'human_refseq',    'Human RefSeq proteins', 'refseq_gene',    $POS++, @_ );
+  $self->add_new_track_transcript( 'human_protein',    'Human proteins', 'prot_gene',    $POS++, @_ );
   $self->add_new_track_transcript( 'targettedgenewise',    'Targetted genewise genes', 'prot_gene',    $POS++, @_ );
   $self->add_new_track_transcript( 'cdna_all',             'cNDA genes', 'prot_gene',    $POS++, @_ );
   $self->add_new_track_transcript( 'refseq',    'Refseq proteins', 'refseq_gene',    $POS++, @_ );
@@ -1140,6 +1142,8 @@ sub ADD_GENE_TRACKS {
                              'gene_col' => sub { return $_[0]->biotype =~ /pseudo/i ? 'rna-pseudo' : 'rna-real' }, @_ );
   $self->add_new_track_gene( 'refseq', 'RefSeq Genes', 'refseq_gene', $POS++, 'gene_col' => '_refseq',  @_ );
   $self->add_new_track_gene( 'mouse_protein', 'Mouse Protein Genes', 'prot_gene', $POS++, 'gene_col' => '_col',  @_ );
+  $self->add_new_track_gene( 'human_refseq', 'Human RefSeq Genes', 'refseq_gene', $POS++, 'gene_col' => '_refseq',  @_ );
+  $self->add_new_track_gene( 'human_protein', 'Human Protein Genes', 'prot_gene', $POS++, 'gene_col' => '_col',  @_ );
   $self->add_new_track_gene( 'targettedgenewise', 'Targetted Genewise Genes', 'prot_gene', $POS++, 'gene_col' => '_col',  @_ );
   $self->add_new_track_gene( 'cdna_all', 'cDNA Genes', 'prot_gene', $POS++, 'gene_col' => '_col',  @_ );
   $self->add_new_track_gene( 'estgene', 'EST Genes', 'est_gene', $POS++,

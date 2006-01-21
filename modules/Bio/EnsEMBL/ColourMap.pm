@@ -36,6 +36,11 @@ sub new {
     '_'          => [ 'black',  'novel' ],
     '_PSEUDO'    => [ 'grey50', 'pseudogene' ],
   );
+  $self->colourSet( 'human_protein',
+    'hi'         => 'highlight1',
+    'superhi'    => 'highlight2',
+    'human_protein' => [ 'blue', 'Human protein' ]
+  );
   $self->colourSet( 'dog_protein',
     'hi'         => 'highlight1',
     'superhi'    => 'highlight2',
@@ -146,6 +151,7 @@ sub new {
     'tge_gw'        => [ 'orchid4', 'Aligned protein' ],
     'targettedgenewise' => [ 'orchid4', 'Aligned protein' ],
     'protein_coding'  => [ 'orchid4', 'Aligned protein' ], 
+    'human_protein'   => [ 'orchid4', 'Human protein' ],
     'xtrop_cdna'      => [ 'orchid2', 'Aligned cDNA' ],
     'xtrop_cDNA'      => [ 'orchid2', 'Aligned cDNA' ],
     '_col'            => [ 'orchid4', 'Aligned protein' ], 
@@ -153,6 +159,7 @@ sub new {
   $self->colourSet( 'refseq_gene',
     'hi'         => 'highlight1',
     'superhi'    => 'highlight2',
+    'refseq' => [ 'blue', 'Aligned RefSeq' ],
     '_refseq' => [ 'blue', 'Aligned RefSeq' ],
   );
   $self->colourSet( 'all_genes', map { $self->colourSet($_) } keys %{$self->{'colour_sets'}} );

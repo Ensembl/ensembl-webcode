@@ -731,9 +731,14 @@ sub _parse {
         }
         my $das_source_conf = $tree->{$das_source};
         ref( $das_source_conf ) eq 'HASH' or $das_source_conf = {};
-        $das_source_conf->{'retrieve_features'} = 1;
-        $das_source_conf->{'name'} = $das_source;
-        $das_conf->{$das_source} = $das_source_conf; # Substitute conf
+        warn ">>> ", $tree->{'ENSEMBL_GOLDEN_PATH'};
+        if( ! exists($das_source_conf->{'assembly'}) || $das_source_conf->{'assembly'} eq $tree->{'general'}->{'GOLDEN_PATH'} ) {
+          $das_source_conf->{'retrieve_features'} = 1;
+          $das_source_conf->{'name'} = $das_source;
+          $das_conf->{$das_source} = $das_source_conf; # Substitute conf
+        } else {
+          delete( $das_conf->{$das_source} );
+        }
         delete $tree->{$das_source};
       }
     }

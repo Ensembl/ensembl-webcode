@@ -1,8 +1,8 @@
 body { color: #666; }
 body { background-image: url(/img/nav-bg.gif); background-repeat: repeat-y; background-position: left; }
 #related, #search, #help, #release-t { display: block }
-#copy, #page { border: solid 0px #fff9af; border-left-width: 190px; }
-#copy #a1, #page #i1 { border: solid 0px #ffdf33; border-left-width: 1px; }
+#copy, #page { border: solid 0px #bbffe0; border-left-width: 190px; }
+#copy #a1, #page #i1 { border: solid 0px #aaeecc; border-left-width: 1px; }
 #copy #a2, #page #i2 { border: solid 0px #ffffff; border-width: 0px 5px 0px 19px; border-left-width: 19px; }
 
 #release { width: 100%; top: 5em; margin: 1px 0px; text-align: left;

@@ -1,5 +1,11 @@
 /* ADDITIONAL STYLES FOR ENSEMBL PAGE CONTENT */
-
+.hi { border: solid 1px red; padding: 0 1px; font-weight: bold }
+.redbox { visibility:hidden; position:absolute; height: 0px; width: 0px;background-color: red; z-index: 100 }
+  div.zmenu { visibility:hidden; position:absolute; top: 800px; left: 800px; width: 200px; z-index: 200 }
+  div.zmenu { border:1px #cccccc solid;}
+  div.zmenu table th { font-size: 0.9em; background-color:#ccc; color:#000; text-align: left; border:1px #cccccc solid; }
+  div.zmenu table td { font-size: 0.9em; color:#666; border-top : 1px #cccccc dotted;}
+  div.zmenu a { text-decoration:none; }
 /* LAYOUT */
 
 .ch span { /*border: red 1px solid;*/ padding: 2px 2em 2px 2px; }
@@ -61,10 +67,6 @@ img.float-left { float:left; padding-right:10px; }
 
 img.float-right { float:right; padding-left:10px; }
 
-.sp-thumb { float:left; padding-right:4px; clear:left; }
-dl.species-list dt { margin:0px; padding:0px; min-height:15px; }
-dl.species-list dd { margin:0px 0px 2px 0px; padding:0px; min-height:25px; }
-
 .screenshot { text-align:center; margin:auto; padding:10px; }
 
 .karyomap { text-align:center; margin:auto; }
@@ -81,20 +83,33 @@ td.ddmain a { background-color:[[BACKGROUND4]]; text-decoration:none; font-size:
 
 div#zmenu { font-family:arial,sans-serif,helvetica; font-size:0.9em; border:1px #cccccc solid;}
 div#zmenu th { background-color:#ccc; color:#000; }
-div#zmenu td { color:#666;}
+div#zmenu td { color:[[TEXTCOLOR2]];}
 div#zmenu a { text-decoration:none; }
+
+/* Mark up for geneseqview features */
+span#n   { background-color:#fefefe; color:black; } /* Normal bp */
+span#ns { background-color:#caff70; color:black; } /* SNP */
+span#nd { background-color:#12ff70; color:black; } /* Deletion */
+span#nc { background-color:#b0e2ff; color:black; } /* Conversed regions */
+span#no { background-color:#ffd700; color:black; } /* Codons */
+span#e   { background-color:#fefefe; color:red; }   /* Exon */
+span#es { background-color:#caff70; color:red; }
+span#ed { background-color:#12ff70; color:red; }
+span#ec { background-color:#b0e2ff; color:red; }
+span#eo { background-color:#ffd700; color:red; }
+
 
 /* TABLES */
 
 tr { vertical-align:top; }
 
-th, td { text-align:left; border:none; color:#333; }
+th, td { text-align:left; border:none; color:[[TEXTCOLOR]]; }
 
 table.two-column { border-collapse:collapse; width: 100% }
 
 th.two-column, td.two-column { vertical-align:top; padding:0px 0.5em 0.5em 0.5em; border:1px solid #ccc; }
 
-th.two-column { width:15%; font-size:1.1em; color:#333;
+th.two-column { width:15%; font-size:1.1em; color:[[TEXTCOLOR]];
     background-color:#f0f0f0; text-align:left; padding-top:0.5em; }
 
 td.two-column p {
@@ -169,11 +184,13 @@ div.formpanel div { margin-top:5px; }
   top: 0px; left: 0px; padding: 0px; margin: 0px; 
   color: [[HEADING]]; font-size: 1em; font-weight: bold;
 }
-.formblock .formcontent { float: left; font-size: 1em; padding: 2px; width: 65%; margin-bottom: 0.8em }
+.formblock .formcontent { float: left; font-size: 1em; padding: 2px; width: 65%; margin-bottom: 0.8em; vertical-align:middle; }
 .formcenter, .formcenter div { display:block; text-align:center; margin-bottom: 0.8em;}
 .formcontent p { margin-top:0.3em; }
 .forminline, .forminline div { display:inline; }
 .forminline h6 { display:inline; margin-right:1em; }
+.tight { padding:0px; margin: 0px; }
+.middle { vertical-align:middle; }
 
 .radiocheck label, .radiocheck1col label { float: left; } /* width: 250px; } */
 
@@ -196,7 +213,7 @@ form#change_chr { margin:10px; }
 /**************************** MISCELLANEOUS *******************************/
 
 div.notice {
-    width:50%; margin:2em auto; padding: 1em;
+    width:90%; margin:2em auto; padding: 1em;
     background: [[BACKGROUND3]]; border:1px solid [[HEADING]];
 }
 
@@ -213,34 +230,24 @@ p.error {
     background-image:url(blue_bullet.gif); background-repeat:no-repeat;
     background-position:left center; padding-left:8px; }
 
-h2.breadcrumbs { color:#333; }
+h2.breadcrumbs { color:[[TEXTCOLOR]]; }
 a.breadcrumb { text-decoration:none }
 
 p.footnote { font-size:85%; }
 a.fnlink { text-decoration:none; }
 
+ul.flush li { margin-left:-2em; }
+.alert { background-color:#fff9af; padding: 1px 0.5em; color:#000; font-style:italic; }
 
 /************************ PAGE-SPECIFIC STYLES *************************/
 
 /* Ensembl homepage */
 
-div#page div.col-wrapper div.narrow3 ul.species-list li {
-    font-size:115%; font-style:italic; font-weight:bold; margin:0em 0em 0.5em -1.5em; }
-
-ul.species-list li a:link, ul.species-list li a:visited { text-decoration:none; }
-
-div#page div.col-wrapper div.narrow3 dl.species-list dt {
-    font-size:115%; font-style:italic; font-weight:bold; }
-
-dl.species-list dd a:link, dl.species-list dd a:visited { text-decoration:none; }
-
-
-div#page div.col-wrapper div.narrow3 ul.species-list li.dropdown ul {
-    left:35px; width:150px; padding:0px; background-color:transparent; }
-
-div#page div.col-wrapper div.narrow3 ul.species-list li.dropdown ul li.popup {
-    font-size:80%; font-weight:normal; font-style:normal; 
-    background-color:[[BACKGROUND3]]; margin:0px; list-style:none; }
+.sp-thumb { float:left; padding-right:4px; clear:left; }
+dl.species-list dt { margin:0px; padding:0px; min-height:15px;
+  font-size:115%; font-style:italic; font-weight:bold; }
+dl.species-list dd { margin:0px 0px 2px 0px; padding:0px; min-height:25px; }
+dl.species-list dt a, dl.species-list dd a { text-decoration:none; }
 
 /* Species homepages */
 
@@ -257,14 +264,13 @@ table#species-stats td.value { text-align:right;}
 a.info { text-decoration: none; font-weight:bold; }
 .blue {color: rgb(51, 102, 187); }
 
-
 /* Other pages */
 
 div#page table.sitemap td ul.sitemap li.toggle { list-style:none; margin-left:-15px; }
 img.toggle-box { padding-right:4px; }
 dl.sitemap, ul.sitemap { margin:-0.5em -2em; }
 dl.sitemap a, ul.sitemap a { text-decoration:none; }
-dl.sitemap dt { font-size:115%; }
+dl.sitemap dt { font-size:115%; font-style:italic; }
 dl.sitemap dd { padding-bottom:0.5em; }
 table.sitemap td { padding:0px 40px; }
 
@@ -277,10 +283,10 @@ a.cv_plusminus { font-family:'Arial Black'; font-size: 30px; font-weight:bold; c
 .long_id_list dt { float: left; width: 13em; padding: 0px; margin: 0.2em 1em 0.2em 0.2em; border: 0; }
 
 table.grid { border-collapse: collapse }
-.grid tr td, .grid tr th { border: solid 1px #666; border-collapse: collapse; padding: 0.2em; }
+.grid tr td, .grid tr th { border: solid 1px [[TEXTCOLOR2]]; border-collapse: collapse; padding: 0.2em; }
 
 /* Private formatting */
-table.bug td { border:solid 1px #666 }
+table.bug td { border:solid 1px [[TEXTCOLOR2]] }
 
 table.zoom { display: inline }
 table.zoom, table.zoom tr td { border:0px; margin:0px; padding:0px; background-color:[[BACKGROUND5]]; font-weight: bold; }
@@ -289,7 +295,3 @@ table.zoom tr td img { margin-top: 0px }
 .navbox { background-color: [[BACKGROUND5]] }
 
 .multicol { float: left; width: 12em; white-space: nowrap }
-
-/* Vega styles */
-
-vh4 { font-size:1.1em; color:[[HEADING]]; }

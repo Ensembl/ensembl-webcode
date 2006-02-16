@@ -1,12 +1,12 @@
 TD.panel_big_head{ 	
-  background-color: #ffffe7
+  background-color: #eefff8
   font-size:        large;
   font-weight:      bold;   
   color:            #990000;
   align:            left; }
 
 TD.panel_head{ 	
-  background-color: #ffffe7;
+  background-color: #eefff8;
   font-weight:      bold;   
   color:            #000070;
   align:            left; }
@@ -35,31 +35,31 @@ TD.entry_warning {
   align:            left;  }
 
 TD.panel_text{ 
-  background-color: #ffffe7;
+  background-color: #eefff8;
   align:            left; }
 
 TD.status_panel_head{ 
-  background-color: #ffdf33;
+  background-color: #aaeecc;
   color:            #5A85D6;
   font-size:        large;
   font-weight:      bold;   
   align:            left; }
 
 TD.status_block_head{ 
-  background-color: #ffdf33;
+  background-color: #aaeecc;
   color:            #5A85D6;
   font-size:        medium;
   font-weight:      bold;   
   align:            left; }
 
 TD.status_entry{ 
-  background-color: #ffdf33;
+  background-color: #aaeecc;
   color:            #5A85D6;
   font-size:        medium;
   align:            left; }
 
 TD.status_warning { 
-  background-color: #ffdf33;
+  background-color: #aaeecc;
   color:            #990000;
   font-size:        small;
   font-style:       italic;

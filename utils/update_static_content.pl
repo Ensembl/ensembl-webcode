@@ -109,7 +109,7 @@ exit;
    my %valid_types = map{ $_ => 1 }
      qw(
 	new_species      generic_species_homepage downloads SSI 
-                         species_table gene_build
+                         gene_build species_table
 	archive          assembly_table copy_species_table
         release          blast_db
        );
@@ -157,79 +157,18 @@ sub species_table {
   return unless $site_type eq 'pre';
 
   my $dir = shift;
-
-  my $ssi_dir = $dir;
-  my $title;
-  if ($site_type eq 'pre') {
-    $ssi_dir .= "/sanger-plugins/pre/htdocs/ssi";
-    $title = "Browse a genome";
-  }
-  else {
-    $ssi_dir .= "/htdocs/ssi";
-    $title = "Species";
-  }
-  utils::Tool::check_dir($ssi_dir);
-
-  my $file = $ssi_dir ."/species_table.html.new";
-  open (my $fh, ">$file") or die "Cannot create $file: $!";
-
-  my %vega_spp = ( Homo_sapiens     => 1,
-		   Mus_musculus     => 1,
-		   Canis_familiaris => 1,
-		   Danio_rerio      => 1 );
-
-  my @species = @{ utils::Tool::all_species() };
-
-  print $fh qq(
-
-   <h3 class="boxed">$title</h3>
-    <dl class="species-list">
-
-);
-
-  foreach my $spp ( @species ) {
-    my $bio_name = utils::Tool::get_config({species =>$spp,
-					  values => "SPECIES_BIO_NAME"});
-    my $assembly = utils::Tool::get_config({species =>$spp,
-					  values => "ASSEMBLY_ID"});
-
-
-    print $fh qq(
- <dt>
-    <a href="/$spp">
-    <img src="/img/species/thumb_$spp.png" width="40" height="40" alt="" style="float:left;padding-right:4px;" /></a>$bio_name 
- <span class="small normal">[$assembly]</span>
- </dt>
-            <dd><a href="/$spp/">browse</a>
-);
-
-    if ( $vega_spp{$spp} ) {
-      print $fh qq( 
-          | <a href="http://vega.sanger.ac.uk/$spp/">Vega</a>
-    );
-    }
-      print $fh "</dd>";
-  }
-  print $fh qq(
-   </dl>
-
-);
-
-  if (-e "$ssi_dir/species_table.html") {
-    system ("cp $ssi_dir/species_table.html $ssi_dir/species_table.html.bck")==0 or die "Couldn't copy files";
-  }
-  system ("mv $ssi_dir/species_table.html.new $ssi_dir/species_table.html") ==0 or die "Couldn't copy files";
-  utils::Tool::info (1, "Updated species table file $ssi_dir/species_table.html");
-return;
+  $dir .= "/sanger-plugins/sanger/utils";
+  system( "$dir/homepage.pl --site_type pre");
+  return;
 }
 #---------------------------------------------------------------------
 
 sub generic_species_homepage {
   my ($dir, $common_name, $species, $chrs) = @_;
-    system ("cp $dir/public-plugins/ensembl/htdocs/img/species/thumb_$species.png $dir/sanger-plugins/pre/htdocs/img/species/");
-    system ("cp $dir/public-plugins/ensembl/htdocs/img/species/pic_$species.png $dir/sanger-plugins/pre/htdocs/img/species/");
 
   if ($site_type eq 'pre') {
+    system ("cp $dir/public-plugins/ensembl/htdocs/img/species/thumb_$species.png $dir/sanger-plugins/pre/htdocs/img/species/");
+    system ("cp $dir/public-plugins/ensembl/htdocs/img/species/pic_$species.png $dir/sanger-plugins/pre/htdocs/img/species/");
     $dir .= "/sanger-plugins/pre/htdocs/$species";
     utils::Tool::check_dir($dir);
   }
@@ -239,8 +178,9 @@ sub generic_species_homepage {
   }
   my $file = $dir ."/index.html";
   if (-e $file) {
-    utils::Tool::info (1, "File $file already exists");
-    return;
+    utils::Tool::info (1, "File $file already exists. Copying old file to $file.old");
+    system ("cp $file $file.old");
+    #return;
   }
   open (my $fh, ">$file") or die "Cannot create $file: $!";
 
@@ -248,7 +188,12 @@ sub generic_species_homepage {
   my $explore = 'examples';
   if ( (scalar @$chrs) > 0 ) {
     $explore = 'karyomap';
+    SSIkaryomap("$dir/ssi", $species, $common_name, $dir) unless -e "$dir/$species/ssi/karyomap.html";
   }
+
+  # check for extra links
+  my $exists_file = $dir."/ssi/links.html";
+  my $extra_links = (-e $exists_file) ? qq([[INCLUDE::/$species/ssi/links.html]]):"";
 
   my $bio_name = utils::Tool::get_config({species =>$species,
 					  values => "SPECIES_BIO_NAME"});
@@ -266,29 +211,28 @@ print $fh qq(
     [[INCLUDE::/$species/ssi/$explore.html]]
     [[INCLUDE::/$species/ssi/entry.html]]
     </div>
-);
 
-print $fh qq(
-    <div class="col2">
-    [[INCLUDE::/$species/ssi/search.html]]
-    </div>
-</div>
-<div class="col-wrapper">
-) unless $site_type eq 'pre';
-
-print $fh qq(
     <div class="col2">
     [[INCLUDE::/$species/ssi/about.html]]
     </div>
+</div>
+
 );
+
 print $fh qq(
+<div class="col-wrapper">
+    <div class="col2">
+    [[INCLUDE::/$species/ssi/whatsnew.html]]
+    </div>
+
     <div class="col2">
     [[INCLUDE::/$species/ssi/stats.html]]
-    </div>
+    $extra_links
+ </div>
+</div>
 ) unless $site_type eq 'pre';
 
 print $fh qq(
-</div>
 </body>
 </html>
   );
@@ -550,9 +494,10 @@ sub do_downloads {
 sub blast_db {
   my ($serverroot, $spp) = @_;
   utils::Tool::info(1, "Updating BLAST_DATASOURCES");
+  my $location =  $site_type eq 'live' ? "/sanger-plugins/sanger/" : "/public-plugins/ensembl/";
+  my $spp_type = $spp eq 'Multi' ? 'MULTI' : $spp;
+  my $ini_file = sprintf ("$SERVERROOT/%s./conf/ini-files/%s.ini", $location, $spp_type);
 
-  my $ini_file = $SERVERROOT."/public-plugins/ensembl/conf/ini-files/$spp".".ini";   
-  $ini_file = $SERVERROOT."/public-plugins/ensembl/conf/ini-files/MULTI.ini" if $spp eq 'Multi';
   open (INI, "<",$ini_file) or die "Couldn't open ini file $ini_file: $!";
   my $contents = [<INI>];
   close INI;
@@ -568,16 +513,16 @@ sub blast_db {
 
   foreach my $line (@$contents) {
     if ($line =~ /
-		  (.*\w+)        # source
+		  ([^\#].*\w+)        # source
 		  (\s+=        # whitespace =
 		  \s+)
-		  $spp\.       # species
+		  $spp\.\d*\.*  # species. (optional number .)
 		  (\w+\.?\d?)\. # golden_path
 		  \w{3}\.       # month
 		  (.*)/x ) {   # type of file
      my $source = $1;
      my $new_file =  $1.$2.$spp. ".$golden_path.$month.$4";
-     die "False positive in pattern match: $line" unless $source =~ /^CDNA|^PEP|^RNA|^LATE/;
+     die "False positive in pattern match (source:$source): $line" unless $source =~ /^CDNA|^PEP|^RNA|^LATE/;
      print $fh_out "$new_file\n";
     }
     else {
@@ -733,7 +678,8 @@ B<  species_table:>;
 
 B<  blast_db:>; 
     Updates public-plugins/ensembl/conf/ini-files so the blast
-    database names match the month of release
+    database names match the month of release (default main site or use '--site_type main").  
+    If flag "--site_type live" is used, it updates sanger-plugins/sanger/conf/ini-file files
 
 B< copy_species_table:>
    simply copies: $SERVERROOT/public-plugins/ensembl/htdocs/ssi/species_table.html to $SERVERROOT/sanger-plugins/archive/htdocs/ssi/species_table.html

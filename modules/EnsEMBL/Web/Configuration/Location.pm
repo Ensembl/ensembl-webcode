@@ -47,7 +47,7 @@ sub context_menu {
     'title' => "ExportView - export sequence of $header as EMBL",
     'href' => "/$species/exportview?l=$q_string;format=embl;action=format" 
   );
-  unless ($obj->species_defs->ENSEMBL_NOMART) {
+  unless ( $obj->species_defs->ENSEMBL_NOMART) {
       $menu->add_entry( $flag, 'icon' => '/img/biomarticon.gif' , 'text' => 'Export Gene info in region',
         'title' => "BioMart - export Gene information in $header",
         'href' => "/$species/martlink?l=$q_string;type=gene_region" );
@@ -58,7 +58,6 @@ sub context_menu {
         'title' => "BioMart - export Vega gene features in $header",
         'href' => "/$species/martlink?l=$q_string;type=vega_region" ) if $obj->species_defs->databases->{'ENSEMBL_VEGA'};
   }
-
   my @options_as = ();
 
   foreach my $id ( qw(MLAGAN-167 MLAGAN-170) ) {

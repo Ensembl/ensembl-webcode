@@ -835,7 +835,7 @@ sub ADD_ALL_DNA_FEATURES {
         'ZMENU'      => [ 'EST cDNA', "EST: ###LABEL###" => '###HREF###' ],
         'URL_KEY'    => { 'WZ' => 'WZ', 'IMCB_HOME' => 'IMCB_HOME', 'EMBL' => 'EMBL' },
                              ,@_ );
-  $self->add_new_track_cdna( 'Exonerate_cDNA', 'Ciona cDNAs', $POS++, @_ );
+  $self->add_new_track_cdna( 'Exonerate_cDNA',           'Exonerate cDNAs', $POS++, @_ );
   $self->add_new_track_cdna( 'Btaurus_Exonerate_cDNA',   'Cow cDNAs', $POS++, @_ );
   $self->add_new_track_cdna( 'Cow_cDNAs',   'Cow cDNAs', $POS++, @_ );
   $self->add_new_track_cdna( 'cow_cdna',   'Cow cDNAs', $POS++, @_ );
@@ -1001,13 +1001,13 @@ sub ADD_ALL_PROTEIN_FEATURES {
   $self->add_new_track_protein( 'GenscanPeptidesUniprotBlast', 'Gen.Pep. UniP.BL.', $POS++, @_ );
   $self->add_new_track_protein( 'BeeProteinBlast',             'Bee Protein blast', $POS++, @_ );
   $self->add_new_track_protein( 'human_ensembl_peptides', 'Human e! peptides',  $POS++, 'URL_KEY' => 'HUMAN_PROTVIEW', @_ );
-  $self->add_new_track_protein( 'ciona_jgi_v1',            'JGI 1.0 model', $POS++, @_ );
-  $self->add_new_track_protein( 'ciona_kyotograil_2004',   "Kyotograil '04 model", $POS++, @_ );
-  $self->add_new_track_protein( 'ciona_kyotograil_2005',   "Kyotograil '05 model", $POS++, @_ );
+  #$self->add_new_track_protein( 'ciona_jgi_v1',            'JGI 1.0 model', $POS++, @_ );
+  #$self->add_new_track_protein( 'ciona_kyotograil_2004',   "Kyotograil '04 model", $POS++, @_ );
+  #$self->add_new_track_protein( 'ciona_kyotograil_2005',   "Kyotograil '05 model", $POS++, @_ );
   $self->add_new_track_protein( 'blastx',            'BLASTx', $POS++, @_ );
   $self->add_new_track_protein( 'blastp',            'BLASTp', $POS++, @_ );
-  $self->add_new_track_protein( 'kyotograil_2004',   "Kyotograil '04 model", $POS++, @_ );
-  $self->add_new_track_protein( 'kyotograil_2005',   "Kyotograil '05 model", $POS++, @_ );
+  #$self->add_new_track_protein( 'kyotograil_2004',   "Kyotograil '04 model", $POS++, @_ );
+  #$self->add_new_track_protein( 'kyotograil_2005',   "Kyotograil '05 model", $POS++, @_ );
 #/* aedes additions */
   $self->add_new_track_protein( 'Similarity_Diptera',   "Similarity Diptera", $POS++, @_ );
   $self->add_new_track_protein( 'Similarity_Arthropoda',"Similarity Arthropoda", $POS++, @_ );
@@ -1064,7 +1064,7 @@ sub ADD_ALL_TRANSCRIPTS {
                                                 'Bee genes',       'bee_gene',       $POS++, @_ );
   $self->add_new_track_transcript( 'gsten',     'Genoscope genes', 'genoscope_gene', $POS++, @_ );
   $self->add_new_track_transcript( 'rna',       'ncRNA genes',     'rna_gene',       $POS++, 'available' => 'features NCRNA|MIRNA',      @_ );
-  $self->add_new_track_transcript( 'erna',       'e! ncRNA genes', 'rna_gene',   $POS++, 'available' => 'features ensembl_ncRNA',        @_ );
+  $self->add_new_track_transcript( 'erna',       'e! ncRNA genes', 'rna_gene',   $POS++, 'available' => 'features ensembl_ncRNA', 'legend_type' => 'rna',        @_ );
   $self->add_new_track_transcript( 'est',       'EST genes',       'est_gene',       $POS++, 'available' => 'databases ENSEMBL_EST', @_ );
   $self->add_new_track_transcript( 'ciona_dbest_ncbi', "3/5' EST genes (dbEST)", 'estgene', $POS++, @_) ;
   $self->add_new_track_transcript( 'ciona_est_seqc',   "3' EST genes (Kyoto)", 'estgene', $POS++, @_) ;
@@ -1212,7 +1212,7 @@ sub ADD_GENE_TRACKS {
                              'logic_name' => 'miRNA tRNA ncRNA',
                              'available' => 'features ncrna|miRNA',
                              'gene_col' => sub { return $_[0]->biotype =~ /pseudo/i ? 'rna-pseudo' : 'rna-real' }, @_ );
-  $self->add_new_track_gene( 'ensembl_ncrna', 'e! ncRNA Genes', 'rna_gene', $POS++,
+  $self->add_new_track_gene( 'ensembl_ncrna', 'e! ncRNA Genes', 'rna_gene', $POS++, 'legend_type' => 'gene_ncrna',
                              'gene_col' => sub { return $_[0]->biotype =~ /pseudo/i ? 'rna-pseudo' : 'rna-real' }, @_ );
   $self->add_new_track_gene( 'refseq', 'RefSeq Genes', 'refseq_gene', $POS++, 'gene_col' => '_refseq',  @_ );
   $self->add_new_track_gene( 'mouse_protein', 'Mouse Protein Genes', 'prot_gene', $POS++, 'gene_col' => '_col',  @_ );

@@ -647,7 +647,7 @@ sub kv_display {
         $parser->no_of_bins($bins);
         $parser->bin_size(int($max_length/$bins));
         $object->parse_user_data($parser, $track_id);
-        $config->{'_group_size'} += scalar(keys %{$parser->counts});
+        $config->{'_group_size'} += scalar(keys %{$parser->counts||{}});
  
         ## create image with parsed data
         $image->add_tracks($object, $config_name, $parser, $track_id);

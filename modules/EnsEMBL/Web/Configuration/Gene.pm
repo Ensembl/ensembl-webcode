@@ -372,7 +372,7 @@ sub context_menu {
        'title' => "TranscriptSNP View - Compare transcript variation in different individuals or strains",
        'href'  => $sample_links[0]{'href'},
        'options' => \@sample_links,
-     )  if $obj->species_defs->databases->{'ENSEMBL_VARIATION'}; 
+     )  if $species eq 'Mus_musculus'; 
 
 
     $self->add_entry( $flag,

@@ -34,6 +34,7 @@ sub new {
     '_PRED'      => [ 'red3',   'prediction'  ],
     '_BACCOM'    => [ 'red',    'bacterial contaminent' ],
     '_'          => [ 'black',  'novel' ],
+    '_NOVEL'     => [ 'black',  'novel' ],
     '_PSEUDO'    => [ 'grey50', 'pseudogene' ],
   );
   $self->colourSet( 'protein_features', qw(

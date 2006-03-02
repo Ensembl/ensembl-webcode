@@ -924,9 +924,12 @@ sub _parse {
         }
       }
     }
-## VARIATION DATABASE SOURCES
+
+## VARIATION DATABASE 
     if( $tree->{'databases'}->{'ENSEMBL_VARIATION'} ){ # Then SNP is configured
       if( my $dbh = $self->db_connect( $tree, 'ENSEMBL_VARIATION' ) ){
+
+	# Sources for TSV, SNPView, GSV
         my $sql = qq(SELECT name FROM source  );
         my $sth = $dbh->prepare( $sql );
 	eval {
@@ -936,7 +939,23 @@ sub _parse {
 	  }
 	};
         $sth->finish();
-        $dbh->disconnect();
+
+	# For yellow menu bar link to TSV
+ 	$sth = $dbh->prepare(qq(
+                     SELECT count(*) 
+                     FROM meta 
+                     WHERE meta_key = "population.default_strain";
+                  )
+ 			    );
+ 	eval {
+ 	  $sth->execute;
+ 	  my ($count) = $sth->fetchrow_array;
+ 	  if ( $count ) {
+ 	    $tree->{'VARIATION_STRAIN'} = $count;
+ 	  }
+ 	};
+	$sth->finish();
+	$dbh->disconnect();
       }
     }
 

@@ -277,6 +277,54 @@ sub new {
 		    'microsatellite' => 'plum4',
 		  );
 
+  $self->colourSet( 'clones',
+    'col_Free'        => 'gray80',
+    'col_Phase0Ac'    => 'thistle2',
+    'col_Committed'   => 'mediumpurple1',
+    'col_PreDraftAc'  => 'plum',
+    'col_Redundant'   => 'gray80',
+    'col_Reserved'    => 'gray80',
+    'col_DraftAc'     => 'gold2',
+    'col_FinishAc'    => 'gold3',
+    'col_Abandoned'   => 'gray80',
+    'col_Accessioned' => 'thistle2',
+    'col_Unknown'     => 'gray80',
+    'col_'            => 'gray80',
+    'lab_Free'        => 'black',
+    'lab_Phase0Ac'    => 'black',
+    'lab_Committed'   => 'black',
+    'lab_PreDraftAc'  => 'black',
+    'lab_Redundant'   => 'black',
+    'lab_Reserved'    => 'black',
+    'lab_DraftAc'     => 'black',
+    'lab_FinishAc'    => 'black',
+    'lab_Abandoned'   => 'black',
+    'lab_Accessioned' => 'black',
+    'lab_Unknown'     => 'black',
+    'lab_'            => 'black',
+    'bacend'          => 'black',
+    'seq_len'         => 'black',
+  );
+
+  $self->colourSet( 'alternating',
+    'col1' => 'red',
+    'col2' => 'orange',
+    'lab1' => 'black',
+    'lab2' => 'black',
+    'bacend' => 'black',
+    'seq_len' => 'black'
+  );
+  $self->colourSet( 'fosmids',
+    'col' => 'purple2',
+    'lab' => 'black'
+  );
+  $self->colourSet( 'supercontigs',
+    'col1' =>  'darkgreen',
+    'col2' => 'green',
+    'lab1' => 'white',
+    'lab2' => 'black',
+  );
+
   $self->colourSet( 'alignment',
 		    'INTRONIC'                  => 'limegreen',
 		    'UPSTREAM'                  => 'mediumspringgreen',  

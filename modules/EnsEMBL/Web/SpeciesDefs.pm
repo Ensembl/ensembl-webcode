@@ -465,12 +465,6 @@ sub _parse {
 ######### Deal with DEFAULTS.ini -- store the information collected in a separate tree...
 #########                           and skip the remainder of this code...
     if( $filename eq 'DEFAULTS' ) { 
-      if( $tree->{'general'}{'SITE_LOGO_KEY'} ) {
-        for( keys %{$tree->{$tree->{'general'}{'SITE_LOGO_KEY'}}} ) {
-          $tree->{'general'}{$_} = $tree->{$tree->{'general'}{'SITE_LOGO_KEY'}}{$_};
-        }
-      }
-
       print STDERR ( "\t  [INFO] Defaults file successfully stored\n" );
       $defaults = $tree;
       next;

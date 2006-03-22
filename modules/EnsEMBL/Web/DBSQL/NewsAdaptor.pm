@@ -293,7 +293,7 @@ sub fetch_random_ad {
   );
                                                                                 
   my $record = $self->db->selectall_arrayref($sql);
-  return unless @$record;
+  return unless $record && @$record;
   my @array = @{$record->[0]};
   my $result = {
       'image' => $array[0],

@@ -32,10 +32,10 @@ sub snpview {
     alleles    EnsEMBL::Web::Component::SNP::alleles
     status     EnsEMBL::Web::Component::SNP::status
     moltype    EnsEMBL::Web::Component::SNP::moltype
-    ld_data    EnsEMBL::Web::Component::SNP::ld_data
     tagged_snp EnsEMBL::Web::Component::SNP::tagged_snp
     seq_region EnsEMBL::Web::Component::SNP::seq_region
   ));
+#    ld_data    EnsEMBL::Web::Component::SNP::ld_data
   $self->{page}->content->add_panel( $info_panel );
 }
 

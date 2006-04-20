@@ -483,7 +483,8 @@ sub align_sequence_display {
 		      }
 
 		  } else {
-		      push @ht, sprintf("%*s:%*u %s", $max_region, $as->seq_region_name, $lineformat, $sindex + $linenumbers[0] + 1);
+		my $pos = $sstrand > 0 ? ($sindex + $linenumbers[0] + 1) : ($linenumbers[0] + 1 - $sindex);
+		      push @ht, sprintf("%*s:%*u %s", $max_region, $as->seq_region_name, $lineformat, $pos);
 		  }
 		
 	      } else {
@@ -549,7 +550,8 @@ sub align_sequence_display {
 		      }
 
 		  } else {
-		      push @ht, sprintf(" %*s:%*u", $max_region, $as->seq_region_name, $lineformat, $sindex + $linenumbers[0]);
+my $pos = $sstrand > 0 ? ($sindex + $linenumbers[0]) : ($linenumbers[0] - $sindex + 2);
+		      push @ht, sprintf(" %*s:%*u", $max_region, $as->seq_region_name, $lineformat, $pos);
 		  }
 		
 	      } else {

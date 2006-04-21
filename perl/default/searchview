@@ -42,13 +42,13 @@ if( $not_fresh ) {
       $CAT =~ s/_/ /g;
       if( $CAT2 ) {
         $CAT2 =~ s/_/ /g;
-        $q->param('_c', "+$CAT2", "+$CAT","+Top/Source/vega37" );
+        $q->param('_c', "+$CAT2", "+$CAT","+Top/Source/v37" );
       } else {
-        $q->param('_c', "+$CAT" , "+Top/Source/vega37");
+        $q->param('_c', "+$CAT" , "+Top/Source/v37");
       }
     }
   } elsif( $q->param('_q') ){
-    $q->param('_c', "+Top/Source/vega37");
+    $q->param('_c', "+Top/Source/v37");
   }
   $exalead->parse( $q );
 }

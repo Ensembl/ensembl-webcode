@@ -360,7 +360,7 @@ sub createObjects {
 	    $das_data->{label} ||= $das_data->{name};
 	    $das_data->{caption} ||= $das_data->{name};
 	    @{$das_data->{enable}} = $self->param('DASenable');
-	    @{$das_data->{mapping}} = $self->param('DAStype');
+	    @{$das_data->{mapping}} = grep { $_ } $self->param('DAStype');
 	    $das_data->{type} = 'mixed' if (scalar(@{$das_data->{mapping}}>1));
 
 	    $das_data->{conftype} = 'external';
@@ -423,7 +423,7 @@ sub createObjects {
 		$das_data->{label} ||= $das_data->{name};
 		$das_data->{caption} ||= $das_data->{name};
 		@{$das_data->{enable}} = $self->param('DASenable');
-		@{$das_data->{mapping}} = $self->param('DAStype');
+		@{$das_data->{mapping}} = grep { $_ } $self->param('DAStype');
 		$das_data->{type} = 'mixed' if (scalar(@{$das_data->{mapping}}>1));
 
 		$das_data->{conftype} = 'external';

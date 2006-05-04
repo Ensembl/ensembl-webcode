@@ -1345,13 +1345,6 @@ sub exons_markup {
              next if (!$ex->start);
 
              my ($active_start, $active_end)  = (0, 0);
-             if ($ex->end <= $slice_length && $ex->exon->end - $ex->exon->start + 1  == $ex->get_aligned_end  ) {
-                 $active_end = 1;
-             }
-             if ($ex->get_aligned_start == 1 && $ex->start > 0) {
-                 $active_start = 1;
-             }
-
 
 	     if ($ex->strand > 0) {
                 if ($ex->end <= $slice_length && $ex->exon->end - $ex->exon->start + 1  == $ex->get_aligned_end  ) {

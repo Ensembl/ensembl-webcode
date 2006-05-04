@@ -699,8 +699,8 @@ sub ldview_nav           {
     'snp'    => $_[1]->param('snp')    || undef,
     'gene'   => $_[1]->param('gene')   || undef,
     'bottom' => $pop                   || undef,
-    'w'      => $_[1]->param('w')      || undef,
-    'c'      => $_[1]->param('c')      || undef,
+    #'w'      => $_[1]->param('w')      || undef,
+    #'c'      => $_[1]->param('c')      || undef,
     'source' => $_[1]->param('source'),
     'h'      => $_[1]->highlights_string || undef,
   } );	
@@ -1352,11 +1352,26 @@ sub exons_markup {
                  $active_start = 1;
              }
 
-#             if ($_->strand < 0) {
-#                 ($active_start, $active_end) = ($active_end, $active_start);
-#             }
 
-#warn("EXON:".join('*', $ex->start, $ex->end, $ex->get_aligned_start, $ex->get_aligned_end, $ex->exon->start, $ex->exon->end, $active_start, $active_end)); 
+	     if ($ex->strand > 0) {
+                if ($ex->end <= $slice_length && $ex->exon->end - $ex->exon->start + 1  == $ex->get_aligned_end  ) {
+                    $active_end = 1;
+                }
+
+
+                if ($ex->get_aligned_start == 1 && $ex->start > 0) {
+                    $active_start = 1;
+                }
+            } else {
+                if ($ex->end <= $slice_length && $ex->get_aligned_start == 1) {
+                    $active_end = 1;
+                }
+
+                if ($ex->start > 0 && $ex->exon->end - $ex->exon->start + 1  == $ex->get_aligned_end ) {
+                    $active_start = 1;
+                }
+            }
+
             push @exons, {
                  'start' => $ex->start,
                  'end' => $ex->end,

@@ -123,9 +123,6 @@ sub add_karyotype_options {
   return (\@chr_values, \@colours, \@styles, \%widgets);
 }
 
-## This wizard can accept multiple data sets, so we need 
-## to keep track of this
-our $tracks = 1;
 
 sub _init {
   my ($self, $object) = @_;
@@ -242,8 +239,18 @@ sub _init {
     },
   );
 
-  ## get useful data from object
- ## add generic karyotype stuff
+  ## work out how many times we've looped so far (if any)
+  my $loops = 1;
+  my @params = $object->param();
+  foreach my $p (@params) {
+    if ($p =~ /style_/) {
+      (my $n = $p) =~ s/style_//;
+      $loops = $n if $n > $loops;
+    }
+  }
+
+
+  ## add generic karyotype stuff
   my $option = {
     'styles' => ['density', 'location'],
     'group_styles' => 1,
@@ -252,7 +259,7 @@ sub _init {
   my %all_fields = (%form_fields, %$widgets);
 
   my $data = {
-    'loops'         => $tracks,
+    'loops'         => $loops,
     'chr_values'    => $chr_values,
     'colours'       => $colours,
     'styles'        => $styles,
@@ -274,19 +281,15 @@ sub kv_add {
   my $node = 'kv_add';           
       
   ## cache uploaded file
-  my $track_id = $wizard->data('loops');
-  my $upload = $object->param("upload_file_$track_id");
+  my $tracks = $wizard->data('loops');
+  my $incr = $tracks + 1;
+  my $upload = $object->param("upload_file_$tracks");
   my $cache = _fh_cache($self, $object, $upload) if $upload;
 
   ## rewrite node values if we are re-doing this page for an additional track
   if ($object->param('submit_kv_add') eq 'Add more data >') {
-    $self->redefine_node('kv_add', 'pass_fields', 
-      ["track_name_$tracks", "style_$tracks", "col_$tracks",
-      "paste_file_$tracks", "upload_file_$tracks", "url_file_$tracks",
-      "merge_$tracks"]);
-    $self->redefine_node('kv_add', 'back', 1);
-    $tracks++;
-    $wizard->data('loops', $tracks);
+    $wizard->redefine_node('kv_add', 'back', 1);
+    $wizard->data('loops', $incr);
   }
                                                                
   my $form = EnsEMBL::Web::Form->new($node, "/$species/$script", 'post');
@@ -301,7 +304,7 @@ sub kv_add {
     my @cols   = @{$wizard->data('colours')};
     my @styles = @{$wizard->data('styles')};
     my ($colour, $style, $h_ref, %hash, $output);
-    for (my $i = 0; $i < $tracks; $i++) {
+    for (my $i = 1; $i < $incr; $i++) {
       my $track_name = $object->param("track_name_$i");
       $output = "$track_name: " if $track_name;
       foreach $h_ref (@cols) {
@@ -325,7 +328,7 @@ sub kv_add {
   if ($upload) {
     $form->add_element(
       'type'   => 'Hidden',
-      'name'   => "cache_file_$track_id",
+      'name'   => "cache_file_$tracks",
       'value'  => $cache,
     );
   }

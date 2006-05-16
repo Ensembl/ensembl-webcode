@@ -76,6 +76,7 @@ sub _init {
       my $end        = $segment->from_end;
       my $ctg_slice  = $segment->to_Slice;
       my $ORI        = $ctg_slice->strand;
+warn $ctg_slice->seq_region_name,' ... ', $ctg_slice->coord_system->name, ' ... ';
       my $feature = { 'start' => $start, 'end' => $end, 'name' => $ctg_slice->seq_region_name };
 
       $feature->{'locations'}{ $ctg_slice->coord_system->name } = [ $ctg_slice->seq_region_name, $ctg_slice->start, $ctg_slice->end, $ctg_slice->strand  ];
@@ -125,6 +126,7 @@ sub _init_non_assembled_contig {
   my $threshold_navigation = ($Config->get($module, 'threshold_navigation')|| 2e6)*1001;
   my $navigation     = $Config->get($module, 'navigation') || 'on';
   my $show_navigation = ($length < $threshold_navigation) && ($navigation eq 'on');
+  my $show_href       = ($length < 1e8 ) && ($navigation eq 'on');
 
 ########
 # Vars used only for scale drawing
@@ -201,7 +203,7 @@ sub _init_non_assembled_contig {
       $script = 'contigview';
       $caption = 'Jump to contigview';
     } 
-    if($navigation eq 'on') {
+    if($show_href eq 'on') {
       foreach( qw(chunk supercontig clone scaffold contig) ) {
         if( my $Q = $tile->{'locations'}->{$_} ) {
           $glyph->{'href'} = qq(/@{[$self->{container}{_config_file_name_}]}/$script?ch=$ch;region=$Q->[0]);

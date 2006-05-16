@@ -205,6 +205,8 @@ sub compact_init {
   }
 
   if($transcript_drawn) {
+    my %legend_old = @{$Config->{'legend_features'}{$type}{'legend'}||[]};
+    foreach(keys %legend_old) { $used_colours{$_} = $legend_old{$_}; }
     my @legend = %used_colours;
     $Config->{'legend_features'}->{$type} = {
       'priority' => $Config->get( $type, 'pos' ),
@@ -561,6 +563,9 @@ sub expanded_init {
     }
   }
   if($transcript_drawn) {
+    my %legend_old = @{$Config->{'legend_features'}{$type}{'legend'}||[]};
+    foreach(keys %legend_old) { $used_colours{$_} = $legend_old{$_}; }
+
     my @legend = %used_colours;
     $Config->{'legend_features'}->{$type} = {
       'priority' => $Config->get( $type, 'pos' ),

@@ -30,7 +30,7 @@ sub new {
     '_protein_coding_KNOWN'     => [ 'rust', 'Known Protein Coding' ],
     '_pseudogene_KNOWN'         => [ 'grey50','Known Pseudogene' ],
     '_protein_coding_NOVEL'     => [ 'black', 'Novel Protein Coding' ],
-    '_pseudogene_NOVEL'         => [ 'grey30','Novel Psuedogene' ],
+    '_pseudogene_NOVEL'         => [ 'grey30','Novel Pseudogene' ],
     '_Mt_tRNA_KNOWN'            => [ 'plum4', 'Known RNA' ],
     '_rRNA_KNOWN'               => [ 'plum4', 'Known RNA' ],
     '_tRNA_KNOWN'               => [ 'plum4', 'Known RNA' ],

@@ -44,11 +44,18 @@ sub _init {
       $w             = $Config->texthelper->width($fontname);
 
   my $labels         = ($Config->get('marker', 'labels' ) eq 'on') && ($L<1e7);
+  if( $L > 5e7 ) {
+    $self->errorTrack( "Markers only displayed for less than 50Mb.");
+    return;
+  }
 
   my $priority = ($self->{container}{_config_file_name_} eq 'Homo_sapiens' ? 
                   $PRIORITY : undef);
 
-  my @features = @{$slice->get_all_MarkerFeatures(undef,$priority,$MAP_WEIGHT)};
+  my $previous_start = $L + 1e9;
+  my $previous_end   = -1e9 ;
+
+  my @features = sort { $a->seq_region_start <=> $b->seq_region_start } @{$slice->get_all_MarkerFeatures(undef,$priority,$MAP_WEIGHT)};
   foreach my $f (@features){
     my $ms           = $f->marker->display_MarkerSynonym;
     my $fid          = '';
@@ -70,11 +77,15 @@ sub _init {
       %HREF = ( 'href'   => $href );
       %ZMENU = ( 'zmenu' => { 'caption' => ($ms && $ms->source eq 'unists' ? "uniSTS:$fid" : $fid), 'Marker info' => $href } );
     }
-    $self->push( new Sanger::Graphics::Glyph::Rect({
-      'x' => $S,        'y' => 0,         'height' => $row_height, 'width' => ($E-$S+1),
-      'colour' => $feature_colour, 'absolutey' => 1,
-      %HREF, %ZMENU
-    }));
+    unless( $slice->strand < 0 ? $previous_start - $S < 0.5/$pix_per_bp : $E - $previous_end < 0.5/$pix_per_bp ) {
+      $self->push( new Sanger::Graphics::Glyph::Rect({
+        'x' => $S,        'y' => 0,         'height' => $row_height, 'width' => ($E-$S+1),
+        'colour' => $feature_colour, 'absolutey' => 1,
+        %HREF, %ZMENU
+      }));
+      $previous_end   = $E;
+      $previous_start = $E;
+    }
     next unless $labels;
     my $glyph = new Sanger::Graphics::Glyph::Text({
       'x'         => $S,

@@ -604,6 +604,8 @@ sub _init {
                     'absolutey'  => 1,
                 });
                 $composite->push($tglyph);
+            } else {
+              $composite->{'title'} = $label;
             }
         }elsif( $style eq 'overlaid2' ) {
             if($bp_textwidth < ($end - $start+1)){

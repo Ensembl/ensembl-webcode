@@ -10,7 +10,8 @@ sub init {
   $self->{'fakecore'} = 1;
 
   $self->{'general'}->{'geneview'} = {
-    '_artefacts' => [qw(ruler regulatory_search_regions regulatory_regions)],
+   # '_artefacts' => [qw(ruler regulatory_search_regions regulatory_regions)],
+    '_artefacts' => [qw(ruler)],
     '_options'  => [qw(pos col known unknown)],
  'fakecore' => 1,
     '_settings' => {

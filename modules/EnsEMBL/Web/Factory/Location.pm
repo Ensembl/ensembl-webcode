@@ -171,7 +171,7 @@ sub _location_from_Peptide {
 sub _location_from_MiscFeature {
   my( $self, $ID ) = @_;
   my $TS;
-  foreach my $type ( qw(name embl_acc synonym clone_name sanger_project) ) {
+  foreach my $type ( qw(name embl_acc synonym clone_name sanger_project well_name clonename) ) {
     eval { $TS = $self->_slice_adaptor->fetch_by_misc_feature_attribute( $type, $ID ); };
     return $self->_create_from_slice( "MiscFeature", $ID, $self->expand($TS) ) if $TS;
   }
@@ -272,6 +272,7 @@ sub _location_from_SeqRegion {
     return undef;
   } else {
     foreach my $system ( @{$self->__coord_systems} ) {
+     warn ".... ",$system->name," $chr ....";
       my $TS;
       eval { $TS = $self->_slice_adaptor->fetch_by_region( $system->name, $chr ); };
       next if $@;

@@ -97,7 +97,7 @@ sub add_new_simple_track {
   );
 }
 sub add_new_synteny_track {
-  my( $self, $species, $short, $pos ) = @_;
+  my( $self, $species, $short, $pos, %pars ) = @_;
   $self->add_track( "synteny_$species",
     "_menu" => 'compara',
     'height'    => 4,
@@ -110,6 +110,7 @@ sub add_new_synteny_track {
     'pos'       => $pos,
     'str'       => 'f',
     'dep'       => 20,
+    %pars
   );
 }
 
@@ -929,7 +930,7 @@ sub ADD_ALL_EST_FEATURES {
   $self->add_new_track_est( 'cint_est',      'Ciona ESTs', $POS++, @_ );
   $self->add_new_track_est( 'expression_pattern', 'Expression pattern', $POS++, 'URL_KEY' => 'EXPRESSION_PATTERN', 'SUBTYPE' => 'default', @_ );
   my @EST_DB_ESTS = (
-    [ 'estgene',               'ESTs' ],
+    [ 'chicken_ests',          'Chicken EST' ],
     [ 'bee_est',               'Bee EST' ],
     [ 'chicken_est_exonerate', 'Chicken EST (ex.)' ],
     [ 'human_est_exonerate',   'Human EST (ex.)' ],
@@ -948,6 +949,7 @@ sub ADD_ALL_EST_FEATURES {
     [ 'est_bestn_5prim',  "EST BestN 5'" ],
     [ 'est_bestn_3prim',  "EST Bestn 3'" ],
     [ 'cint_cdna',        'Ciona EST' ],
+    [ 'est_exonerate',         'ESTs (ex.)' ]
   );
   my @EST_DB_CDNA = (
     [ 'drosophila_cdna_all',   'Fly cDNA (all)',  'URL_KEY' => 'DROSOPHILA_EST', 'ZMENU' =>
@@ -962,13 +964,13 @@ sub ADD_ALL_EST_FEATURES {
   );
   foreach ( @EST_DB_ESTS ) {
     my($A,$B,@T) = @$_;
-    $self->add_new_track_est( "otherfeatures_$A",  $B, $POS++,
+    $self->add_new_track_est( "est_$A",  $B, $POS++,
                               'FEATURES'  => $A, 'available' => "database_features ENSEMBL_EST.$A",
                               'THRESHOLD' => 0, 'DATABASE' => 'est', @T, @_ );
   }
   foreach ( @EST_DB_CDNA ) {
     my($A,$B,@T) = @$_; warn ">>> @T <<<";
-    $self->add_new_track_cdna( "otherfeatures_$A",  $B, $POS++,
+    $self->add_new_track_cdna( "est_$A",  $B, $POS++,
                               'FEATURES'  => $A, 'available' => "database_features ENSEMBL_EST.$A",
                               'THRESHOLD' => 0, 'DATABASE' => 'est', @T, @_ );
   }
@@ -978,7 +980,7 @@ sub ADD_ALL_EST_FEATURES {
   );
   foreach ( @EST_DB_ESTS_PROT ) {
     my($A,$B,@T) = @$_;
-    $self->add_new_track_est_protein( "otherfeatures_$A",  $B, $POS++,
+    $self->add_new_track_est_protein( "est_$A",  $B, $POS++,
                               'FEATURES'  => $A, 'available' => "database_features ENSEMBL_EST.$A",
                               'THRESHOLD' => 0, 'DATABASE' => 'est', @T, @_ );
   }
@@ -1158,7 +1160,9 @@ sub ADD_ALL_TRANSCRIPTS {
 sub ADD_ALL_OLIGO_TRACKS {
   my $self = shift;
   my $POS  = shift || 4000;
-  my @OLIGO = map { sort keys %{ $self->{'species_defs'}{'_storage'}->{$_}{'OLIGO'}||{} } } keys %{$self->{'species_defs'}{'_storage'}};
+  warn "@{[ keys %{$self->{'species_defs'}{'_storage'}} ]}";
+  my %OLIGO = map { (%{ $self->{'species_defs'}{'_storage'}->{$_}{'OLIGO'}||{} }) } keys %{$self->{'species_defs'}{'_storage'}};
+  my @OLIGO = sort keys %OLIGO;
 #    qw( Canine ),    # Dog
 #    qw( Zebrafish ), # Zfish
 #    qw( Chicken ),   # Chicken
@@ -1170,11 +1174,12 @@ sub ADD_ALL_OLIGO_TRACKS {
 #    qw( Rat230_2 RG-U34A RG-U34B RG-U34C ),           # Rat
 #  );
   foreach my $chipset (@OLIGO) {
+warn $chipset;
     ( my $T = lc($chipset) ) =~ s/\W/_/g;
     ( my $T2 = $chipset ) =~ s/Plus_/+/i;
     $self->add_track(
       $T, 'on' => 'off', 'pos' => $POS++, 'str' => 'b', '_menu' => 'features', 
-          'caption' => "OLIGO $T2",
+          'caption' => $OLIGO{$chipset}." $T2",
           'dep' => 6,
       'col' => 'springgreen4',
       'compact'   => 0,

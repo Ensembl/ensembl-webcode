@@ -11,15 +11,16 @@ sub init {
 
   $self->{'_transcript_names_'} = 'yes';
   $self->{'general'}->{'altsplice'} = {
-    '_artefacts'    => [ qw(ruler scalebar contig variation regulatory_regions 
-                            regulatory_search_regions ) ],
+    '_artefacts'    => [ qw(ruler scalebar contig variation
+# regulatory_regions regulatory_search_regions
+    ) ],
     '_options'      => [qw(pos col known unknown)],
     'fakecore' => 1,
     '_settings'     => {
       'features' => [ 
 		     [ 'variation' => "SNPs" ],
-                     [ 'regulatory_regions' => 'Regulatory regions'  ],
-                     [ 'regulatory_search_regions' => 'Regulatory search regions'  ],
+#                    [ 'regulatory_regions' => 'Regulatory regions'  ],
+#                    [ 'regulatory_search_regions' => 'Regulatory search regions'  ],
 		    ],
       'show_labels'  => 'yes',
       'show_buttons' => 'no',

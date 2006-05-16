@@ -72,6 +72,16 @@ sub handler {
   # warn $ENV{'ENSEMBL_SPECIES'};
   #$page->masthead->species = $SD->SPECIES_COMMON_NAME if $ENV{'ENSEMBL_SPECIES'};
 
+  my $head = $pageContent =~ /<head>(.*?)<\/head>/sm ? $1 : '';
+  while($head=~s/<script(.*?)>(.*?)<\/script>//sm) {
+    my($attr,$cont) = ($1,$2);
+    next unless $attr =~/text\/javascript/;
+    if($attr =~ /src="(.*?)"/ ) {
+      $page->javascript->add_source( $1 );
+    } else {
+      $page->javascript->add_script( $cont );
+    }   
+  }
   $page->content->add_panel(
     new EnsEMBL::Web::Document::Panel( 
       'raw' => $pageContent =~ /<body.*?>(.*?)<\/body>/sm ? $1 : $pageContent

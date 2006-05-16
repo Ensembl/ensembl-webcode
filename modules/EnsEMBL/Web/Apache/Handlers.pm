@@ -127,14 +127,14 @@ LONG PROCESS %10s IP:  %s  UA: %s
 
 sub _run_blast_no_ticket {
   my( $loads, $seconds_since_last_run ) = @_;
-  return $loads->{'blast'} < 5 &&
+  return $loads->{'blast'} < 3 &&
          rand( $loads->{'httpd'} ) < 10 &&
          rand( $seconds_since_last_run ) > 1;
 }
 
 sub _run_blast_ticket {
   my( $loads, $seconds_since_last_run ) = @_;
-  return $loads->{'blast'} < 15;
+  return $loads->{'blast'} < 8;
 }
 
 use vars qw($LOAD_COMMAND);
@@ -289,8 +289,10 @@ sub transHandler {
     my $DSN = $path_segments[0];
     my $command = '';
     if( $DSN eq 'dsn' ) {
-      $command = 'dsn';
-      $r->subprocess_env->{'ENSEMBL_SCRIPT'}  = $command;
+      $path_info = join( '/', @path_segments );
+warn "..... DSN ";
+#      $command = 'dsn';
+#      $r->subprocess_env->{'ENSEMBL_SCRIPT'}  = $command;
     } else {
       my( $das_species, $assembly, $type, $subtype ) = split /\./, $DSN;
       $command = $path_segments[1];
@@ -305,24 +307,24 @@ sub transHandler {
       $r->subprocess_env->{'ENSEMBL_DAS_TYPE'}     = $type;
       $r->subprocess_env->{'ENSEMBL_DAS_SUBTYPE'}  = $subtype;
       $r->subprocess_env->{'ENSEMBL_SCRIPT'}  = $command;
+      my $error_filename = '';
+      foreach my $dir ( @PERL_TRANS_DIRS ) {
+        my $filename = sprintf( $dir, $species )."/das/$command";
+        my $t_error_filename = sprintf( $dir, $species )."/das/das_error";
+        $error_filename ||= $t_error_filename if -r $t_error_filename;
+        next unless -r $filename;
+        $r->filename( $filename );
+        $r->uri( "/perl/das/$DSN/$command" );
+        return OK;
+      }
+      if( -r $error_filename ) {
+        $r->subprocess_env->{'ENSEMBL_DAS_ERROR'}  = 'unknown-command';
+        $r->filename( $error_filename );
+        $r->uri( "/perl/das/$DSN/$command" );
+        return OK;
+      }
+      return DECLINED;
     }
-    my $error_filename = '';
-    foreach my $dir ( @PERL_TRANS_DIRS ) {
-      my $filename = sprintf( $dir, $species )."/das/$command";
-      my $t_error_filename = sprintf( $dir, $species )."/das/das_error";
-      $error_filename ||= $t_error_filename if -r $t_error_filename;
-      next unless -r $filename;
-      $r->filename( $filename );
-      $r->uri( "/perl/das/$DSN/$command" );
-      return OK;
-    }
-    if( -r $error_filename ) {
-      $r->subprocess_env->{'ENSEMBL_DAS_ERROR'}  = 'unknown-command';
-      $r->filename( $error_filename );
-      $r->uri( "/perl/das/$DSN/$command" );
-      return OK;
-    }
-    return DECLINED;
   } else {
   # DECLINE this request if we cant find a valid species
     if( $species && ($species = map_alias_to_species($species)) ) {

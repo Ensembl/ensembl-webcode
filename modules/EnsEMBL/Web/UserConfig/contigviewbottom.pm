@@ -32,7 +32,8 @@ sub init {
         matepairs  bacends 
         ruler     scalebar  stranded_contig
         sequence  codonseq  codons gap gcplot encode
-	encode_region regulatory_search_regions regulatory_regions
+	encode_region 
+#       regulatory_search_regions regulatory_regions
 #       redbox
         restrict),
     # qw( zfish_est ),
@@ -77,7 +78,7 @@ sub init {
       'opt_zclick'     => 1,
       'opt_halfheight'     => 0,
       'opt_shortlabels'     => 0,
-      'opt_restrict_zoom' => 1,
+      'opt_restrict_zoom' => 0,
       'bgcolor'     => 'background1',
       'bgcolour1'     => 'background2',
       'bgcolour2'     => 'background3',
@@ -108,8 +109,8 @@ sub init {
          [ 'marker'          => 'Markers'       ],
          [ 'qtl'             => 'QTLs'     ],
          [ 'operon'          => 'Operon'      ],
-         [ 'regulatory_regions' => 'Regulatory features'  ],
-         [ 'regulatory_search_regions' => 'Regulatory search regions'  ],
+       #  [ 'regulatory_regions' => 'Regulatory features'  ],
+       #  [ 'regulatory_search_regions' => 'Regulatory search regions'  ],
          [ 'rnai'            => 'RNAi'        ],
          [ 'ex_profile'      => 'Exp. profile'    ],
          [ 'alternative_assembly'     => 'Vega assembly' ],
@@ -124,6 +125,7 @@ sub init {
          # 'name'            => 'caption'
          # [ 'assemblyexception' => 'Assembly exceptions' ],
          [ 'sequence'        => 'Sequence'      ],
+         [ 'bacends'        => 'BAC ends'      ],
          [ 'codonseq'        => 'Codons'      ],
          [ 'codons'          => 'Start/Stop codons' ],
          [ 'stranded_contig' => 'Contigs'       ],

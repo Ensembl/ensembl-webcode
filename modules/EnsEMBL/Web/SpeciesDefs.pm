@@ -820,7 +820,7 @@ sub _parse {
           };
 ## Affy probe sets...
           $sql   = qq(
-            select distinct(aa.name)
+            select distinct(aa.name), aa.type
               from oligo_array as aa, oligo_probe as ap
              where aa.oligo_array_id = ap.oligo_array_id
           );
@@ -828,7 +828,7 @@ sub _parse {
           eval {
             $query->execute;
             while (my $row = $query->fetchrow_arrayref ){
-              $tree->{'OLIGO'}{$row->[0]} = 1;
+              $tree->{'OLIGO'}{$row->[0]} = $row->[1];
               ( my $key = uc("OLIGO_$row->[0]") ) =~ s/\W/_/;
               $tree->{'DB_FEATURES'}{$key} = 1;
             }

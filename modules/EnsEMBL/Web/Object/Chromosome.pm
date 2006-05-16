@@ -146,14 +146,14 @@ sub get_synteny_local_genes {
     if( $num < 0 ) {
         $slice = $sliceAdaptor->fetch_by_region
       ('chromosome', $chr, 1, $start );
-        @localgenes = @{$slice->get_all_Genes( 'ensembl' )};
+        @localgenes = @{$slice->get_all_Genes( undef, 'core' )};
         if(@localgenes>-$num) {
             @localgenes = @localgenes[$num..-1]; 
             $start = 1;
         } elsif(@localgenes==0) {
              $slice = $sliceAdaptor->fetch_by_region
            ('chromosome',$chr, $start ,$chr_length);
-            @localgenes = @{$slice->get_all_Genes( 'ensembl' )};
+            @localgenes = @{$slice->get_all_Genes( 'ensembl', 'havana' )};
             @localgenes = @localgenes[0..(-$num-1)] if(@localgenes>-$num);
         } else { 
             $start = 1;
@@ -161,7 +161,7 @@ sub get_synteny_local_genes {
     } else {
     $slice = $sliceAdaptor->fetch_by_region
       ( 'chromosome', $chr, $start, $chr_length );
-         @localgenes = @{$slice->get_all_Genes( 'ensembl' )};
+         @localgenes = @{$slice->get_all_Genes( undef, 'core' )};
         if(@localgenes>$num) {
             @localgenes = @localgenes[0..($num-1)]; 
         } elsif(@localgenes==0) {

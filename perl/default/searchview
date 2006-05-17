@@ -28,7 +28,7 @@ if( $not_fresh ) {
     my $CAT2 = '';
     if( $q->param('species') && $q->param('species') ne 'all' ) {
       $CAT = "Top/Species/".$q->param('species');
-      unless( $q->param('idx') && $q->param('idx') ne 'All' ) {
+      if ( $q->param('idx') && $q->param('idx') ne 'All' ) {
         $CAT .= '/'.$q->param('idx');
         $CAT2 = "Top/Feature type/".$q->param('idx').'/'.$q->param('species');
       }

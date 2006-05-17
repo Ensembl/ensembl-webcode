@@ -13,23 +13,20 @@ my $page = new EnsEMBL::Web::Document::WebPage;
 
 my $exalead = new ExaLead;
    $exalead->engineURL = $page->{'species_defs'}->ENSEMBL_SEARCH_URL; 
-   $exalead->rootURL   = '/perl/searchview';
+   $exalead->rootURL   = "/$ENV{'ENSEMBL_SPECIES'}/searchview";
 my $q = CGI->new();
 
-( my $SPECIES   = $ENV{'ENSEMBL_SPECIES'} ) =~ s/_/ /g; 
+( my $SPECIES   = $ENV{'ENSEMBL_SPECIES'} ) =~ s/_/ /g;
+
+my $source = "+Top/Source/vega37_2";
+
 my $not_fresh = $q->param;
 if( $not_fresh ) {
   if( $q->param('q') ) {
     $q->param('_q',$q->param('q'));
     my $CAT = '';
     my $CAT2 = '';
-    if( $q->param('idx') ) { 
-      $CAT = "Top/Species/".$SPECIES;
-      if( $q->param('idx') ne 'All' ) {
-        $CAT .= "/".$q->param('idx');
-        $CAT2 = "Top/Feature type/".$q->param('idx').'/'.$SPECIES;
-      }
-    } elsif( $q->param('species') && $q->param('species') ne 'All' ) {
+    if( $q->param('species') && $q->param('species') ne 'all' ) {
       $CAT = "Top/Species/".$q->param('species');
       unless( $q->param('idx') && $q->param('idx') ne 'All' ) {
         $CAT .= '/'.$q->param('idx');
@@ -42,22 +39,22 @@ if( $not_fresh ) {
       $CAT =~ s/_/ /g;
       if( $CAT2 ) {
         $CAT2 =~ s/_/ /g;
-        $q->param('_c', "+$CAT2", "+$CAT","+Top/Source/vega37_2" );
+        $q->param('_c', "+$CAT2", "+$CAT","$source" );
       } else {
-        $q->param('_c', "+$CAT" , "+Top/Source/vega37_2");
+        $q->param('_c', "+$CAT" , "$source");
       }
     }
   } elsif( $q->param('_q') ){
-    $q->param('_c', "+Top/Source/vega37_2");
+    $q->param('_c', "$source");
   }
   $exalead->parse( $q );
 }
 
 my $renderer = new ExaLead::Renderer::HTML( $exalead );
 
-
+my $sitetype = $page->{'species_defs'}->ENSEMBL_SITE_NAME;
 my $panel = new EnsEMBL::Web::Document::Panel(
-  'caption' => 'Ensembl text search',
+  'caption' => "$sitetype text search",
   'content' => $renderer->render_form. 
                $renderer->render_spelling.
     $renderer->render_summary.

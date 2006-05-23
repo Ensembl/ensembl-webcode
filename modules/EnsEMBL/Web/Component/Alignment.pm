@@ -155,17 +155,23 @@ sub output_AlignSlice {
     my( $panel, $object ) = @_;
 
     my $as = $object->Obj;
-    my $esp = $ENV{ENSEMBL_SPECIES};
-    
+    (my $esp = $ENV{ENSEMBL_SPECIES}) =~ s!_! !g;
 
     my @species;
-    foreach my $sp  (split(/,/, $object->param('s'))) {
-	next if ( $sp eq $esp);
-    	$sp =~ s!_! !g;
-	push @species, $sp;
+
+    if ($object->param('s')) {
+	foreach my $sp  (split(/,/, $object->param('s'))) {
+	    $sp =~ s!_! !g;
+	    push @species, $sp unless ( $sp eq $esp);
+	}
+
+    } else {
+	my $ss = $as->get_MethodLinkSpeciesSet->species_set;
+	foreach my $gdb (@$ss) {
+	    push @species, $gdb->name unless ( $gdb->name eq $esp);
+	}
     }
 
-    $esp =~ s!_! !g;
     my $sa = $as->get_SimpleAlign( $esp, @species);
     
     my $type = $as->get_MethodLinkSpeciesSet->method_link_type;

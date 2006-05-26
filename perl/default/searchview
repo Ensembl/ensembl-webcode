@@ -43,6 +43,8 @@ if( $not_fresh ) {
       } else {
         $q->param('_c', "+$CAT" , "$source");
       }
+    } else {
+      $q->param( '_c', "$source" );
     }
   } elsif( $q->param('_q') ){
     $q->param('_c', "$source");

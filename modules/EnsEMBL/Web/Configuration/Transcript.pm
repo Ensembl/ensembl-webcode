@@ -104,7 +104,6 @@ sub transview {
 sub transcriptsnpview {
  my $self   = shift;
  my $obj    = $self->{'object'};
- my $params = { 'transcript' => $obj->stable_id, 'db' => $obj->get_db  };
 
  # Info panel
  my $panel1 = new EnsEMBL::Web::Document::Panel::Information(
@@ -187,8 +186,8 @@ sub transcriptsnpview {
 
  $self->update_configs_from_parameter( 'bottom', qw(TSV_context TSV_sampletranscript TSV_transcript) );
 
-
-  if( my $panel2 = $self->new_panel( 'Image',
+ my $params = { 'transcript' => $obj->stable_id, 'db' => $obj->get_db  };
+ if( my $panel2 = $self->new_panel( 'Image',
     'code'    => "image#",
     'caption' => 'SNPs and variations in region of transcript '.$obj->stable_id,
     'status'  => 'panel_image',
@@ -213,7 +212,7 @@ sub transcriptsnpview {
    last if (defined $counts->[1] && $counts->[1] == 0);
    if( my $panel_table = $self->new_panel( 'SpreadSheet',
       'code' => "variation#-$sample",
-      'caption' => "Variations and consequences for $sample",
+      'caption' => "Variations in $sample",
       'status'  => 'panel_sample',
       'object'  => $obj,
       'params'  => $params,
@@ -221,12 +220,63 @@ sub transcriptsnpview {
    #   'null_data' => "<p>Where there is coverage, all alleles <em>observed</em> in sample $sample are the same as the reference.</p>",
  )) {
      $panel_table->add_components( qw(TSVvariations
-        EnsEMBL::Web::Component::Transcript::spreadsheet_TSVtable));
+        EnsEMBL::Web::Component::Transcript::spreadsheet_TSVtable
+        ));
      $self->add_panel( $panel_table );
    }
  }
+
+
+ # Form ---------------------------------------------------------------------
+ if (
+     my $form_panel = $self->new_panel("",
+    'code'    => "info$self->{flag}",
+    'caption' => "Dump data",
+    'status'  => 'panel_options',
+    'params'  => $params,
+                                       )) {
+    $form_panel->add_components(qw(
+    dump  EnsEMBL::Web::Component::Transcript::dump
+                                  ));
+
+     $form_panel->add_form( $self->{page}, qw(dump_form EnsEMBL::Web::Component::Transcript::dump_form) );
+
+     # finally, add the complete panel to the page object
+     $self->add_panel( $form_panel );
+   }
+
 }
 
+sub transcriptsnpdataview {
+   my $self = shift;
+   my $object = $self->{object};
+
+#  # Description : table of values ------------------------------------
+   if (
+     my $form_panel = $self->new_panel('',
+     'code'    => "info$self->{flag}",
+     'caption' => "Variation data for strains on transcript ".$object->stable_id,
+     'object'  => $object,
+                                 )) {
+
+     if ($self->{object}->param('dump') eq 'ashtml') {
+       $form_panel->add_components(qw(
+     html_data        EnsEMBL::Web::Component::Transcript::html_dump
+                                   ));
+     }
+     elsif ($self->{object}->param('dump') eq 'astext') {
+       $form_panel->add_components(qw(
+     text_data        EnsEMBL::Web::Component::Transcript::text_dump
+                                   ));
+     }
+#     elsif ($self->{object}->param('dump') eq 'asexcel') {
+#       $form_panel->add_components(qw(
+#     excel_data        EnsEMBL::Web::Component::LDtable::excel_data
+#                                   ));
+#     }
+     $self->{page}->content->add_panel( $form_panel );
+   }
+}
 
 sub context_menu {
   my $self = shift;
@@ -283,10 +333,11 @@ sub context_menu {
   # Variation: TranscriptSNP view
   # if meta_key in variation meta table has default strain listed
   if ( $obj->species_defs->VARIATION_STRAIN ) { 
+    my $strain =  $obj->species_defs->translate( "strain" )."s";
     $self->add_entry( $flag,
 		      'code'  => 'TSV',
 		      'text'  => "Compare transcript SNPs",
-		      'title' => 'TranscriptSNPView - Compare variation in different individuals or strains for this transcript '.$obj->stable_id,
+		      'title' => "TranscriptSNPView - Compare variation in different $strain for this transcript ".$obj->stable_id,
 		      'href'  => "/$species/transcriptsnpview?$q_string" 
 		    );
   }

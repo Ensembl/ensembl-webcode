@@ -14,11 +14,6 @@ sub _init {
 
   my $Config        = $self->{'config'};
   my $colours       = $Config->get('snp_fake','colours' );
-  foreach my $type ( sort { $colours->{$a}->[0] cmp $colours->{$b}->[0]} keys %$colours ) {
-    push @{ $Config->{'variation_legend_features'}->{'variations'}->{'legend'}}, $colours->{$type}->[1],   $colours->{$type}->[0];
-  }
- push @{ $Config->{'variation_legend_features'}->{'variations'}->{'legend'}}, "Allele same as reference assembly", "border:grey70";
-
   my ($w,$th) = $Config->texthelper()->px2bp($Config->species_defs->ENSEMBL_STYLE->{'LABEL_FONT'});
 
   my $snps = $Config->{'snps'};
@@ -89,7 +84,14 @@ sub _init {
     $self->join_tag( $tglyph, "X:$tag_root=$tag2", .5, 0, $colour,'',-3 );
     $self->push( $tglyph );
 
+
+    # Colour legend stuff
+    unless($Config->{'variation_types'}{$type}) {
+      push @{ $Config->{'variation_legend_features'}->{'variations'}->{'legend'}}, $colours->{$type}->[1],   $colours->{$type}->[0];
+      $Config->{'variation_types'}{$type} = 1;
+    }
   }
+  push @{ $Config->{'variation_legend_features'}->{'variations'}->{'legend'}}, $colours->{"SARA"}->[1],   $colours->{"SARA"}->[0];
 }
 
 sub zmenu {
@@ -108,10 +110,10 @@ sub zmenu {
         'caption'           => "SNP: ".$f->variation_name(),
         '01:SNP properties' => $self->href( $f ),
         "02:bp: $pos" => '',
-        "03:class: ".$f->var_class() => '',
+        "04:class: ".$f->var_class() => '',
         "03:status: ".join(', ', @{$f->get_all_validation_states||[]} ) => '',
         "06:mapweight: ".$f->map_weight => '',
-        "07:ambiguity code: ".$f->ambig_code => '',
+        "05:ambiguity code: ".$f->ambig_code => '',
         "08:alleles: ".(length($allele)<16 ? $allele : substr($allele,0,14).'..') => '',
         "09:source: ".$f->source() => '',
    );
@@ -120,7 +122,7 @@ sub zmenu {
     
     my $source = $f->source; 
     my $type = $f->get_consequence_type;
-    $zmenu{"57:Type: $type"} = "" unless $type eq '';  
+    $zmenu{"57:type: $type"} = "" unless $type eq '';  
     return \%zmenu;
 }
 

@@ -79,9 +79,9 @@ sub draw {
     }
     elsif($direction eq 'W'){ # <|
 	push @$points, (
-	    $start_x, $y_offset,
-	    $start_x - $width, $y_offset + $height/2,
-	    $start_x, $y_offset + $height,
+	    $start_x+$width, $y_offset,
+	    $start_x, $y_offset + $height/2,
+	    $start_x+$width, $y_offset + $height,
 	);
     }
     elsif($direction eq 'S'){ # V 

@@ -969,7 +969,8 @@ sub ADD_ALL_EST_FEATURES {
                               'THRESHOLD' => 0, 'DATABASE' => 'est', @T, @_ );
   }
   foreach ( @EST_DB_CDNA ) {
-    my($A,$B,@T) = @$_; warn ">>> @T <<<";
+    my($A,$B,@T) = @$_; 
+#warn ">>> @T <<<";
     $self->add_new_track_cdna( "est_$A",  $B, $POS++,
                               'FEATURES'  => $A, 'available' => "database_features ENSEMBL_EST.$A",
                               'THRESHOLD' => 0, 'DATABASE' => 'est', @T, @_ );

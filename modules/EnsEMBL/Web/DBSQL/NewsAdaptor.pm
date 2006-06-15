@@ -291,6 +291,7 @@ sub fetch_random_ad {
     SELECT image, alt, url
     FROM miniad
     WHERE start_date < NOW() AND end_date > NOW()
+    AND url NOT LIKE "%pre.ensembl.org%"	    
     ORDER BY rand()
     LIMIT 1
   );

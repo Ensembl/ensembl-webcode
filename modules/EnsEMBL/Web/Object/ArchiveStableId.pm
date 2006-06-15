@@ -27,6 +27,20 @@ use EnsEMBL::Web::Object;
 our @ISA = qw(EnsEMBL::Web::Object);
 
 
+
+=head2 _adaptor
+
+ Arg1        : data object
+ Description : internal call to get archive stable ID adaptor
+ Return type : ArchiveStableId adaptor
+
+=cut
+
+sub _adaptor {
+  my $self = shift;
+  return $self->database('core')->get_ArchiveStableIdAdaptor;
+}
+
 =head2 assembly
 
  Arg1        : data object
@@ -54,23 +68,34 @@ sub db_name {
   return $self->Obj->db_name;
 }
 
+
+=head2 genes
+
+ Arg1        : data object
+ Description : fetches archived genes off the core API object 
+ Return type : list ref of archive IDs
+
+=cut
+
+sub genes {
+  my $self = shift;
+  return $self->Obj->get_all_gene_archive_ids();
+}
+
 =head2 get_current_object
 
  Arg1        : data object
- Arg2        : type e.g. 'Translation', 'Peptide', 'Gene' (string)
- Arg3        : stable id (string)
- Description : tries to fetch an object of type $type and with id $id and
-               version $version. Used to see if ID exists in the current db.
- Return type : object with this id if it still exists (even if the version number is different
+ Description : fetches version off the core API object 
+ Return type : string
 
 =cut
 
 sub get_current_object {
   my ($self, $type, $id) = @_;
+  $id ||= $self->stable_id;
   warn "Error: no id" && return unless $id;
   $type = ucfirst(lc($type));
   $type = 'Translation' if $type eq 'Peptide';
-  $id ||= $self->stable_id;
   my $call = "get_$type"."Adaptor";
   my $adaptor = $self->database('core')->$call;
   return $adaptor->fetch_by_stable_id($id) || undef;
@@ -93,6 +118,19 @@ sub history {
   return unless $adaptor;
   my $history = $adaptor->fetch_archive_id_history($self->Obj);
   return $history;
+}
+
+=head2 peptide
+
+ Arg1        : data object
+ Description : fetches peptide archive IDs off the core API object 
+ Return type : listref of Bio::EnsEMBL::ArchiveStableId
+
+=cut
+
+sub peptide {
+  my $self = shift;
+  return $self->Obj->get_all_translation_archive_ids;
 }
 
 
@@ -133,7 +171,7 @@ sub stable_id {
 
 sub successors {
   my $self = shift;
-  return $self->Obj->successors;
+  return $self->Obj->get_all_successors;
 }
 
 =head2 type
@@ -176,33 +214,6 @@ sub transcript {
   return $self->Obj->get_all_transcript_archive_ids;
 }
 
-
-=head2 peptide
-
- Arg1        : data object
- Description : fetches peptide archive IDs off the core API object 
- Return type : listref of Bio::EnsEMBL::ArchiveStableId
-
-=cut
-
-sub peptide {
-  my $self = shift;
-  return $self->Obj->get_all_translation_archive_ids;
-}
-
-
-=head2 _adaptor
-
- Arg1        : data object
- Description : internal call to get archive stable ID adaptor
- Return type : ArchiveStableId adaptor
-
-=cut
-
-sub _adaptor {
-  my $self = shift;
-  return $self->database('core')->get_ArchiveStableIdAdaptor;
-}
 
 
 

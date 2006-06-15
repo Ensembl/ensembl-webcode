@@ -114,8 +114,6 @@ sub associated_ids {
     }
   }
 
-sub transcript {
-  my($panel, $object) = @_;
   # Transcripts
   unless ($type eq 'Transcript') {
     my $label2  = 'Archived transcripts';
@@ -230,6 +228,9 @@ sub _archive_link {
   if ($type eq 'peptide') {
     $view = 'protview';
   }
+  elsif ($type eq 'transcript') {
+    $view = 'transview';
+  }
   $id = qq(<a title="Archive site" href="$url$view?$type=$name">$id</a>);
   return $id;
 }
@@ -240,6 +241,9 @@ sub _current_link {
   my $view = $type."view";
   if ($type eq 'peptide') {
     $view = 'protview';
+  }
+  elsif ($type eq 'transcript') {
+    $view = 'transview';
   }
   return qq(<a title="Archive site" href="$url$view?$type=$name">$display</a>);
 }

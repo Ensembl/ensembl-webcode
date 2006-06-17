@@ -21,6 +21,7 @@ sub default_track_by_gene {
     vega evega_transcript
     otherfeatures est_transcript
   );
+
   my %mappings_logic_name = (
     map( {( $_, $_ )} qw( 
       genscan fgenesh genefinder snap ciona_snap
@@ -33,7 +34,7 @@ sub default_track_by_gene {
       ensembl sgd homology_low cow_proteins refseq mouse_protein dog_protein
       jamboree_cdnas ciona_dbest_ncbi ciona_est_seqc ciona_est_seqn
       ciona_est_seqs ciona_jgi_v1 ciona_kyotograil_2004
-      ciona_kyotograil_2005 )
+      ciona_kyotograil_2005 ) 
     ),
     qw(
       rodent_protein   rprot_transcript
@@ -49,6 +50,7 @@ sub default_track_by_gene {
       otter            vega_transcript
     )
   );
+  return lc($logic).'_transcript' if $db eq 'otherfeatures' && lc($logic) =~ /^singapore_(est|protein)$/;
   return $mappings_db{ lc( $db ) } ||
          $mappings_logic_name{ lc( $logic ) } || 'ensembl_transcript';
 }
@@ -1058,7 +1060,7 @@ sub get_supporting_evidence { ## USED!
           $evidence->{ 'hits' }{$dl_seq_name}{'scores'} = [];          
           push @dl_seq_list, $dl_seq_name ; # list to get descriptions in one go 
       # Hold the data library that this feature is from
-          ($evidence->{ 'hits' }{$dl_seq_name}{'datalib'} = $this_feature->analysis->logic_name) =~ s/swir/Swir/;
+          ($evidence->{ 'hits' }{$dl_seq_name}{'datalib'} = ( $this_feature->analysis ? $this_feature->analysis->logic_name : '') ) =~ s/swir/Swir/;
           $show = 1; 
         }               
         # Compare to see if this is the top-score

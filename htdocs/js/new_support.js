@@ -79,7 +79,7 @@ function egYr( i ) { return parseInt( i.offsetTop ); }
 NNNN = 5;
 function egeX(e) {
  switch(MODE) {
-  case 'IE6': return event.clientX + (document.body.scrollLeft?document.body.scrollLeft:(document.documentElement?(document.documentElement.scrollLeft?document.documentElement.scrollLeft:0):0));  
+  case 'IE6': return event.clientX + (document.body.scrollLeft?document.body.scrollLeft:(document.documentElement?(document.documentElement.scrollLeft?document.documentElement.scrollLeft:0):0)) - 2;  
   case 'NS6': return e.pageX;
 }}
 
@@ -88,7 +88,7 @@ function egeY(e) {
 //    alert( e.clientY +'..'+e.pageY+'..'+e.screenY +'..'+ ( (document.body.scrollTop)?document.body.scrollTop:document.documentElement.scrollTop) +'..' + ( window.pageYOffset ) );
   }
 switch(MODE) {
-  case 'IE6': return event.clientY + (document.body.scrollTop?document.body.scrollTop:(document.documentElement?(document.documentElement.scrollTop?document.documentElement.scrollTop:0):0));   
+  case 'IE6': return event.clientY + (document.body.scrollTop?document.body.scrollTop:(document.documentElement?(document.documentElement.scrollTop?document.documentElement.scrollTop:0):0)) - 2;   
   case 'NS6': return e.pageY;
 }}
 function egeXr(e) {switch(MODE) {

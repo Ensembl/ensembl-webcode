@@ -26,7 +26,7 @@ $self->{'general'}->{'cytoview'} = {
     'opt_pdf' => 0, 'opt_svg' => 0, 'opt_postscript' => 0,
     'opt_lines' => 1,
     'opt_empty_tracks' => 0,
-    'opt_gene_labels' => 0,
+    'opt_gene_labels' => 1,
     'opt_zmenus'     => 1,
     'opt_zclick'     => 1,
     'bgcolor'      => 'background1',

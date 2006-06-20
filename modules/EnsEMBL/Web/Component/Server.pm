@@ -310,8 +310,11 @@ sub urlsource_form {
     if defined $object->param('h') || defined $object->param('highlight');
   $form->add_element(
     'type' => 'URL', 'required' => 'yes',
-    'label' => "Date URL:",  'name' => 'data_URL',
+    'label' => "Data URL:",  'name' => 'data_URL',
     'value' => "http://",
+  );
+  $form->add_element( 'type' => 'Information',
+   'value' => 'This view supports all formats supported by the UCSC browser (GFF, BED, PSL, GTF); click on the "Help" link above for information on the format of the file.' 
   );
   $form->add_element( 'type' => 'Submit', 'value' => 'Add source' );
   return $form;

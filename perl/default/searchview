@@ -24,14 +24,15 @@ if( $not_fresh ) {
     my $CAT = '';
     my $CAT2 = '';
     if( $q->param('species') && $q->param('species') ne 'all' ) {
-      $CAT = "Top/Species/".$q->param('species');
-      unless( $q->param('idx') && $q->param('idx') ne 'All' ) {
+      $CAT = "Top/Species/$SPECIES";
+      if( $q->param('idx') && $q->param('idx') ne 'All' ) {
         $CAT .= '/'.$q->param('idx');
-        $CAT2 = "Top/Feature type/".$q->param('idx').'/'.$q->param('species');
+        $CAT2 = "Top/Feature type/".$q->param('idx')."/$SPECIES";
       }
     } elsif( $q->param('idx') && $q->param('idx') ne 'All' ) {
       $CAT = "Top/Feature type/".$q->param('idx');
     }
+warn ">> $CAT\n>> $CAT2";
     if( $CAT ) {
       $CAT =~ s/_/ /g;
       if( $CAT2 ) {

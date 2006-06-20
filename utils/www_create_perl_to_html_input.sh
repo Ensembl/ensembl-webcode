@@ -33,13 +33,13 @@
 
 . /etc/profile
 
-PERLMOD_LOC="/ensemblweb/www/www_37"   # current server root
+PERLMOD_LOC="/ensemblweb/www/www_39"   # current server root
 #PERLMOD_LOC="/ensemblweb/www/server"   # current server root
 
 PDOC_LOC="$PERLMOD_LOC/htdocs/info/software/Pdoc"    # where you want Pdocs created
 HTTP="/info/software/Pdoc"
 P2WDOC_LOC="/ensemblweb/shared/bin/pdoc-live"  # Pdoc code location
-P2WDOCER="/ensemblweb/shared/bin/pdoc-live/perlmod2www.pl"
+P2WDOCER="/ensemblweb/shared/bin/pdoc-live/scripts/perlmod2www.pl"
 
 
 F1=bioperl-live

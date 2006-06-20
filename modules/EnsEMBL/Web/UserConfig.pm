@@ -1307,7 +1307,7 @@ sub ADD_GENE_TRACKS {
   $self->add_new_track_gene( 'singapore_protein', 'Singapore Protein Genes', 'prot_gene', $POS++, 'database' => 'otherfeatures', 'gene_col' => '_col', @_ );
   $self->add_new_track_gene( 'estgene', 'EST Genes', 'est_gene', $POS++,
                              'database' => 'otherfeatures', 'available' => 'databases ENSEMBL_OTHERFEATURES',
-                             'logic_name' => 'genomewise estgene', 'label_threshold' => 500, # 'on' => 'off',
+                             'logic_name' => 'genomewise estgene', 'label_threshold' => 200, # 'on' => 'off',
                              'gene_col' => 'estgene', @_ );
   $self->add_new_track_gene( 'otter', 'Vega Genes', 'vega_gene', $POS++,
                              'database' => 'vega', 'available' => 'databases ENSEMBL_VEGA',

@@ -138,7 +138,7 @@ sub new {
   $self->add_link( "Manage sources...", qq(javascript:X=window.open('$URL','das_sources','left=10,top=10,resizable,scrollbars=yes');X.focus()), '');
 
   $URL = sprintf qq(/%s/%s?%sscript=%s), $self->{'species'}, 'urlsource', $self->{'LINK'}, $script;
-  $self->add_link( "URL based data...",  qq(javascript:X=window.open('$URL','urlsources','left=10,top=10,scrollbars=yes');X.focus()),'');
+  $self->add_link( "URL based data...",  qq(javascript:X=window.open('$URL','urlsources','left=10,top=10,height=400,width=750,scrollbars=yes');X.focus()),'');
 
   return $self;
 }

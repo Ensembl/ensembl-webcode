@@ -58,6 +58,11 @@ sub context_menu {
         'title' => "BioMart - export Vega gene features in $header",
         'href' => "/$species/martlink?l=$q_string;type=vega_region" ) if $obj->species_defs->databases->{'ENSEMBL_VEGA'};
   }
+  my $script = $ENV{'ENSEMBL_SCRIPT'} eq 'cytoview' ? 'CytoView' : 'ContigView';
+  my $URL = qq(/$species/urlsource?l=$q_string;script=). lc( $script );
+  $menu->add_entry( $flag, 'text' => "View URL based data on ".$script, 'text' => 'View data stored on another webserver in '.$script,
+    'href' => qq(javascript:X=window.open('$URL','urlsources','left=10,top=10,height=400,width=750,scrollbars=yes');X.focus()),'');
+
   my @options_as = ();
 
   my %alignments = $obj->species_defs->multiX('ALIGNMENTS');

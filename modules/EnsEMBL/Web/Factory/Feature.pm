@@ -89,7 +89,7 @@ sub create_RegulatoryFactor {
   my $reg_factor_adaptor = $db_adaptor->get_RegulatoryFactorAdaptor;
 
   my $features = [];
-  foreach my $fid ( $id, split /\s+/, $id ) {
+  foreach my $fid ( ($id=~/\s/?$id:()), split /\s+/, $id ) {
     my $t_features;
     eval {
       $t_features = $reg_feature_adaptor->fetch_all_by_factor_name($fid);
@@ -135,7 +135,7 @@ sub _generic_create {
     }
     my $adaptor_name = "get_${object_type}Adaptor";
     my $features = [];
-    foreach my $fid ( $id, split /\s+/, $id ) {
+    foreach my $fid ( ($id=~/\s/?$id:()), split /\s+/, $id ) {
       my $t_features;
       if ($xref_db) {
         eval {
@@ -240,7 +240,8 @@ sub create_XrefArray {
     my @matches;
     push @matches, $t;
     ## get genes for each xref
-    my $id = $t->primary_id;
+    warn "... ",$t;
+    my $id = $t->primary_id; 
     my $t_genes = $self->_generic_create( 'Gene', 'fetch_all_by_external_name', $db, $id, 'no_errors' );
     if ($t_genes && @$t_genes) {
       push (@matches, @$t_genes);

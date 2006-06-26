@@ -114,6 +114,7 @@ sub init {
          [ 'ex_profile'      => 'Exp. profile'    ],
          [ 'alternative_assembly'     => 'Vega assembly' ],
 ### Other ###
+         [ 'bacends'         => 'BAC ends' ],
          [ 'encode_region'   => 'ENCODE' ],
 ## MICROARRAY TRACKS ##
          [ 'all_affy'            => 'All-Probe-Sets' ],
@@ -143,7 +144,6 @@ sub init {
          [ 'restrict'        => 'Rest.Enzymes' ],
          [ 'opt_restrict_zoom'   => 'Rest.Enzymes on zoom' ],
       #   [ 'vegaclones'     => 'Vega clones' ],
-         [ 'bacends'         => 'BAC ends' ],
       ],
       'menus' => [ qw( features DAS options repeats export jumpto resize )]
     },

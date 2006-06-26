@@ -18,7 +18,7 @@ my $q = CGI->new();
 
 ( my $SPECIES   = $ENV{'ENSEMBL_SPECIES'} ) =~ s/_/ /g;
 
-my $source = "+Top/Source/vega_38-1";
+my $source = "+Top/Source/vega_38-1a";
 
 my $not_fresh = $q->param;
 if( $not_fresh ) {

@@ -182,7 +182,8 @@ sub create_Xref {
   if ($subtype eq 'MIM') {
     my $mim_g = $self->_generic_create( 'DBEntry', 'fetch_by_db_accession', [$db, 'MIM_GENE'] );
     my $mim_m = $self->_generic_create( 'DBEntry', 'fetch_by_db_accession', [$db, 'MIM_MORBID'] );
-    @$t_features = (@$mim_g, @$mim_m);
+    push(@$t_features, @$mim_g) if $mim_g;  
+    push(@$t_features, @$mim_m) if $mim_m;  
   }
   else {
     $t_features = $self->_generic_create( 'DBEntry', 'fetch_by_db_accession', [$db, $subtype] );

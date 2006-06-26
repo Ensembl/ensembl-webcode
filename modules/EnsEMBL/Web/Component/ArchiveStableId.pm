@@ -77,17 +77,21 @@ sub status {
 
   my $status;
   my $current_obj = $object->get_current_object($object->type);
-  my $archive = _archive_link($object, $id, $param, "Archive <img src='/img/ensemblicon.gif'/>");
+
 
   if (!$current_obj) {
     $status = "<b>This ID has been removed from Ensembl</b>";
     my @successors = @{ $object->successors || []};
     my $url = qq(<a href="idhistoryview?$param=%s">%s</a>);
-    my $verb = scalar @successors > 1 ? "split into " : "replaced by ";
+    my $verb = scalar @successors > 1 ? "and split into " : "and replaced by ";
+    if ($successors[0]->stable_id eq $object->stable_id) {
+      $verb = "but existed as";
+    }
     my @successor_text = map {
-      sprintf ($url, $_->stable_id, $_->stable_id).
+      my $succ_id = $_->stable_id.".".$_->version;
+      sprintf ($url, $succ_id, $succ_id).
 	" in release ".$_->release; } @successors;
-    $status .= " and <b>$verb</b><br />".
+    $status .= " <b>$verb</b><br />".
       join "and <br />", @successor_text if @successors;
   }
   elsif ($current_obj->version eq $object->version) {
@@ -102,7 +106,13 @@ sub status {
   }
   $panel->add_row( "Status", $status );
   return 1 if $status =~/^Current/;
+}
 
+sub archive {
+  my ($panel, $object) = @_;
+  my $id = $object->stable_id.".".$object->version;
+  my $param = $object->type eq 'Translation' ? 'peptide' : lc($object->type);
+  my $archive = _archive_link($object, $id, $param, "Archive <img src='/img/ensemblicon.gif'/>");
   if ($archive) {
     $panel->add_row("Archive", "$archive (release ".$object->release.")");
   }

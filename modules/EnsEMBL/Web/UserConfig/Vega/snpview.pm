@@ -15,7 +15,7 @@ sub init {
                 ruler
                 scalebar
                 vega_transcript
-                snp_triangle_glovar
+                glovar_snp_triangle
                 variation_legend
                 )],
         '_settings' => {
@@ -54,7 +54,7 @@ sub init {
             'abbrev'      => 'on',
             'navigation'  => 'off'
         },
-        'snp_triangle_glovar' => {
+        'glovar_snp_triangle' => {
             'on'          => "on",
             'pos'         => '4521',
             'str'         => 'r',

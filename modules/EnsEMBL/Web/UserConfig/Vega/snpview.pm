@@ -20,7 +20,7 @@ sub init {
                 )],
         '_settings' => {
             'features' => [
-                [ 'snp_triangle_glovar' => "SNPs" ],
+                [ 'glovar_snp_triangle' => "SNPs" ],
             ],
             'options' => [
                 [ 'opt_empty_tracks' => 'Show empty tracks' ],

@@ -21,6 +21,26 @@ use CGI qw(escapeHTML);
 
 # General info table #########################################################
 
+
+=head2 version_info
+
+ Arg1,2      : panel, data object
+ Description : static paragraph of info text
+ Output      : two col table
+ Return type : 1
+
+=cut
+
+
+sub version_info {
+   my ($panel, $object) = @_;
+  $panel->print(qq(<p>Ensembl Gene, Transcript and Exon versions are distinct from 
+database versions.  The versions increment when there is a sequence change to a Gene, Transcript or Exon respectively (considering exons only for genes and transcripts). Genes or Transcripts may merge over time. When this happens one identifier is retired.  The retired IDs are shown in the table. </p>));
+
+ return 1;
+}
+
+
 =head2 name
 
  Arg1,2      : panel, data object
@@ -92,7 +112,7 @@ sub status {
       sprintf ($url, $succ_id, $succ_id).
 	" in release ".$_->release; } @successors;
     $status .= " <b>$verb</b><br />".
-      join "and <br />", @successor_text if @successors;
+      join " and <br />", @successor_text if @successors;
   }
   elsif ($current_obj->version eq $object->version) {
     $status = "Current release ".$object->species_defs->ENSEMBL_VERSION;
@@ -112,12 +132,37 @@ sub archive {
   my ($panel, $object) = @_;
   my $id = $object->stable_id.".".$object->version;
   my $param = $object->type eq 'Translation' ? 'peptide' : lc($object->type);
-  my $archive = _archive_link($object, $id, $param, "Archive <img src='/img/ensemblicon.gif'/>");
-  if ($archive) {
-    $panel->add_row("Archive", "$archive (release ".$object->release.")");
+
+  my ($history, $releases) = _get_history($object);
+
+  my $current_obj = $object->get_current_object($object->type);
+  if ($current_obj && $current_obj->version eq $object->version) {
+    $panel->add_row("Archive", "This version is current");
   }
   else {
-    $panel->add_row("Archive", "No archive for release ".$object->release." available.");
+    my @archive_releases;
+    if ($history) {
+      for  (my $i =0; $i < scalar @$releases; $i++) {
+	foreach my $a ( @{ $history->{ $releases->[$i] } }  ) {
+	  my $history_id = $a->stable_id.".".$a->version;
+	  next unless $history_id eq $id;
+	  push @archive_releases,  $releases->[$i], $releases->[$i+1]+1;
+	  last;
+	}
+      }
+    }
+
+    my $text;
+    if (scalar @archive_releases > 1) {
+    my $archive_first = _archive_link($object, $id, $param, "Archive <img src='/img/ensemblicon.gif'/>", $archive_releases[-1]) || " (no web archive)";
+    my $archive_last = _archive_link($object, $id, $param, "Archive <img src='/img/ensemblicon.gif'/>", $archive_releases[0]) || " (no web archive)";
+
+    $text = "$id was in release $archive_releases[-1] $archive_first to $archive_releases[0] $archive_last";
+  }
+    else {
+      $text = "No archive available for $id";
+    }
+    $panel->add_row("Archive", $text);
   }
   return 1;
 }
@@ -178,6 +223,29 @@ sub associated_ids {
 }
 
 
+=head2 _get_history
+
+ Arg1        : data object
+ Description : gets history and order of releases for object
+ Output      : hashref, arrayref
+ Return type : hashref, arrayref
+
+=cut
+
+sub _get_history {
+  my ($object) = @_;
+  my $history;
+  foreach my $arch_id ( @{ $object->history} ) {
+    push @{ $history->{$arch_id->release} }, $arch_id;
+  }
+  return unless keys %$history;
+  my @releases = (sort { $b <=> $a } keys %$history);
+  return ($history, \@releases);
+}
+
+
+
+
 =head2 history
 
  Arg1,2      : panel, data object
@@ -187,13 +255,11 @@ sub associated_ids {
 
 =cut
 
+
 sub history {
   my($panel, $object) = @_;
-  my $history;
-  foreach my $arch_id ( @{ $object->history} ) {
-    push @{ $history->{$arch_id->release} }, $arch_id;
-  }
-  return unless keys %$history;
+  my ($history, $release_ref) = _get_history($object);
+  return unless $history;
 
   $panel->add_columns(
     { 'key' => 'Release',  },
@@ -206,9 +272,10 @@ sub history {
   my $param = $type eq 'Translation' ? "peptide" : lc($type);
   my $id_focus = $object->stable_id.".".$object->version;
 
-  my @releases = (sort { $b <=> $a } keys %$history);
+
   # loop over releases and print results
 
+  my @releases = @$release_ref;
   for (my $i =0; $i <= $#releases; $i++) {
     my $row;
     if ( $releases[$i]-$releases[$i+1] == 1) {
@@ -240,7 +307,12 @@ sub history {
       $panel->add_columns(  { 'key' => $a->stable_id, 
 			      'title' => $type.": ".$a->stable_id} ) unless $columns{$a->stable_id};
       $columns{$a->stable_id}++;
-      my $archive = _archive_link($object, $id, $param, "<img src='/img/ensemblicon.gif'/>",  $releases[$i]);
+
+      # Link to archive of first appearance
+      my $first = $releases[$i+1]+1;
+      $first = 26 if $first < 26 && $releases[$i] > 25;
+
+      my $archive = _archive_link($object, $id, $param, "<img src='/img/ensemblicon.gif'/>",  $first, $a->version );
       my $display_id = $id eq $id_focus ? "<b>$id</b>" : $id;
       $row->{$a->stable_id} = qq(<a href="idhistoryview?$param).qq(=$id">$display_id</a> $archive);
     }
@@ -264,12 +336,13 @@ sub history {
 
 
 sub _archive_link {
-  my ($object, $name, $type, $id, $release) = @_;
+  my ($object, $name, $type, $id, $release, $version) = @_;
   $release ||= $object->release;
-  return unless $release > 24;
+  $version ||= $object->version;
+  return unless $release >= 25;
   my $url;
   my $current_obj = $object->get_current_object($type, $name);
-  if ($current_obj && $current_obj->version eq $object->version) {
+  if ($current_obj && $current_obj->version eq $version) {
     $url = "/";
   }
   else {

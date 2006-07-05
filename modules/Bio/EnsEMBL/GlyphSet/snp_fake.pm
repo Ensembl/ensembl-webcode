@@ -36,8 +36,8 @@ sub _init {
     my @alleles = split "\/", $label;
     my  $h = 4 + ($th+2) * scalar @alleles;
 
-    my @res = $self->get_text_width( ($end-$start+1)*$pix_per_bp, $label, 'A', 'font'=>$fontname, 'ptsize' => $fontsize );
-    if( $res[0] eq $label ) {
+    my @res = $self->get_text_width( ($end-$start+1)*$pix_per_bp, $label =~ /\w\/\w/ ? 'A/A' : $label, 'A', 'font'=>$fontname, 'ptsize' => $fontsize );
+    if( $res[0] eq $label || $res[0] eq 'A/A' ) {
       $h = 8 + $th*2;
       my $tmp_width = ($w*2+$res[2]) / $pix_per_bp;
       if ( ($end - $start + 1) > $tmp_width ) {
@@ -56,7 +56,7 @@ sub _init {
         'absolutey'  => 1,
       });
       $self->push( $textglyph );
-    } elsif( $res[0] eq 'X' && $label =~ /^[-\w](\/[-\w])+$/ ) {
+    } elsif( $res[0] eq 'A' && $label =~ /^[-\w](\/[-\w])+$/ ) {
       for (my $i = 0; $i < 3; $i ++ ) {
 	my $textglyph = new Sanger::Graphics::Glyph::Text({
           'x'          => ( $end + $start - 1 )/2,

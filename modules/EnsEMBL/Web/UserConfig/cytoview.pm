@@ -45,8 +45,6 @@ $self->{'general'}->{'cytoview'} = {
       # [ 'decipher'     =>  'DECIPHER'    ],
     ],
     'options' => [
-      [ 'fosmid_map'     => 'Fosmid map' 		],
-#      [ 'bac_map'     => 'BAC map' 		],
       [ 'haplotype_links'    => 'Haplotype blocks'       ],
       [ 'bacends'     => 'BACends'       ],
       [ 'supercontigs'  => 'FPC Contigs'     ],
@@ -60,7 +58,6 @@ $self->{'general'}->{'cytoview'} = {
       [ 'opt_lines'     => 'Show register lines' ],
       [ 'opt_empty_tracks'=> 'Show empty tracks' ],
       [ 'opt_zmenus'    => 'Show popup menus'  ],
-#      [ 'opt_zclick'    => '... popup on click'  ],
       [ 'gap'        => 'Gaps' ],
     ],
     'menus' => [ qw(features DAS options repeats export jumpto resize) ]
@@ -256,23 +253,6 @@ $self->{'general'}->{'cytoview'} = {
     'available' => 'features mapset_cloneset',
     'colours' => {
       'col' => 'gold',
-      'lab' => 'black'
-    },
-    'str' => 'r',
-    'dep' => '9999999',
-    'threshold_navigation' => '100000',
-    'full_threshold'     => '50000',
-    'outline_threshold'  => '350000'
-  },
-  'fosmid_map' => {
-    'on' => 'on',
-    'height' => 5,
-    'pos' => '994',
-    'col' => 'purple2',
-    'lab' => 'black',
-    'available' => 'features mapset_fosmid_map',
-    'colours' => {
-      'col' => 'purple2',
       'lab' => 'black'
     },
     'str' => 'r',

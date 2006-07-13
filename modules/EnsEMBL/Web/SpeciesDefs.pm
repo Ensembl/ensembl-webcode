@@ -97,7 +97,7 @@ sub new {
   my $conffile = $SiteDefs::ENSEMBL_CONF_DIRS[0].'/'.$ENSEMBL_CONFIG_FILENAME;
   $self->{'_filename'} = $conffile;
 
-warn "NEW.... $CONF";
+#warn "NEW.... $CONF";
   $self->parse unless $CONF;
 
   ## Diagnostic - sets up back trace of point at which new was

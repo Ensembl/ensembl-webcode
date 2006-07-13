@@ -25,6 +25,13 @@ BEGIN{
 }
 
 
+my %featuresMasterTable = (
+			   'karyotype' => 'karyotype',
+			   'transcripts' => 'gene',
+			   'ditags' => 'ditag_feature',
+			   'cagetags' => 'ditag_feature'
+			   );
+
 # Load modules needed for reading config -------------------------------------
 require EnsEMBL::Web::SpeciesDefs; 
 my $species_defs = EnsEMBL::Web::SpeciesDefs->new();
@@ -43,6 +50,7 @@ foreach my $sp (@$species) {
 			  	 -species => $sp,
 				 -dbname => $db_info->{'NAME'},
 				 -host => $db_info->{'HOST'},
+				 -port => $db_info->{'PORT'},
 				 -user=> $db_info->{'USER'},
 				 -driver => $db_info->{'DRIVER'},
 						 );
@@ -55,11 +63,27 @@ foreach my $sp (@$species) {
 
     $shash->{$mapmaster}->{description} = sprintf("%s Reference server based on %s assembly. Contains %d top level entries.", $sp, $species_defs->get_config($sp,'ENSEMBL_GOLDEN_PATH'), scalar(@toplevel_slices));
 
-    foreach my $feature ( qw(karyotype)) {
+    foreach my $feature ( qw(karyotype transcripts ditags cagetags)) {
+	my $db = 'ENSEMBL_DB';
+	my $table = $featuresMasterTable{$feature};
+	my $rv = $species_defs->get_table_size(
+					      { 
+						  -db => $db, 
+						  -table=> $table 
+					      },
+					      $sp
+					      );
+	print STDERR "\t $sp : $feature : $table => ", $rv || 'Off',  "\n";
+
+	next unless $rv;
+
+
 	my $dsn = sprintf("%s.%s.%s", $sp, $species_defs->get_config($sp,'ENSEMBL_GOLDEN_PATH'), $feature);
-    $shash->{$dsn}->{mapmaster} = "http://$SiteDefs::ENSEMBL_SERVERNAME/das/$mapmaster";
-    $shash->{$dsn}->{description} = sprintf("Annotation source for %s %s", $sp, $feature);
+	$shash->{$dsn}->{mapmaster} = "http://$SiteDefs::ENSEMBL_SERVERNAME/das/$mapmaster";
+	$shash->{$dsn}->{description} = sprintf("Annotation source for %s %s", $sp, $feature);
     }
+
+    
 }
 
 dsn($shash);

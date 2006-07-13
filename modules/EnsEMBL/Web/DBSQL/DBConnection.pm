@@ -83,7 +83,7 @@ sub get_DBAdaptor {
     
     # try to retrieve the DBAdaptor from the Registry
     my $dba = $reg->get_DBAdaptor($species, $database);
-    warn "$species - $database - $dba";
+#    warn "$species - $database - $dba";
 
     # Glovar
     if(!defined($dba) || $database eq 'glovar'){
@@ -362,7 +362,7 @@ sub _get_core_database{
 sub _get_db_with_dnadb {
   my $self = shift;
   my $db = shift || die("No database given");
-  warn "..... $db ........";
+#  warn "..... $db ........";
   my $species = shift || die("No species given");
   #warn "_GET_DB_WIDTH_DNADB -> $db -> $species";
   my $getter = "_get_" . lc($db) . "_database";

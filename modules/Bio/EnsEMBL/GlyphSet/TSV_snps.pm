@@ -45,7 +45,7 @@ sub _init {
 
   # Data stuff
   my $colour_map = $Config->get('TSV_snps','colours' );
-  my $EXTENT        = $Config->get('_settings','context');
+  my $EXTENT        = $Config->get('_settings','context') || 1e6;
      $EXTENT        = 1e6 if $EXTENT eq 'FULL';
   my $seq_region_name = $self->{'container'}->seq_region_name();
   my @consequences =  @$consequences_ref;

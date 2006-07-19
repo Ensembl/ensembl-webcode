@@ -9,6 +9,10 @@ use Data::Dumper;
 use CGI
 $Data::Dumper::Indent = 1;
 
+#uncomment these two lines to disable searchview
+#print "Content-type: text/plain\n\nSearch currently unavailable\n";
+#exit;
+
 my $page = new EnsEMBL::Web::Document::WebPage;
 
 my $exalead = new ExaLead;

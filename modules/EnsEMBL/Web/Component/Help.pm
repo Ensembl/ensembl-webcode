@@ -21,6 +21,9 @@ sub _wrap_form {
 
 sub hv_intro      { _wrap_form($_[0], $_[1], 'hv_intro'); }
 sub hv_contact    { _wrap_form($_[0], $_[1], 'hv_contact'); }
+#vega
+sub hv_contact_vega    { _wrap_form($_[0], $_[1], 'hv_contact_vega'); }
+
 
 sub hv_multi {
   my($panel,$object) = @_;

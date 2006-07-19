@@ -29,25 +29,43 @@ sub helpview {
   ## the "helpview" wizard uses 7 nodes: intro, do search, multiple results, single result, 
   ## no result, send email and acknowledgement
   my $wizard = EnsEMBL::Web::Wizard::Help->new($object);
-  $wizard->add_nodes([qw(hv_intro hv_search hv_multi hv_single hv_contact hv_email hv_thanks)]);
-  $wizard->default_node('hv_intro');
+  #$wizard->add_nodes([qw(hv_intro hv_search hv_multi hv_single hv_contact hv_email hv_thanks)]);
+  #$wizard->default_node('hv_intro');
+
+  ## chain the nodes together
+  #$wizard->chain_nodes([
+   #       ['hv_intro'=>'hv_search'],
+   #       ['hv_search'=>'hv_multi'],
+   #       ['hv_search'=>'hv_single'],
+   #       ['hv_search'=>'hv_contact'],
+   #       ['hv_contact'=>'hv_email'],
+   #       ['hv_email'=>'hv_thanks'],
+ # ]);
+
+  #Vega
+  #
+
+  
+  $wizard->add_nodes([qw(hv_contact_vega hv_email hv_thanks hv_single hv_search hv_multi)]);
+  $wizard->default_node('hv_contact_vega');
 
   ## chain the nodes together
   $wizard->chain_nodes([
           ['hv_intro'=>'hv_search'],
           ['hv_search'=>'hv_multi'],
           ['hv_search'=>'hv_single'],
-          ['hv_search'=>'hv_contact'],
-          ['hv_contact'=>'hv_email'],
+          ['hv_search'=>'hv_contact_vega'],
+          ['hv_contact_vega'=>'hv_email'],
           ['hv_email'=>'hv_thanks'],
   ]);
-
+  
+  
   ## make this wizard compatible with old URLs
   if ($object->param('se')) {
     $wizard->current_node($object, 'hv_single');
   }
   elsif ($object->param('ref')) {
-    $wizard->current_node($object, 'hv_contact');
+    $wizard->current_node($object, 'hv_contact_vega');
   }
   elsif ($object->param('kw') && !$object->param('results') ) {
     $wizard->current_node($object, 'hv_search');

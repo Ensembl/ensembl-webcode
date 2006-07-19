@@ -100,6 +100,14 @@ sub _init {
       'title' => 'Contact Helpdesk',
       'page' => 1,
     },
+    'hv_contact_vega' => {
+      'form' => 1,
+      'title' => 'Vega Help',
+      'input_fields' => [qw(name email category comments)],
+
+    },
+
+
   );
 
   my $data = {
@@ -140,7 +148,7 @@ sub hv_search {
   ## avoid broken links
 
   if (!$total) {
-    $parameter{'node'} = 'hv_contact';
+    $parameter{'node'} = 'hv_contact_vega';
     $parameter{'search'} = $object->param('kw');
   }
   elsif ($total > 1) {
@@ -211,6 +219,55 @@ sub hv_contact {
                                                                                 
   return $form;
 }
+
+
+
+sub hv_contact_vega {
+  
+  # this is a special version of hv_contact that is specific to Vega
+
+  my ($self, $object) = @_;
+                                                                                
+  my $wizard = $self->{wizard};
+  my $script = $object->script;
+  my $species = $object->species;
+  my $node = 'hv_contact_vega'; 
+
+  my $form = EnsEMBL::Web::Form->new($node, "/$species/$script", 'post');
+                      
+  my $kw = $object->param('search');
+  if ($kw) {
+    $wizard->redefine_node($node, 'title', 'No matches found.');
+    $form->add_element(
+      'type' => 'Information',
+      'value' => qq(Sorry, your search for "$kw" found no matches. [N.B. Very common word such as 'Ensembl' and 'chromosome' are omitted by the search as they appear on almost every page.]<p>If you require more information, please contact us using the form below.</p>),
+    );
+  } else{
+    $form->add_element(
+      'type' => 'Information',
+      'value' => qq(To start searching, either enter your keywords in the lookup box above, or select one of the links on the left hand side. <p>If you require more information, please contact us using the form below</p>)
+    );
+  }
+  
+  ## more backwards compatibility
+  if ($object->param('kw')) {
+    $kw = $object->param('kw');
+  }
+  $wizard->add_widgets($node, $form, $object);
+  $form->add_element(
+    'type'  => 'Hidden',
+    'name'  => 'kw',
+    'value' => $kw,
+  );
+                                                                                
+  $wizard->add_buttons($node, $form, $object);
+  return $form;
+}
+
+
+
+
+
 
 sub hv_email {
   my ($self, $object) = @_;

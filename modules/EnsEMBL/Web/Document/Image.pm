@@ -66,9 +66,9 @@ sub karyotype {
     $wuc->container_width( $data->species_defs->MAX_CHR_LENGTH );
     my $total_chrs = @{$data->species_defs->ENSEMBL_CHROMOSOMES};
 
-    if (!($wuc->{'_rows'})) {
+#   if (!($wuc->{'_rows'})) {
        $wuc->{'_rows'} = $data->param('rows') || ceil($total_chrs / 13 );
-     }
+#     }
   } 
   else {
     $chr_name = $data->chr_name;

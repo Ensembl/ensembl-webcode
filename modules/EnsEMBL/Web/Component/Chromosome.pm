@@ -439,6 +439,7 @@ sub kv_display {
   }
 
   my $all_pointers;
+  $image->do_chr_layout($object,$config_name) if not $tracks and $chr eq 'ALL';;
   for (my $i = 0; $i < $tracks; $i++) {
     my $pointers = [];
     my $track_id = $i+1;

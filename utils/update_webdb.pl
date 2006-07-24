@@ -134,6 +134,10 @@ foreach my $sp (sort @species) {
     }
 }
 
+#exit if this is Vega with no presites
+my $st = $SD->get_config( $species[0],'ENSEMBL_SITE_NAME');
+exit if ($st eq 'Vega');
+
 ## Add pre species to release_species table
 
 my $pre_dir = $SERVERROOT.'/sanger-plugins/pre/conf/';

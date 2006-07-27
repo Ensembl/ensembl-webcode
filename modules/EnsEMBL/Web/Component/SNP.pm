@@ -74,6 +74,7 @@ sub synonyms {
   my $info;
 
   foreach my $db (keys %synonyms) {
+
     my @ids =  @{ $synonyms{$db} } ;
     my @urls;
 
@@ -82,7 +83,6 @@ sub synonyms {
     }
     elsif ($db =~ /dbsnp/i) { 
       foreach (@ids) {
-	next if $_ =~/^ss/; # don't display SSIDs - these are useless
 	push @urls , $object->get_ExtURL_link( $_, 'DBSNPSS', $_ );
       }
       next unless @urls;

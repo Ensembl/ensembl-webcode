@@ -67,6 +67,17 @@ sub new {
     hi                 green
     default            violet2 
   ));
+  $self->colourSet( 'oxford_genes',
+    'hi'         => 'highlight1',
+    'superhi'    => 'highlight2',
+    'oxford' => [ 'darkred', 'Oxford genes' ]
+  );
+  $self->colourSet( 'platypus_protein',
+    'hi'         => 'highlight1',
+    'superhi'    => 'highlight2',
+    'platypus_protein' => [ 'blue', 'Platypus protein' ],
+    'other_protein' => [ 'black', 'Other protein' ],
+  );
   $self->colourSet( 'dog_protein',
     'hi'         => 'highlight1',
     'superhi'    => 'highlight2',

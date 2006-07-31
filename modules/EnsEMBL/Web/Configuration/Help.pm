@@ -46,7 +46,7 @@ sub helpview {
   #
 
   
-  $wizard->add_nodes([qw(hv_contact_vega hv_email hv_thanks hv_single hv_search hv_multi)]);
+  $wizard->add_nodes([qw(hv_intro hv_contact_vega hv_email hv_thanks hv_single hv_search hv_multi)]);
   $wizard->default_node('hv_contact_vega');
 
   ## chain the nodes together
@@ -62,7 +62,12 @@ sub helpview {
   
   ## make this wizard compatible with old URLs
   if ($object->param('se')) {
-    $wizard->current_node($object, 'hv_single');
+    if($object->param('kw') && ($object->param('kw') eq 'newsview')){
+      $wizard->current_node($object, 'hv_contact_vega');
+    }
+    else{
+      $wizard->current_node($object, 'hv_single');
+    }
   }
   elsif ($object->param('ref')) {
     $wizard->current_node($object, 'hv_contact_vega');
@@ -70,6 +75,7 @@ sub helpview {
   elsif ($object->param('kw') && !$object->param('results') ) {
     $wizard->current_node($object, 'hv_search');
   }
+
 
   $self->add_wizard($wizard);
   $self->wizard_panel('');

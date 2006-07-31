@@ -879,6 +879,7 @@ sub ADD_ALL_DNA_FEATURES {
   $self->add_new_track_cdna( 'mouse_cdna', 'Mouse cDNAs',   $POS++, @_ );
   $self->add_new_track_cdna( 'other_cdna', 'Other cDNAs',   $POS++, @_ );
   $self->add_new_track_cdna( 'opossum_cdna', 'Opossum cDNAs',   $POS++, @_ );
+  $self->add_new_track_cdna( 'platypus_cdnas', 'Platypus cDNAs',   $POS++, @_ );
 ## now the tetraodon tracks...
   $self->add_new_track_cdna( 'cdm', 'Tetraodon cDNAs',   $POS++, 'SUBTYPE'     => 'genoscope', 'on' => 'off', @_ );
   $self->add_new_track_cdna( 'xlaevis_cDNA', 'X.laevis cDNAs',   $POS++, @_ );
@@ -909,6 +910,7 @@ sub ADD_ALL_EST_FEATURES {
   $self->add_new_track_est( 'yeast_est',  'Yeast ESTs',   $POS++, @_ );
   $self->add_new_track_est( 'human_est',    'Human ESTs',      $POS++, @_ );
   $self->add_new_track_est( 'mouse_est',    'Mouse ESTs',      $POS++, @_ );
+  $self->add_new_track_est( 'platypus_ests', 'Platypus ESTs',   $POS++, @_ );
   $self->add_new_track_est( 'zfish_est',    'D.rerio ESTs',    $POS++, @_ );
   $self->add_new_track_est( 'Btaurus_Exonerate_EST',    'B.taurus ESTs',    $POS++, @_ );
   $self->add_new_track_est( 'Cow_ESTs',    'B.taurus ESTs',    $POS++, @_ );
@@ -1042,6 +1044,7 @@ sub ADD_ALL_PROTEIN_FEATURES {
   $self->add_new_track_protein( 'wormpep',             'Worm proteins',  $POS++, @_ );
   $self->add_new_track_protein( 'human_protein',       'Human proteins', $POS++, @_ );
   $self->add_new_track_protein( 'human_refseq',        'Human RefSeqs', $POS++, @_ );
+  $self->add_new_track_protein( 'platypus_protein', 'Platypus Proteins',   $POS++, @_ );
   $self->add_new_track_protein( 'dog_protein',         'Dog proteins', $POS++, @_ );
   $self->add_new_track_protein( 'Btaurus_Exonerate_Protein',         'Cow proteins', $POS++, @_ );
   $self->add_new_track_protein( 'cow_proteins',         'Cow proteins', $POS++, @_ );
@@ -1146,6 +1149,11 @@ sub ADD_ALL_TRANSCRIPTS {
   $self->add_new_track_transcript( 'vectorbase_0_5',   'VectorBase genes',   'vectorbase_0_5',   $POS++, @_ );
   $self->add_new_track_transcript( 'tigr_0_5',   'TIGR genes',   'tigr_0_5',   $POS++, @_ );
   $self->add_new_track_transcript( 'homology_low', 'Bee genes',    'bee_pre_gene',   $POS++, @_ );
+
+  $self->add_new_track_transcript( 'oxford_genes', 'Oxford Genes', 'oxford_genes', $POS++, @_ );
+
+  $self->add_new_track_transcript( 'platypus_protein', 'Platypus/Other Genes', 'platypus_protein', $POS++, @_ );
+
   # trancripts for Vega
   $self->add_new_track_transcript('vega', 'Vega genes', 'vega_gene',
     $POS++, 'glyph' => 'vega_transcript', 'logic_name' => 'otter',
@@ -1257,6 +1265,17 @@ sub ADD_GENE_TRACKS {
     'gene_col'             => 'cow_protein', @_
   );
 
+  $self->add_new_track_gene( 'oxford_genes', 'Oxford Genes', 'oxford_genes', $POS++,
+    'gene_label'           => sub { return $_[0]->stable_id },
+    'gene_col'             => 'oxford', @_
+  );
+
+  $self->add_new_track_gene( 'platypus_protein', 'Platypus/Other Genes', 'platypus_protein', $POS++,
+    'logic_name'           => 'platypus_protein other_protein',
+    'gene_label'           => sub { return $_[0]->stable_id },
+    'gene_col'             => sub { return $_[0]->analysis->logic_name }, @_
+  );
+
   $self->add_new_track_gene( 'VectorBase_0_5', 'VectorBase proteins', 'vectorbase_0_5', $POS++,
     'gene_label'           => sub { return $_[0]->stable_id },
     'gene_col'             => 'vectorbase_0_5', @_
@@ -1361,6 +1380,7 @@ sub ADD_AS_GENE_TRACKS {
 			       'gene_col'             => sub { return $_[0]->biotype eq 'Genoscope_predicted' ? '_GSTEN'    : '_HOX' },
 			       'logic_name'           => 'gsten hox cyt', @_
 			       );
+
     
     $self->add_new_track_gene( 'otter', 'Vega Genes', 'vega_gene', $POS++,
 			       'database' => 'vega', 'available' => 'databases ENSEMBL_VEGA',

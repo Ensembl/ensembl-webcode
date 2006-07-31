@@ -28,7 +28,7 @@ sub default_track_by_gene {
     ),
     map( {($_, $_.'_transcript')} qw(
       vectorbase_0_5 tigr_0_5
-      cdna_all targettedgenewise
+      cdna_all targettedgenewise oxford_genes
       genebuilderbeeflymosandswall gsten flybase wormbase
       ensembl sgd homology_low cow_proteins refseq mouse_protein dog_protein
       jamboree_cdnas ciona_dbest_ncbi ciona_est_seqc ciona_est_seqn
@@ -39,6 +39,8 @@ sub default_track_by_gene {
       rodent_protein   rprot_transcript
       hox              gsten_transcript
       cyt              gsten_transcript
+      playtpus_protein platypus_protein_transcript
+      other_protein    platypus_protein_transcript
       ncrna            rna_transcript
       mirna            rna_transcript
       trna             rna_transcript

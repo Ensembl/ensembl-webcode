@@ -61,10 +61,13 @@ sub alignview_External {
   my $geneid  = $object->param('gene');
   my $title = "Alignment between External Feature: $seqid and";
 
-  $title .= " Gene ID: $geneid" if $geneid;
-  $title .= " Exon ID: $exonid" if $exonid;
-  $title .= " Transcript ID: $tranid" if $tranid;
-    
+  if ($tranid) {
+	  $title .= " Transcript ID: $tranid";
+  }
+  else {
+	  $title .= " Gene ID: $geneid" if $geneid;
+	  $title .= " Exon ID: $exonid" if $exonid;
+}
   if( my $panel1 = $self->new_panel( '', 'code'    => "info", 'caption' => $title) ) {
     $panel1->add_components(qw(
       output EnsEMBL::Web::Component::Alignment::output_External

@@ -202,7 +202,8 @@ sub new {
         'absolutey' => 1,
         'x'         => -$panel_start + $margin + 2,
         'y'         => -2,
-        'width'     => 1,
+        'width'     => 6,
+        'textwidth'     => 6,
         'height'    => 6,
         'colour'    => 'red',
         'absolutex' => 1, 'absolutewidth' => 1, 'pixperbp' => $x_scale
@@ -273,9 +274,7 @@ sub new {
       ## set up the "bumping button" label for this strip
       if(defined $glyphset->label() && $show_labels eq 'yes' ) {
         my $gh = $glyphset->label->height || $Config->texthelper->height($glyphset->label->font());
-        $glyphset->label->y(
-          ( ($glyphset->maxy() - $glyphset->miny() - $gh) / 2) + $gminy
-        );
+        $glyphset->label->y( ( ($glyphset->maxy() - $glyphset->miny() - $gh) / 2) + $gminy );
         $glyphset->label->height($gh);
         $glyphset->label()->pixelwidth( $label_width );
         $glyphset->push( $glyphset->label() );
@@ -310,15 +309,18 @@ sub new {
 sub render {
   my ($self, $type) = @_;
   
+ my $timer = $self->can('species_defs') ? $self->species_defs->{'timer'} : undef;
   ## build the name/type of render object we want
   my $renderer_type = qq(Sanger::Graphics::Renderer::$type);
   $self->dynamic_use( $renderer_type );
+  $timer->push("Used renderer $type",8) if $timer;
   ## big, shiny, rendering 'GO' button
   my $renderer = $renderer_type->new(
     $self->{'config'},
     $self->{'__extra_block_spacing__'},
     $self->{'glyphsets'}
   );
+  $timer->push("Created $type",8) if $timer;
   return $renderer->canvas();
 }
 

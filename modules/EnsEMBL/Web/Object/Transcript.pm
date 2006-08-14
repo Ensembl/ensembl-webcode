@@ -853,6 +853,7 @@ sub get_markedup_trans_seq {
   eval {
     my $pep_obj = $trans->translate;
     $peptide = $pep_obj->seq();
+warn "...... $peptide ....";
     $can_translate = 1;
     $flip = 0;
     my $startphase = $trans->translation->start_Exon->phase;
@@ -868,7 +869,7 @@ sub get_markedup_trans_seq {
     for( my $i= $cd_start + $S - 1; ($i+2)<= $cd_end; $i+=3) {
       $bps[$i]{'bg'}=$bps[$i+1]{'bg'}=$bps[$i+2]{'bg'} = "c$flip";
       $bps[$i]{'peptide'}=$bps[$i+2]{'peptide'}='-';    # puts dash a beginging AND end of codon
-      $bps[$i+1]{'peptide'}=substr($peptide,int( ($i+1-$cd_start)/3 ), 1 ) || '.';
+      $bps[$i+1]{'peptide'}=substr($peptide,int( ($i+1-$cd_start)/3 ), 1 ) || ($i+1 < $cd_end ? '*' : '.');
       $flip = 1-$flip;
     }
     $peptide = '';

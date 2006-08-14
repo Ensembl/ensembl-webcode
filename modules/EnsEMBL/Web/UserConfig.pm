@@ -229,7 +229,7 @@ sub add_new_track_cdna {
     'str'         => 'b',
     'compact'     => 0,
     'glyphset'    => 'generic_match',
-    'SUBTYPE'     => sub {$_[0] =~ /^NM_/ ? 'refseq' : ( $_[0] =~ /(RO|ZX|PX|ZA|PL)\d{5}[A-Z]\d{2}/ ? 'riken' : 'default') },
+    'SUBTYPE'     => sub {$_[0] =~ /^N[MR]_/ ? 'refseq' : ( $_[0] =~ /(RO|ZX|PX|ZA|PL)\d{5}[A-Z]\d{2}/ ? 'riken' : 'default') },
     'URL_KEY'     => { 'refseq' => 'REFSEQ', 'riken' => 'RIKEN', 'default' => 'EMBL', 'genoscope_ecotig' => 'TETRAODON_ECOTIG', 'genoscope' => 'TETRAODON_CDM' },
     'ID'          => { 'refseq' => TRIM },
     'ZMENU'       => {
@@ -932,7 +932,6 @@ sub ADD_ALL_DNA_FEATURES {
 
   foreach ( @EST_DB_CDNA ) {
     my($A,$B,@T) = @$_;
-    warn ".. $A $B ..";
     $self->add_new_track_cdna( "otherfeatures_$A",  $B, $POS++,
                               'FEATURES'  => $A, 'available' => "database_features ENSEMBL_OTHERFEATURES.$A",
                               'THRESHOLD' => 0, 'DATABASE' => 'otherfeatures', @T, @_ );

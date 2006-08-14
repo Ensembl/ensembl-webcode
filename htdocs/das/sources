@@ -1,0 +1,593 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<SOURCES xmlns="http://biodas.org/documents/das2">
+ 
+  <SOURCE uri="ENSEMBL_1_AaegL1" title="Aedes_aegypti.AaegL1.reference" description="Aedes_aegypti Reference server based on AaegL1 assembly. Contains 4758 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="7159" source="Chromosome" authority="AaegL1" version="AaegL1" test_range="supercont1.32:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Aedes_aegypti.AaegL1.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Aedes_aegypti.AaegL1.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_AaegL1" title="Aedes_aegypti.AaegL1.transcripts" description="Annotation source for Aedes_aegypti transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="7159" source="Chromosome" authority="AaegL1" version="AaegL1" test_range="supercont1.32:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Aedes_aegypti.AaegL1.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Aedes_aegypti.AaegL1.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_2_AgamP3" title="Anopheles_gambiae.AgamP3.karyotype" description="Annotation source for Anopheles_gambiae karyotype">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="7165" source="Chromosome" authority="AgamP3" version="AgamP3" test_range="2L:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Anopheles_gambiae.AgamP3.karyotype/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Anopheles_gambiae.AgamP3.karyotype/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_AgamP3" title="Anopheles_gambiae.AgamP3.reference" description="Anopheles_gambiae Reference server based on AgamP3 assembly. Contains 7 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="7165" source="Chromosome" authority="AgamP3" version="AgamP3" test_range="2L:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Anopheles_gambiae.AgamP3.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Anopheles_gambiae.AgamP3.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_AgamP3" title="Anopheles_gambiae.AgamP3.transcripts" description="Annotation source for Anopheles_gambiae transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="7165" source="Chromosome" authority="AgamP3" version="AgamP3" test_range="2L:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Anopheles_gambiae.AgamP3.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Anopheles_gambiae.AgamP3.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_Btau_2.0" title="Bos_taurus.Btau_2.0.reference" description="Bos_taurus Reference server based on Btau_2.0 assembly. Contains 98088 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9913" source="Chromosome" authority="Btau_2.0" version="Btau_2.0" test_range="18:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Bos_taurus.Btau_2.0.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Bos_taurus.Btau_2.0.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_Btau_2.0" title="Bos_taurus.Btau_2.0.transcripts" description="Annotation source for Bos_taurus transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9913" source="Chromosome" authority="Btau_2.0" version="Btau_2.0" test_range="18:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Bos_taurus.Btau_2.0.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Bos_taurus.Btau_2.0.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_CEL150" title="Caenorhabditis_elegans.CEL150.reference" description="Caenorhabditis_elegans Reference server based on CEL150 assembly. Contains 7 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="6239" source="Chromosome" authority="CEL150" version="CEL150" test_range="MtDNA:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Caenorhabditis_elegans.CEL150.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Caenorhabditis_elegans.CEL150.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_CEL150" title="Caenorhabditis_elegans.CEL150.transcripts" description="Annotation source for Caenorhabditis_elegans transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="6239" source="Chromosome" authority="CEL150" version="CEL150" test_range="MtDNA:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Caenorhabditis_elegans.CEL150.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Caenorhabditis_elegans.CEL150.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_BROADD1" title="Canis_familiaris.BROADD1.reference" description="Canis_familiaris Reference server based on BROADD1 assembly. Contains 41 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9615" source="Chromosome" authority="BROADD1" version="BROADD1" test_range="11:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Canis_familiaris.BROADD1.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Canis_familiaris.BROADD1.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_BROADD1" title="Canis_familiaris.BROADD1.transcripts" description="Annotation source for Canis_familiaris transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9615" source="Chromosome" authority="BROADD1" version="BROADD1" test_range="11:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Canis_familiaris.BROADD1.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Canis_familiaris.BROADD1.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_JGI2" title="Ciona_intestinalis.JGI2.reference" description="Ciona_intestinalis Reference server based on JGI2 assembly. Contains 4390 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="7719" source="Chromosome" authority="JGI2" version="JGI2" test_range="1p:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Ciona_intestinalis.JGI2.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Ciona_intestinalis.JGI2.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_JGI2" title="Ciona_intestinalis.JGI2.transcripts" description="Annotation source for Ciona_intestinalis transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="7719" source="Chromosome" authority="JGI2" version="JGI2" test_range="1p:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Ciona_intestinalis.JGI2.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Ciona_intestinalis.JGI2.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_CSAV2.0" title="Ciona_savignyi.CSAV2.0.reference" description="Ciona_savignyi Reference server based on CSAV2.0 assembly. Contains 374 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="51511" source="Chromosome" authority="CSAV2.0" version="CSAV2.0" test_range="reftig_35:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Ciona_savignyi.CSAV2.0.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Ciona_savignyi.CSAV2.0.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_CSAV2.0" title="Ciona_savignyi.CSAV2.0.transcripts" description="Annotation source for Ciona_savignyi transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="51511" source="Chromosome" authority="CSAV2.0" version="CSAV2.0" test_range="reftig_35:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Ciona_savignyi.CSAV2.0.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Ciona_savignyi.CSAV2.0.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_ZFISH6" title="Danio_rerio.ZFISH6.reference" description="Danio_rerio Reference server based on ZFISH6 assembly. Contains 2991 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="7955" source="Chromosome" authority="ZFISH6" version="ZFISH6" test_range="3:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Danio_rerio.ZFISH6.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Danio_rerio.ZFISH6.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_ZFISH6" title="Danio_rerio.ZFISH6.transcripts" description="Annotation source for Danio_rerio transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="7955" source="Chromosome" authority="ZFISH6" version="ZFISH6" test_range="3:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Danio_rerio.ZFISH6.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Danio_rerio.ZFISH6.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_ARMA" title="Dasypus_novemcinctus.ARMA.reference" description="Dasypus_novemcinctus Reference server based on ARMA assembly. Contains 283219 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9361" source="Chromosome" authority="ARMA" version="ARMA" test_range="GeneScaffold_3145:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Dasypus_novemcinctus.ARMA.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Dasypus_novemcinctus.ARMA.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_ARMA" title="Dasypus_novemcinctus.ARMA.transcripts" description="Annotation source for Dasypus_novemcinctus transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9361" source="Chromosome" authority="ARMA" version="ARMA" test_range="GeneScaffold_3145:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Dasypus_novemcinctus.ARMA.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Dasypus_novemcinctus.ARMA.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_2_BDGP4.3" title="Drosophila_melanogaster.BDGP4.3.karyotype" description="Annotation source for Drosophila_melanogaster karyotype">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="7227" source="Chromosome" authority="BDGP4.3" version="BDGP4.3" test_range="2L:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Drosophila_melanogaster.BDGP4.3.karyotype/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Drosophila_melanogaster.BDGP4.3.karyotype/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_BDGP4.3" title="Drosophila_melanogaster.BDGP4.3.reference" description="Drosophila_melanogaster Reference server based on BDGP4.3 assembly. Contains 12 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="7227" source="Chromosome" authority="BDGP4.3" version="BDGP4.3" test_range="2L:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Drosophila_melanogaster.BDGP4.3.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Drosophila_melanogaster.BDGP4.3.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_BDGP4.3" title="Drosophila_melanogaster.BDGP4.3.transcripts" description="Annotation source for Drosophila_melanogaster transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="7227" source="Chromosome" authority="BDGP4.3" version="BDGP4.3" test_range="2L:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Drosophila_melanogaster.BDGP4.3.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Drosophila_melanogaster.BDGP4.3.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_TENREC" title="Echinops_telfairi.TENREC.reference" description="Echinops_telfairi Reference server based on TENREC assembly. Contains 297967 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9371" source="Chromosome" authority="TENREC" version="TENREC" test_range="GeneScaffold_6570:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Echinops_telfairi.TENREC.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Echinops_telfairi.TENREC.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_TENREC" title="Echinops_telfairi.TENREC.transcripts" description="Annotation source for Echinops_telfairi transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9371" source="Chromosome" authority="TENREC" version="TENREC" test_range="GeneScaffold_6570:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Echinops_telfairi.TENREC.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Echinops_telfairi.TENREC.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_WASHUC1" title="Gallus_gallus.WASHUC1.reference" description="Gallus_gallus Reference server based on WASHUC1 assembly. Contains 54 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9031" source="Chromosome" authority="WASHUC1" version="WASHUC1" test_range="6:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Gallus_gallus.WASHUC1.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Gallus_gallus.WASHUC1.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_WASHUC1" title="Gallus_gallus.WASHUC1.transcripts" description="Annotation source for Gallus_gallus transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9031" source="Chromosome" authority="WASHUC1" version="WASHUC1" test_range="6:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Gallus_gallus.WASHUC1.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Gallus_gallus.WASHUC1.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_BROADS1" title="Gasterosteus_aculeatus.BROADS1.reference" description="Gasterosteus_aculeatus Reference server based on BROADS1 assembly. Contains 1844 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="69293" source="Chromosome" authority="BROADS1" version="BROADS1" test_range="contig_11142:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Gasterosteus_aculeatus.BROADS1.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Gasterosteus_aculeatus.BROADS1.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_BROADS1" title="Gasterosteus_aculeatus.BROADS1.transcripts" description="Annotation source for Gasterosteus_aculeatus transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="69293" source="Chromosome" authority="BROADS1" version="BROADS1" test_range="contig_11142:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Gasterosteus_aculeatus.BROADS1.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Gasterosteus_aculeatus.BROADS1.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_5_NCBI36" title="Homo_sapiens.NCBI36.cagetags" description="Annotation source for Homo_sapiens cagetags">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9606" source="Chromosome" authority="NCBI36" version="NCBI36" test_range="1:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Homo_sapiens.NCBI36.cagetags/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Homo_sapiens.NCBI36.cagetags/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_4_NCBI36" title="Homo_sapiens.NCBI36.ditags" description="Annotation source for Homo_sapiens ditags">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9606" source="Chromosome" authority="NCBI36" version="NCBI36" test_range="1:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Homo_sapiens.NCBI36.ditags/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Homo_sapiens.NCBI36.ditags/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_2_NCBI36" title="Homo_sapiens.NCBI36.karyotype" description="Annotation source for Homo_sapiens karyotype">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9606" source="Chromosome" authority="NCBI36" version="NCBI36" test_range="1:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Homo_sapiens.NCBI36.karyotype/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Homo_sapiens.NCBI36.karyotype/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_NCBI36" title="Homo_sapiens.NCBI36.reference" description="Homo_sapiens Reference server based on NCBI36 assembly. Contains 117 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9606" source="Chromosome" authority="NCBI36" version="NCBI36" test_range="1:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Homo_sapiens.NCBI36.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Homo_sapiens.NCBI36.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_NCBI36" title="Homo_sapiens.NCBI36.transcripts" description="Annotation source for Homo_sapiens transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9606" source="Chromosome" authority="NCBI36" version="NCBI36" test_range="1:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Homo_sapiens.NCBI36.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Homo_sapiens.NCBI36.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_BROADE1" title="Loxodonta_africana.BROADE1.reference" description="Loxodonta_africana Reference server based on BROADE1 assembly. Contains 213843 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9785" source="Chromosome" authority="BROADE1" version="BROADE1" test_range="GeneScaffold_1118:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Loxodonta_africana.BROADE1.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Loxodonta_africana.BROADE1.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_BROADE1" title="Loxodonta_africana.BROADE1.transcripts" description="Annotation source for Loxodonta_africana transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9785" source="Chromosome" authority="BROADE1" version="BROADE1" test_range="GeneScaffold_1118:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Loxodonta_africana.BROADE1.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Loxodonta_africana.BROADE1.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_MMUL_1" title="Macaca_mulatta.MMUL_1.reference" description="Macaca_mulatta Reference server based on MMUL_1 assembly. Contains 121811 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9544" source="Chromosome" authority="MMUL_1" version="MMUL_1" test_range="11:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Macaca_mulatta.MMUL_1.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Macaca_mulatta.MMUL_1.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_MMUL_1" title="Macaca_mulatta.MMUL_1.transcripts" description="Annotation source for Macaca_mulatta transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9544" source="Chromosome" authority="MMUL_1" version="MMUL_1" test_range="11:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Macaca_mulatta.MMUL_1.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Macaca_mulatta.MMUL_1.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_BROADO3" title="Monodelphis_domestica.BROADO3.reference" description="Monodelphis_domestica Reference server based on BROADO3 assembly. Contains 11 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="13616" source="Chromosome" authority="BROADO3" version="BROADO3" test_range="2:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Monodelphis_domestica.BROADO3.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Monodelphis_domestica.BROADO3.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_BROADO3" title="Monodelphis_domestica.BROADO3.transcripts" description="Annotation source for Monodelphis_domestica transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="13616" source="Chromosome" authority="BROADO3" version="BROADO3" test_range="2:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Monodelphis_domestica.BROADO3.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Monodelphis_domestica.BROADO3.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_5_NCBIM36" title="Mus_musculus.NCBIM36.cagetags" description="Annotation source for Mus_musculus cagetags">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="10090" source="Chromosome" authority="NCBIM36" version="NCBIM36" test_range="11:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Mus_musculus.NCBIM36.cagetags/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Mus_musculus.NCBIM36.cagetags/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_4_NCBIM36" title="Mus_musculus.NCBIM36.ditags" description="Annotation source for Mus_musculus ditags">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="10090" source="Chromosome" authority="NCBIM36" version="NCBIM36" test_range="11:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Mus_musculus.NCBIM36.ditags/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Mus_musculus.NCBIM36.ditags/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_2_NCBIM36" title="Mus_musculus.NCBIM36.karyotype" description="Annotation source for Mus_musculus karyotype">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="10090" source="Chromosome" authority="NCBIM36" version="NCBIM36" test_range="11:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Mus_musculus.NCBIM36.karyotype/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Mus_musculus.NCBIM36.karyotype/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_NCBIM36" title="Mus_musculus.NCBIM36.reference" description="Mus_musculus Reference server based on NCBIM36 assembly. Contains 99 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="10090" source="Chromosome" authority="NCBIM36" version="NCBIM36" test_range="11:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Mus_musculus.NCBIM36.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Mus_musculus.NCBIM36.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_NCBIM36" title="Mus_musculus.NCBIM36.transcripts" description="Annotation source for Mus_musculus transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="10090" source="Chromosome" authority="NCBIM36" version="NCBIM36" test_range="11:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Mus_musculus.NCBIM36.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Mus_musculus.NCBIM36.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_RABBIT" title="Oryctolagus_cuniculus.RABBIT.reference" description="Oryctolagus_cuniculus Reference server based on RABBIT assembly. Contains 196698 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9986" source="Chromosome" authority="RABBIT" version="RABBIT" test_range="GeneScaffold_3964:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Oryctolagus_cuniculus.RABBIT.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Oryctolagus_cuniculus.RABBIT.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_RABBIT" title="Oryctolagus_cuniculus.RABBIT.transcripts" description="Annotation source for Oryctolagus_cuniculus transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9986" source="Chromosome" authority="RABBIT" version="RABBIT" test_range="GeneScaffold_3964:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Oryctolagus_cuniculus.RABBIT.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Oryctolagus_cuniculus.RABBIT.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_CHIMP1A" title="Pan_troglodytes.CHIMP1A.reference" description="Pan_troglodytes Reference server based on CHIMP1A assembly. Contains 51 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9598" source="Chromosome" authority="CHIMP1A" version="CHIMP1A" test_range="11:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Pan_troglodytes.CHIMP1A.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Pan_troglodytes.CHIMP1A.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_CHIMP1A" title="Pan_troglodytes.CHIMP1A.transcripts" description="Annotation source for Pan_troglodytes transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="9598" source="Chromosome" authority="CHIMP1A" version="CHIMP1A" test_range="11:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Pan_troglodytes.CHIMP1A.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Pan_troglodytes.CHIMP1A.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_2_RGSC3.4" title="Rattus_norvegicus.RGSC3.4.karyotype" description="Annotation source for Rattus_norvegicus karyotype">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="10116" source="Chromosome" authority="RGSC3.4" version="RGSC3.4" test_range="19:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Rattus_norvegicus.RGSC3.4.karyotype/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Rattus_norvegicus.RGSC3.4.karyotype/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_RGSC3.4" title="Rattus_norvegicus.RGSC3.4.reference" description="Rattus_norvegicus Reference server based on RGSC3.4 assembly. Contains 31 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="10116" source="Chromosome" authority="RGSC3.4" version="RGSC3.4" test_range="19:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Rattus_norvegicus.RGSC3.4.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Rattus_norvegicus.RGSC3.4.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_RGSC3.4" title="Rattus_norvegicus.RGSC3.4.transcripts" description="Annotation source for Rattus_norvegicus transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="10116" source="Chromosome" authority="RGSC3.4" version="RGSC3.4" test_range="19:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Rattus_norvegicus.RGSC3.4.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Rattus_norvegicus.RGSC3.4.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_SGD1" title="Saccharomyces_cerevisiae.SGD1.reference" description="Saccharomyces_cerevisiae Reference server based on SGD1 assembly. Contains 17 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="4932" source="Chromosome" authority="SGD1" version="SGD1" test_range="XIII:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Saccharomyces_cerevisiae.SGD1.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Saccharomyces_cerevisiae.SGD1.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_SGD1" title="Saccharomyces_cerevisiae.SGD1.transcripts" description="Annotation source for Saccharomyces_cerevisiae transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="4932" source="Chromosome" authority="SGD1" version="SGD1" test_range="XIII:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Saccharomyces_cerevisiae.SGD1.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Saccharomyces_cerevisiae.SGD1.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_FUGU4" title="Takifugu_rubripes.FUGU4.reference" description="Takifugu_rubripes Reference server based on FUGU4 assembly. Contains 7213 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="31033" source="Chromosome" authority="FUGU4" version="FUGU4" test_range="scaffold_860:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Takifugu_rubripes.FUGU4.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Takifugu_rubripes.FUGU4.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_FUGU4" title="Takifugu_rubripes.FUGU4.transcripts" description="Annotation source for Takifugu_rubripes transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="31033" source="Chromosome" authority="FUGU4" version="FUGU4" test_range="scaffold_860:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Takifugu_rubripes.FUGU4.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Takifugu_rubripes.FUGU4.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_TETRAODON7" title="Tetraodon_nigroviridis.TETRAODON7.reference" description="Tetraodon_nigroviridis Reference server based on TETRAODON7 assembly. Contains 27 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="99883" source="Chromosome" authority="TETRAODON7" version="TETRAODON7" test_range="8:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Tetraodon_nigroviridis.TETRAODON7.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Tetraodon_nigroviridis.TETRAODON7.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_TETRAODON7" title="Tetraodon_nigroviridis.TETRAODON7.transcripts" description="Annotation source for Tetraodon_nigroviridis transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="99883" source="Chromosome" authority="TETRAODON7" version="TETRAODON7" test_range="8:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Tetraodon_nigroviridis.TETRAODON7.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Tetraodon_nigroviridis.TETRAODON7.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_1_JGI4.1" title="Xenopus_tropicalis.JGI4.1.reference" description="Xenopus_tropicalis Reference server based on JGI4.1 assembly. Contains 19501 top level entries.">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="8364" source="Chromosome" authority="JGI4.1" version="JGI4.1" test_range="scaffold_1:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Xenopus_tropicalis.JGI4.1.reference/features" />
+      <CAPABILITY type="das1:entry_points" query_uri="http://www.ensembl.org/das/Xenopus_tropicalis.JGI4.1.reference/entry_points"/>
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+ 
+  <SOURCE uri="ENSEMBL_3_JGI4.1" title="Xenopus_tropicalis.JGI4.1.transcripts" description="Annotation source for Xenopus_tropicalis transcripts">
+    <MAINTAINER email="helpdesk@ensembl.org" />
+    <VERSION uri="latest" created="2006-08-09">
+      <COORDINATES uri="ensembl_location_chromosome" taxid="8364" source="Chromosome" authority="JGI4.1" version="JGI4.1" test_range="scaffold_1:1,100000"/>
+      <CAPABILITY type="das1:features" query_uri="http://www.ensembl.org/das/Xenopus_tropicalis.JGI4.1.transcripts/features" />
+      <CAPABILITY type="das1:stylesheet" query_uri="http://www.ensembl.org/das/Xenopus_tropicalis.JGI4.1.transcripts/stylesheet"/> 
+      <PROPERTY name="label" value="ENSEMBL" />
+    </VERSION>
+  </SOURCE>
+</SOURCES>

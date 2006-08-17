@@ -62,7 +62,7 @@ sub helpview {
   
   ## make this wizard compatible with old URLs
   if ($object->param('se')) {
-    if($object->param('kw') && ($object->param('kw') eq 'newsview')){
+    if($object->param('kw') && (($object->param('kw') eq 'newsview') || ($object->param('kw') eq 'searchview'))){
       $wizard->current_node($object, 'hv_contact_vega');
     }
     else{

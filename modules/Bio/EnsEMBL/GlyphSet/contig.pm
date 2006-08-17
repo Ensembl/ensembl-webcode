@@ -36,6 +36,15 @@ sub _init {
    
   my $Container = $self->{'container'};
   $self->{'vc'} = $Container;
+
+  my $Config = $self->{'config'};
+
+  if( $Config->species_defs->NO_SEQUENCE ) {
+    my $msg = "Clone map - no sequence to display";
+    $self->errorTrack($msg);
+    return;
+  }
+
   my $length = $Container->length();
 
   my $ystart = 3;
@@ -63,7 +72,6 @@ sub _init {
   if ( ! $Container->isa("Bio::EnsEMBL::Compara::AlignSlice::Slice") && ($Container->{__type__} ne 'alignslice')) {
     @coord_systems = @{$Container->adaptor->db->get_CoordSystemAdaptor->fetch_all() || []};
   }
-  my $Config = $self->{'config'};
 
   my $module = ref($self);
      $module = $1 if $module=~/::([^:]+)$/;
@@ -107,8 +115,8 @@ warn $ctg_slice->seq_region_name,' ... ', $ctg_slice->coord_system->name, ' ... 
       if ($Container->isa("Bio::EnsEMBL::Compara::AlignSlice::Slice") && $Container->{compara} ne 'primary') {
 	  $msg = "Alignment gap - no contigs to display!";
       }
+      $msg = "Clone map - no sequence to display" if $Config->species_defs->NO_SEQUENCE;
       $self->errorTrack($msg);
-
   }
 }
 

@@ -67,6 +67,7 @@ sub _init {
     my $bands = $self->{'container'}->get_all_KaryotypeBands();
     my $min_start;
     my $max_end; 
+    my $no_sequence = $self->{'config'}->species_defs->NO_SEQUENCE;
     foreach my $band (reverse @$bands){
 	my $chr = $band->slice()->seq_region_name();
 	my $bandname = $band->name();
@@ -132,6 +133,7 @@ sub _init {
         });
         foreach my $script (qw(contigview cytoview)) {
           next if $script eq $ENV{'ENSEMBL_SCRIPT'};
+          next if $script eq 'contigview' && $no_sequence;
           $gband->{'zmenu'}{ "01:Display in $script" } = "/@{[$self->{container}{_config_file_name_}]}/$script?l=$chr:$band_start-$band_end";
         }	
 	if( @{[$self->{container}{_config_file_name_}]} =~ /Anopheles_gambiae/i ){

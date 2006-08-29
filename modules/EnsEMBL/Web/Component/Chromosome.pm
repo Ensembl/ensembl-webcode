@@ -96,6 +96,7 @@ sub stats {
   $chr_stats{'Length'} = ($chr->chr_name eq 'ALL') ? $chr->max_chr_length : $chr->length ;
 
   for my $stat (@orderlist){
+warn ". ", $stat,' ... ', $chr_stats{$stat};
     my $value = $chr->thousandify( $chr_stats{$stat} );
     next if !$value;
     my $bps_label = ($stat eq "Length") ? 'bps' : '&nbsp;';
@@ -154,6 +155,13 @@ sub change_chr_form {
     'value'    => $chr_name,
     'button_value' => 'Go'
   );
+  if ($object->param('otherspecies')) {
+    $form->add_element(
+      'type'  =>  'Hidden',
+      'name'  =>  'otherspecies',
+      'value' =>  $object->param('otherspecies'),
+    );
+  }
   return $form;
 }
 

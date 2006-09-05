@@ -430,7 +430,7 @@ sub simple_webpage {
     }
     $self->action;
   }
-  warn $self->timer->render();
+#  warn $self->timer->render();
 }
 
 sub wrapper {

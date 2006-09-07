@@ -67,6 +67,14 @@ sub new {
     hi                 green
     default            violet2 
   ));
+  $self->colourSet( 'medaka_gene',
+    'hi'         => 'highlight1',
+    'superhi'    => 'highlight2',
+    'medaka_protein' => [ 'blue', 'Medaka protein' ],
+    'gff_prediction' => [ 'darkblue', 'MGP gene' ],
+    'protein_coding' => [ 'darkblue', 'MGP gene' ],
+  );
+
   $self->colourSet( 'oxford_genes',
     'hi'         => 'highlight1',
     'superhi'    => 'highlight2',
@@ -77,6 +85,11 @@ sub new {
     'superhi'    => 'highlight2',
     'platypus_protein' => [ 'blue', 'Platypus protein' ],
     'other_protein' => [ 'black', 'Other protein' ],
+  );
+  $self->colourSet( 'human_ensembl_proteins',
+    'hi'         => 'highlight1',
+    'superhi'    => 'highlight2',
+    'human_ensembl_proteins' => [ 'blue', 'Projected human gene' ]
   );
   $self->colourSet( 'dog_protein',
     'hi'         => 'highlight1',
@@ -201,9 +214,6 @@ sub new {
     'xtrop_cdna'      => [ 'orchid2', 'Aligned cDNA' ],
     'xtrop_cDNA'      => [ 'orchid2', 'Aligned cDNA' ],
     '_col'            => [ 'orchid4', 'Aligned protein' ], 
-    'mus_one2one_human_orth' => [ 'orchid2', 'Mm/Hs orth. gene' ],
-    'human_one2one_mus_orth' => [ 'orchid3', 'Hs/Mm orth. gene' ],
-    'species_protein'        => [ 'orchid1', 'Gene' ],
   );
   $self->colourSet( 'refseq_gene',
     'hi'         => 'highlight1',
@@ -333,7 +343,6 @@ sub new {
     'col_Reserved'    => 'gray80',
     'col_DraftAc'     => 'gold2',
     'col_FinishAc'    => 'gold3',
-    'col_Selected'    => 'green',
     'col_Abandoned'   => 'gray80',
     'col_Accessioned' => 'thistle2',
     'col_Unknown'     => 'gray80',
@@ -346,7 +355,6 @@ sub new {
     'lab_Reserved'    => 'black',
     'lab_DraftAc'     => 'black',
     'lab_FinishAc'    => 'black',
-    'lab_Selected'    => 'black',
     'lab_Abandoned'   => 'black',
     'lab_Accessioned' => 'black',
     'lab_Unknown'     => 'black',

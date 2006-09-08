@@ -39,32 +39,20 @@ sub snpview {
   $self->{page}->content->add_panel( $info_panel );
 }
 
-# prints a table of variation genotypes, their Population ids, genotypes, frequencies  etc. in spreadsheet format
+# prints a table of variation genotypes, alleles, their Population ids, genotypes, frequencies  etc. in spreadsheet format
 if (
- my $genotype_panel = $self->new_panel('SpreadSheet',
-    'code'    => "pop genotypes$self->{flag}",
-    'caption' => "Genotype frequencies per population",
+ my $frequency_panel = $self->new_panel('SpreadSheet',
+    'code'    => "pop frequencies$self->{flag}",
+    'caption' => "Genotype and Allele frequencies per population",
     @params,
-    'status'  => 'panel_genotypes',
-    'null_data' => '<p>This SNP has not been genotyped in a population.</p>'
+    'status'  => 'panel_frequencies',
+    'null_data' => '<p>This SNP has no allele or genotype frequencies per population.</p>'
 				      )) {
 
-  $genotype_panel->add_components( qw(genotype_freqs EnsEMBL::Web::Component::SNP::genotype_freqs) );
-  $self->{page}->content->add_panel( $genotype_panel );
+  $frequency_panel->add_components( qw(all_freqs EnsEMBL::Web::Component::SNP::all_freqs) );
+  $self->{page}->content->add_panel( $frequency_panel );
 }
 
-# prints a table of alleles, their Population ids, frequencies as a spreadsheet
-if (
- my $allele_panel = $self->new_panel('SpreadSheet',
-    'code'    => "pop alleles$self->{flag}",
-    'caption' => "Allele frequencies per population",
-    @params,
-    'status'  => 'panel_alleles',
-    'null_data' => '<p>This SNP has no allele frequences per population.</p>'
-				    )) {
-  $allele_panel->add_components( qw(allele_freqs EnsEMBL::Web::Component::SNP::allele_freqs)  );
-  $self->{page}->content->add_panel( $allele_panel );
-}
 
 #  Description : genomic location of SNP
 if ( 
@@ -153,10 +141,11 @@ sub context_menu {
 
   my @genes = @{ $obj->get_genes };
   foreach my $gene (@genes) {
-    $self->add_entry(
+	  my $name = scalar @genes > 1 ? $gene->stable_id." -" : "";
+	  $self->add_entry(
         "snp$self->{flag}", 
         'code' => 'gene_snp_info',
-        'text' => "Gene SNP info",
+        'text' => "$name GeneSNP info",
 	"title" => "GeneSNPView - SNPs and their coding consequences",
 	'href' => "/$species/genesnpview?gene=".$gene->stable_id
     );

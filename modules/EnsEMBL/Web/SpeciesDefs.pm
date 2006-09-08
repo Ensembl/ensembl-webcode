@@ -1421,7 +1421,6 @@ sub bread_crumb_creator {
 
 sub _is_available_artefact{
   my $self     = shift;
-  my $this_species  = shift || $self->{'species'};
   my $def_species  = shift || $ENV{'ENSEMBL_SPECIES'};
   my $available = shift;
 
@@ -1438,7 +1437,7 @@ sub _is_available_artefact{
       ) ? $success : $fail;
   } elsif( $test[0] eq 'multi' ) { # See whether the traces database is specified
     my( $type,$species ) = split /\|/,$test[1],2;
-    my %species = $self->multi($type, $this_species);
+    my %species = $self->multi($type, $def_species);
     return $success if exists( $species{$species} );
     return $fail;
   } elsif( $test[0] eq 'multialignment' ) { # See whether the traces database is specified

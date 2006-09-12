@@ -243,7 +243,7 @@ sub add_form {
     }
     my $DATA;
 	if ($self->form($key)) {
-		$DATA = self->form($key)->render_js;
+		$DATA = $self->form($key)->render_js;
 		$page->javascript->add_source( $DATA->{'scripts'} );
 		$page->javascript->add_script( $DATA->{'head_vars'} );
 		$page->add_body_attr( 'onload' => $DATA->{'body_code'} );

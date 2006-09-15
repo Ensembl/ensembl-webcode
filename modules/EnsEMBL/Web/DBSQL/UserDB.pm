@@ -17,6 +17,8 @@ use EnsEMBL::Web::SpeciesDefs;
 use Digest::MD5;
 use strict;
 use CGI::Cookie;
+## use EnsEMBL::Web::Apache::Handlers qw($ENSEMBL_USER_DB_HANDLE);
+use Carp qw(cluck);
 
 sub new {
   my $caller = shift;
@@ -25,7 +27,7 @@ sub new {
   my $self = { '_request' => $r };
   if(defined( EnsEMBL::Web::SpeciesDefs->ENSEMBL_USERDB_NAME ) and EnsEMBL::Web::SpeciesDefs->ENSEMBL_USERDB_NAME ne '') {
     eval {
-      $self->{'_handle'} =
+      $self->{'_handle'} = #  $EnsEMBL::Web::Apache::Handlers::ENSEMBL_USER_DB_HANDLE ||=
          DBI->connect(
  	  	"dbi:mysql:@{[EnsEMBL::Web::SpeciesDefs->ENSEMBL_USERDB_NAME]}:@{[EnsEMBL::Web::SpeciesDefs->ENSEMBL_USERDB_HOST]}:@{[EnsEMBL::Web::SpeciesDefs->ENSEMBL_USERDB_PORT]}",
 		EnsEMBL::Web::SpeciesDefs->ENSEMBL_USERDB_USER,
@@ -94,6 +96,7 @@ sub clearCookie {
 
 sub setConfigByName {
   my( $self, $r, $session_ID, $key, $value ) = @_;
+## cluck "SET CONFIG BY NAME $r $session_ID $key $value";
   return unless $self->{'_handle'};
   unless($session_ID) {
     $session_ID = $self->create_session( 0, $r ? $r->uri : '' );
@@ -111,8 +114,8 @@ sub setConfigByName {
     }
     $ENV{'ENSEMBL_FIRSTSESSION'} = $session_ID;
   }
-  my( $key_ID ) = $self->{'_handle'}->selectrow_array( "select ID from USERDATATYPE where name = ?", {},  $key );
 ## Create a USERDATATYPE value if one doesn't exist!! ##
+  my( $key_ID ) = $self->{'_handle'}->selectrow_array( "select ID from USERDATATYPE where name = ?", {},  $key );
   unless( $key_ID ) {
     $self->{'_handle'}->do( "insert ignore into USERDATATYPE set name = ?", {}, $key );
     ( $key_ID ) = $self->{'_handle'}->selectrow_array( "select ID from USERDATATYPE where name = ?", {}, $key );
@@ -154,8 +157,9 @@ sub setConfig {
   my $self            = shift;
   my $r               = shift;
   my $session_ID      = shift;
-  my $userdatatype_ID = shift || 1;
+  my $userdatatype_ID = shift;
   my $value           = shift;
+  return unless $userdatatype_ID;
   return unless( $self->{'_handle'} );
   unless($session_ID) {
     $session_ID = $self->create_session( 0, $r ? $r->uri : '' );
@@ -190,7 +194,8 @@ sub setConfig {
 sub getConfig {
   my $self            = shift;
   my $session_ID      = shift;
-  my $userdatatype_ID = shift || 1;  
+  my $userdatatype_ID = shift;
+  return unless $userdatatype_ID;
   return unless( $self->{'_handle'} && $session_ID > 0 );
   my $value = $self->{'_handle'}->selectrow_array(
     "select value
@@ -204,7 +209,8 @@ sub getConfig {
 sub resetConfig {
   my $self            = shift;
   my $session_ID      = shift;
-  my $userdatatype_ID = shift || 1;  
+  my $userdatatype_ID = shift;  
+  return unless $userdatatype_ID;
   return unless( $self->{'_handle'} && $session_ID > 0 );
   $self->{'_handle'}->do(
     "delete from USERDATA

@@ -95,10 +95,10 @@ sub new {
   }
 
 
-  foreach my $source (grep {$_ } CGI::param('das_sources')) {
-      $config->set("managed_extdas_$source", 'on', 'on', 1);
-  }
-  $config->save;
+#  foreach my $source (grep {$_ } CGI::param('das_sources')) {
+#      $config->set("managed_extdas_$source", 'on', 'on', 1);
+#  }
+#  $config->save;
 
 
   my $ds2 = $ext_das->{'data'};

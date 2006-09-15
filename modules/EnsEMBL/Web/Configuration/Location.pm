@@ -288,6 +288,15 @@ sub cytoview {
   my $self = shift;
   my $obj    = $self->{object};
   $self->update_configs_from_parameter( 'bottom', 'cytoview' );
+  my @T = $obj->param('das_sources');
+  @T = grep {$_} @T;
+  if( @T ) {
+    my $wuc = $obj->user_config_hash( 'cytoview' ); 
+    foreach my $source (@T) {
+      $wuc->set("managed_extdas_$source", 'on', 'on', 1);
+    }
+    $wuc->save;
+  }
   my $q_string = sprintf( '%s:%s-%s', $obj->seq_region_name, $obj->seq_region_start, $obj->seq_region_end );
   my @common = (
     
@@ -397,6 +406,18 @@ sub contigview {
   my $obj    = $self->{object};
   my $q_string = sprintf( '%s:%s-%s', $obj->seq_region_name, $obj->seq_region_start, $obj->seq_region_end );
   $self->update_configs_from_parameter( 'bottom', 'contigviewbottom' );
+  my @T = $obj->param('das_sources');
+  warn "... @T ....";
+  @T = grep {$_} @T;
+  warn "... @T ....";
+  if( @T ) {
+    my $wuc = $obj->user_config_hash( 'contigviewbottom' );
+    foreach my $source (@T) {
+      $wuc->set("managed_extdas_$source", 'on', 'on', 1);
+    }
+    $wuc->save;
+  }
+
   my $last_rendered_panel = undef;
   my @common = ( 'params' => { 'l'=>$q_string, 'h' => $obj->highlights_string } );
 

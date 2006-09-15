@@ -171,6 +171,12 @@ sub createObjects {
     my $config = $uca->getUserConfig( 'dasconfview' );
     my $section = $conf_script;
 
+    my $current = $config->{'user'}->{'dasconfview'}->{$conf_script} || {};
+    my $before = '';
+    foreach (sort keys %$current ) {
+      next if $_ eq 'format_svg';
+      $before .= ":$_:$current->{$_}"; 
+    }
     $config->reset_subsection($section);
 #    warn("DAS Select : ".join('*', $self->param('das_sources')));
 
@@ -178,7 +184,17 @@ sub createObjects {
     foreach my $src ( $self->param('das_sources')) {
 	$config->set($section, $src, "on", 1);
     }
-    $config->save( );
+    $current = $config->{'user'}->{'dasconfview'}->{$conf_script} || {};
+    my $after = '';
+    foreach (sort keys %$current ) {
+      next if $_ eq 'format_svg';
+      $after .= ":$_:$current->{$_}";
+    }
+
+    if( $before ne $after ) {
+  warn "SAVING DAS CONF";
+      $config->save( );
+   }
 
     my %DASsel = map {$_ => 1} $self->param('das_sources');
 

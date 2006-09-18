@@ -3,6 +3,7 @@ package EnsEMBL::Web::File::Image;
 use strict;
 use Digest::MD5 qw(md5_hex);
 use Image::Size;
+#use Data::Dumper;
 
 our $TMP_IMG_FORMAT     = 'XXX/X/X/XXXXXXXXXXXXXXX';
 our $DEFAULT_FORMAT = 'png';
@@ -101,11 +102,15 @@ sub extraStyle {
 
 sub render_image_tag {
   my $self = shift;
-$self->{'species_defs'}{'timer'}->push("Starting render",6);
+
+#my $dumped= Dumper($self->{'species_defs'});
+#warn "sr7:$dumped\n\n";
+
+#$self->{'species_defs'}{'timer'}->push("Starting render",6);
   my $IF = $self->render( @_ );
-$self->{'species_defs'}{'timer'}->push("Finished render",6);
+#$self->{'species_defs'}{'timer'}->push("Finished render",6);
   my($width, $height ) = imgsize( $IF->{'file'} );
-$self->{'species_defs'}{'timer'}->push("Got image size",6);
+#$self->{'species_defs'}{'timer'}->push("Got image size",6);
   my $HTML;
   if ($width > 5000) {
     my $url = $IF->{'URL'};
@@ -177,9 +182,9 @@ sub render {
     }
   }
   my $image;
-$self->{'species_defs'}{'timer'}->push( "RAW RENDER START", 7);
+#$self->{'species_defs'}{'timer'}->push( "RAW RENDER START", 7);
   eval { $image    = $self->dc->render($format); };
-$self->{'species_defs'}{'timer'}->push( "RAW RENDER END", 7);
+#$self->{'species_defs'}{'timer'}->push( "RAW RENDER END", 7);
   if( $image ) {
     if( $format eq 'imagemap' ) {
       if( $self->{'cache'} ) { ## Now we write the image...
@@ -195,7 +200,7 @@ $self->{'species_defs'}{'timer'}->push( "RAW RENDER END", 7);
       binmode IMG_OUT;
       print IMG_OUT $image;
       close(IMG_OUT);
-$self->{'species_defs'}{'timer'}->push( "FILE WRITE END", 7);
+#$self->{'species_defs'}{'timer'}->push( "FILE WRITE END", 7);
       return { 'URL' => $self->URL($format), 'file' => $file };
     }
   } else {

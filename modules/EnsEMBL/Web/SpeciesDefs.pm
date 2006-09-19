@@ -515,6 +515,31 @@ sub _parse {
         }
       }
     }
+
+#### INI FILE BLAST DATABASES
+# Creates default file name of format
+# Anopheles_gambiae.AgamP3.39.dna_rm.seqlevel.fa if the value "%_" is in ini file
+
+    foreach my $blast_type (keys %$tree) {
+      next unless $blast_type =~ /_DATASOURCES/;
+      foreach my $source ( keys %{$tree->{$blast_type}} ) {
+        my $file = $tree->{$blast_type}{$source};
+        next unless $file =~ /^%_/;
+        my $assembly = $tree->{'general'}{'ENSEMBL_GOLDEN_PATH'};
+        (my $type = lc($source)) =~ s/_/\./ ;
+        if ($type =~ /latestgp/) {
+          $type =~ s/latestgp(.*)/dna$1\.seqlevel/;
+          $type =~ s/.masked/_rm/;
+        }
+        $type = "ncrna" if $type eq 'rna.nc';
+        my $new_file = sprintf( '%s.%s.%s.%s', $filename, $assembly, $SiteDefs::ENSEMBL_VERSION, $type ).".fa";
+        #print "AUTOGENERATING $source......$new_file\t";
+        $tree->{$blast_type}{$source} = $new_file;
+      }
+    }
+
+
+
 #### This is the bit of code which handles the "Multi-species" part of the hash....
 #### It creates an entry "_multi" with the following structure:
 ####
@@ -1369,6 +1394,77 @@ sub bread_crumb_creator {
     'ENSEMBL_PARENTS'     => $ENSEMBL_PARENTS, 
     'ENSEMBL_CHILDREN'    => $ENSEMBL_CHILDREN
   } );
+}
+
+sub _is_available_artefact{
+  my $self     = shift;
+  my $def_species  = shift || $ENV{'ENSEMBL_SPECIES'};
+  my $available = shift;
+
+  my @test = split( ' ', $available );
+  if( ! $test[0] ){ return 999; } # No test found - return pass.
+
+  my( $success, $fail ) = ($test[0] =~ s/^!//) ? ( 0, 1 ) : ( 1, 0 );
+
+  if( $test[0] eq 'database_tables' ){ # Then test using get_table_size
+    my( $database, $table ) = split( '\.', $test[1] );
+    return $self->get_table_size(
+          { -db    => $database, -table => $table },
+          $self->{'species'}
+      ) ? $success : $fail;
+  } elsif( $test[0] eq 'multi' ) { # See whether the traces database is specified
+    my( $type,$species ) = split /\|/,$test[1],2;
+    my %species = $self->multi($type, $self->{'species'});
+    return $success if exists( $species{$species} );
+    return $fail;
+  } elsif( $test[0] eq 'multialignment' ) { # See whether the traces database is specified
+    my( $alignment_id ) = $test[1];
+    my %alignment = $self->multi('ALIGNMENTS', $alignment_id);
+    return $success if (scalar(keys %alignment));
+    return $fail;
+  } elsif( $test[0] eq 'database_features' ){ # See whether the given database is specified
+    my $ft = $self->other_species($def_species,'DB_FEATURES') || {};
+    my @T = split /\|/, $test[1];
+    my $flag = 1;
+    foreach( @T ) {
+      $flag = 0 if $ft->{uc($_)};
+    }
+    return $fail if $flag;
+    return $success;
+  } elsif( $test[0] eq 'databases' ){ # See whether the given database is specified
+    my $db = $self->other_species($def_species,'databases')  || {};
+    return $fail unless $db->{$test[1]}       ;
+    return $fail unless $db->{$test[1]}{NAME} ;
+    return $success;
+  } elsif( $test[0] eq 'features' ){ # See whether the given db feature is specified
+    my $ft = $self->other_species($def_species,'DB_FEATURES') || {};
+    my @T = split /\|/, $test[1];
+    my $flag = 1;
+    foreach( @T ) {
+      $flag = 0 if $ft->{uc($_)};
+    }
+    return $fail if $flag;
+    return $success;
+  } elsif( $test[0] eq 'any_feature' ){ # See whether any of the given db features is specified
+    my $ft = $self->other_species($def_species,'DB_FEATURES') || {};
+    shift @test;
+    foreach (@test) {
+      return $success if $ft->{uc($_)};
+    }
+    return $fail;
+  } elsif( $test[0] eq 'species_defs') {
+    return $self->other_species($def_species,$test[1]) ? $success : $fail;
+  } elsif( $test[0] eq 'species') {
+    if(Bio::EnsEMBL::Registry->get_alias($def_species,"no throw") ne Bio::EnsEMBL::Registry->get_alias($test[1],"no throw")){
+      return $fail;
+    }
+  } elsif( $test[0] eq 'das_source' ){ # See whether the given DAS source is specified
+    my $source = $self->ENSEMBL_INTERNAL_DAS_SOURCES || {};
+    return $fail unless $source->{$test[1]}   ;
+    return $success;
+  }
+
+  return $success; # Test not found - assume a pass anyway!
 }
 
 1;

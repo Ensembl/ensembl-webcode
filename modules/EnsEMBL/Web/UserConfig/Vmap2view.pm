@@ -14,7 +14,7 @@ sub init {
   $self->{'_userdatatype_ID'} = 109;
 
   $self->{'general'}->{'Vmap2view'} = {
-    '_artefacts'   => [qw(Vsnps Vpercents Vgenes Videogram)],
+    '_artefacts'   => [qw(Vsnps Vpercents Vgenes Vsupercontigs Videogram)],
     '_options'   => [],
 
     '_settings' => {
@@ -59,6 +59,20 @@ sub init {
       'col'         => 'blue',
       'logicname' => 'snpDensity'
     },        
+    'Vsupercontigs' => {
+       'on'          => 'off',
+       'pos'         => '400',
+       'width'       =>  20,
+       'totalwidth'  =>  100,
+       'padding'     =>  6,
+       'col'         => 'blue',
+       'col_ctgs1'    => 'green',
+       'col_ctgs2'    => 'darkgreen',
+       'lab'         => 'black',
+       'include_labelling' => 1,
+       'available'   => 'features MAPSET_SUPERCTGS',
+    },
+
     'Videogram' => {
       'on'          => "on",
       'pos'         => '1000',

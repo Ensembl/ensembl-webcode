@@ -857,7 +857,9 @@ sub ADD_ALL_DNA_FEATURES {
 ## 
   $self->add_new_track_cdna( 'Harvard_manual', 'Manual annot.', $POS++, 'URL_KEY' => 'NULL', 'ZMENU' => [ '###ID###', 'Internal identifier', '' ], @_ );
 
+  $self->add_new_track_cdna( 'medaka_cdna',    'Medaka cDNAs',    $POS++, @_ );
   $self->add_new_track_cdna( 'human_cdna', 'Human cDNAs',   $POS++, @_ );
+  $self->add_new_track_cdna( 'chimp_cdna', 'Chimp cDNAs',   $POS++, @_ );
   $self->add_new_track_cdna( 'dog_cdna',   'Dog cDNAs',     $POS++, @_ );
   $self->add_new_track_cdna( 'rat_cdna',   'Rat cDNAs',     $POS++, @_ );
   $self->add_new_track_cdna( 'zfish_cdna', 'D.rerio cDNAs', $POS++,
@@ -909,6 +911,7 @@ sub ADD_ALL_EST_FEATURES {
   $self->add_new_track_est( 'macaque_est',  'Macaque ESTs',   $POS++, @_ );
   $self->add_new_track_est( 'yeast_est',  'Yeast ESTs',   $POS++, @_ );
   $self->add_new_track_est( 'human_est',    'Human ESTs',      $POS++, @_ );
+  $self->add_new_track_est( 'medaka_est',    'Medaka ESTs',    $POS++, @_ );
   $self->add_new_track_est( 'mouse_est',    'Mouse ESTs',      $POS++, @_ );
   $self->add_new_track_est( 'platypus_ests', 'Platypus ESTs',   $POS++, @_ );
   $self->add_new_track_est( 'zfish_est',    'D.rerio ESTs',    $POS++, @_ );
@@ -1040,6 +1043,7 @@ sub ADD_ALL_PROTEIN_FEATURES {
   @_ );
   $self->add_new_track_protein( 'chicken_protein',     'G.gallus pep', $POS++, @_ );
   $self->add_new_track_protein( 'BeeProteinSimilarity','Bee pep. evid.',  $POS++, @_ );
+  $self->add_new_track_protein( 'medaka_protein',    'Medaka proteins',    $POS++, @_ );
   $self->add_new_track_protein( 'riken_prot',          'Riken proteins', $POS++, @_ );
   $self->add_new_track_protein( 'wormpep',             'Worm proteins',  $POS++, @_ );
   $self->add_new_track_protein( 'human_protein',       'Human proteins', $POS++, @_ );
@@ -1140,11 +1144,14 @@ sub ADD_ALL_TRANSCRIPTS {
   $self->add_new_track_transcript( 'mouse_protein',    'Refseq proteins', 'prot_gene',    $POS++, @_ );
   $self->add_new_track_transcript( 'targettedgenewise',    'Targetted genewise genes', 'prot_gene',    $POS++, @_ );
   $self->add_new_track_transcript( 'cdna_all',             'cNDA genes', 'prot_gene',    $POS++, @_ );
+  $self->add_new_track_transcript( 'medaka_protein',   'Medaka genes',   'medaka_gene',   $POS++, @_ );
+  $self->add_new_track_transcript( 'gff_prediction',   'MGP genes',   'medaka_gene',   $POS++, @_ );
   $self->add_new_track_transcript( 'refseq',    'Refseq proteins', 'refseq_gene',    $POS++, @_ );
   $self->add_new_track_transcript( 'rprot',     'Rodent proteins', 'prot_gene',      $POS++, @_ );
   $self->add_new_track_transcript( 'jamboree_cdnas',   'X.trop. jambo. genes',   'prot_gene',   $POS++, @_ );
 
   $self->add_new_track_transcript( 'dog_protein',   'Dog genes',   'dog_protein',   $POS++, @_ );
+  $self->add_new_track_transcript( 'human_ensembl_proteins',   'Human genes',   'human_ensembl_proteins',   $POS++, @_ );
   $self->add_new_track_transcript( 'cow_proteins',   'Cow genes',   'cow_protein',   $POS++, @_ );
   $self->add_new_track_transcript( 'vectorbase_0_5',   'VectorBase genes',   'vectorbase_0_5',   $POS++, @_ );
   $self->add_new_track_transcript( 'tigr_0_5',   'TIGR genes',   'tigr_0_5',   $POS++, @_ );
@@ -1256,9 +1263,9 @@ sub ADD_GENE_TRACKS {
     'gene_col'             => sub { return $_[0]->biotype eq 'Genoscope_predicted' ? '_GSTEN'    : '_HOX' },
     'logic_name'           => 'gsten hox cyt', @_
   );
-  $self->add_new_track_gene( 'dog_protein', 'Dog proteins', 'dog_protein', $POS++,
+  $self->add_new_track_gene( 'human_ensembl_proteins', 'Human genes', 'human_ensembl_proteins', $POS++,
     'gene_label'           => sub { return $_[0]->stable_id },
-    'gene_col'             => 'dog_protein' , @_
+    'gene_col'             => 'human_ensembl_proteins' , @_
   );
   $self->add_new_track_gene( 'Cow_proteins', 'Cow proteins', 'cow_protein', $POS++,
     'gene_label'           => sub { return $_[0]->stable_id },
@@ -1312,6 +1319,9 @@ sub ADD_GENE_TRACKS {
   $self->add_new_track_gene( 'vega_gene', 'Vega Genes', 'vega_gene', $POS++,
     'available' => 'features VEGA_GENES_OTTER', 'glyphset' => 'vega_gene',
     'logic_name' => 'otter', 'gene_col' => 'vega_gene', @_);
+  $self->add_new_track_gene( 'medaka_protein',  "Medaka protein",  'medaka_gene', $POS++, 'gene_col' => 'medaka_protein' , @_ );
+  $self->add_new_track_gene( 'gff_prediction',  "MGP genes",       'medaka_gene', $POS++, 'gene_col' => 'gff_prediction', @_ );
+
   $self->add_new_track_gene( 'vega_corf_gene', 'CORF Genes', 'vega_gene', $POS++,
     'available' => 'features VEGA_GENES_OTTER_CORF', 'glyphset' => 'vega_gene',
     'logic_name' => 'otter_corf', 'gene_col' => 'vega_gene', @_);

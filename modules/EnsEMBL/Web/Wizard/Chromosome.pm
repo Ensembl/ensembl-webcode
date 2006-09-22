@@ -183,16 +183,25 @@ sub _init {
       'type'  => 'CheckBox',
       'label' => 'Show GC content frequency *',
       'value' => 'on',
+      'available' => '!species_defs NO_SEQUENCE'
     },
     'track_Vsnps'  => {
       'type'  => 'CheckBox',
       'label' => 'Show SNP frequency *',
       'value' => 'on',
+      'available' => 'databases ENSEMBL_VARIATION'
     },
     'track_Vgenes'  => {
       'type'  => 'CheckBox',
       'label' => 'Show gene frequency *',
       'value' => 'on',
+      'available' => 'database_tables ENSEMBL_DB.gene'
+    },
+    'track_Vsupercontigs' => {
+      'type'  => 'CheckBox',
+      'label' => 'Show supercontigs *',
+      'value' => 'on',
+      'available' => 'features MAPSET_SUPERCTGS'
     },
     'track_blurb' => {
       'type'  => 'Information',
@@ -221,7 +230,7 @@ sub _init {
     'kv_extras' => {
       'form' => 1,
       'title' => 'Add extra features',
-      'input_fields'  => [qw(extras_subhead track_Vpercents track_Vsnps track_Vgenes track_blurb)],
+      'input_fields'  => [qw(extras_subhead track_Vpercents track_Vsnps track_Vgenes track_Vsupercontigs track_blurb)],
       'no_passback' => [qw(style)],
       'button' => 'Continue',
       'back'   => 1,
@@ -382,9 +391,13 @@ sub kv_extras {
     $wizard->redefine_node('kv_extras', 'input_fields', ['zmenu']); 
   }
                                                                                 
+  my $input_fields = $wizard->get_node_def('kv_extras','input_fields');
+
+  
   my $form = EnsEMBL::Web::Form->new($node, "/$species/$script", 'post');
                                                                                 
-  $wizard->add_widgets($node, $form, $object);
+  
+  $wizard->add_widgets($node, $form, $object,);
   $wizard->pass_fields($node, $form, $object);
   if ($upload) {
     $form->add_element(

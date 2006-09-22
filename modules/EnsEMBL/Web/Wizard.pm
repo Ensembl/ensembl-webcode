@@ -395,6 +395,11 @@ sub add_widgets {
   my %form_fields = %{$self->get_fields};
   foreach my $field (@$fields) {
     my %field_info = %{$form_fields{$field}};
+    if( $field_info{'available'} ) {
+warn "... $field_info{'available'}...";
+warn "... ",$object->species_defs->_is_available_artefact( $ENV{'ENSEMBL_SPECIES'}, $field_info{'available'} )," ...";
+      next unless $object->species_defs->_is_available_artefact( $ENV{'ENSEMBL_SPECIES'}, $field_info{'available'} );
+    }
     my $field_name = $field;
     ## Is this field involved in looping through multiple records?
     if ($field_info{'loop'}) {

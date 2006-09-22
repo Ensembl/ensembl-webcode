@@ -386,6 +386,8 @@ sub createObjects {
         $location = $self->_location_from_Marker( $temp_id, $seq_region );
       } elsif( $ftype eq 'band' ) {
         $location = $self->_location_from_Band( $temp_id, $seq_region );
+      } elsif( $ftype eq 'misc_feature' ) {
+        $location = $self->_location_from_MiscFeature( $temp_id );
       } elsif( $ftype eq 'region' ) {
         $location = $self->_location_from_SeqRegion( $temp_id );
       } else {
@@ -414,7 +416,7 @@ sub createObjects {
     } elsif( $temp_id = $self->param('peptide') || $self->param('pepid') || $self->param('peptideid') || $self->param('translation') ) {
       $location = $self->_location_from_Peptide( $temp_id );
     ## MiscFeature (completed)
-    } elsif( $temp_id = $self->param('mapfrag') || $self->param('miscfeature') ) {
+    } elsif( $temp_id = $self->param('mapfrag') || $self->param('miscfeature') || $self->param('misc_feature') ) {
         $location = $self->_location_from_MiscFeature( $temp_id );
     ## Marker (completed)
     } elsif( $temp_id = $self->param('marker') ) { 

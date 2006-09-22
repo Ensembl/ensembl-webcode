@@ -203,9 +203,16 @@ sub add_tracks {
       my @logicnames = ( split /\s+/,
                           $config->get( $art, 'logicname' ) );
       my @good_lnames = grep{$features{$_}} @logicnames;
-      scalar( @good_lnames ) || next;
-      $config->set( $art, 'on', 'on' );
-      $config->set( $art, 'logicname', join( " ", @good_lnames ) );
+      if( @logicnames  ) {
+        if( @good_lnames ) {
+          $config->set( $art, 'on', 'on' );
+          $config->set( $art, 'logicname', join( " ", @good_lnames ) );
+        } else {
+          $config->set( $art, 'on', 'off' );
+        }
+      } elsif( $config->is_available_artefact( $art ) ) {
+        $config->set( $art, 'on', 'on' );
+      }
     }
   }
   return 1;

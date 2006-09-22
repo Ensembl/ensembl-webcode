@@ -231,8 +231,10 @@ sub add_form {
   if( $self->dynamic_use( $module_name ) ) {
     no strict 'refs';
     eval {
-      $self->{'forms'}{$key} = &$function_name( $self, $self->{'object'} );
+      my $T = &$function_name( $self, $self->{'object'} );
+      $self->{'forms'}{$key} = $T if $T;
     };
+    return unless $self->{'forms'}{$key};
     if( $@ ) {
       warn $@;
       my $error = "<pre>".$self->_format_error($@)."</pre>";

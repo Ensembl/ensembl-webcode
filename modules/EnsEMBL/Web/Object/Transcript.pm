@@ -27,10 +27,11 @@ sub default_track_by_gene {
       gsc gid slam gws_h gws_s )
     ),
     map( {($_, $_.'_transcript')} qw(
+      medaka_protein gff_prediction
       vectorbase_0_5 tigr_0_5
       cdna_all targettedgenewise oxford_genes
       genebuilderbeeflymosandswall gsten flybase wormbase
-      ensembl sgd homology_low cow_proteins refseq mouse_protein dog_protein
+      ensembl sgd homology_low cow_proteins refseq mouse_protein dog_protein human_ensembl_proteins
       jamboree_cdnas ciona_dbest_ncbi ciona_est_seqc ciona_est_seqn
       ciona_est_seqs ciona_jgi_v1 ciona_kyotograil_2004
       ciona_kyotograil_2005 )

@@ -1046,13 +1046,13 @@ sub ADD_ALL_EST_FEATURES {
 sub ADD_ALL_CLONE_TRACKS {
   my $self = shift;
   my $POS = shift || 2500;
-  $self->add_clone_track( '0_5MB_cloneset', '0.5Mb clones',   $POS++, @_ );
-  $self->add_clone_track( '1MB_cloneset',   '1Mb clones',     $POS++, @_ );
+# $self->add_clone_track( '0_5MB_cloneset', '0.5Mb clones',   $POS++, @_ );
+# $self->add_clone_track( '1MB_cloneset',   '1Mb clones',     $POS++, @_ );
   $self->add_clone_track( 'cloneset_1mb',   '1Mb clones',     $POS++, @_ );
   $self->add_clone_track( 'cloneset_30k',   '30k TPA clones', $POS++, @_ );
   $self->add_clone_track( 'cloneset_32k',   '32k clones',     $POS++, @_ );
-  $self->add_clone_track( 'acc_bac_map',    'Acc. BAC map',   $POS++, @_ );
-  $self->add_clone_track( 'bac_map',        'BAC map',        $POS++, 'thresholds' => { 20000 => {'FEATURES'=>'acc_bac_map'}}, @_ );
+# $self->add_clone_track( 'acc_bac_map',    'Acc. BAC map',   $POS++, @_ );
+# $self->add_clone_track( 'bac_map',        'BAC map',        $POS++, 'thresholds' => { 20000 => {'FEATURES'=>'acc_bac_map'}}, @_ );
   $self->add_clone_track( 'bacs',           'BACs',           $POS++, @_ );
   $self->add_clone_track( 'bacs_bands',     'Band BACs',      $POS++, @_ );
   $self->add_clone_track( 'bacends',        'BAC ends',       $POS++, @_ );

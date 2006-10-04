@@ -90,6 +90,7 @@ sub stats {
   foreach my $attrib (@{$chr->Obj->get_all_Attributes()}) {
     my $name = $attrib->name();
     my $value = $attrib->value();
+    next if exists( $chr_stats{$attrib->name()} ) && $attrib->value() <  $chr_stats{$attrib->name()};
     $chr_stats{$attrib->name()} = $attrib->value();
   }
 

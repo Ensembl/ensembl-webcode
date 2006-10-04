@@ -199,11 +199,11 @@ sub AUTOLOAD {
 
 sub configure_registry {
   my $self = shift;
-warn "CR";
+#warn "CR";
   my %adaptors = (
     'VARIATION' => 'Bio::EnsEMBL::Variation::DBSQL::DBAdaptor', 
     'SNP'       => 'Bio::EnsEMBL::ExternalData::SNPSQL::DBAdaptor',
-    'GLOVAR'    => 'Bio::EnsEMBL::ExternalData::Glovar::DBAdaptor',
+#    'GLOVAR'    => 'Bio::EnsEMBL::ExternalData::Glovar::DBAdaptor',
     'LITE'      => 'Bio::EnsEMBL::Lite::DBAdaptor',
     'HAPLOTYPE' => 'Bio::EnsEMBL::ExternalData::Haplotype::DBAdaptor',
     'EST'       => 'Bio::EnsEMBL::DBSQL::DBAdaptor',
@@ -764,12 +764,6 @@ sub _parse {
       unless($dbh) {
         warn( "\t  [DB] Unable to connect to ",ref($database)eq'HASH' ? $database->{'NAME'} : $database);
         $tree->{'databases'}{$database} = undef;
-        next;
-      }
-      if($tree->{'databases'}->{$database}{'DRIVER'} ne "mysql"){ 
-        print STDERR "\t  [WARN] Omitting table scans for ",
-              $tree->{'databases'}->{$database}{'DRIVER'},
-              " database: \"$database\"\n";
         next;
       }
 	  my $q = "show table status";

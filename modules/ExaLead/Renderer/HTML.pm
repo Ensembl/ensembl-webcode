@@ -8,6 +8,13 @@ use CGI;
 
 @ExaLead::Renderer::HTML::ISA = qw(ExaLead::Renderer);
 
+our $hit_maps = {
+ qw(geneview   contigview
+    transview  contigview
+    protview   contigview
+    contigview cytoview)
+};
+
 sub render_spelling {
   my $self = shift;
   return unless $self->exalead->spellingsuggestions;
@@ -65,9 +72,11 @@ sub _render_text {
 sub _render_group {
   my( $self, $group ) = @_;
   if( $group->link( 'reset' ) ) {
+    my $name = $group->name ;
+    $name =~ s/answergroup\.//;
     return sprintf qq(<dt><a href="%s">%s</a></dt>\n),
       $group->link( 'reset' )->URL,
-      CGI::escapeHTML( $group->name )
+      CGI::escapeHTML( $name )
 
   } else {
     return sprintf '<dt>'.CGI::escapeHTML( $group->name )."</dt>\n";
@@ -98,18 +107,29 @@ sub _render_category {
 
 sub _render_hit {
   my( $self,  $hit ) = @_;
+  my $URL = $hit->URL;
+  my $script = $URL =~ /(\w+)\?/ ? $1 : '';
+  my $mapped_script = $hit_maps->{$script};
+  my $extra = '';
+  if( $mapped_script ) {
+    $script = $URL;
+    $script =~s/(\w+)\?/$mapped_script\?/g;
+    $mapped_script = ucfirst($mapped_script);
+    $mapped_script =~s/view/View/;
+    $extra = sprintf( ' [<a href="%s">%s</a>]' , $script, $mapped_script );
+  }
   return sprintf qq(
-<p><strong><a href="%s">%s</a></strong><br />
+<p><strong><a href="%s">%s</a></strong>%s<br />
   %s
 </p>
 <blockquote>%s</blockquote>
 
 ),
-    CGI::escapeHTML( $hit->URL ),
-    $hit->field('title')->getHighlighted,
+    CGI::escapeHTML( $hit->URL ), 
+    $hit->field('title')->getHighlighted, $extra,
     $hit->field('description')->getHighlighted,
     join( '&nbsp;&nbsp; ',
-      map { '<strong>'.CGI::escapeHTML( $_->name ).'</strong>: '.
+      map { '<strong>'.CGI::escapeHTML( $_->name =~ /answergroup\.(.*)/?$1:$_->name ).'</strong>: '.
             $self->_render_hitcats( $_->children ) } $hit->groups );
 }
 

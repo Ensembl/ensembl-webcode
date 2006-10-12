@@ -213,6 +213,8 @@ sub new {
     'protein_coding'  => [ 'orchid4', 'Aligned protein' ], 
     'xtrop_cdna'      => [ 'orchid2', 'Aligned cDNA' ],
     'xtrop_cDNA'      => [ 'orchid2', 'Aligned cDNA' ],
+    'human_one2one_mus_orth' => [ 'orchid4', 'Human/Mus orth' ],
+    'mus_one2one_human_orth' => [ 'orchid2', 'Mus/Human orth' ],
     '_col'            => [ 'orchid4', 'Aligned protein' ], 
   );
   $self->colourSet( 'refseq_gene',

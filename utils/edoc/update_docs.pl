@@ -37,14 +37,15 @@ mkdir $EXPORT, 0755 unless -e $EXPORT;
 my $start = time();
 my $document = EnsEMBL::Web::Tools::Document->new( (
   directory => \@locations,
-  identifier => "###"
+  identifier => "###",
+  server_root => $SERVER_ROOT
 ) );
 
 my $point_1 = time();
 $document->find_modules;
 
 my $point_2 = time();
-$document->generate_html( $EXPORT, '/docs/', $SUPPORT );
+$document->generate_html( $EXPORT, '/info/software/website/docs/', $SUPPORT );
 my $end = time();
 
 print "Directories documented:\n";

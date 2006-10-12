@@ -1142,6 +1142,7 @@ sub ADD_ALL_TRANSCRIPTS {
 
   $self->add_new_track_transcript( 'rprot',     'Rodent proteins', 'prot_gene', $POS++, 'available' => 'features rodent_protein', @_ );
   $self->add_new_track_transcript( 'mouse_protein',    'Refseq proteins', 'prot_gene',    $POS++, @_ );
+  $self->add_new_track_transcript( 'chicken_protein',    'Chicken proteins', 'prot_gene',    $POS++, @_ );
   $self->add_new_track_transcript( 'targettedgenewise',    'Targetted genewise genes', 'prot_gene',    $POS++, @_ );
   $self->add_new_track_transcript( 'cdna_all',             'cNDA genes', 'prot_gene',    $POS++, @_ );
   $self->add_new_track_transcript( 'medaka_protein',   'Medaka genes',   'medaka_gene',   $POS++, @_ );
@@ -1150,6 +1151,8 @@ sub ADD_ALL_TRANSCRIPTS {
   $self->add_new_track_transcript( 'rprot',     'Rodent proteins', 'prot_gene',      $POS++, @_ );
   $self->add_new_track_transcript( 'jamboree_cdnas',   'X.trop. jambo. genes',   'prot_gene',   $POS++, @_ );
 
+  $self->add_new_track_transcript( 'mus_one2one_human_orth', 'Mus/Human orths', 'prot_gene', $POS++, @_ );
+  $self->add_new_track_transcript( 'human_one2one_mus_orth', 'Human/Mus orths', 'prot_gene', $POS++, @_ );
   $self->add_new_track_transcript( 'dog_protein',   'Dog genes',   'dog_protein',   $POS++, @_ );
   $self->add_new_track_transcript( 'human_ensembl_proteins',   'Human genes',   'human_ensembl_proteins',   $POS++, @_ );
   $self->add_new_track_transcript( 'cow_proteins',   'Cow genes',   'cow_protein',   $POS++, @_ );
@@ -1304,6 +1307,9 @@ sub ADD_GENE_TRACKS {
                              'gene_col' => sub { return $_[0]->biotype =~ /pseudo/i ? 'rna-pseudo' : 'rna-real' }, @_ );
   $self->add_new_track_gene( 'refseq', 'RefSeq Genes', 'refseq_gene', $POS++, 'gene_col' => '_refseq',  @_ );
   $self->add_new_track_gene( 'mouse_protein', 'Mouse Protein Genes', 'prot_gene', $POS++, 'gene_col' => '_col',  @_ );
+  $self->add_new_track_gene( 'chicken_protein', 'Chicken Protein Genes', 'prot_gene', $POS++, 'gene_col' => '_col',  @_ );
+  $self->add_new_track_gene( 'mus_one2one_human_orth', 'Mus/Human orths', 'prot_gene', $POS++, @_ );
+  $self->add_new_track_gene( 'human_one2one_mus_orth', 'Human/Mus orths', 'prot_gene', $POS++, @_ );
   $self->add_new_track_gene( 'targettedgenewise', 'Targetted Genewise Genes', 'prot_gene', $POS++, 'gene_col' => '_col',  @_ );
   $self->add_new_track_gene( 'cdna_all', 'cDNA Genes', 'prot_gene', $POS++, 'gene_col' => '_col',  @_ );
   $self->add_new_track_gene( 'estgene', 'EST Genes', 'est_gene', $POS++,

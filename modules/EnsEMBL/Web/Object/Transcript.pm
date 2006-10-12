@@ -27,9 +27,9 @@ sub default_track_by_gene {
       gsc gid slam gws_h gws_s )
     ),
     map( {($_, $_.'_transcript')} qw(
-      medaka_protein gff_prediction
+      medaka_protein gff_prediction human_one2one_mus_orth mus_one2one_human_orth
       vectorbase_0_5 tigr_0_5
-      cdna_all targettedgenewise oxford_genes
+      cdna_all targettedgenewise oxford_genes chicken_protein
       genebuilderbeeflymosandswall gsten flybase wormbase
       ensembl sgd homology_low cow_proteins refseq mouse_protein dog_protein human_ensembl_proteins
       jamboree_cdnas ciona_dbest_ncbi ciona_est_seqc ciona_est_seqn

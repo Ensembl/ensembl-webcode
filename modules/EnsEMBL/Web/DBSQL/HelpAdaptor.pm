@@ -19,6 +19,11 @@ sub db {
   return $self->{'dbh'};
 }
 
+sub disconnect {
+  my $self = shift;
+  $self->{'dbh'}->disconnect if $self->{'dbh'};
+}
+
 sub fetch_all_by_keyword {
   my( $self, $keyword ) = @_;
   return [] unless $self->db;

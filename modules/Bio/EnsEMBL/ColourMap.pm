@@ -100,10 +100,10 @@ sub new {
     'dog_protein' => [ 'blue', 'Dog protein' ]
   );
 
-  $self->colourSet( 'human_ensembl_proteins',
+  $self->colourSet( 'human_ensembl_proteins_gene',
     'hi'         => 'highlight1',
     'superhi'    => 'highlight2',
-    'human_ensembl_proteins' => [ 'blue', 'Projected human gene' ]
+    map {( "human_ensembl_proteins$_" => [ $core{$_}[0], "Human proteins (@{[$core{$_}[1]]})" ] )} keys %core
   );
 
   $self->colourSet( 'cow_protein',

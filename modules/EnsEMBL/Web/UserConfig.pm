@@ -1355,7 +1355,7 @@ sub ADD_GENE_TRACKS {
   $self->add_new_track_gene( 'ncrna', 'ncRNA Genes', 'rna_gene', $POS++,
                              'logic_name' => 'miRNA tRNA ncRNA',
                              'available' => 'features ncrna|miRNA',
-                             'gene_col' => sub { return $_[0]->biotype =~ /pseudo/i ? 'rna-pseudo' : 'rna-real' }, @_ );
+                             'gene_col' => sub { return ($_[0]->biotype =~ /pseudo/i ? 'rna-pseudo' : 'rna-real').($_[0]->status) }, @_ );
   $self->add_new_track_gene( 'ensembl_ncrna', 'e! ncRNA Genes', 'rna_gene', $POS++, 'legend_type' => 'gene_ncrna',
                              'gene_col' => sub { return $_[0]->biotype =~ /pseudo/i ? 'rna-pseudo' : 'rna-real' }, @_ );
   $self->add_new_track_gene( 'refseq', 'RefSeq Genes', 'refseq_gene', $POS++, 'gene_col' => '_refseq',  @_ );

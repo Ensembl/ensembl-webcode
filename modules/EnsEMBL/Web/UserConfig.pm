@@ -1163,7 +1163,7 @@ sub ADD_ALL_TRANSCRIPTS {
   $self->add_new_track_transcript( 'dog_protein',   'Dog genes',   'dog_protein',   $POS++, @_ );
   $self->add_new_track_transcript( 'species_protein', 'Dog protein',       'prot_gene', $POS++,  @_ );
   $self->add_new_track_transcript( 'human_one2one_mus_orth', 'Hs/Mm orth', 'prot_gene', $POS++,  @_ );
-  $self->add_new_track_transcript( 'human_ensembl_proteins',   'Human genes',   'human_ensembl_proteins',   $POS++, @_ );
+  $self->add_new_track_transcript( 'human_ensembl_proteins',   'Human genes',   'human_ensembl_proteins_gene',   $POS++, @_ );
   $self->add_new_track_transcript( 'mus_one2one_human_orth', 'Ms/Hs orth', 'prot_gene', $POS++,  @_ );
 
   $self->add_new_track_transcript( 'cow_proteins',   'Cow genes',   'cow_protein',   $POS++, @_ );
@@ -1291,6 +1291,12 @@ sub ADD_GENE_TRACKS {
     'gene_col'             => sub { return $_[0]->biotype eq 'bacterial_contaminant' ? '_BACCOM'    : $_[0]->analysis->logic_name.'_'.$_[0]->biotype.'_'.$_[0]->status          },
     @_
   );
+  $self->add_new_track_gene( 'human_ensembl_proteins', 'Human Genes', 'human_ensembl_proteins_gene', $POS++,
+    'gene_label'           => sub { return $_[0]->biotype eq 'bacterial_contaminant' ? 'Bac. cont.' : ( $_[0]->biotype eq 'pseudogene' ? 'Pseudogene' : ( $_[0]->external_name || 'NOVEL' ) ) },
+    'gene_col'             => sub { return $_[0]->biotype eq 'bacterial_contaminant' ? '_BACCOM'    : $_[0]->analysis->logic_name.'_'.$_[0]->biotype.'_'.$_[0]->status          },
+    @_
+  );
+
   $self->add_new_track_gene( 'Homology_low', 'Bee Genes', 'bee_pre_gene', $POS++,
     'gene_col'   => sub { return $_[0]->analysis->logic_name },
     'gene_label' => sub { return $_[0]->stable_id },
@@ -1312,10 +1318,6 @@ sub ADD_GENE_TRACKS {
   $self->add_new_track_gene( 'Cow_proteins', 'Cow proteins', 'cow_protein', $POS++,
     'gene_label'           => sub { return $_[0]->stable_id },
     'gene_col'             => 'cow_protein', @_
-  );
- $self->add_new_track_gene( 'human_ensembl_proteins', 'Human genes', 'human_ensembl_proteins', $POS++,
-    'gene_label'           => sub { return $_[0]->stable_id },
-    'gene_col'             => 'human_ensembl_proteins', @_
   );
 
   $self->add_new_track_gene( 'oxford_genes', 'Oxford Genes', 'oxford_genes', $POS++,

@@ -194,8 +194,11 @@ sub new {
   $self->colourSet( 'rna_gene',
     'hi'         => 'highlight1',
     'superhi'    => 'highlight2',
-    'rna-pseudo' => [ 'plum3', 'RNA Pseudogene' ] ,
-    'rna-real'   => [ 'plum4', 'RNA gene' ]
+    'rna-realKNOWN'       => [ 'plum4', 'RNA gene (Known)' ],
+    'rna-realPREDICTED'   => [ 'plum3', 'RNA gene (Predicted)' ],
+    'rna-realNOVEL'       => [ 'plum1', 'RNA gene (Novel)' ],
+    'rna-pseudoKNOWN'     => [ 'pink3', 'RNA Pseudogene (Known)' ] ,
+    'rna-pseudoNOVEL'     => [ 'pink1', 'RNA Pseudogene (Novel)' ] ,
   );
   $self->colourSet( 'est_gene',
     'hi'         => 'highlight1',

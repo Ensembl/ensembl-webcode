@@ -32,7 +32,11 @@ sub load_genes {
       push (@$subarray_ref, $gene_obj);
       if($self->param('display')) {
         my $fam_obj = $fa->fetch_by_Member_source_stable_id( 'ENSEMBLGENE', $gene_obj->stable_id );
-        push (@$subarray_ref, $fam_obj->[0]);
+        if( $fam_obj ) {
+          push (@$subarray_ref, $fam_obj->[0]);
+        } else {
+warn "NO FAMILY OBJ ", $gene_obj->stable_id ;
+        }
       }
       push (@$array_ref, $subarray_ref);
     }
@@ -112,10 +116,10 @@ sub get_faminfo {
     my @subarray = @$subarray_ref;
     my $family = $subarray[1];
 
-    push @$results, {
+    push @$results, $family ? {
         'stable_id'     => $family->stable_id,
         'description'   => $family->description
-    }
+    } : {};
   }
   return $results;
 }

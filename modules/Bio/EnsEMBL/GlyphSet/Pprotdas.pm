@@ -45,10 +45,9 @@ sub _init {
     my $bml = floor( $prot_len * $pix_per_bp);
     my $bitmap_length = floor( $prot_len * $pix_per_bp);
 
-    my $gene = $self->{'container'}->adaptor->db->get_GeneAdaptor->fetch_by_translation_stable_id($self->{'container'}->stable_id);	
-
+    my $transcript = $self->{'container'}->adaptor->db->get_TranscriptAdaptor->fetch_by_translation_stable_id( $self->{'container'}->stable_id );
 #    warn("GENE : $gene");
-    my $tr = $gene->get_all_Transcripts->[0];
+#    my $tr = $gene->get_all_Transcripts->[0];
 #    foreach my $transcript (@{$gene->get_all_Transcripts()}) {
 #	warn("T:".$transcript->stable_id);
 #	my @exons = sort {$a->start <=> $b->start} grep { $_ } @{$transcript->get_all_Exons()};
@@ -85,10 +84,7 @@ sub _init {
 	    next;
 	}
 
-	my @coords;
-	foreach my $transcript (@{$gene->get_all_Transcripts()}) {
-	    @coords = grep { $_->isa('Bio::EnsEMBL::Mapper::Coordinate') } $transcript->genomic2pep($feat->das_segment->start, $feat->das_segment->end, $feat->strand);
-	}
+	my @coords =  grep { $_->isa('Bio::EnsEMBL::Mapper::Coordinate') } $transcript->genomic2pep($feat->das_segment->start, $feat->das_segment->end, $feat->strand);
 
 	if (@coords) {
 	    my $c = $coords[0];

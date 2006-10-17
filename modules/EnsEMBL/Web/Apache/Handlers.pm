@@ -49,7 +49,7 @@ sub childInitHandler {
   $process_start_time = time;
   srand( time() ^ $TT );
 
-  my $T =  new EnsEMBL::Web::DBSQL::UserDB( $r );
+  my $T =  new EnsEMBL::Web::DBSQL::UserDB( $r ); # $T->{_handle}->disconnect; $T->{_handle}=undef;
   $ENSEMBL_USER_DB_HANDLE = $T->{'_handle'};
   if( $ENSEMBL_DEBUG_FLAGS & 8 ){
     print STDERR "Child $$: - initialised at @{[time]}\n";

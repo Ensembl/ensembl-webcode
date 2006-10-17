@@ -33,7 +33,7 @@ sub disconnect {
 }
 sub DESTROY {
   my $self = shift;
-  warn $self->disconnect;
+  $self->disconnect;
 }
 
 ############################## SELECT QUERIES #################################

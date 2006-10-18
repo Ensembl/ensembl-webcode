@@ -118,14 +118,19 @@ sub _known_feature {
   my( $self, $type, $parameter ) = @_;
   my $db        = $self->param('db')||'core';
   my $name      = $self->param($parameter)||$self->param('peptide') || $self->param('transcript') || $self->param('gene');
-  my @features  = undef;
+  my @features  = ();
   my $adaptor;
   my $adaptor_name = "get_$type".'Adaptor';
   eval { $adaptor = $self->database($db)->$adaptor_name;};
     die ("Datafactory: Unknown DBAdapter in get_known_feature: $@") if ($@);
-  eval { $features[0] = $adaptor->fetch_by_display_label($name); };
-  unless($@){
-    eval { @features = @{$adaptor->fetch_all_by_external_name($name)}; };
+  eval {
+    my $f = $adaptor->fetch_by_display_label($name);
+    push @features,$f if $f;
+  };
+  unless(@features) {
+    eval {
+      @features = @{$adaptor->fetch_all_by_external_name($name)};
+    };
   }
   if( $@ ) {
     $self->problem('fatal', "Error retrieving $type from database", "An error occured while trying to retrieve the $type $name. ");

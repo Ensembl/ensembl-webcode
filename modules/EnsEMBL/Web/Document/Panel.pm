@@ -287,12 +287,7 @@ sub render_Text {
 
 sub render_XML {
   my $self = shift;
-  my $temp_renderer = $self->renderer;
-  $self->renderer = new EnsEMBL::Web::Document::Renderer::String();
   $self->content();
-  my $value = $self->renderer->value(); 
-  $self->renderer = $temp_renderer;
-  $self->renderer->print( $value )
 }
 
 sub content_Text() { 
@@ -549,6 +544,7 @@ sub content {
   }
   foreach my $component ($self->components) {
     foreach my $function_name ( @{$self->{'components'}{$component}} ) { 
+warn "$component - $function_name";
       my $result;
       (my $module_name = $function_name ) =~s/::\w+$//;
       if( $self->dynamic_use( $module_name ) ) {

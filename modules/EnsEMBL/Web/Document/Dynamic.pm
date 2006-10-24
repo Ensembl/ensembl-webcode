@@ -48,6 +48,7 @@ sub _initialize_HTML {
     title      EnsEMBL::Web::Document::HTML::Title
     stylesheet EnsEMBL::Web::Document::HTML::Stylesheet
     javascript EnsEMBL::Web::Document::HTML::Javascript
+    rss        EnsEMBL::Web::Document::HTML::RSS
     meta       EnsEMBL::Web::Document::HTML::Meta
   );
     #iehover    EnsEMBL::Web::Document::HTML::IEHoverHack

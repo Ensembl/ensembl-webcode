@@ -35,6 +35,7 @@ sub _initialize_HTML {
   $self->call_child_functions( 'common_page_elements' );
   $self->_common_HTML;
   $self->_script_HTML;
+  $self->rss->add( '/common/rss.xml', 'Ensembl website news feed', 'rss' );
   $self->helplink->kw = $ENV{'ENSEMBL_SCRIPT'}.';se=1';
 }
 

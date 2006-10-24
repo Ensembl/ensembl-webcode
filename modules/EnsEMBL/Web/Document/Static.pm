@@ -14,6 +14,7 @@ sub _initialize {
     title      EnsEMBL::Web::Document::HTML::Title
     stylesheet EnsEMBL::Web::Document::HTML::Stylesheet
     meta       EnsEMBL::Web::Document::HTML::Meta
+    rss        EnsEMBL::Web::Document::HTML::RSS
     javascript EnsEMBL::Web::Document::HTML::Javascript
   );
 
@@ -31,6 +32,7 @@ sub _initialize {
   $self->_common_HTML();
 
 ## Let us set up the search box...
+  $self->rss->add( '/common/rss.xml', 'Ensembl website news feed', 'rss' );
   $self->searchbox->sp_common  = $self->species_defs->SPECIES_COMMON_NAME;
 
   if( $ENV{'ENSEMBL_SPECIES'} ) { # If we are in static content for a species

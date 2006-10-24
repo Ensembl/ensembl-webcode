@@ -16,6 +16,7 @@ sub accession {
   my $label = 'GO Accession';
   my $name;
   my $html = '<p>';
+  return unless $object->name;
   if ( $object->param('display') ) {
     $name = $object->name;
     $html .= qq(The following Ensembl genes have been mapped to Gene Ontology ID: <a href="goview?acc=$acc_id">$acc_id</a> [$name]);
@@ -35,6 +36,7 @@ sub gene_acc {
 
   my $acc_id = $object->acc_id;
   my $name = $object->name;
+  return unless $object->name;
   $panel->add_row( 'GO Accession', $acc_id ? "<p><strong>$acc_id</strong> ($name)</p>" : "<p>(none selected)</p>" );
   return 1;
 }
@@ -103,6 +105,8 @@ sub tree {
   my $species = $object->species;
 
   if ($object->param('acc') || $object->param('query')) {
+    my $it = $object->iterator;
+    return unless $it;
     # start building spreadsheet
     my $table = EnsEMBL::Web::Document::SpreadSheet->new();
     $table->add_columns(
@@ -112,7 +116,6 @@ sub tree {
     );
 
     # create tree
-    my $it = $object->iterator;
     my %families = %{$object->families};
     my $id = $object->acc_id;
     my $query = $object->param('query');
@@ -186,7 +189,7 @@ sub family {
   my $species = $object->species;
 
   if ($id) {
-    $object->load_genes();
+    return unless $object->load_genes();
     my $table = EnsEMBL::Web::Document::SpreadSheet->new();
 
     $table->add_columns(

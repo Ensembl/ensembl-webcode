@@ -28,15 +28,13 @@ use strict;
 use warnings;
 
 sub features {
-    my( $panel, $object ) = @_;
+  my( $panel, $object ) = @_;
 
-    my @segments = $object->Locations;
+  my @segments = $object->Locations;
 
-    foreach my $segment (@segments) {
-	warn(join ('*', "SEGMENT:", $segment->seq_region_name, $segment->seq_region_start, $segment->seq_region_end));
-
-    }
-
+  foreach my $segment (@segments) {
+    warn(join ('*', "SEGMENT:", $segment->seq_region_name, $segment->seq_region_start, $segment->seq_region_end));
+  }
 }
 
 1;

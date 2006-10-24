@@ -268,8 +268,7 @@ sub alleles {
   my $observed_alleles = "Observed alleles are: ". join ", ", (keys %alleles);
   if (@vari_mappings) {
     return "This variation maps to several locations. $observed_alleles";
-  }
-  else {
+  } else {
     return "This variation has no mapping.  $observed_alleles";
   }
 }

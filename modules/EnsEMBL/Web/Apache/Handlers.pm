@@ -278,8 +278,12 @@ sub _process_blast {
         unlink $FILE3;
         flock FH, LOCK_UN;
         my $COMMAND = "$ENSEMBL_BLASTSCRIPT $blast_file $FILE2";
+        open X, ">>$FILE2";
+        print X "PARSING at ".gmtime()." on host ".`hostname`;
+        print X "$COMMAND\n";
+        close X;
       ## NOW WE PARSE THE BLAST FILE.....
-warn "EXECUTING BLAST $COMMAND";
+# warn "EXECUTING BLAST $COMMAND";
         `$COMMAND`;
         if( $ticket && ( $_process_blast_called_at + 30>time() )) {
           $loads = _get_loads();

@@ -350,18 +350,10 @@ sub transHandler {
   if( $species eq 'das' ) { # we have a DAS request...
     my $DSN = $path_segments[0];
     my $command = '';
-    if( $DSN eq 'dsn' ) {
-      $path_info = join ('/',@path_segments );
-      if( $ENSEMBL_DEBUG_FLAGS & 8 ) {
-        my @X = localtime();
-        $LOG_INFO = sprintf( "SCRIPT:%8s:%-10d %04d-%02d-%02d %02d:%02d:%02d /%s/%s?%s\n",
-          substr($THIS_HOST,0,8), $$, $X[5]+1900, $X[4]+1, $X[3], $X[2],$X[1],$X[0],
-          'das','dsn','' );
-        warn $LOG_INFO;
-        $LOG_TIME = time();
-        $r->push_handlers( PerlCleanupHandler   => \&fixupHandler );
-        $r->push_handlers( PerlCleanupHandler => \&Apache::SizeLimit::handler );
-      }
+    if( $path_segments[1] eq 'entry_points' && -e $SiteDefs::ENSEMBL_SERVERROOT."/htdocs/das/$DSN/entry_points" ||
+      $DSN eq 'dsn' ) {
+## Fall through this is a static page!!
+      $path_info = join '/', @path_segments;
     } else {
 # Because assemblies might contain dots themselves - we split DSN on dots
 # the first element will be species, the last - source name, and all the field in the middle are the assembly
@@ -371,7 +363,6 @@ sub transHandler {
       my $assembly = join ('.', @dsn_fields);
 
       $command = $path_segments[1];
-      my $FN = "/ensemblweb/wwwdev/server/perl/das/$command";
       $das_species = map_alias_to_species( $das_species );
       if( ! $das_species ) {
         $command = 'das_error';
@@ -380,7 +371,7 @@ sub transHandler {
       $r->subprocess_env->{'ENSEMBL_SPECIES' }     = $das_species;
       $r->subprocess_env->{'ENSEMBL_DAS_ASSEMBLY'} = $assembly;
       $r->subprocess_env->{'ENSEMBL_DAS_TYPE'}     = $type;
-      $r->subprocess_env->{'ENSEMBL_SCRIPT'}  = $command;
+      $r->subprocess_env->{'ENSEMBL_SCRIPT'}       = $command;
       my $error_filename = '';
       foreach my $dir ( @PERL_TRANS_DIRS ) {
         my $filename = sprintf( $dir, $species )."/das/$command";
@@ -474,6 +465,9 @@ sub transHandler {
       return REDIRECT;
     }
     -r $filename or next;
+    if( $species eq 'das' ) {
+      $r->headers_out->add( "Content-type", "text/xml" );
+    }
     $r->filename( $filename );
     return OK;
   }

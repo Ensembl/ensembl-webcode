@@ -854,7 +854,7 @@ sub get_markedup_trans_seq {
   eval {
     my $pep_obj = $trans->translate;
     $peptide = $pep_obj->seq();
-warn "...... $peptide ....";
+#warn "...... $peptide ....";
     $can_translate = 1;
     $flip = 0;
     my $startphase = $trans->translation->start_Exon->phase;

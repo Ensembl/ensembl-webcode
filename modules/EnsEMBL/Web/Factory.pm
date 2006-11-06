@@ -118,6 +118,7 @@ sub _known_feature {
   my( $self, $type, $parameter ) = @_;
   my $db        = $self->param('db')||'core';
   my $name      = $self->param($parameter)||$self->param('peptide') || $self->param('transcript') || $self->param('gene');
+  my $sitetype = $self->species_defs->ENSEMBL_SITETYPE || 'Ensembl';
   my @features  = ();
   my $adaptor;
   my $adaptor_name = "get_$type".'Adaptor';
@@ -150,7 +151,7 @@ sub _known_feature {
       $self->problem('unmapped');
     }
     else {
-      $self->problem('fatal', "$type '$name' not found", "The identifier '$name' is not present in the current release of the Ensembl database. ")  ;
+      $self->problem('fatal', "$type '$name' not found", "The identifier '$name' is not present in the current release of the $sitetype database. ")  ;
     }
   }
   return;

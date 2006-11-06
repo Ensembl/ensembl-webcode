@@ -103,7 +103,7 @@ sub init {
 
        'Vannot_knownPTrans' => {
 	    'on' => 'on',
-	    'pos' => '11',
+	    'pos' => '13',
 	    'width' => 40,
             'glyphset' => 'Vgenedensity_vega',
             'label' => ["Kn_Pt"],
@@ -113,7 +113,7 @@ sub init {
 
     	'Vannot_novelPTrans' => {
 	    'on' => 'on',
-	    'pos' => '13',
+	    'pos' => '14',
 	    'width' => 40,
             'glyphset' => 'Vgenedensity_vega',
             'label' => ["No_Pt"],
@@ -158,7 +158,7 @@ sub init {
             'glyphset' => 'Vgenedensity_vega',
             'label' => ["IgS", "IgP"],
             'colour' => [qw(Ig_segment_NOVEL Ig_pseudogene_segment_UNKNOWN)],
-    	    'logicname' => [qw(IgSegDensity IgPseudoSegDensity)],
+    	    'logicname' => 'IgSegDensity IgPseudoSegDensity',
 	    },
 
 	    'Vpercents' => {

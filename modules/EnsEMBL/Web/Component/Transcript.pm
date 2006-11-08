@@ -1,6 +1,7 @@
 package EnsEMBL::Web::Component::Transcript;
 
 use EnsEMBL::Web::Component;
+use EnsEMBL::Web::Form;
 our @ISA = qw( EnsEMBL::Web::Component);
 
 use Data::Dumper;

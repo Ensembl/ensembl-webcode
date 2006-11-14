@@ -5,14 +5,12 @@
 #
 package Sanger::Graphics::GlyphSet;
 use strict;
+use warnings;
 use Exporter;
+use base qw(Sanger::Graphics::Root);
 use Sanger::Graphics::Glyph::Diagnostic;
 use Sanger::Graphics::Glyph::Text;
-use Sanger::Graphics::Root;
 use Sanger::Graphics::Glyph::Space;
-
-use vars qw(@ISA);
-@ISA = qw( Sanger::Graphics::Root );
 
 #########
 # constructor
@@ -53,6 +51,7 @@ sub __init {
   my $self = shift;
   $self->_init(@_);
 }
+
 sub _init {
     my ($self) = @_;
     print STDERR qq($self unimplemented\n);
@@ -277,5 +276,11 @@ sub errorTrack {
 }
 
 sub commify { CORE::shift; local $_ = reverse $_[0]; s/(\d\d\d)(?=\d)(?!\d*\.)/$1,/g; return scalar reverse $_; }
+
+sub check {
+    my $self   = shift;
+    my ($name) = ref($self) =~ /::([^:]+)$/;
+    return $name;
+}
 
 1;

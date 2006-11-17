@@ -1,17 +1,15 @@
 #########
-# Author: rmp@sanger.ac.uk
-# Maintainer: webmaster@sanger.ac.uk
-# Created: 2001
+# Author:        rmp@sanger.ac.uk
+# Maintainer:    webmaster@sanger.ac.uk
+# Created:       2001
+# Last Modified: $Date$
 #
 package Sanger::Graphics::WebUserConfig;
 use strict;
+use warnings;
 use Sanger::Graphics::ColourMap;
 use Sanger::Graphics::TextHelper;
-use Exporter;
-use vars qw(@ISA);
 use Data::Dumper;
-
-@ISA = qw(Exporter);
 
 #########
 # 'general' settings contain defaults.
@@ -37,6 +35,10 @@ sub new {
     $self->init( @_ ) if($self->can('init'));
 
     return $self;
+}
+
+sub is_available_artefact {
+  return 1;
 }
 
 sub dump {

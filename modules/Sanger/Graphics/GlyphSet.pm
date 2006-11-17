@@ -48,7 +48,7 @@ sub new {
 # keep track of x,y,width,height as it goes.
 #
 sub __init {
-  my $self = shift;
+  my $self = CORE::shift;
   $self->_init(@_);
 }
 
@@ -278,7 +278,7 @@ sub errorTrack {
 sub commify { CORE::shift; local $_ = reverse $_[0]; s/(\d\d\d)(?=\d)(?!\d*\.)/$1,/g; return scalar reverse $_; }
 
 sub check {
-    my $self   = shift;
+    my $self   = CORE::shift;
     my ($name) = ref($self) =~ /::([^:]+)$/;
     return $name;
 }

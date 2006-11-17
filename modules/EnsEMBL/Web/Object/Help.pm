@@ -35,7 +35,7 @@ sub send_email {
   my $mailer = new Mail::Mailer 'smtp', Server => "localhost";
   my $sitetype = ucfirst(lc($self->species_defs->ENSEMBL_SITETYPE))||'Ensembl';
   my $recipient = $self->species_defs->ENSEMBL_HELPDESK_EMAIL;
-  $mailer->open({ 'To' => $recipient, 'Subject' => "$sitetype website Helpdesk", });
+  $mailer->open({ 'To' => $recipient, 'Subject' => "$sitetype website Helpdesk", 'From' => $self->param('email') });
   print $mailer $message;
   $mailer->close();
   return 1;

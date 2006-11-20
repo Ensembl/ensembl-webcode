@@ -313,26 +313,17 @@ sub align_markup_options_form {
 
 sub name {
   my( $panel, $object ) = @_;
-  
   my $page_type= $object->[0];
   my @vega_info=();
-  
   if($page_type eq 'Transcript'){
     my $trans= $object->transcript;
-
-
     my @similarity_links= @{$object->get_similarity_hash($trans)};
-  
     my @vega_links= grep {$_->{db_display_name} eq 'Havana transcripts'} @similarity_links;
     my $urls= $object->ExtURL;
-  
     foreach my $link(@vega_links){
-
       my $id= $link->{display_id};
       my $href= $urls->get_url('Vega_transcript', $id);
       push @vega_info, [$id, $href];
-
-
     }
   }
   my( $display_name, $dbname, $ext_id, $dbname_disp, $info_text ) = $object->display_xref(); $info_text = '';
@@ -353,8 +344,6 @@ sub name {
 	$linked_display_name = $prefix . ':' . $linked_display_name if $prefix;
 
   }
-
-
   my $site_type = ucfirst(lc($SiteDefs::ENSEMBL_SITETYPE));
 
   # If gene ID projected from other spp, put link on other spp geneID
@@ -368,7 +357,6 @@ sub name {
       $info_text =~s|($gene)|<a href="/$species/geneview?gene=$gene">$gene</a> |;
     }
   }
-
   my $html = qq(
   <p>
     <strong>$linked_display_name</strong> $info_text ($dbname_disp)
@@ -382,20 +370,16 @@ sub name {
     This $lc_type is a member of the human CCDS set: @{[join ', ', map {$object->get_ExtURL_link($_,'CCDS', $_)} @CCDS] }
   </p>);
   }
-
   if(@vega_info){
     foreach my $info(@vega_info){
       my $id= $$info[0];
       my $href= $$info[1];
-      
-      $html .= qq(
-        <p>
+      $html .= qq(<p>
           This transcript is identical to Vega transcript: <a href="$href">$id</a> 
        </p>
-     );
+      );
     }
-   } 
-  
+  }
   $panel->add_row( $label, $html );
   return 1;
 }
@@ -410,7 +394,11 @@ sub stable_id {
   return 1 unless $geneid;
   my $vega_link = '';
   if( $db eq 'vega' ){
-	$label = 'Vega '.$label;
+	#hack to display Vega source names nicely
+	my %matches = ('Vega_external' => 'External',
+				   'Vega_havana'   => 'Havana',
+				  );
+	$label = 'Vega '.$matches{$db_type}.' '.$o_type.' ID';
     $vega_link = sprintf qq(<span class="small">[%s]</span>),
       $object->get_ExtURL_link( "View $o_type @{[$object->stable_id]} in Vega", 'VEGA_'.uc($o_type), $object->stable_id )
   }

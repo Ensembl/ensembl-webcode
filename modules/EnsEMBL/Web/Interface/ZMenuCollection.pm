@@ -99,7 +99,7 @@ sub json {
   if (!$parameters{escape} || $parameters{escape}  eq "yes") {
     $json =~ s/'/\\'/g;
   }
-  warn "JSON: " . $json;
+#  warn "JSON: " . $json;
   return $json;
 }
 

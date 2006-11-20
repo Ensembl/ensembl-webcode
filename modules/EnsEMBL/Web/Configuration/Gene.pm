@@ -238,6 +238,17 @@ sub geneview {
       paralogues    EnsEMBL::Web::Component::Gene::paralogues
       diseases      EnsEMBL::Web::Component::Gene::diseases
     ));
+	if ($obj->get_db eq 'vega') {
+	   $panel1->add_component_after(qw(
+	     stable_id author EnsEMBL::Web::Component::Gene::author
+	   ));
+	   $panel1->add_component_after(qw(
+	     author type EnsEMBL::Web::Component::Gene::type
+	   ));
+	   $panel1->add_component_after(qw(
+	     location version_and_date  EnsEMBL::Web::Component::Gene::version_and_date
+       ));
+    }
     $self->add_panel( $panel1 );
   }
 
@@ -275,6 +286,11 @@ sub geneview {
         trans_image EnsEMBL::Web::Component::Transcript::transcript_structure
         prot_image  EnsEMBL::Web::Component::Transcript::protein_features_geneview
       ));
+	  if ($obj->get_db eq 'vega') {
+	    $panel->add_component_after(qw(
+	      proteininfo class EnsEMBL::Web::Component::Transcript::class
+       ));
+    }
       $self->add_panel( $panel ); 
     }
   }

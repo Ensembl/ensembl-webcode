@@ -9,9 +9,11 @@ use EnsEMBL::Web::Object;
 our @ISA = qw(EnsEMBL::Web::Object);
 use Mail::Mailer;
 
+sub results     { return $_[0]->Obj->{'results'}; }
 sub index       { return $_[0]->Obj->{'index'};   }
 sub glossary    { return $_[0]->Obj->{'glossary'};   }
-sub results     { return $_[0]->Obj->{'results'}; }
+sub movie_list  { return $_[0]->Obj->{'movie_list'};   }
+sub movie       { return $_[0]->Obj->{'movie'};   }
 
 sub send_email {
   my $self = shift;
@@ -33,7 +35,7 @@ sub send_email {
   my $mailer = new Mail::Mailer 'smtp', Server => "localhost";
   my $sitetype = ucfirst(lc($self->species_defs->ENSEMBL_SITETYPE))||'Ensembl';
   my $recipient = $self->species_defs->ENSEMBL_HELPDESK_EMAIL;
-  $mailer->open({ 'To' => $recipient, 'Subject' => "$sitetype website Helpdesk", });
+  $mailer->open({ 'To' => $recipient, 'Subject' => "$sitetype website Helpdesk", 'From' => $self->param('email') });
   print $mailer $message;
   $mailer->close();
   return 1;

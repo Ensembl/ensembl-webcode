@@ -1187,8 +1187,7 @@ sub ADD_ALL_TRANSCRIPTS {
     'available'=>'features VEGA_GENES_OTTER_EXTERNAL', @_);
 ## OTHER FEATURES DATABASE TRANSCRIPTS....
   $self->add_new_track_transcript( 'est',       'EST genes',       'est_gene', $POS++,
-    'available' => 'databases_features ENSEMBL_OTHERFEATURES.estgene', @_ );
-
+    'available' => 'database_features ENSEMBL_OTHERFEATURES.estgene', @_ );
   $self->add_new_track_transcript( 'medaka_transcriptcoalescer', 'EST Genes',     'medaka_genes',$POS++,
     'available' => "database_features ENSEMBL_OTHERFEATURES.medaka_transcriptcoalescer" , @_ );
   $self->add_new_track_transcript( 'medaka_genome_project', 'MGP Genes',     'medaka_genes',$POS++,
@@ -1460,7 +1459,6 @@ sub ADD_ALL_AS_TRANSCRIPTS {
     my $POS  = shift || 2000;
     $self->add_new_track_transcript( 'ensembl',   'Ensembl genes',   'ensembl_gene',   $POS++, @_ );
     $self->add_new_track_transcript( 'evega',     'Vega genes',      'vega_gene',      $POS++, 'available' => 'databases ENSEMBL_VEGA',    @_ );
-    
     return $POS;
 }
 

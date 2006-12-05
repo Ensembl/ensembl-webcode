@@ -3,43 +3,65 @@ package EnsEMBL::Web::Configuration::SNP;
 use strict;
 use EnsEMBL::Web::Configuration;
 
-## Function to configure snp view
+### Function to configure snp view
 our @ISA = qw( EnsEMBL::Web::Configuration );
 
 sub snpview {
   my $self   = shift;
-  my $obj    = $self->{'object'}; 
+  my $obj    = $self->{'object'};
+
   my $params = { 'snp' => $obj->name };
      $params->{'c'} =  $obj->param('c') if  $obj->param('c');
      $params->{'w'} =  $obj->param('w') if  $obj->param('w');
      $params->{'source'} =  $obj->param('source') if  $obj->param('source');
-     
+
   my @params = (
     'object' => $obj,
     'params' => $params
   );
 
-  # Description : prints a two col table with info abou the SNP
+  my $bad_mapping_flag = $obj->seq_region_data ? 0 : 1;
+  if ($bad_mapping_flag) {
+    my @tmp = ($obj->seq_region_data);
+    $bad_mapping_flag = $tmp[3] || "incorrect";
+  }
 
+  # Description : prints a two col table with info abou the SNP
   if (my $info_panel = $self->new_panel('Information',
     'code'    => "info$self->{flag}",
     'caption' => 'SNP Report',
 				       )) {
 
-  $info_panel->add_components(qw(
+    $info_panel->add_components(qw(
     name       EnsEMBL::Web::Component::SNP::name
     synonyms   EnsEMBL::Web::Component::SNP::synonyms
     alleles    EnsEMBL::Web::Component::SNP::alleles
     status     EnsEMBL::Web::Component::SNP::status
     moltype    EnsEMBL::Web::Component::SNP::moltype
     ld_data    EnsEMBL::Web::Component::SNP::ld_data
-    tagged_snp EnsEMBL::Web::Component::SNP::tagged_snp
     seq_region EnsEMBL::Web::Component::SNP::seq_region
-  ));
-  $self->{page}->content->add_panel( $info_panel );
-}
+				  ));
 
-# prints a table of variation genotypes, alleles, their Population ids, genotypes, frequencies  etc. in spreadsheet format
+    $info_panel->remove_component("ld_data") if $bad_mapping_flag;
+    $self->{page}->content->add_panel( $info_panel );
+  }
+
+  #  Description : genomic location of SNP
+  my $caption = $bad_mapping_flag ? " has $bad_mapping_flag mappings" : " is located in the following transcripts";
+  if ( my $mapping_panel = $self->new_panel('SpreadSheet',
+    'code'    => "mappings $self->{flag}",
+    'caption' => "SNP ". $obj->name.$caption,
+     @params,
+    'status'  => 'panel_locations',
+    'null_data' => '<p>There are no transcripts that contain this SNP either because there is no mapping or because it was removed from Ensembl because its alleles did not match the reference sequence.</p>'
+				    )) {
+    $mapping_panel->add_components( qw(mappings EnsEMBL::Web::Component::SNP::mappings) );
+    $self->{page}->content->add_panel( $mapping_panel );
+  }
+
+  return if $bad_mapping_flag;
+
+  # prints a table of variation genotypes, alleles, their Population ids, genotypes, frequencies  etc. in spreadsheet format
 if (
  my $frequency_panel = $self->new_panel('SpreadSheet',
     'code'    => "pop frequencies$self->{flag}",
@@ -51,20 +73,6 @@ if (
 
   $frequency_panel->add_components( qw(all_freqs EnsEMBL::Web::Component::SNP::all_freqs) );
   $self->{page}->content->add_panel( $frequency_panel );
-}
-
-
-#  Description : genomic location of SNP
-if ( 
-my $mapping_panel = $self->new_panel('SpreadSheet',
-    'code'    => "mappings $self->{flag}",
-    'caption' => "SNP ". $obj->name." is located in the following transcripts",
-     @params,
-    'status'  => 'panel_locations',
-    'null_data' => '<p>There are no transcripts that contain this SNP.</p>'
-				    )) {
-  $mapping_panel->add_components( qw(mappings EnsEMBL::Web::Component::SNP::mappings) );
-  $self->{page}->content->add_panel( $mapping_panel );
 }
 
 # Neighbourhood image -------------------------------------------------------
@@ -132,6 +140,7 @@ if (
 }
 
 sub context_menu {
+  ### SNPview Lefthand side menu bar
   my $self = shift;
   my $obj  = $self->{'object'};
   my $species = $obj->species;
@@ -150,7 +159,7 @@ sub context_menu {
 	'href' => "/$species/genesnpview?gene=".$gene->stable_id
     );
   }
-  
+
   my $snpview_href = "/$species/snpview?snp=$name";
   if ($obj->param('source')) {
     $snpview_href .= ';source='.$obj->param('source');

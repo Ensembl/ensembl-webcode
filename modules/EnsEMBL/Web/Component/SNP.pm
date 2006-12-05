@@ -5,9 +5,7 @@ package EnsEMBL::Web::Component::SNP;
 This code is distributed under an Apache style licence:
 Please see http://www.ensembl.org/code_licence.html for details
 
-=head1 CONTACT
-
-Fiona Cunningham <webmaster@sanger.ac.uk>
+CONTACT Fiona Cunningham <webmaster@sanger.ac.uk>
 
 =cut
 
@@ -35,17 +33,15 @@ use CGI qw(escapeHTML);
 
 # General info table #########################################################
 
-=head2 name
-
- Arg1        : panel
- Arg2        : data object
- Example     : $panel1->add_rows(qw(name   EnsEMBL::Web::Component::SNP::name) );
- Description : adds a label and the variation name, source to the panel
- Return type : 1
-
-=cut
-
 sub name {
+
+  ### General_table_info
+  ### Arg1        : panel
+  ### Arg2        : data object
+  ### Example     : $panel1->add_rows(qw(name   EnsEMBL::Web::Component::SNP::name) );
+  ### Description : adds a label and the variation name, source to the panel
+  ### Returns  1
+
   my($panel, $object) = @_;
   my $label  = 'SNP';
   my $name   = $object->name;
@@ -57,17 +53,16 @@ sub name {
 }
 
 
-=head2 synonyms
-
- Arg1        : panel
- Arg2        : data object
- Example     : $panel1->add_rows(qw(synonyms   EnsEMBL::Web::Component::SNP::synonyms) );
- Description : adds a label and the variation synonyms to the panel
- Return type : 1
-
-=cut
 
 sub synonyms {
+
+  ### General_table_info
+  ### Arg1        : panel
+  ### Arg2        : data object
+  ### Example     : $panel1->add_rows(qw(synonyms   EnsEMBL::Web::Component::SNP::synonyms) );
+  ### Description : adds a label and the variation synonyms to the panel
+  ### Returns  1
+
   my($panel, $object) = @_;
   my $label = 'Synonyms';
   my %synonyms = %{$object->dblinks};
@@ -116,17 +111,16 @@ sub synonyms {
 }
 
 
-=head2 status
-
- Arg1        : panel
- Arg2        : data object
- Example     : $panel1->add_rows("status EnsEMBL::Web::Component::SNP::status");
- Description : adds a label and string for the variation validation status to the panel
- Return type : 1
-
-=cut
 
 sub status {
+
+  ### General_table_info
+  ### Arg1        : panel
+  ### Arg2        : data object
+  ### Example     : $panel1->add_rows("status EnsEMBL::Web::Component::SNP::status");
+  ### Description : adds a label and string for the variation validation status to the panel
+  ### Returns  1
+
   my ( $panel, $object ) = @_;
   my $label = 'Validation status';
   my @status = @{$object->status};
@@ -163,18 +157,17 @@ sub status {
 
 
 
-=head2 alleles
 
- Arg1        : panel
- Arg2        : data object
- Example     : $panel1->add_rows(qw(alleles EnsEMBL::Web::Component::SNP::alleles) );
- Description : adds a label and html for the Variations alleles
-               adds a line describing the ancestor allele if this exists
- Return type : 1
+sub alleles {
 
-=cut
+  ### General_table_info
+  ### Arg1        : panel
+  ### Arg2        : data object
+  ### Example     : $panel1->add_rows(qw(alleles EnsEMBL::Web::Component::SNP::alleles) );
+  ### Description : adds a label and html for the Variations alleles
+  ###              adds a line describing the ancestor allele if this exists
+  ### Returns  1
 
- sub alleles {
    my ( $panel, $object ) = @_;
    my $label = 'Alleles';
    my $alleles = $object->alleles;
@@ -196,17 +189,15 @@ sub status {
 
 
 
-=head2 moltype
-
- Arg1        : panel
- Arg2        : data object
- Description : adds a label and its value to the panel:
-               which describes the molecular type e.g. 'Genomic'
- Return type : 1
-
-=cut
-
 sub moltype {
+
+  ### General_table_info
+  ### Arg1        : panel
+  ### Arg2        : data object
+  ### Description : adds a label and its value to the panel:
+  ### which describes the molecular type e.g. 'Genomic'
+  ### Returns  1
+
   my ( $panel, $object ) = @_;
   my $label = 'Molecular type';
   my $snp_data  = $object->moltype;
@@ -216,66 +207,46 @@ sub moltype {
 }
 
 
-=head2 ld_data
-
- Arg1        : panel
- Arg2        : data object
- Example     : $panel1->add_rows(qw(ld_data EnsEMBL::Web::Component::SNP::ld_data) );
- Description : adds a label and its value to the panel:
-               Get all the populations with LD data within 100kb of this SNP
-                 Make links from these populations to LDView
- Return type : 1
-
-=cut
 
 sub ld_data {
-  my ( $panel, $object ) = @_;
-  my $pop_names = _ld_populations($object) ;
-  my $label = "Linkage disequilibrium <br />data";
 
-  unless (@$pop_names) {
+### General_table_info
+ ### Arg1        : panel
+ ### Arg2        : data object
+ ### Example     : $panel1->add_rows(qw(ld_data EnsEMBL::Web::Component::SNP::ld_data) );
+ ### Description : adds a label and its value to the panel:
+ ###              Get all the populations with LD data within 100kb of this SNP
+ ###                Make links from these populations to LDView
+ ### Returns  1
+
+  my ( $panel, $object ) = @_;
+  my %pop_names = %{_ld_populations($object) ||{} };
+  my $label = "Linkage disequilibrium <br />data";
+  my %tag_data  = %{$object->tagged_snp ||{} };
+
+  my %ld = (%pop_names, %tag_data);
+  unless (keys %ld) {
     $panel->add_row($label, "<h5>No linkage data for this SNP</h5>");
     return 1;
   }
 
-  $panel->add_row($label, link_to_ldview($panel, $object, $pop_names) );
+  $panel->add_row($label, link_to_ldview($panel, $object, \%ld) );
   return 1;
 }
 
 
-=head2 tagged_snp
-
- Arg1        : panel
- Arg2        : data object
- Example     : $panel1->add_rows(qw(tagged_snp EnsEMBL::Web::Component::SNP::tagged_snp) );
- Description : adds a label and html to the panel
-               the populations in which this snp is tagged, if it is tagged an any in two_col_table format
- Return type : 1
-
-=cut
-
-sub tagged_snp {
-  my ( $panel, $object ) = @_;
-  my $label = 'SNP in tagged set for these populations';
-  my $snp_data  = $object->tagged_snp;
-  return 1 unless @$snp_data;
-  $panel->add_row($label, link_to_ldview($panel, $object, $snp_data) );
-  return 1;
-}
 
 
-=head2 seq_region
-
- Arg1        : panel
- Arg2        : data object
- Example     : $panel1->add_rows(qw(seq_region EnsEMBL::Web::Component::SNP::seq_region) );
- Description : adds a label and html to the panel
-               the variations sequence region in two_col_table format
- Return type : 1
-
-=cut
 
 sub seq_region {
+
+### General_table_info
+ ### Arg1        : panel
+ ### Arg2        : data object
+ ### Example     : $panel1->add_rows(qw(seq_region EnsEMBL::Web::Component::SNP::seq_region) );
+ ### Description : adds a label and html to the panel
+ ###              the variations sequence region in two_col_table format
+ ### Returns  1
   my ( $panel, $object ) = @_;
   my $label = 'Sequence region';
   my $alleles = $object->alleles;
@@ -299,70 +270,51 @@ sub seq_region {
 
 # Population genotype table and Allele Frequency Table ######################
 
-=head2 genotype_freqs;
+sub all_freqs {
 
- Arg1        : panel
- Arg2        : data object
- Example     :  $genotype_panel->add_components( qw(genotype_freqs EnsEMBL::Web::Component::SNP::genotype_freqs) ); 
- Description : prints a table of variation genotypes, their Population ids, genotypes, frequencies  etc. in spreadsheet format
- Return type : 1
+  ### Population_genotype_alleles
+  ### Arg1        : panel
+  ### Arg2        : data object
+  ### Example     : $allele_panel->add_components( qw(all_freqs EnsEMBL::Web::Component::SNP::all_freqs) );
+  ### Description : prints a table of allele and genotype frequencies for the variation per population
+  ### Returns  1
 
-=cut
-
-sub genotype_freqs {
   my ( $panel, $object ) = @_;
-  my $freq_data = $object->pop_table;
+  my $freq_data = $object->freqs;
   return [] unless %$freq_data;
 
-  format_frequencies($panel, $object, $freq_data, "Genotypes");
+  format_frequencies($panel, $object, $freq_data);
   return 1;
 }
 
-=head2 allele_freqs
-
- Arg1        : panel
- Arg2        : data object
- Example     : $allele_panel->add_components( qw(allele_freqs EnsEMBL::Web::Component::SNP::allele_freqs) );
- Description : prints a table of allele frequencies for the variation
- Return type : 1
-
-=cut
-
-sub allele_freqs {
-  my ( $panel, $object ) = @_;
-  my $freq_data = $object->allele_freqs;
-  return [] unless %$freq_data;
-
-  format_frequencies($panel, $object, $freq_data, "Alleles");
-  return 1;
-}
-
-
-=head2 format_frequencies
-
- Arg1        : panel
- Arg2        : data object 
- Arg3        : frequency data
- Arg4        : data type i.e. "Alleles" or "Genotypes"
- Example     : format_frequencies($panel, $object, $freq_data, "Alleles");
- Description : prints a table of allele or genotype frequencies for the variation
- Return type : 1
-
-=cut
 
 sub format_frequencies {
-  my ( $panel, $object, $freq_data, $data_type ) = @_;
+
+  ### Population_genotype_alleles
+  ### Arg1        : panel
+  ### Arg2        : data object 
+  ### Arg3        : frequency data
+  ### Example     : format_frequencies($panel, $object, $freq_data, "Alleles");
+  ### Description : prints a table of allele or genotype frequencies for the variation
+  ### Returns  1
+
+  my ( $panel, $object, $freq_data ) = @_;
   my %freq_data = %{ $freq_data };
   my %columns;
 
   foreach my $pop_id (sort { $freq_data{$a}{pop_info}{Name} cmp $freq_data{$b}{pop_info}{Name}} keys %freq_data) {
     my %pop_row;
 
-    # Freqs and genotypes/alleles ---------------------------------------------
-    my @freq = @{ $freq_data{$pop_id}{Frequency} };
+    # Freqs alleles ---------------------------------------------
+    my @allele_freq = @{ $freq_data{$pop_id}{AlleleFrequency} };
+    foreach my $gt ( @{ $freq_data{$pop_id}{Alleles} } ) {
+      $pop_row{"Alleles&nbsp;<br />$gt"} = sprintf("%.3f", shift @allele_freq ) || 'no data';
+    }
 
-    foreach my $gt ( @{ $freq_data{$pop_id}{$data_type} } ) {
-      $pop_row{$gt} = sprintf("%.3f", shift @freq ) || 'no data';
+    # Freqs genotypes ---------------------------------------------
+    my @genotype_freq = @{ $freq_data{$pop_id}{GenotypeFrequency} || [] };
+    foreach my $gt ( @{ $freq_data{$pop_id}{Genotypes} } ) {
+      $pop_row{"Genotypes&nbsp;<br />$gt"} = sprintf("%.3f", shift @genotype_freq ) || 'no data';
     }
 
     # Add a name, size and description if it exists ---------------------------
@@ -371,8 +323,11 @@ sub format_frequencies {
 
     # Descriptions too long. Only display first sentence
     (my $description = $freq_data{$pop_id}{pop_info}{Description}) =~ s/International HapMap project.*/International HapMap project\.\.\./;
+    $description =~ s/<.*?>//g;
+    if (length $description > 220) {
+      $description = substr($description, 0, 220) ."...";
+    }
     $pop_row{Description} = "<small>". ($description ||"-") ."</small>";
-
 
     # Super and sub populations ----------------------------------------------
     my $super_string = _sort_extra_pops($object, $freq_data{$pop_id}{pop_info}{"Super-Population"});
@@ -385,14 +340,13 @@ sub format_frequencies {
     map {  $columns{$_} = 1 if $pop_row{$_};  } (keys %pop_row);
   }
 
-
   # Format table columns ------------------------------------------------------
   my @header_row;
-  foreach my $col (sort keys %columns) {
+  foreach my $col (sort {$a cmp $b} keys %columns) {
     next if $col eq 'pop';
     if ($col !~ /Population|Description/) {
       unshift (@header_row, {key  =>$col,  'align'=>'left',
- 			     title => "$data_type&nbsp;<br />$col" });
+ 			     title => $col });
     }
     else {
       push (@header_row, {key  =>$col, 'align'=>'left', title => "&nbsp;$col&nbsp;"  });
@@ -406,18 +360,17 @@ sub format_frequencies {
 
 # Variation feature mapping table #############################################
 
-=head2 mappings
-
- Arg1        : panel
- Arg2        : data object 
- Arg3        : the view name (i.e. "snpview" or "ldview")
- Example     :  $mapping_panel->add_components( qw(mappings EnsEMBL::Web::Component::SNP::mappings) );
- Description : table showing Variation feature mappings to genomic locations
- Return type : 1
-
-=cut
 
 sub mappings {
+
+ ### Mapping_table
+ ### Arg1        : panel
+ ### Arg2        : data object 
+ ### Arg3        : the view name (i.e. "snpview" or "ldview")
+ ### Example     :  $mapping_panel->add_components( qw(mappings EnsEMBL::Web::Component::SNP::mappings) );
+ ### Description : table showing Variation feature mappings to genomic locations
+ ### Returns  1
+
   my ( $panel, $object, $view ) = @_;
   $view ||= "snpview";
   my %mappings = %{ $object->variation_feature_mapping };
@@ -479,19 +432,11 @@ sub mappings {
       $panel->add_row({ %chr_info, %trans_info});
 
       unless (@table_header) {
-	push (@table_header,
-	      {key => 'transcript', title => 'Transcript: start-end&nbsp;'},
-	     );
-	unless ($source eq 'Glovar') {
-	  push (@table_header,
-		{key => 'genesnpview', title => 'GeneSNPView link&nbsp;'},
-	       );
-	}
-
-
-	push @table_header, {key => 'translation', title => 'Translation: start-end&nbsp;'} if $transcript_data->{'proteinname'} ;
-	push @table_header, {key => 'pepallele',   title =>'Peptide allele&nbsp;'} if $transcript_data->{'pepallele'} ;
+	push (@table_header, {key => 'transcript', title => 'Transcript: relative SNP position&nbsp;'}, );
+	push @table_header, {key => 'translation', title => 'Translation: relative SNP position&nbsp;'} if $transcript_data->{'proteinname'} ;
+	push @table_header, {key => 'pepallele',   title =>'Amino Acid&nbsp;'} if $transcript_data->{'pepallele'} ;
 	push (@table_header, {key => 'conseq', title =>'Type'});
+        push (@table_header, {key => 'genesnpview', title => 'GeneSNPView link&nbsp;'},) ;
       }
       %chr_info = ();
     }
@@ -504,16 +449,15 @@ sub mappings {
 }
 
 
-=head2 _sort_start_end
-
- Arg1     : start and end coordinate
- Example  : $coord = _sort_star_end($start, $end)_
- Description : Returns $start-$end if they are defined, else 'n/a'
- Return type : string
-
-=cut
 
 sub _sort_start_end {
+
+ ### Mapping_table
+ ### Arg1     : start and end coordinate
+ ### Example  : $coord = _sort_star_end($start, $end)_
+ ### Description : Returns $start-$end if they are defined, else 'n/a'
+ ### Returns  string
+
   my ( $start, $end ) = @_;
   if ($start or $end){
     return " $start-$end&nbsp;";
@@ -523,20 +467,19 @@ sub _sort_start_end {
 
 # Location info ###############################################################
 
-=head2 snpview_image_menu
-
- Arg1     : panel
- Arg2     : data object 
- Example  : $image_panel->add_components(qw(
-      menu  EnsEMBL::Web::Component::SNP::snpview_image_menu
-      image EnsEMBL::Web::Component::SNP::snpview_image
-    ));
- Description : Creates a menu container for snpview and adds it to the panel
- Return type : 0
-
-=cut
 
 sub snpview_image_menu {
+
+  ### Image
+  ### Arg1     : panel
+  ### Arg2     : data object 
+  ### Example  : $image_panel->add_components(qw(
+  ###     menu  EnsEMBL::Web::Component::SNP::snpview_image_menu
+  ###     image EnsEMBL::Web::Component::SNP::snpview_image
+  ###   ));
+  ### Description : Creates a menu container for snpview and adds it to the panel
+  ### Returns  0
+
   my($panel, $object ) = @_;
   my $user_config = $object->user_config_hash( 'snpview' );
   my $params =  {
@@ -563,21 +506,19 @@ sub snpview_image_menu {
 }
 
 
-=head2 snpview_image
-
- Arg1     : panel
- Arg2     : data object
- Arg[3]   : width (optional)
- Example  : $image_panel->add_components(qw(
-      menu  EnsEMBL::Web::Component::SNP::snpview_image_menu
-      image EnsEMBL::Web::Component::SNP::snpview_image
-    ));
- Description : Creates a drawable container for snpview and adds it to the panel
- Return type : 0
-
-=cut
-
 sub snpview_image {
+
+### Image
+ ### Arg1     : panel
+ ### Arg2     : data object
+ ### Arg[3]   : width (optional)
+ ### Example  : $image_panel->add_components(qw(
+ ###     menu  EnsEMBL::Web::Component::SNP::snpview_image_menu
+ ###     image EnsEMBL::Web::Component::SNP::snpview_image
+ ###   ));
+ ### Description : Creates a drawable container for snpview and adds it to the panel
+ ### Returns  0
+
   my($panel, $object) = @_;
   my $width = $object->param('w') || "100000";
   my ($seq_region, $start, $seq_type ) = $object->seq_region_data;
@@ -612,19 +553,17 @@ sub snpview_image {
 }
 
 
-=head2 snpview_noimage
-
- Arg1     : panel
- Arg2     : data object
- Example  :  $image_panel->add_components(qw(
-      no_image EnsEMBL::Web::Component::SNP::snpview_noimage
-   ));
- Description : Adds an HTML string to the panel if the SNP cannot be mapped uniquely
- Return type : 1
-
-=cut
-
 sub snpview_noimage {
+
+  ### Image
+  ### Arg1     : panel
+  ### Arg2     : data object
+  ### Example  :  $image_panel->add_components(qw(
+  ###      no_image EnsEMBL::Web::Component::SNP::snpview_noimage
+  ### ));
+  ### Description : Adds an HTML string to the panel if the SNP cannot be mapped uniquely
+  ### Returns  1
+
   my ($panel, $object) = @_;
   $panel->print("<p>Unable to draw SNP neighbourhood as we cannot uniquely determine the SNP's location</p>");
   return 1;
@@ -633,17 +572,16 @@ sub snpview_noimage {
 
 # Individual table ############################################################
 
-=head2 individual
-
- Arg1        : panel
- Arg2        : data object
- Example     : $object->outputIndGenotypeTable
- Description : adds a table of Individual genotypes, their refSNP ssids, allele, sex etc. in spreadsheet format to the panel
- Return type : 1
-
-=cut
 
 sub individual {
+
+### Individual_table
+ ### Arg1        : panel
+ ### Arg2        : data object
+ ### Example     : $object->outputIndGenotypeTable
+ ### Description : adds a table of Individual genotypes, their refSNP ssids, allele, sex etc. in spreadsheet format to the panel
+ ### Returns  1
+
   my ( $panel, $object) = @_;
   my %ind_data = %{ $object->individual_table };
   unless (%ind_data) {
@@ -671,9 +609,9 @@ sub individual {
 
     my $pop_string = join ", ", @populations;
     my %tmp_row =  (
-		  Individual => $ind_data{$ind_id}{Name}."<br />(".
-		    $ind_data{$ind_id}{Gender}.")",
-		  Genotype   => $genotype,
+		  Individual => "<small>".$ind_data{$ind_id}{Name}."<br />(".
+		    $ind_data{$ind_id}{Gender}.")</small>",
+		  Genotype   => "<small>$genotype</small>",
 		  Description=> "<small>".($description ||"-") ."</small>", 
                   Populations=> "<small>".($pop_string ||"-") ."</small>",
 		  Father     => "<small>".($father||"-") ."</small>",
@@ -695,9 +633,9 @@ sub individual {
   }
 
 
-  my @header_row = ({key =>"Individual", title =>"Individual<br />(Gender)"} );
+  my @header_row = ({key =>"Individual", title =>"Individual<br />(gender)"} );
   push (@header_row, 
-	{key  =>"Genotype",    title => "Genotype"},
+	{key  =>"Genotype",    title => "Genotype<br />(forward strand)"},
 	{key  =>"Description", title => "Description"},
 	{key  =>"Populations", title => "Populations", width=>"250"}, 
 	{key  =>"Father",      title => "Father"},
@@ -710,24 +648,19 @@ sub individual {
 }
 
 
-###############################################################################
+
 #               INTERNAL CALLS
-###############################################################################
-
-
 # Internal: Population table #################################################
 
-=head2 _sort_extra_pops
-
-    Arg1      : data object
-    Arg2      : hashref with population data
-    Example   :     my $super_string = _sort_extra_pops($object, $freq_data{$pop_id}{pop_info}{"Super-Population"});
-    Description : returns string with Population name (size)<br> description
-    Return type : string
-
-=cut
-
 sub _sort_extra_pops {
+
+    ### Population_table
+    ### Arg1      : data object
+    ### Arg2      : hashref with population data
+    ### Example   :     my $super_string = _sort_extra_pops($object, $freq_data{$pop_id}{pop_info}{"Super-Population"});
+    ### Description : returns string with Population name (size)<br> description
+    ### Returns  string
+
   my ( $object, $extra_pop ) = @_;
 
   my @pops;
@@ -742,39 +675,31 @@ sub _sort_extra_pops {
   return  (join "<br />", @pops);
 }
 
-
-=head2 _pop_url  ## ALSO IN LD RENDERER
-
-   Arg1        : data object
-   Arg2        : Population name (to be displayed)
-   Arg3        : dbSNP population ID (variable to be linked to)
-   Example     : _pop_url($object, $pop_name, $pop_dbSNPID);
-   Description : makes pop_name into a link
-   Return type : string
-
-=cut
-
 sub _pop_url {
+
+   ### Arg1        : data object
+   ### Arg2        : Population name (to be displayed)
+   ### Arg3        : dbSNP population ID (variable to be linked to)
+   ### Example     : _pop_url($object, $pop_name, $pop_dbSNPID);
+   ### Description : makes pop_name into a link
+   ### Returns  string
+
   my ($object, $pop_name, $pop_dbSNP) = @_;
   return $pop_name unless $pop_dbSNP;
   return $object->get_ExtURL_link( $pop_name, 'DBSNPPOP',$pop_dbSNP->[0] );
 }
 
 
-# Internal: Individual table calls ###########################################
-
-=head2 _format_parent
-
-  Arg[1]      : data object
-  Arg2        : parent data 
-  Example     : format_parent(
-                  $object->parent($object, $ind_genotype,"father") );
-  Description : Formats output 
-  Return type : string
-
-=cut
-
 sub _format_parent {
+
+  ### Internal_individual_table
+  ### Arg1        : data object
+  ### Arg2        : parent data 
+  ### Example     : format_parent(
+  ###                $object->parent($object, $ind_genotype,"father") );
+  ### Description : Formats output 
+  ### Returns  string
+
   my $object        = shift;
   my $parent_data = shift;
   return "-" unless $parent_data;
@@ -786,29 +711,28 @@ sub _format_parent {
 
 # Internal: LD related calls #################################################
 
-=head2 link_to_ldview
-
-   Arg1        : panel
-   Arg2        : object
-   Arg3        : population data
-   Example     : link_to_ldview($panel, $object, \%pop_data);
-   Description : Make links from these populations to LDView
-   Return type : Table of HTML links to LDView
-
-=cut
-
 sub link_to_ldview {
+  
+  ### LD
+  ### Arg1        : panel
+  ### Arg2        : object
+  ### Arg3        : hash ref of population data
+  ### Example     : link_to_ldview($panel, $object, \%pop_data);
+  ### Description : Make links from these populations to LDView
+  ### Returns  Table of HTML links to LDView
+
   my ($panel, $object, $pops ) = @_;
   my $output = "<table width='100%' class='hidden' border=0><tr>";
   $output .="<td> <b>Links to LDview per population:</b></td></tr><tr>";
   my $count = 0;
-  for my $pop_name (sort {$a cmp $b} @$pops) {
+  for my $pop_name (sort {$a cmp $b} keys %$pops) {
+    my $tag = $pops->{$pop_name} eq 1 ? "" : " (Tag SNP)";
     $count++;
     $output .= "<td><a href='ldview?snp=". $object->name;
     $output .=  ";c=".$object->param('c') if $object->param('c');
     $output .=  ";w=".($object->param('w') || "20000");
-    $output .=	";bottom=opt_pop_$pop_name:on'>$pop_name</a></td>";
-    if ($count ==4) {
+    $output .=	";bottom=opt_pop_$pop_name:on'>$pop_name</a>$tag</td>";
+    if ($count ==3) {
       $count = 0;
       $output .= "</tr><tr>";
     }
@@ -817,27 +741,26 @@ sub link_to_ldview {
   return  $output;
 }
 
-=head2 _ld_populations
-
-   Arg1        : object
-   Example     : ld_populations()
-   Description : data structure with population id and name of pops 
-                 with LD info for this SNP
-   Return type : hashref
-
-=cut
 
 sub _ld_populations {
+
+  ### LD
+  ### Arg1        : object
+  ### Example     : ld_populations()
+  ### Description : data structure with population id and name of pops 
+  ### with LD info for this SNP
+  ### Returns  hashref
+
   my $object = shift;
   my $pop_ids = $object->ld_pops_for_snp;
-  return [] unless @$pop_ids;
+  return {} unless @$pop_ids;
 
-  my @pops;
+  my %pops;
   foreach (@$pop_ids) {
     my $pop_obj = $object->pop_obj_from_id($_);
-    push @pops, $pop_obj->{$_}{Name};
+    $pops{ $pop_obj->{$_}{Name} } = 1;
   }
-  return \@pops;
+  return \%pops;
 }
 
 

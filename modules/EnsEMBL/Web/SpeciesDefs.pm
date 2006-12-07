@@ -55,6 +55,8 @@ use Data::Dumper;
 use Bio::EnsEMBL::Registry;
 use Bio::EnsEMBL::Utils::ConfigRegistry;
 
+use Bio::EnsEMBL::Utils::Eprof qw(eprof_start eprof_end eprof_dump);
+
 use DBI;
 use SiteDefs qw(:ALL);
 our ( $AUTOLOAD, $CONF );
@@ -582,11 +584,10 @@ sub _parse {
 
     foreach( keys %{$tree->{'general'}} ) {  
       $tree->{$_} = $tree->{'general'}{$_};
-    }                      
+    }
     delete $tree->{'general'};
     if( $filename eq 'MULTI' ) { ## This is the multispecies hash...
       my $dbh;
-  
       if( $tree->{'databases'}->{'ENSEMBL_COMPARA_MULTIPLE'} ){
         $dbh = $self->db_connect( $tree, 'ENSEMBL_COMPARA_MULTIPLE' );
       } elsif(  $tree->{'databases'}->{'ENSEMBL_COMPARA'} ) {
@@ -602,22 +603,22 @@ sub _parse {
 	        SELECT ml.type, gd.name, mlss.name, mlss.method_link_species_set_id
 	        FROM   method_link ml, method_link_species_set mlss, genome_db gd, species_set ss 
 	        WHERE  mlss.method_link_id = ml.method_link_id 
-          AND    mlss.species_set_id=ss.species_set_id 
-          AND    ss.genome_db_id = gd.genome_db_id 
-          AND    ml.type in ('MLAGAN','BLASTZ_NET','BLASTZ_RAW')};
+            AND    mlss.species_set_id=ss.species_set_id 
+            AND    ss.genome_db_id = gd.genome_db_id 
+            AND    ml.type in ('MLAGAN','BLASTZ_NET','BLASTZ_RAW')};
 
           my $sth = $dbh->prepare( $q );
           my $rv  = $sth->execute || die( $sth->errstr );
           my $results = $sth->fetchall_arrayref();
           my $thash;
 
-	        my $KEY = 'ALIGNMENTS';
+		  my $KEY = 'ALIGNMENTS';
           foreach my $row ( @$results ) {
             my ($type, $species, $name, $id) = (uc($row->[0]), $row->[1], $row->[2], $row->[3]);
             $species =~ tr/ /_/;
-	          $tree->{$KEY}->{$id}->{'id'} = $id;
-	          $tree->{$KEY}->{$id}->{'name'} = $name;
-	          $tree->{$KEY}->{$id}->{'type'} = $type;
+	        $tree->{$KEY}->{$id}->{'id'} = $id;
+	        $tree->{$KEY}->{$id}->{'name'} = $name;
+	        $tree->{$KEY}->{$id}->{'type'} = $type;
             $tree->{$KEY}->{$id}->{'species'}->{$species} = 1;
           }
 
@@ -644,11 +645,10 @@ sub _parse {
         my $sth = $dbh->prepare( $q );
         my $rv  = $sth->execute || die( $sth->errstr );
         my $results = $sth->fetchall_arrayref();
-    
+
         if( $SiteDefs::ENSEMBL_SITETYPE eq 'Vega' ) {
 			my %config;
-
-## add list of self compared species and genomic analyses for vega self compara.
+			#add list of self compared species and genomic analyses for vega self compara.
 			$q = "select ml.type, gd.name, gd.name, count(*) as count
                   from method_link_species_set as mls, method_link as ml, species_set as ss, genome_db as gd 
                  where mls.species_set_id = ss.species_set_id
@@ -664,68 +664,132 @@ sub _parse {
 				push @$results,$config;
 			}
 
-			my $file_name = 'Multi.config';
 			#get the stored data structure
-			if (-e $file_name) {
-				print "retrieving vega alignment data from $file_name";
-				%config = %{lock_retrieve($file_name)};
+			my $file_name = 'conf/Multi.config';
+			if (0) { #-e $file_name) {
+				print STDERR "          [WARN]Retrieving vega alignment data from $file_name\n";
+				%config = %{lock_retrieve($file_name)};		
 			}
 			else {
-				print "parsing vega compara database for alignment details";
-## get details of all genomic alignments in Vega self compara 
-				$q = "select ga.genomic_align_block_id, ml.type,
-                       ga.method_link_species_set_id, df.name as chr,
-                       ga.dnafrag_start as start, ga.dnafrag_end as stop,
-                       gdb.name as species
-                  from genomic_align ga, dnafrag df, genome_db gdb,
-                       method_link_species_set mlss, method_link ml
-                 where ga.dnafrag_id = df.dnafrag_id and 
-                       df.genome_db_id = gdb.genome_db_id and
-                       ga.method_link_species_set_id = mlss.method_link_species_set_id and
-                       mlss.method_link_id = ml.method_link_id
-                 order by genomic_align_block_id";
+				print STDERR "          [INFO]Parsing vega compara database for alignment details\n";
+
+				## get details of all genomic alignments in Vega self compara
+#			&eprof_start('new_mysql');
+				#get details of seq_regions in the database
+				$q = qq(select df.dnafrag_id,
+                           df.name, 
+                           df.coord_system_name, 
+                           gdb.name
+                      from dnafrag df, 
+                           genome_db gdb
+                     where df.genome_db_id = gdb.genome_db_id );
 				$sth = $dbh->prepare( $q );
 				$rv  = $sth->execute || die( $sth->errstr );
-				my ($gabid,$type,$mlssid,$chr,$start,$stop,$species);
-				my ($old_gabid,$old_species,$old_chr,$old_start,$old_stop,@old_ids);
-				## create data structure containing summary of all genomic analyses in a self-compara
-				while( ($gabid,$type,$mlssid,$chr,$start,$stop,$species) = $sth->fetchrow_array ) {
-					next unless $type eq 'BLASTZ_RAW';
-					my $id = $gabid.$mlssid.$chr.$species;
-					next if (grep {$id eq $_ } @old_ids);
-					if( $old_gabid eq $gabid ) {
-						$species =~ s/ /_/;
-						push @{$config{$species}{$old_species}},[$chr,$old_chr]       unless grep {$_->[0] eq $chr && $_->[1] eq $old_chr} @{$config{$species}{$old_species}};
-						push @{$config{$old_species}{$species}},[$old_chr,$chr]       unless grep {$_->[0] eq $old_chr && $_->[1] eq $chr} @{$config{$old_species}{$species}};          
-						$config{$species}{'regions'}{$chr}{'last'}= $stop             unless $config{$species}{'regions'}{$chr}{'last'} > $stop;
-						$config{$old_species}{'regions'}{$old_chr}{'last'}= $old_stop unless $config{$old_species}{'regions'}{$old_chr}{'last'} > $old_stop;
-						if( defined $config{$species}{'regions'}{$chr}{'first'} ) { 
-							$config{$species}{'regions'}{$chr}{'first'}= $start unless ($config{$species}{'regions'}{$chr}{'first'} < $start);
-						} else {
-							$config{$species}{'regions'}{$chr}{'first'}= $start;
-						}
-						if( defined $config{$old_species}{'regions'}{$old_chr}{'first'} ) {
-							$config{$old_species}{'regions'}{$old_chr}{'first'}= $old_start unless ($config{$old_species}{'regions'}{$old_chr}{'first'} < $old_start);
-						} else {
-							$config{$old_species}{'regions'}{$old_chr}{'first'}= $old_start;
-						}
-						push @old_ids, $id;
-					} else {
-						@old_ids     = ();
-						$species     =~ s/ /_/;
-						$old_species = $species;
-						$old_gabid   = $gabid;
-						$old_chr     = $chr;
-						$old_stop    = $stop;
-						$old_start   = $start;
-					}
-					push @old_ids, $id;
+				my %genomic_regions;
+				while (my ($dnafrag_id,$sr,$coord_system,$species) = $sth->fetchrow_array ) {
+					$species =~ s/ /_/;
+					$genomic_regions{$dnafrag_id} = {
+													 species    => $species,
+													 seq_region => $sr,
+													 coord_system => $coord_system,
+													};
 				}
+#			warn Dumper(\%genomic_regions);
+				#get details of methods in the database -
+				$q = qq(select mlss.method_link_species_set_id, 
+                           ml.type
+                      from method_link_species_set mlss, 
+                           method_link ml
+                     where mlss.method_link_id = ml.method_link_id);
+				$sth = $dbh->prepare( $q );
+				$rv  = $sth->execute || die( $sth->errstr );
+				my %methods;
+				while (my ($mlss, $type) = $sth->fetchrow_array ) {
+					$methods{$mlss} = $type;
+				}
+#			warn Dumper(\%methods);
+				#get details of alignments
+				$q = qq(select genomic_align_block_id,
+                           method_link_species_set_id,
+                           dnafrag_start,
+                           dnafrag_end,
+                           dnafrag_id
+                      from genomic_align);
+				$sth = $dbh->prepare( $q );
+				$rv  = $sth->execute || die( $sth->errstr );
+
+#			&eprof_end('new_mysql');
+#			&eprof_start('new parsing');
+				my (@seen_ids,$prev_id,$prev_df_id,$prev_comparison,$prev_method,$prev_start,$prev_end,$prev_sr,$prev_species,$prev_coord_sys);
+				while (my ($gabid,$mlss_id,$start,$end,$df_id) = $sth->fetchrow_array) {
+					my $id = $gabid.$mlss_id;
+					if ($id eq $prev_id) {
+						my $this_method    = $methods{$mlss_id};
+						my $this_sr        = $genomic_regions{$df_id}->{'seq_region'};
+						my $this_species   = $genomic_regions{$df_id}->{'species'};
+						my $this_coord_sys = $genomic_regions{$df_id}->{'coord_system'};
+						my $comparison     = "$this_sr:$prev_sr";
+						my $coords         = "$this_coord_sys:$prev_coord_sys";
+						
+						#add a record of the coord systems used (might be needed for zebrafish ?)
+						$config{$this_method}{$this_species}{$prev_species}{$comparison}{'coord_systems'} = "$coords";
+						#add names of compared regions
+						$config{$this_method}{$this_species}{$prev_species}{$comparison}{'source_name'}    = "$this_sr";
+						$config{$this_method}{$this_species}{$prev_species}{$comparison}{'source_species'} = "$this_species";
+						$config{$this_method}{$this_species}{$prev_species}{$comparison}{'target_name'}    = "$prev_sr";
+						$config{$this_method}{$this_species}{$prev_species}{$comparison}{'target_species'} = "$prev_species";
+						$config{$this_method}{$this_species}{$prev_species}{$comparison}{'mlss_id'}         = "$mlss_id";
+						
+						#look for smallest start in this comparison
+						&get_vega_regions(\%config,$this_method,$comparison,$this_species,$prev_species,$start,$prev_start,'start');
+						#look for largest ends in this comparison
+						&get_vega_regions(\%config,$this_method,$comparison,$this_species,$prev_species,$end,$prev_end,'end');
+					}
+					else {
+						$prev_id        = $id;
+						$prev_df_id     = $df_id;
+						$prev_start     = $start;
+						$prev_end       = $end;
+						$prev_sr        = $genomic_regions{$df_id}->{'seq_region'};
+						$prev_species   = $genomic_regions{$df_id}->{'species'};
+						$prev_coord_sys = $genomic_regions{$df_id}->{'coord_system'};
+					}	
+				}
+
+				#add reciprocal entries for each chromosome to chromosome comparison
+				foreach my $method (keys %config) {
+					foreach my $p_species (keys %{$config{$method}}) {
+						foreach my $s_species ( keys %{$config{$method}{$p_species}} ) {						
+							foreach my $comp ( keys %{$config{$method}{$p_species}{$s_species}} ) {
+								my $revcomp = join ':', reverse(split ':',$comp);
+								unless ( exists($config{$method}{$s_species}{$p_species}{$revcomp} ) ) {
+									if ($config{$method}{$p_species}{$s_species}{$comp}{'coord_systems'} eq 'chromosome:chromosome') {
+										my $record = {
+												  'source_name'    => $config{$method}{$p_species}{$s_species}{$comp}{'target_name'},
+												  'source_species' => $config{$method}{$p_species}{$s_species}{$comp}{'target_species'},
+												  'source_start'   => $config{$method}{$p_species}{$s_species}{$comp}{'target_start'},
+												  'source_end'     => $config{$method}{$p_species}{$s_species}{$comp}{'target_end'},
+												  'target_name'    => $config{$method}{$p_species}{$s_species}{$comp}{'source_name'},
+												  'target_species' => $config{$method}{$p_species}{$s_species}{$comp}{'source_species'},
+												  'target_start'   => $config{$method}{$p_species}{$s_species}{$comp}{'source_start'},
+												  'target_end'     => $config{$method}{$p_species}{$s_species}{$comp}{'source_end'},
+												  'mlss_id'        => $config{$method}{$p_species}{$s_species}{$comp}{'mlss_id'},
+												  'coord_systems' => 'chromosome:chromosome',
+													 };
+										$config{$method}{$s_species}{$p_species}{$revcomp} = $record;
+									}
+								}
+							}
+						}
+					}
+				}
+#			&eprof_end('new parsing');				
 				lock_nstore(\%config,$file_name);
 			}
-			$tree->{'VEGA_BLASTZ_CONF'} = \%config;
+#			warn Dumper(\%config);					
+			$tree->{'VEGA_COMPARA_CONF'} = \%config;
 		}
-		
+#		  &eprof_dump(\*STDERR);		
         foreach my $row ( @$results ) {
           my ( $species1, $species2 ) = ( $row->[1], $row->[2] );
           $species1 =~ tr/ /_/;
@@ -740,8 +804,11 @@ sub _parse {
       delete $tree->{'general'};
       $CONF->{'_multi'} = $tree;
       $CONF->{'_storage'}{'Multi'} = $tree;
-#	  warn(Dumper($tree->{VEGA_BLASTZ_CONF}));
+#      warn(Dumper($tree->{VEGA_COMPARA_CONF}));
+#      warn(Dumper($tree->{'BLASTZ_RAW'}));
 #      warn(Dumper($CONF->{_multi}->{'ALIGNMENTS'}));
+
+
       next;
   }
 ## Move anything in the general section over up to the top level
@@ -1044,6 +1111,39 @@ sub _parse {
 }
 
 sub DESTROY { }
+
+sub get_vega_regions {
+#compare regions to get the smallest start and largest end
+	my ($config,$method,$comparison,$species1,$species2,$location1,$location2,$condition) = @_;
+	if ($config->{$method}{$species1}{$species2}{$comparison}{'source_'.$condition}) {
+		if (&comp_se( $condition,$location1,$config->{$method}{$species1}{$species2}{$comparison}{'source_'.$condition} )) {
+			$config->{$method}{$species1}{$species2}{$comparison}{'source_'.$condition} = $location1;
+		}
+	}
+	else {
+		$config->{$method}{$species1}{$species2}{$comparison}{'source_'.$condition} = $location1;	
+	}
+	
+	if ($config->{$method}{$species1}{$species2}{$comparison}{'target_'.$condition}) {
+		if (&comp_se( $condition,$location2,$config->{$method}{$species1}{$species2}{$comparison}{'target_'.$condition} )) {
+			$config->{$method}{$species1}{$species2}{$comparison}{'target_'.$condition} = $location2;
+		}
+	}
+	else {
+		$config->{$method}{$species1}{$species2}{$comparison}{'target_'.$condition} = $location2;	
+	}
+}
+
+sub comp_se {
+# compare start (less than) or end (greater than) regions depending on condition
+	my ($condition, $location1, $location2) = @_;
+	if ($condition eq 'start') {
+		return $location1 < $location2 ? 1 : 0;
+	}
+	if ($condition eq 'end') {
+		return $location1 > $location2 ? 1 : 0;
+	}
+}
 
 
 sub anyother_species {
@@ -1414,10 +1514,14 @@ sub _is_available_artefact{
     return $fail;
   } elsif( $test[0] eq 'database_features' ){ ## Is the given database specified?
     my $ft = $self->other_species($def_species,'DB_FEATURES') || {};
+#	use Data::Dumper;
+#	warn Dumper($ft);
     my @T = split /\|/, $test[1];
     my $flag = 1;
     foreach( @T ) {
+#		warn "looking for $_";
       $flag = 0 if $ft->{uc($_)};
+#		warn "flag is $flag";
     }
     return $fail if $flag;
     return $success;

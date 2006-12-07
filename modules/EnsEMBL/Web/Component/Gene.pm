@@ -9,6 +9,8 @@ no warnings "uninitialized";
 use EnsEMBL::Web::Component::Slice;
 #use EnsEMBL::Web::Component::Transcript qw(_sort_similarity_links);
 
+use EnsEMBL::Web::Form;
+
 use Data::Dumper;
 use Bio::AlignIO;
 use IO::String;

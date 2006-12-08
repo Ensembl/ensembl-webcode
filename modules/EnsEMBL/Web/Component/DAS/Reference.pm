@@ -138,16 +138,9 @@ sub dna {
     while($block_start <= $segment->{'STOP'} ) {
       my $block_end = $block_start - 1 + 600000; # do in 600K chunks to simplify memory usage...
       $block_end = $segment->{'STOP'} if $block_end > $segment->{'STOP'};
-      warn "$segment->{'REGION'} - $block_start - $block_end";
       my $slice = $object->subslice( $segment->{'REGION'}, $block_start, $block_end );
-      my $pattern = '.{60}';
       my $seq = $slice->seq;
       $seq =~ s/(.{60})/$1\n/g;
- #     while ($seq =~ /($pattern)/g) {
- #       $panel->print ("$1\n");
- #     }
- #     my $tail = length($seq) % 60;
- #     $panel->print( substr($seq, -$tail)."\n" );
       $panel->print( $seq );
       $panel->print( "\n" ) unless $seq =~ /\n$/;
       $block_start = $block_end + 1;
@@ -158,9 +151,10 @@ sub dna {
 
 sub sequence {
   my( $panel, $object ) = @_;
-
   my $segment_tmp = qq{<SEQUENCE id="%s" start="%s" stop="%s" version="1.0">\n};
   my $error_tmp = qq{<ERRORSEGMENT id="%s" start="%s" stop="%s" />\n};
+
+  my $feature_tmp = qq{<DNA length=\"%d\">\n};
 
   my $features = $object->DNA();
 
@@ -170,14 +164,26 @@ sub sequence {
       next;
     }
     $panel->print( sprintf ($segment_tmp, $segment->{'REGION'}, $segment->{'START'} || '', $segment->{'STOP'} || ''));
-    my $pattern = '.{60}';
-    my $seq = $segment->{'SEQ'};
-    while ($seq =~ /($pattern)/g) {
-      $panel->print ("$1\n");
+    $panel->print( sprintf ($feature_tmp, $segment->{'STOP'}  - $segment->{'START'} + 1 ));
+
+    my $block_start = $segment->{'START'};
+    while($block_start <= $segment->{'STOP'} ) {
+      my $block_end = $block_start - 1 + 600000; # do in 600K chunks to simplify memory usage...
+      $block_end = $segment->{'STOP'} if $block_end > $segment->{'STOP'};
+# warn "$segment->{'REGION'} - $block_start - $block_end";
+      my $slice = $object->subslice( $segment->{'REGION'}, $block_start, $block_end );
+      my $pattern = '.{60}';
+      my $seq = $slice->seq;
+      $seq =~ s/(.{60})/$1\n/g;
+ #     while ($seq =~ /($pattern)/g) {
+ #       $panel->print ("$1\n");
+ #     }
+ #     my $tail = length($seq) % 60;
+ #     $panel->print( substr($seq, -$tail)."\n" );
+      $panel->print( $seq. ($seq =~ /\n$/ ? '' : "\n" ) );
+      $block_start = $block_end + 1;
     }
-    my $tail = length($seq) % 60;
-    $panel->print (substr($seq, -$tail));
-    $panel->print (qq{\n</SEQUENCE>\n});
+    $panel->print( qq{</DNA>\n</SEQUENCE>\n} );
   }
 }
 

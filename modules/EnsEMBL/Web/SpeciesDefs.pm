@@ -665,7 +665,7 @@ sub _parse {
 			}
 
 			#get the stored data structure
-			my $file_name = 'conf/Multi.config';
+			my $file_name = $SiteDefs::ENSEMBL_CONF_DIRS[0].'/'.'Multi.config';
 			if (0) { #-e $file_name) {
 				print STDERR "          [WARN]Retrieving vega alignment data from $file_name\n";
 				%config = %{lock_retrieve($file_name)};		

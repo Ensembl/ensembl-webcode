@@ -33,6 +33,7 @@ sub Features {
 	my $slice = $s->slice;
 	my @segment_features;
 
+        my $offset = $s->seq_region_start - 1;
 	foreach my $ft (sort {$a->start <=> $b->start} @{$dfa->fetch_all_by_Slice($slice) || [] }) {
 
 	    next unless grep {$_ eq $ft->analysis->logic_name} @ditag_analysis;
@@ -59,8 +60,8 @@ sub Features {
 		'LABEL'       => $ft->ditag_id,
 		'TYPE'        => $ft->ditag_side || '', 
 		'METHOD'      => $ft->analysis->logic_name,
-		'START'       => $ft->start,
-		'END'         => $ft->end,
+		'START'       => $ft->start + $offset,
+		'END'         => $ft->end + $offset,
 		'ORIENTATION' => $ft->strand+0,
 		'NOTE'        => ["tag_count: $tag_count"],
 		'GROUP' => [$group], 

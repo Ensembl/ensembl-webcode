@@ -150,8 +150,8 @@ MAIN:{
   
   $CGI->param( 'ticket', $TICKET );
   $blast_adpt->ticket( $TICKET );
-  use Apache2::RequestUtil;
-  my $r = Apache2::RequestUtil->request();
+  use Apache;
+  my $r = Apache->request();
   $ENV{'ticket'} = $TICKET;
   $r->subprocess_env->{'ticket'} = $TICKET;
   if( $CGI->param('format') eq 'raw' ){

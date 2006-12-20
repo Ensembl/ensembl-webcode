@@ -13,10 +13,12 @@ my $biomart_url = "http://www.biomart.org/biomart/martview?";
 
 foreach my $key (keys %params) {
   if ($params{$key}) {
-    $biomart_url .= $key . "=" . $params{$key};
+    $biomart_url .= $key . "=" . CGI::escape($params{$key}).'&';
   }
 }
 
+warn "$biomart_url";
+$biomart_url =~ s/%7C/|/g;
 print "Content-Type: text/html\n\n";
 print qq(
 <html>

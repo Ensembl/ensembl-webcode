@@ -1,7 +1,9 @@
 package EnsEMBL::Web::Apache::ServerError;
      
 use strict;
-use Apache2::Const qw(:common :http);
+use Apache::Constants qw(:response :http);
+use Apache::File ();
+use Apache::Log ();
 use CGI qw(:html);
 use SiteDefs qw(:WEB);
 use Text::Wrap;
@@ -33,9 +35,9 @@ sub handler {
     my $page     = new EnsEMBL::Web::Document::Static( $renderer, undef, $SD );
     $page->_initialize();
     $page->title->set( "500: Internal Server Error" );    
-    # unless ($r->err_header_out('ensembl_headers_out')){  
-    #  $output->start;
-    # }
+#    unless ($r->err_header_out('ensembl_headers_out')){  
+#      $output->start;
+#    }
       
 ###############################################################
 # If ENSEMBL_MAIL_ERRORS is set, then mail out an error report

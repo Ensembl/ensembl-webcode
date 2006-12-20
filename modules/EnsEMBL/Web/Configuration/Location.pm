@@ -4,7 +4,7 @@ use strict;
 
 use EnsEMBL::Web::Configuration;
 use EnsEMBL::Web::Interface::FragmentCollection;
-use Apache2::RequestUtil;
+use Apache;
 use CGI;
 
 our @ISA = qw( EnsEMBL::Web::Configuration );
@@ -494,7 +494,7 @@ sub contigview {
   my $ajax_detailed = 'off';
   my $ajax_zoom     = 'off';
 
-  my $r = Apache2::RequestUtil->request();
+  my $r = Apache->request();
   my %cookies = CGI::Cookie->parse($r->headers_in->{'Cookie'});
   if ($cookies{'ENSEMBL_AJAX'} ne 'none') {
     $ajax_overview = 'on';

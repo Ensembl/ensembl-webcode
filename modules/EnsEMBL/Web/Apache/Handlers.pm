@@ -3,15 +3,14 @@ package EnsEMBL::Web::Apache::Handlers;
 
 use SiteDefs qw( :APACHE);
 use strict;
-use Apache2::Const qw(:common :http :methods);
+use Apache::Constants qw(:common :response);
 use EnsEMBL::Web::DBSQL::UserDB;
 use EnsEMBL::Web::DBSQL::BlastAdaptor;
 use EnsEMBL::Web::Object::BlastJobMaster;
 use EnsEMBL::Web::Cookie;
 use EnsEMBL::Web::Registry;
-use Apache2::SizeLimit;
-use Apache2::URI ();
-use APR::URI ();
+use Apache::SizeLimit;
+use Apache::URI ();
 use CGI::Cookie;
 use Time::HiRes qw(time);
 use Sys::Hostname;
@@ -241,7 +240,7 @@ sub transHandler {
           $r->push_handlers( PerlCleanupHandler => \&cleanupHandler_script      );
 #warn "PUSHING BLASTSCRIPTXX.... $ENSEMBL_BLASTSCRIPT";
 #          $r->push_handlers( PerlCleanupHandler => \&cleanupHandler_blast       ) if $ENSEMBL_BLASTSCRIPT;
-          $r->push_handlers( PerlCleanupHandler => \&Apache2::SizeLimit::handler );
+          $r->push_handlers( PerlCleanupHandler => \&Apache::SizeLimit::handler );
         }
         return OK;
       }
@@ -259,7 +258,7 @@ sub transHandler {
           $r->push_handlers( PerlCleanupHandler => \&cleanupHandler_script      );
 #warn "PUSHING BLASTSCRIPTYY.... $ENSEMBL_BLASTSCRIPT";
 #          $r->push_handlers( PerlCleanupHandler => \&cleanupHandler_blast       ) if $ENSEMBL_BLASTSCRIPT;
-          $r->push_handlers( PerlCleanupHandler => \&Apache2::SizeLimit::handler );
+          $r->push_handlers( PerlCleanupHandler => \&Apache::SizeLimit::handler );
         }
         return OK;
       }
@@ -273,11 +272,11 @@ sub transHandler {
       unshift ( @path_segments, '', $species, $script );
       my $newfile = join( '/', @path_segments );
 
-      if( $newfile ne $file ){ # Path is changed; HTTP_TEMPORARY_REDIRECT
+      if( $newfile ne $file ){ # Path is changed; REDIRECT
         $r->uri( $newfile );
         $r->headers_out->add( 'Location' => join( '?', $newfile, $querystring || () ) );
         $r->child_terminate;
-        return HTTP_TEMPORARY_REDIRECT;
+        return REDIRECT;
       }
       # Mess with the environment
       $r->subprocess_env->{'ENSEMBL_SPECIES'} = $species;
@@ -304,7 +303,7 @@ sub transHandler {
 #          $r->push_handlers( PerlCleanupHandler => \&cleanupHandler_blast       );
 #  warn "YARG $$ ....";
 #}
-          $r->push_handlers( PerlCleanupHandler => \&Apache2::SizeLimit::handler );
+          $r->push_handlers( PerlCleanupHandler => \&Apache::SizeLimit::handler );
         }
         return OK;
       }
@@ -324,7 +323,7 @@ sub transHandler {
       $r->filename( $filename . ( $r->filename =~ /\/$/ ? '' : '/' ). 'index.html' );
       $r->headers_out->add( 'Location' => $r->uri );
       $r->child_terminate;
-      return HTTP_TEMPORARY_REDIRECT;
+      return REDIRECT;
     }
     next unless -r $filename;
     $r->filename( $filename );
@@ -351,7 +350,7 @@ sub cleanupHandler {
     my $u           = $r->parsed_uri;
     my $file        = $u->path;
     my $query       = $u->query.$r->subprocess_env->{'ENSEMBL_REQUEST'};
-    my $size        = &$Apache2::SizeLimit::HOW_BIG_IS_IT();
+    my $size        = &$Apache::SizeLimit::HOW_BIG_IS_IT();
     $r->subprocess_env->{'ENSEMBL_ENDTIME'} = $end_time;
     if( $ENSEMBL_DEBUG_FLAGS & 8 ) {
       print STDERR sprintf "LONG PROCESS %10s DT: %24s Time: %10s Size: %10s
@@ -379,7 +378,7 @@ LONG PROCESS %10s IP:  %s  UA: %s
     my $file_mod_time = $temp[9];
     if( $file_mod_time >= $ENSEMBL_WEB_REGISTRY->timer->get_process_start_time ) {
       print STDERR sprintf "KILLING CHILD %10s\n", $$;
-      if( $Apache2::SizeLimit::WIN32 ) {
+      if( $Apache::SizeLimit::WIN32 ) {
         CORE::exit(-2);
       } else {
         $r->child_terminate();
@@ -408,7 +407,7 @@ sub childExitHandler {
     printf STDERR "Child %9d: - reaped at      %30s;  Time: %11.6f;  Req:  %4d;  Size: %8dK\n",
       $$, ''.gmtime(), time-$ENSEMBL_WEB_REGISTRY->timer->get_process_start_time,
       $ENSEMBL_WEB_REGISTRY->timer->get_process_child_count,
-      &$Apache2::SizeLimit::HOW_BIG_IS_IT()
+      &$Apache::SizeLimit::HOW_BIG_IS_IT()
   }
 }
 

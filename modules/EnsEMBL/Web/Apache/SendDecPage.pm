@@ -1,8 +1,8 @@
 package EnsEMBL::Web::Apache::SendDecPage;
        
 use strict;
-#use Apache::File ();
-# use Apache::Log ();
+use Apache::File ();
+use Apache::Log ();
 use SiteDefs qw(:ALL);
 use EnsEMBL::Web::Document::Renderer::Apache;
 use EnsEMBL::Web::Document::Panel;
@@ -14,7 +14,7 @@ use EnsEMBL::Web::Root;
 
 warn $ENSEMBL_WEB_REGISTRY;
 
-use Apache2::Const qw(:common :methods :http);
+use Apache::Constants qw(:response :methods :http);
 #############################################################
 # Mod_perl request handler all /htdocs pages
 #############################################################
@@ -30,7 +30,7 @@ sub handler {
 
   if ($r->method_number == M_INVALID) {
     $r->log->error("Invalid method in request ", $r->the_request);
-    return HTTP_NOT_IMPLEMENTED;
+    return NOT_IMPLEMENTED;
   }
 
   return DECLINED                if $r->method_number == M_OPTIONS;
@@ -42,7 +42,8 @@ sub handler {
   }
   return HTTP_METHOD_NOT_ALLOWED if $r->method_number != M_GET;
 
-  unless( -r $r->filename) {
+  my $fh = Apache::File->new($r->filename);
+  unless ($fh) {
     $r->log->error("File permissions deny server access: ", $r->filename);
     return FORBIDDEN;
   }
@@ -84,7 +85,7 @@ sub handler {
   my $pageContent;
   {
     local($/) = undef;
-    $pageContent = ${ $r->slurp_filename() }; #<$fh>;
+    $pageContent = <$fh>;
   }
 
   return DECLINED if $pageContent =~ /<!--#set var="decor" value="none"-->/;

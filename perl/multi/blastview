@@ -23,6 +23,7 @@ use EnsEMBL::Web::Container::HSPContainer;
 # use EnsEMBL::HTML::Page;
 
 use EnsEMBL::Web::RegObj;
+use EnsEMBL::Web::SpeciesDefs;
 use EnsEMBL::Web::DBSQL::DBConnection;
 use Bio::Tools::Run::EnsemblSearchMulti;
 use EnsEMBL::Web::BlastView::Meta;
@@ -45,7 +46,7 @@ use vars qw( %ERRORS ); # Errors per-stage
 
 BEGIN {
   $META_DATA = EnsEMBL::Web::BlastView::MetaDataBlast->config || die( "Can't configure MetaData" );
-  $SPECIES_DEFS = $ENSEMBL_WEB_REGISTRY->species_defs;
+  $SPECIES_DEFS = EnsEMBL::Web::SpeciesDefs->new();
   $DBCONNECTION = EnsEMBL::Web::DBSQL::DBConnection->new( undef, $SPECIES_DEFS );
 }
 
@@ -204,7 +205,7 @@ MAIN:{
 
     if( my $hsp_id = $CGI->param('hsp_id') ){
       my $sp = $ENV{'ENSEMBL_SPECIES'} eq 'Multi' ? $SPECIES_DEFS->ENSEMBL_PRIMARY_SPECIES : $ENV{'ENSEMBL_SPECIES'};
-      my $blast_adpt = $DBCONNECTION->get_databases_species($sp, 'blast')->{'blast'};
+#      my $blast_adpt = $DBCONNECTION->get_databases_species($sp, 'blast')->{'blast'};
       my @args = ( $hsp_id, $blast_adpt );
       eval{ $hsp = Bio::Search::HSP::EnsemblHSP->retrieve( @args ) };
       $@ and warn( $@ );
@@ -213,7 +214,7 @@ MAIN:{
     
     if( my $hit_id = $CGI->param('hit_id') ){
       my $sp = $ENV{'ENSEMBL_SPECIES'} eq 'Multi' ? $SPECIES_DEFS->ENSEMBL_PRIMARY_SPECIES : $ENV{'ENSEMBL_SPECIES'};
-      my $blast_adpt = $DBCONNECTION->get_databases_species($sp, 'blast')->{'blast'};
+#      my $blast_adpt = $DBCONNECTION->get_databases_species($sp, 'blast')->{'blast'};
       my @args = ( $hit_id, $blast_adpt );
       eval{ $hit = Bio::Search::Hit::EnsemblHit->retrieve( @args ) };
       $@ and warn( $@ );
@@ -238,6 +239,7 @@ MAIN:{
     $page->content->add_panel( EnsEMBL::Web::Document::Panel->new( 'raw' => $content ) );
     $page->content->render();
     $page->render_end();
+    $blast_adpt->dbc->disconnect_if_idle;
     exit;
   }
 

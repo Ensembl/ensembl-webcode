@@ -23,7 +23,10 @@ foreach my $p (@parameters) {
 }
 
 $new_params =~ s/^&/\?/;
-$url = $host . $new_params;
+
+# Redirect to the current config script
+$url = CGI::escape($cgi->param('url'));
+my $redirect_url = '/common/current_config?id=' . $cgi->param('id') . '&url=' . $url;
 
 my $session = $ENSEMBL_WEB_REGISTRY->get_session;
 $session->set_input($cgi);
@@ -41,10 +44,10 @@ if ($ENV{'ENSEMBL_USER_ID'}) {
     }
   }
 } else {
-  $url = '/error/config_failed.html';
+  $redirect_url = '/error/config_failed.html';
 }
 
-CGI::redirect($url);
+CGI::redirect($redirect_url);
 
 sub prepare_url {
   my ($url) = @_;

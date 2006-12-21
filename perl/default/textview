@@ -59,8 +59,9 @@ if($ERROR) {
   $content .= print_syntax();
 }
 
+my $site_type = $SD->ENSEMBL_SITETYPE;
 my $panel = new EnsEMBL::Web::Document::Panel(
-  'caption' => 'Ensembl text search',
+  'caption' => "$site_type text search",
   'content' => $content
 );
 $document->content->add_panel($panel);

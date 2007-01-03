@@ -58,14 +58,16 @@ sub ld_values {
   # Check there is data to display
   my $zoom = $object->param('w')|| 50000;
   my %return;
+  my $display_zoom = $object->round_bp($zoom);
 
-  foreach my $pop_name ( keys %pops ) {
+  foreach my $pop_name (sort keys %pops ) {
     my $pop_obj = $object->pop_obj_from_name($pop_name);
+    next unless $pop_obj;
     my $pop_id = $pop_obj->{$pop_name}{dbID};
-    my $data = $object->ld_for_slice($pop_id);
+    my $data = $object->ld_for_slice($pop_obj->{$pop_name}{'PopObject'}, $zoom);
     foreach my $ldtype ( "r2", "d_prime" ) {
       my $display = $ldtype eq 'r2' ? "r2" : "D'";
-      my $nodata = "No $display linkage data in $zoom kb window for population $pop_name";
+      my $nodata = "No $display linkage data in $display_zoom window for population $pop_name";
       unless (%$data && keys %$data) {
 	$return{$ldtype}{$pop_name}{"text"} = $nodata;
 	next;
@@ -75,6 +77,7 @@ sub ld_values {
 	sort { $a->[1]->start <=> $b->[1]->start }
 	  map  { [ $_ => $data->{'variationFeatures'}{$_} ] }
 	    keys %{ $data->{'variationFeatures'} };
+
       unless (scalar @snp_list) {
 	$return{$ldtype}{$pop_name}{"text"} = $nodata;
 	next;
@@ -126,6 +129,7 @@ sub ld_values {
       }
 	push (@starts_list, $pos);
       }
+
       my $location = $object->seq_region_name .":".$object->seq_region_start.
 	"-".$object->seq_region_end;
       $return{$ldtype}{$pop_name}{"text"} = "Pairwise $display values for $location.  Population: $pop_name";
@@ -140,11 +144,12 @@ sub ld_values {
 
 
 sub html_lddata {
+
   ###  Args      : panel, object
-  ###  Description : Calls ld_values function which returns the data in text format
-  ###              This function formats the data into HTML
-  ###               It prints a title and the LD values in an HTML table to the panel.
-  ###  Returns 1
+  ### It first calls ld_values function which returns the data in 
+  ### text format.  It formats this data into HTML and 
+  ### prints a title and the LD values in an HTML table to the panel.
+  ### Returns 1
 
   my ($panel, $object) = @_;
   my $return = ld_values($object);
@@ -162,9 +167,12 @@ sub html_lddata {
 	return 1;
       }
       my $start      = shift @$starts;
-      my $header_row = qq(
+      my $first_snp  = shift @$snps;
+      my $footer_row = qq(
     <th>SNPs: bp position</th>
-    <td>@{[ shift @$snps ]}: $start</td>);
+    <td>$first_snp: $start</td>);
+      my $header_row = qq(<th>SNPs: bp position</th>
+                         <td class="bg2">$first_snp: $start</td>);
 
       # Fill rest of table ----------------------------------------------------
       my $user_config = $object->user_config_hash( 'ldview' );
@@ -176,7 +184,6 @@ sub html_lddata {
 	my $snp = shift @$snps;
 	my $pos = shift @$starts;
 	my $snp_string = $snp =~/^\*/ ? qq(<strong>$snp: $pos</strong>) : "$snp: $pos";
-
 	$table_rows .= qq(
   <tr style="vertical-align: middle"  class="small">
     <td class="bg2">$snp_string</td>).
@@ -187,9 +194,9 @@ sub html_lddata {
 
 	$table_rows .= qq(
     <td class="bg2">$snp_string</td>
-  </tr>);
+  </tr>) if scalar @$snps;
 	next if $row == $table_data->[-1];
-	$header_row .= qq(
+	$footer_row .= qq(
     <td>$snp_string</td>);
       }
       $panel->print(qq(
@@ -198,7 +205,7 @@ sub html_lddata {
                            $header_row
                         </tr>$table_rows
                         <tr class="bg2 small">
-                           $header_row
+                           $footer_row
                       </tr>
                       </table>));
     }
@@ -212,12 +219,12 @@ sub html_lddata {
 
 sub text_lddata {
 
-  ### Args      :  Either a string with "No data" message or Arrayref 
-  ###               Each value in the array is an arrayrefs with 
-  ###                    arrayref of SNP start positions in basepair (start order)
-  ###                    Arrayref of SNP names in start order
-  ###                    Arrayref 2 dimensional array of LD values
-  ### Example     : $self->text_ldtable({$title, \@starts, \@snps, \@table});
+  ### Args:  Either a string with "No data" message or Arrayref 
+  ### Each value in the array is an arrayrefs with arrayref of 
+  ### SNP start positions in basepair (start order)
+  ### Arrayref of SNP names in start order
+  ### Arrayref 2 dimensional array of LD values
+  ### Example : $self->text_ldtable({$title, \@starts, \@snps, \@table});
   ### Description : prints text formatted table for LD data
   ### Returns text (string)
 

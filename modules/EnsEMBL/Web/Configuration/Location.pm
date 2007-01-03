@@ -496,7 +496,7 @@ sub contigview {
 
   my $r = Apache->request();
   my %cookies = CGI::Cookie->parse($r->headers_in->{'Cookie'});
-  if ($cookies{'ENSEMBL_AJAX'} ne 'none') {
+  if(0 && $cookies{'ENSEMBL_AJAX'} ne 'none') {
     $ajax_overview = 'on';
     $ajax_detailed = 'on';
     $ajax_zoom = 'on';

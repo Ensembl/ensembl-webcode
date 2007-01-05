@@ -199,7 +199,7 @@ sub fetch_homologues_of_gene_in_species {
         next if ($member->stable_id eq $qy_member->stable_id);
         push @homologues, $member;  
       }
-    }    
+    }
     return \@homologues;
 }
 

@@ -188,7 +188,7 @@ sub get_synteny_matches {
     my $OTHER = $self->param('otherspecies') ||$self->param('species')|| ($ENV{ 'ENSEMBL_SPECIES' } eq 'Homo_sapiens' ? 'Mus_musculus' : 'Homo_sapiens');
     my $gene2_adaptor = $self->database('core', $OTHER)->get_GeneAdaptor();
     my ($localgenes,$offset ) = $self->get_synteny_local_genes;
-    
+   
     foreach my $localgene (@$localgenes){
         my ($sppgene, $separate, $syntenygene);
         my $data;

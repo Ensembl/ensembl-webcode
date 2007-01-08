@@ -38,7 +38,7 @@ sub features {
 <FEATURE id="%s" %s>
   <START>%d</START>
   <END>%d</END>
-  <TYPE id="%s">%s</TYPE>
+  <TYPE id="%s"%s>%s</TYPE>
   <METHOD id="%s">%s</METHOD>
   <ORIENTATION>%s</ORIENTATION>
   %s
@@ -117,6 +117,7 @@ sub features {
 				    $feature->{'START'} || '',
 				    $feature->{'END'} || '',
 				    $feature->{'TYPE'}|| '',
+					$feature->{'CATEGORY'} ? qq{ category="$feature->{'CATEGORY'}"} : '',
 				    $feature->{'TYPE'} || '',
 				    $feature->{'METHOD'} || '',
 				    $feature->{'METHOD'} || '',

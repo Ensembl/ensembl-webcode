@@ -642,154 +642,162 @@ sub _parse {
         # So lets get on with the DNA, SYNTENY and GENE hashes;
 	        my $q = qq{select ml.type, gd1.name, gd2.name from genome_db gd1, genome_db gd2, species_set ss1, species_set ss2 , method_link ml, method_link_species_set mls1, method_link_species_set mls2 where mls1.method_link_species_set_id = mls2.method_link_species_set_id and ml.method_link_id = mls1.method_link_id and ml.method_link_id = mls2.method_link_id and gd1.genome_db_id != gd2.genome_db_id and mls1.species_set_id = ss1.species_set_id and mls2.species_set_id = ss2.species_set_id and ss1.genome_db_id = gd1.genome_db_id and ss2.genome_db_id = gd2.genome_db_id};
 
-        my $sth = $dbh->prepare( $q );
-        my $rv  = $sth->execute || die( $sth->errstr );
-        my $results = $sth->fetchall_arrayref();
+		  my $sth = $dbh->prepare( $q );
+		  my $rv  = $sth->execute || die( $sth->errstr );
+		  my $results = $sth->fetchall_arrayref();
 
-        if( $SiteDefs::ENSEMBL_SITETYPE eq 'Vega' ) {
-			my %config;
-			#add list of self compared species and genomic analyses for vega self compara.
-			$q = "select ml.type, gd.name, gd.name, count(*) as count
+		  my $self_comparisons = 0;
+		  my %config;
+		  #see if there are any intraspecies alignments (ie a self compara)
+		  $q = "select ml.type, gd.name, gd.name, count(*) as count
                   from method_link_species_set as mls, method_link as ml, species_set as ss, genome_db as gd 
                  where mls.species_set_id = ss.species_set_id
                    and ss.genome_db_id = gd.genome_db_id 
                    and mls.method_link_id = ml.method_link_id
+                   and ml.type not like '%PARALOGUES'
                  group by mls.method_link_species_set_id, mls.method_link_id
                 having count = 1";
-			$sth = $dbh->prepare( $q );
-			$rv  = $sth->execute || die( $sth->errstr );
-			my $v_results = $sth->fetchall_arrayref();
-			foreach my $config (@$v_results) {
-				pop @$config;
-				push @$results,$config;
-			}
+		  $sth = $dbh->prepare( $q );
+		  $rv  = $sth->execute || die( $sth->errstr );
+		  my $v_results = $sth->fetchall_arrayref();
+		  foreach my $config (@$v_results) {
+			  $self_comparisons = 1;
+			  pop @$config;
+			  push @$results,$config;
+		  }
 
-			#get the stored data structure
-			my $file_name = $SiteDefs::ENSEMBL_CONF_DIRS[0].'/'.'Multi.config';
-			if (0) { #-e $file_name) {
-				print STDERR "          [WARN]Retrieving vega alignment data from $file_name\n";
-				%config = %{lock_retrieve($file_name)};		
-			}
-			else {
-				print STDERR "          [INFO]Parsing vega compara database for alignment details\n";
+		  #if there are intraspecies alignments then get the details (currently only for Vega)
+		  if ($self_comparisons) {
+			  #get the stored data structure
+			  my $file_name = $SiteDefs::ENSEMBL_CONF_DIRS[0].'/'.'Multi.config';
+			  if (0) { #-e $file_name) {
+				  print STDERR "          [WARN]Retrieving alignment data from $file_name\n";
+				  %config = %{lock_retrieve($file_name)};		
+			  }
+			  else {
+				  print STDERR "          [INFO]Parsing compara database for alignment details\n";
+				  ## get details of all genomic alignments in Vega self compara
+#			      &eprof_start('new_mysql');
 
-				## get details of all genomic alignments in Vega self compara
-#			&eprof_start('new_mysql');
-				#get details of seq_regions in the database
-				$q = qq(select df.dnafrag_id,
-                           df.name, 
-                           df.coord_system_name, 
-                           gdb.name
-                      from dnafrag df, 
-                           genome_db gdb
-                     where df.genome_db_id = gdb.genome_db_id );
-				$sth = $dbh->prepare( $q );
-				$rv  = $sth->execute || die( $sth->errstr );
-				my %genomic_regions;
-				while (my ($dnafrag_id,$sr,$coord_system,$species) = $sth->fetchrow_array ) {
-					$species =~ s/ /_/;
-					$genomic_regions{$dnafrag_id} = {
-													 species    => $species,
-													 seq_region => $sr,
-													 coord_system => $coord_system,
-													};
-				}
-#			warn Dumper(\%genomic_regions);
-				#get details of methods in the database -
-				$q = qq(select mlss.method_link_species_set_id, 
-                           ml.type
-                      from method_link_species_set mlss, 
-                           method_link ml
-                     where mlss.method_link_id = ml.method_link_id);
-				$sth = $dbh->prepare( $q );
-				$rv  = $sth->execute || die( $sth->errstr );
-				my %methods;
-				while (my ($mlss, $type) = $sth->fetchrow_array ) {
-					$methods{$mlss} = $type;
-				}
-#			warn Dumper(\%methods);
-				#get details of alignments
-				$q = qq(select genomic_align_block_id,
-                           method_link_species_set_id,
-                           dnafrag_start,
-                           dnafrag_end,
-                           dnafrag_id
-                      from genomic_align);
-				$sth = $dbh->prepare( $q );
-				$rv  = $sth->execute || die( $sth->errstr );
+				  #get details of seq_regions in the database
+				  $q = qq(select df.dnafrag_id,
+                                 df.name, 
+                                 df.coord_system_name, 
+                                 gdb.name
+                            from dnafrag df, 
+                                 genome_db gdb
+                           where df.genome_db_id = gdb.genome_db_id );
+				  $sth = $dbh->prepare( $q );
+				  $rv  = $sth->execute || die( $sth->errstr );
+				  my %genomic_regions;
+				  while (my ($dnafrag_id,$sr,$coord_system,$species) = $sth->fetchrow_array ) {
+					  $species =~ s/ /_/;
+					  $genomic_regions{$dnafrag_id} = {
+													   species    => $species,
+													   seq_region => $sr,
+													   coord_system => $coord_system,
+													  };
+				  }
+#			      warn Dumper(\%genomic_regions);
 
-#			&eprof_end('new_mysql');
-#			&eprof_start('new parsing');
-				my (@seen_ids,$prev_id,$prev_df_id,$prev_comparison,$prev_method,$prev_start,$prev_end,$prev_sr,$prev_species,$prev_coord_sys);
-				while (my ($gabid,$mlss_id,$start,$end,$df_id) = $sth->fetchrow_array) {
-					my $id = $gabid.$mlss_id;
-					if ($id eq $prev_id) {
-						my $this_method    = $methods{$mlss_id};
-						my $this_sr        = $genomic_regions{$df_id}->{'seq_region'};
-						my $this_species   = $genomic_regions{$df_id}->{'species'};
-						my $this_coord_sys = $genomic_regions{$df_id}->{'coord_system'};
-						my $comparison     = "$this_sr:$prev_sr";
-						my $coords         = "$this_coord_sys:$prev_coord_sys";
+				  #get details of methods in the database -
+				  $q = qq(select mlss.method_link_species_set_id, ml.type
+                            from method_link_species_set mlss, 
+                                 method_link ml
+                           where mlss.method_link_id = ml.method_link_id);
+				  $sth = $dbh->prepare( $q );
+				  $rv  = $sth->execute || die( $sth->errstr );
+				  my %methods;
+				  while (my ($mlss, $type) = $sth->fetchrow_array ) {
+					  $methods{$mlss} = $type;
+				  }
+#			      warn Dumper(\%methods);
+
+				  #get details of alignments
+				  $q = qq(select genomic_align_block_id,
+                                 method_link_species_set_id,
+                                 dnafrag_start,
+                                 dnafrag_end,
+                                 dnafrag_id
+                            from genomic_align);
+				  $sth = $dbh->prepare( $q );
+				  $rv  = $sth->execute || die( $sth->errstr );
+
+#			      &eprof_end('new_mysql');
+
+				  #parse the data
+#			      &eprof_start('new parsing');
+				  my (@seen_ids,$prev_id,$prev_df_id,$prev_comparison,$prev_method,$prev_start,$prev_end,$prev_sr,$prev_species,$prev_coord_sys);
+				  while (my ($gabid,$mlss_id,$start,$end,$df_id) = $sth->fetchrow_array) {
+					  my $id = $gabid.$mlss_id;
+					  if ($id eq $prev_id) {
+						  my $this_method    = $methods{$mlss_id};
+						  my $this_sr        = $genomic_regions{$df_id}->{'seq_region'};
+						  my $this_species   = $genomic_regions{$df_id}->{'species'};
+						  my $this_coord_sys = $genomic_regions{$df_id}->{'coord_system'};
+						  my $comparison     = "$this_sr:$prev_sr";
+						  my $coords         = "$this_coord_sys:$prev_coord_sys";
 						
-						#add a record of the coord systems used (might be needed for zebrafish ?)
-						$config{$this_method}{$this_species}{$prev_species}{$comparison}{'coord_systems'} = "$coords";
-						#add names of compared regions
-						$config{$this_method}{$this_species}{$prev_species}{$comparison}{'source_name'}    = "$this_sr";
-						$config{$this_method}{$this_species}{$prev_species}{$comparison}{'source_species'} = "$this_species";
-						$config{$this_method}{$this_species}{$prev_species}{$comparison}{'target_name'}    = "$prev_sr";
-						$config{$this_method}{$this_species}{$prev_species}{$comparison}{'target_species'} = "$prev_species";
-						$config{$this_method}{$this_species}{$prev_species}{$comparison}{'mlss_id'}         = "$mlss_id";
+						  #add a record of the coord systems used (might be needed for zebrafish ?)
+						  $config{$this_method}{$this_species}{$prev_species}{$comparison}{'coord_systems'} = "$coords";
+						  #add names of compared regions
+						  $config{$this_method}{$this_species}{$prev_species}{$comparison}{'source_name'}    = "$this_sr";
+						  $config{$this_method}{$this_species}{$prev_species}{$comparison}{'source_species'} = "$this_species";
+						  $config{$this_method}{$this_species}{$prev_species}{$comparison}{'target_name'}    = "$prev_sr";
+						  $config{$this_method}{$this_species}{$prev_species}{$comparison}{'target_species'} = "$prev_species";
+						  $config{$this_method}{$this_species}{$prev_species}{$comparison}{'mlss_id'}         = "$mlss_id";
 						
-						#look for smallest start in this comparison
-						&get_vega_regions(\%config,$this_method,$comparison,$this_species,$prev_species,$start,$prev_start,'start');
-						#look for largest ends in this comparison
-						&get_vega_regions(\%config,$this_method,$comparison,$this_species,$prev_species,$end,$prev_end,'end');
-					}
-					else {
-						$prev_id        = $id;
-						$prev_df_id     = $df_id;
-						$prev_start     = $start;
-						$prev_end       = $end;
-						$prev_sr        = $genomic_regions{$df_id}->{'seq_region'};
-						$prev_species   = $genomic_regions{$df_id}->{'species'};
-						$prev_coord_sys = $genomic_regions{$df_id}->{'coord_system'};
-					}	
-				}
+						  #look for smallest start in this comparison
+						  &get_vega_regions(\%config,$this_method,$comparison,$this_species,$prev_species,$start,$prev_start,'start');
+						  #look for largest ends in this comparison
+						  &get_vega_regions(\%config,$this_method,$comparison,$this_species,$prev_species,$end,$prev_end,'end');
+					  }
+					  else {
+						  $prev_id        = $id;
+						  $prev_df_id     = $df_id;
+						  $prev_start     = $start;
+						  $prev_end       = $end;
+						  $prev_sr        = $genomic_regions{$df_id}->{'seq_region'};
+						  $prev_species   = $genomic_regions{$df_id}->{'species'};
+						  $prev_coord_sys = $genomic_regions{$df_id}->{'coord_system'};
+					  }	
+				  }
 
-				#add reciprocal entries for each chromosome to chromosome comparison
-				foreach my $method (keys %config) {
-					foreach my $p_species (keys %{$config{$method}}) {
-						foreach my $s_species ( keys %{$config{$method}{$p_species}} ) {						
-							foreach my $comp ( keys %{$config{$method}{$p_species}{$s_species}} ) {
-								my $revcomp = join ':', reverse(split ':',$comp);
-								unless ( exists($config{$method}{$s_species}{$p_species}{$revcomp} ) ) {
-									if ($config{$method}{$p_species}{$s_species}{$comp}{'coord_systems'} eq 'chromosome:chromosome') {
-										my $record = {
-												  'source_name'    => $config{$method}{$p_species}{$s_species}{$comp}{'target_name'},
-												  'source_species' => $config{$method}{$p_species}{$s_species}{$comp}{'target_species'},
-												  'source_start'   => $config{$method}{$p_species}{$s_species}{$comp}{'target_start'},
-												  'source_end'     => $config{$method}{$p_species}{$s_species}{$comp}{'target_end'},
-												  'target_name'    => $config{$method}{$p_species}{$s_species}{$comp}{'source_name'},
-												  'target_species' => $config{$method}{$p_species}{$s_species}{$comp}{'source_species'},
-												  'target_start'   => $config{$method}{$p_species}{$s_species}{$comp}{'source_start'},
-												  'target_end'     => $config{$method}{$p_species}{$s_species}{$comp}{'source_end'},
-												  'mlss_id'        => $config{$method}{$p_species}{$s_species}{$comp}{'mlss_id'},
-												  'coord_systems' => 'chromosome:chromosome',
-													 };
-										$config{$method}{$s_species}{$p_species}{$revcomp} = $record;
-									}
-								}
-							}
-						}
-					}
-				}
-#			&eprof_end('new parsing');				
-				lock_nstore(\%config,$file_name);
-			}
-#			warn Dumper(\%config);					
-			$tree->{'VEGA_COMPARA_CONF'} = \%config;
-		}
+				  #add reciprocal entries for each chromosome to chromosome comparison
+				  foreach my $method (keys %config) {
+					  foreach my $p_species (keys %{$config{$method}}) {
+						  foreach my $s_species ( keys %{$config{$method}{$p_species}} ) {						
+							  foreach my $comp ( keys %{$config{$method}{$p_species}{$s_species}} ) {
+								  my $revcomp = join ':', reverse(split ':',$comp);
+								  unless ( exists($config{$method}{$s_species}{$p_species}{$revcomp} ) ) {
+									  if ($config{$method}{$p_species}{$s_species}{$comp}{'coord_systems'} eq 'chromosome:chromosome') {
+										  my $record = {
+														'source_name'    => $config{$method}{$p_species}{$s_species}{$comp}{'target_name'},
+														'source_species' => $config{$method}{$p_species}{$s_species}{$comp}{'target_species'},
+														'source_start'   => $config{$method}{$p_species}{$s_species}{$comp}{'target_start'},
+														'source_end'     => $config{$method}{$p_species}{$s_species}{$comp}{'target_end'},
+														'target_name'    => $config{$method}{$p_species}{$s_species}{$comp}{'source_name'},
+														'target_species' => $config{$method}{$p_species}{$s_species}{$comp}{'source_species'},
+														'target_start'   => $config{$method}{$p_species}{$s_species}{$comp}{'source_start'},
+														'target_end'     => $config{$method}{$p_species}{$s_species}{$comp}{'source_end'},
+														'mlss_id'        => $config{$method}{$p_species}{$s_species}{$comp}{'mlss_id'},
+														'coord_systems' => 'chromosome:chromosome',
+													   };
+										  $config{$method}{$s_species}{$p_species}{$revcomp} = $record;
+									  }
+								  }
+							  }
+						  }
+					  }
+				  }
+#       		  &eprof_end('new parsing');				
+				  lock_nstore(\%config,$file_name);
+			  }
+#   		  warn Dumper(\%config);					
+			  $tree->{'VEGA_COMPARA_CONF'} = \%config;
+		  }
 #		  &eprof_dump(\*STDERR);		
+
         foreach my $row ( @$results ) {
           my ( $species1, $species2 ) = ( $row->[1], $row->[2] );
           $species1 =~ tr/ /_/;

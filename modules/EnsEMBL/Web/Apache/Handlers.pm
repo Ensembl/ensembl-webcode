@@ -13,7 +13,6 @@ use CGI::Cookie;
 use Time::HiRes qw(time);
 my $requests;
 my $process_start_time;
-my $oracle_home;
 use Sys::Hostname;
 use Data::Dumper;
 
@@ -97,27 +96,11 @@ sub initHandler {
     %cookies && $cookies{$ENSEMBL_USER_COOKIE} &&
     EnsEMBL::Web::DBSQL::UserDB::decryptID($cookies{$ENSEMBL_USER_COOKIE}->value) || 0;
   $r->subprocess_env->{'ENSEMBL_STARTTIME'} = time();
-
-  ## hack for oracle/AV problem: if child has used Oracle before, redirect
-  ## the request and kill the child
-  if( ($ENSEMBL_SITETYPE eq 'Vega') && $oracle_home && ($r->uri =~ /\/textview/) ) {
-    warn "[WARN] Killing child process to prevent Oracle/AV error.\n";
-    my $location = $r->uri;
-    if($r->args) {
-      $location .= "?" . $r->args;
-    }
-    $r->headers_out->set(Location => $location);
-    $r->child_terminate;
-    return REDIRECT;
-  }
   return;
 }
 
 sub cleanupHandler {
   my $r = shift;      # Get the connection handler
-
-  ## hack for oracle/AV problem: remember that this child has used Oracle
-  $oracle_home ||= $ENV{'ORACLE_HOME'};
 
   return  if $r->subprocess_env->{'ENSEMBL_ENDTIME'};
   my $end_time    = time();

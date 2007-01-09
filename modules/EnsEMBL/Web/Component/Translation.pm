@@ -904,11 +904,8 @@ sub similarity_matches {
     my $db = $data->get_db();
     my $entry = $data->gene_type || 'Ensembl';
     # add table call here
-    my $html;
-    unless ($data->species_defs->ENSEMBL_SITETYPE eq 'Vega') {
-        $html = qq(
+    my $html = qq(
                 <p><strong>This $entry entry corresponds to the following database identifiers:</strong></p>);
-    }
     $html .= qq(<table>);
     foreach my $key (sort keys %links){
         if (scalar (@{$links{$key}}) > 0){

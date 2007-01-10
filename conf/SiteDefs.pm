@@ -96,15 +96,28 @@ $VERSION=32;
 # directory that contains htdocs, modules, perl, ensembl, etc
 # DO NOT LEAVE A TRAILING '/' ON ENSEMBL_SERVERROOT
 ##########################################################################
-# use FindBin qw($Bin);
-# use File::Basename qw( dirname );
+use File::Spec;
 
-# $ENSEMBL_SERVERROOT     = dirname( $Bin );            # Local Ensembl dir
-($ENSEMBL_SERVERROOT = __FILE__ ) =~ s/[\\\/]+conf[\\\/]+SiteDefs.pm$//;
+my( $volume, $dir, $file ) = File::Spec->splitpath( __FILE__ );
+my @dir = File::Spec->splitdir( $dir );
+my @clean_directory = ();
+my $current_directory   = File::Spec->curdir();
+my $parent_directory    = File::Spec->updir();
+foreach( @dir ) {
+  next if $_ eq $current_directory; ## If we have a "." in the path ignore
+  if( $_ eq $parent_directory ) {
+    pop @clean_directory;           ## If we have a ".." in the path remove the parent directory
+  } else {
+    push @clean_directory, $_;      ## Otherwise add it!
+  }
+}
+while( pop @clean_directory ne 'conf') { 1; }     ## Remove up to the last "conf" directory...
 
+$ENSEMBL_SERVERROOT = File::Spec->catpath( $volume, File::Spec->catdir( @clean_directory ) );
+
+warn "$ENSEMBL_SERVERROOT";
 ## Define Plugin directories....
-(my $plugin_file = __FILE__) =~s/SiteDefs/Plugins/;
-eval "require '$plugin_file'";
+eval qq(require '$ENSEMBL_SERVERROOT/conf/Plugins.pm');
 error( "Error requiring plugin file:\n$@" ) if $@;
 
 $ENSEMBL_SERVER         = Sys::Hostname::hostname();  # Local machine name
@@ -124,10 +137,9 @@ $ENSEMBL_SERVERADMIN    = 'webmaster&#064;mydomain.org';
 $ENSEMBL_HELPDESK_EMAIL = $ENSEMBL_SERVERADMIN;
 $ENSEMBL_SERVERNAME     = 'www.mydomain.org';
 $ENSEMBL_PROTOCOL       = 'http';
-$ENSEMBL_MAIL_COMMAND   = '/usr/bin/Mail -s';     # Mail command
-$ENSEMBL_MAIL_ERRORS    = '0';                    # Do we want to email errors?
-$ENSEMBL_ERRORS_TO      = join ", ",              # ...and to whom?
-		            map { "$_\@sanger.ac.uk" } qw(js5 fc1 ek3 ap5);
+$ENSEMBL_MAIL_COMMAND   = '/usr/bin/Mail -s';               # Mail command
+$ENSEMBL_MAIL_ERRORS    = '0';                              # Do we want to email errors?
+$ENSEMBL_ERRORS_TO      = 'webmaster&#064;mydomain.org';    # ...and to whom?
 
 ##  64 <- Time stamped logs...
 ##  32 <- Enable eprof error diagnostics in web scripts
@@ -190,18 +202,18 @@ $ENSEMBL_REGISTRY       = undef;
 
 
 @ENSEMBL_LIB_DIRS     = (
-                         $ENSEMBL_SERVERROOT.'/modules',
-                         $ENSEMBL_SERVERROOT.'/ensembl/modules',
-                         $ENSEMBL_SERVERROOT.'/ensembl-compara/modules',
-                         $ENSEMBL_SERVERROOT.'/ensembl-draw/modules',
-                         $ENSEMBL_SERVERROOT.'/ensembl-variation/modules',
-                         $ENSEMBL_SERVERROOT.'/ensembl-external/modules',
-                         $ENSEMBL_SERVERROOT.'/ensembl-mart/modules',
-                         $ENSEMBL_SERVERROOT.'/ensembl-genename/modules',
-                         $ENSEMBL_SERVERROOT.'/biomart-web/modules',
-                         $ENSEMBL_SERVERROOT.'/biomart-plib',
-                         $ENSEMBL_SERVERROOT.'/bioperl-live',
-                        );
+  $ENSEMBL_SERVERROOT.'/modules',
+  $ENSEMBL_SERVERROOT.'/ensembl/modules',
+  $ENSEMBL_SERVERROOT.'/ensembl-compara/modules',
+  $ENSEMBL_SERVERROOT.'/ensembl-draw/modules',
+  $ENSEMBL_SERVERROOT.'/ensembl-variation/modules',
+  $ENSEMBL_SERVERROOT.'/ensembl-external/modules',
+  $ENSEMBL_SERVERROOT.'/ensembl-mart/modules',
+  $ENSEMBL_SERVERROOT.'/ensembl-genename/modules',
+  $ENSEMBL_SERVERROOT.'/biomart-web/modules',
+  $ENSEMBL_SERVERROOT.'/biomart-plib',
+  $ENSEMBL_SERVERROOT.'/bioperl-live',
+);
 
 # Add perl-version specific lib from /ensemblweb/shared/lib for e.g. Storable.pm
 my @vers = split( /[\.0]+/, $] );
@@ -227,8 +239,8 @@ $ENSEMBL_PERL_SPECIES  = 'Homo_sapiens'; # Default species
 our %__species_aliases = (
 #-------------------- mammals
   'Bos_taurus'              => [qw(bt cow moo)],
-  'Canis_familiaris'        => [qw(cf dog)], 
-  'Homo_sapiens'            => [qw(hs human man default)], 
+  'Canis_familiaris'        => [qw(cf dog)],
+  'Homo_sapiens'            => [qw(hs human man default)],
   'Mus_musculus'            => [qw(mm mouse mus)],
   'Pan_troglodytes'         => [qw(pt chimp)],
   'Rattus_norvegicus'       => [qw(rn rat)],
@@ -236,7 +248,7 @@ our %__species_aliases = (
   'Gallus_gallus'           => [qw(gg chicken)],
 #-------------------- fish
   'Danio_rerio'  => [qw(dr zfish zebrafish)],
-  'Fugu_rubripes'           => [qw(fr ffish fugu)],
+  'Fugu_rubripes'           => [qw(fr takifugu_rubripes ffish fugu)],
   'Tetraodon_nigroviridis'  => [qw(tn tetraodon)],
 #-------------------- amphibians
   'Xenopus_tropicalis'      => [qw(xt xenopus frog)],
@@ -251,6 +263,7 @@ our %__species_aliases = (
 #-------------------- yeast
   'Saccharomyces_cerevisiae' => [qw(sc yeast saccharomyces )],
 );
+
 
 ###############################################################################
 ## Web user datbase - used to store information about settings, e.g. DAS
@@ -330,18 +343,18 @@ while( my( $dir, $name ) = splice(@T,0,2)  ) {
 # You should not change anything below here
 ###############################################################################
 
-my @T = reverse @{$ENSEMBL_PLUGINS||[]}; ## These have to go on in reverse order...
+@T = reverse @{$ENSEMBL_PLUGINS||[]}; ## These have to go on in reverse order...
 $ENSEMBL_PLUGIN_ROOTS = ();
 while( my( $dir, $name ) = splice(@T,0,2)  ) {
   unshift @ENSEMBL_PERL_DIRS,   $dir.'/perl'; 
   unshift @ENSEMBL_HTDOCS_DIRS, $dir.'/htdocs'; 
   unshift @$ENSEMBL_PLUGIN_ROOTS,   $name;
+  push    @ENSEMBL_CONF_DIRS,   $dir.'/conf'; 
 }
 
-my @T = @{$ENSEMBL_PLUGINS||[]};         ## But these have to go on in normal order...
+@T = @{$ENSEMBL_PLUGINS||[]};         ## But these have to go on in normal order...
 while( my( $name, $dir ) = splice(@T,0,2)  ) {
-  push @ENSEMBL_CONF_DIRS,   $dir.'/conf'; 
-  push @ENSEMBL_LIB_DIRS,    $dir.'/modules';
+  unshift @ENSEMBL_LIB_DIRS,    $dir.'/modules';
 }
 
 @ENSEMBL_LIB_DIRS = reverse @ENSEMBL_LIB_DIRS; # Helps getting @inc into 
@@ -373,11 +386,13 @@ foreach my $binomial ( @$ENSEMBL_SPECIES ) {
   }
   my $key = lc($binomial);
   $ENSEMBL_SPECIES_ALIASES->{$key} = $binomial;   # homo_sapiens
-  $key =~s/_//g;
+  $key =~s/\.//g;
   $ENSEMBL_SPECIES_ALIASES->{$key} = $binomial;   # homosapiens
   $key = lc($binomial);
   $key =~s/^([a-z])[a-z]*_/$1_/g;
   $ENSEMBL_SPECIES_ALIASES->{$key} = $binomial;   # h_sapiens
+  $key =~s/_/\./g;
+  $ENSEMBL_SPECIES_ALIASES->{$key} = $binomial;   # h.sapiens
   $key =~s/_//g;
   $ENSEMBL_SPECIES_ALIASES->{$key} = $binomial;   # hsapiens
 }
@@ -581,7 +596,7 @@ $MART_ENSEMBL_LINKS = $ENSEMBL_SERVERNAME;
   @ENSEMBL_PERL_DIRS
   @ENSEMBL_HTDOCS_DIRS
   @ENSEMBL_LIB_DIRS
-    $MART_ENSEMBL_LINKS
+  $MART_ENSEMBL_LINKS
   )],
   WEB => [qw(
   $ENSEMBL_PLUGIN_ROOTS

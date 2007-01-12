@@ -1055,7 +1055,7 @@ sub factor {
 
 
 sub genespliceview_menu {  return gene_menu( @_, 'genesnpview_transcript',
-   [qw( Features SNPContext ImageSize THExport )], ['GeneSpliceHelp'] ); }
+   [qw( Features SNPContext ImageSize THExport )] ); }
 
 sub genetreeview_menu {
     my($panel, $object, $configname, $left, $right ) =  
@@ -1179,6 +1179,7 @@ sub genesnpview {
     $CONFIG->{'extent'}     = $extent;
       ## Store transcript information on config....
     my $TS = $trans_obj->__data->{'transformed'};
+#	warn Data::Dumper::Dumper($TS);
     $CONFIG->{'transcript'} = {
       'exons'        => $TS->{'exons'},
       'coding_start' => $TS->{'coding_start'},

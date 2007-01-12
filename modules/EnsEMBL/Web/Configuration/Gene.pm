@@ -199,7 +199,7 @@ sub genespliceview {
 
   if( my $panel2 = $self->new_panel( 'Image',
     'code'    => "image#",
-    'caption' => 'Splice sites for region go gene '.$obj->stable_id,
+    'caption' => 'Splice sites for region of gene '.$obj->stable_id,
     'params' => $params
   ) ) {
     $self->initialize_zmenu_javascript;

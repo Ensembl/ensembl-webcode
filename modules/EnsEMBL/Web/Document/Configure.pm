@@ -8,7 +8,7 @@ our @ISA  = qw(EnsEMBL::Web::Root);
 sub common_menu_items {
   my( $self, $doc ) = @_;
 ## Now the links on the left hand side....
-  warn "DOCUMENT: " . $doc->{'_object'};
+#  warn "DOCUMENT: " . $doc->{'_object'};
   if ($doc->species_defs->ENSEMBL_LOGINS) {
     ## Is the user logged in?
     my $user_id = $ENV{'ENSEMBL_USER_ID'};

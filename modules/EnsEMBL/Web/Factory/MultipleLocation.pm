@@ -105,7 +105,7 @@ sub createObjectsLocation {
   my $self = shift;
 
 #show input parameters
-#  foreach ($self->param) {	  
+ # foreach ($self->param) {	  
 #	  warn "$_ = ",$self->param($_),"\n";
 #  }
 
@@ -195,7 +195,6 @@ sub createObjectsLocation {
 		  warn "2----";
 		  ($chrom) =  $self->param("c$ID") =~ /^([-\w\.]+):?/;
 	  }
-#	  warn "CHROM = $chrom";
 #	  warn "sc = $sc";
       my $species = $self->map_alias_to_species( $self->param($par) );
 	  ## Skip if we've said flip an active species....
@@ -266,10 +265,10 @@ sub _best_guess {
   my( $self, $slice, $species, $width, $chrom ) = @_;
   ( my $S2 = $species ) =~ s/_/ /g;
   ## foreach my $method ( @{$self->species_defs->COMPARATIVE_METHODS} ) {
-  foreach my $method ( qw(BLASTZ_RAW BLASTZ_NET BLASTZ_GROUP BLASTZ_RECIP_NET PHUSION_BLASTN TRANSLATED_BLAT) ) {
+  foreach my $method ( qw(BLASTZ_RAW BLASTZ_NET BLASTZ_GROUP BLASTZ_RECIP_NET PHUSION_BLASTN TRANSLATED_BLAT BLASTZ_CHAIN) ) {
     my( $seq_region, $cp, $strand ) = $self->_dna_align_feature_adaptor->interpolate_best_location( $slice, $S2, $method, $chrom );
     if( $seq_region ) {
-      warn ">> $method <<";
+#      warn ">> $method <<";
       my $start = $cp - ($width-1)/2;
       my $end   = $cp + ($width-1)/2;
       $self->__set_species( $species );

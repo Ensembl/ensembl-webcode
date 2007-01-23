@@ -765,6 +765,7 @@ sub init {
   my $compara = 3000;
   my @methods = (
          [ 'BLASTZ_RAW'           ,'pink',  'cons bz' ],
+         [ 'BLASTZ_CHAIN'         ,'pink',  'cons bz chain' ],
         );
   foreach my $METHOD (@methods) {
     foreach my $SPECIES (@species) {

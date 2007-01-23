@@ -177,12 +177,12 @@ sub multi_bottom {
        $config->{'next_species'}       = $next_species;
        $config->{'slice_id'}           = $i;
        $config->{'other_slices'}       = \@other_slices;
-       $config->{'primary_slice'}      = $primary_slice;
+       $config->{'primary_slice'}      = $primary_slice; 
     if( $previous_species && $next_species eq $previous_species ) {
       if( $flags{'match'} ) {
-        foreach(qw( BLASTZ_RAW PHUSION_BLASTN BLASTZ_NET BLASTZ_GROUP BLASTZ_RECIP_NET) ) {
+        foreach(qw( BLASTZ_RAW PHUSION_BLASTN BLASTZ_NET BLASTZ_GROUP BLASTZ_RECIP_NET BLASTZ_CHAIN) ) {
           my $K = lc($previous_species)."_".lc($_)."_match";
-          $config->set( $K, "on", "on" );
+		  $config->set( $K, "on", "on" );
           $config->set( $K, "str", "x" );
           $config->set( $K, "join", 1 ) if $flags{ 'join_match' };
           $config->set( $K, "compact", $flags{ 'group_match' } ? 0 : 1 );
@@ -209,7 +209,7 @@ sub multi_bottom {
     } else {
       if( $previous_species ) {
         if( $flags{'match'} ) {
-          foreach(qw( BLASTZ_RAW PHUSION_BLASTN BLASTZ_NET BLASTZ_GROUP BLASTZ_RECIP_NET) ) {
+          foreach(qw( BLASTZ_RAW PHUSION_BLASTN BLASTZ_NET BLASTZ_GROUP BLASTZ_RECIP_NET BLASTZ_CHAIN) ) {
             my $K = lc($previous_species)."_".lc($_)."_match";
             $config->set( $K, "on", "on" );
             $config->set( $K, "str", "f" );
@@ -238,7 +238,7 @@ sub multi_bottom {
       }
       if( $next_species ) {
         if( $flags{'match'} ) {
-          foreach(qw( BLASTZ_RAW PHUSION_BLASTN BLASTZ_NET BLASTZ_GROUP BLASTZ_RECIP_NET) ) {
+          foreach(qw( BLASTZ_RAW PHUSION_BLASTN BLASTZ_NET BLASTZ_GROUP BLASTZ_RECIP_NET BLASTZ_CHAIN) ) {
             my $K = lc($next_species)."_".lc($_)."_match";
             $config->set( $K, "on", "on" );
             $config->set( $K, "str", "r" );
@@ -247,7 +247,7 @@ sub multi_bottom {
           }
         }
         if( $flags{'hcr'} ) {
-          foreach(qw(PHUSION_BLASTN_TIGHT BLASTZ_NET_TIGHT BLASTZ_GROUP_TIGHT)) {
+          foreach(qw(PHUSION_BLASTN_TIGHT BLASTZ_NET_TIGHT BLASTZ_GROUP_TIGHT )) {
             my $K = lc($next_species)."_".lc($_)."_match";
             $config->set( $K, "on", "on" );
             $config->set( $K, "str", "r" );

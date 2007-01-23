@@ -30,28 +30,32 @@ sub new {
            $self->{'config'}->{'species_defs'}->multi( 'PHUSION_BLASTN',   $self->{'species'} ),
            $self->{'config'}->{'species_defs'}->multi( 'BLASTZ_RECIP_NET', $self->{'species'} ),
            $self->{'config'}->{'species_defs'}->multi( 'TRANSLATED_BLAT',  $self->{'species'} ),
-           $self->{'config'}->{'species_defs'}->multi( 'BLASTZ_RAW',       $self->{'species'} ) 
+           $self->{'config'}->{'species_defs'}->multi( 'BLASTZ_RAW',       $self->{'species'} ),
            );
 		my %vega_config = $self->{'config'}->{'species_defs'}->multiX('VEGA_COMPARA_CONF');
 		if (defined %vega_config) {
 			my ($ps_name,$ps_start,$ps_end) = split /:/, $self->{'location'};
 			my $this_species = $self->{'species'};
 			#only add links for alignments actually in the database
-			foreach my $other_species (sort keys %{$vega_config{'BLASTZ_RAW'}{$this_species}}) {
-				foreach my $alignment (keys %{$vega_config{'BLASTZ_RAW'}{$this_species}{$other_species}}) {			
-					my $this_name = $vega_config{'BLASTZ_RAW'}{$this_species}{$other_species}{$alignment}{'source_name'};
-					#sanity check for alignments that exclude this slice
-					next unless ($ps_name eq $this_name);
-					my $start = $vega_config{'BLASTZ_RAW'}{$this_species}{$other_species}{$alignment}{'source_start'};
-					my $end = $vega_config{'BLASTZ_RAW'}{$this_species}{$other_species}{$alignment}{'source_end'};
-					#only create entries for alignments that overlap the current slice
-					if ($end > $ps_start && $start < $ps_end) {
-						my $chr = $vega_config{'BLASTZ_RAW'}{$this_species}{$other_species}{$alignment}{'target_name'};
-						$self->add_link(
-										"Add/Remove $other_species:$chr",
-										$LINK."flip=$other_species:$chr",
-										''
-									   );
+			my $methods_names = [ [qw(BLASTZ_RAW chromosome)], [qw(BLASTZ_CHAIN clone)] ];
+			foreach my $method_link ( @{$methods_names} ) {
+				my $method = $method_link->[0];
+				foreach my $other_species (sort keys %{$vega_config{$method}{$this_species}}) {
+					foreach my $alignment (keys %{$vega_config{$method}{$this_species}{$other_species}}) {			
+						my $this_name = $vega_config{$method}{$this_species}{$other_species}{$alignment}{'source_name'};
+						#sanity check for alignments that exclude this slice
+						next unless ($ps_name eq $this_name);
+						my $start = $vega_config{$method}{$this_species}{$other_species}{$alignment}{'source_start'};
+						my $end = $vega_config{$method}{$this_species}{$other_species}{$alignment}{'source_end'};
+						#only create entries for alignments that overlap the current slice
+						if ($end > $ps_start && $start < $ps_end) {
+							my $chr = $vega_config{$method}{$this_species}{$other_species}{$alignment}{'target_name'};
+							$self->add_link(
+											"Add/Remove $other_species:$chr",
+											$LINK."flip=$other_species:$chr",
+											''
+										   );
+						}
 					}
 				}
 			}

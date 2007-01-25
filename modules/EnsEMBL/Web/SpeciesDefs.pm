@@ -719,7 +719,8 @@ sub _parse {
                                  dnafrag_start,
                                  dnafrag_end,
                                  dnafrag_id
-                            from genomic_align);
+                            from genomic_align
+                        order by genomic_align_block_id);
 				  $sth = $dbh->prepare( $q );
 				  $rv  = $sth->execute || die( $sth->errstr );
 
@@ -770,30 +771,29 @@ sub _parse {
 							  foreach my $comp ( keys %{$config{$method}{$p_species}{$s_species}} ) {
 								  my $revcomp = join ':', reverse(split ':',$comp);
 								  unless ( exists($config{$method}{$s_species}{$p_species}{$revcomp} ) ) {
-									  if ($config{$method}{$p_species}{$s_species}{$comp}{'coord_systems'} eq 'chromosome:chromosome') {
-										  my $record = {
-														'source_name'    => $config{$method}{$p_species}{$s_species}{$comp}{'target_name'},
-														'source_species' => $config{$method}{$p_species}{$s_species}{$comp}{'target_species'},
-														'source_start'   => $config{$method}{$p_species}{$s_species}{$comp}{'target_start'},
-														'source_end'     => $config{$method}{$p_species}{$s_species}{$comp}{'target_end'},
-														'target_name'    => $config{$method}{$p_species}{$s_species}{$comp}{'source_name'},
-														'target_species' => $config{$method}{$p_species}{$s_species}{$comp}{'source_species'},
-														'target_start'   => $config{$method}{$p_species}{$s_species}{$comp}{'source_start'},
-														'target_end'     => $config{$method}{$p_species}{$s_species}{$comp}{'source_end'},
-														'mlss_id'        => $config{$method}{$p_species}{$s_species}{$comp}{'mlss_id'},
-														'coord_systems' => 'chromosome:chromosome',
-													   };
-										  $config{$method}{$s_species}{$p_species}{$revcomp} = $record;
-									  }
+									  my $record = {
+													'source_name'    => $config{$method}{$p_species}{$s_species}{$comp}{'target_name'},
+													'source_species' => $config{$method}{$p_species}{$s_species}{$comp}{'target_species'},
+													'source_start'   => $config{$method}{$p_species}{$s_species}{$comp}{'target_start'},
+													'source_end'     => $config{$method}{$p_species}{$s_species}{$comp}{'target_end'},
+													'target_name'    => $config{$method}{$p_species}{$s_species}{$comp}{'source_name'},
+													'target_species' => $config{$method}{$p_species}{$s_species}{$comp}{'source_species'},
+													'target_start'   => $config{$method}{$p_species}{$s_species}{$comp}{'source_start'},
+													'target_end'     => $config{$method}{$p_species}{$s_species}{$comp}{'source_end'},
+													'mlss_id'        => $config{$method}{$p_species}{$s_species}{$comp}{'mlss_id'},
+													'coord_systems' => 'chromosome:chromosome',
+												   };
+									  $config{$method}{$s_species}{$p_species}{$revcomp} = $record;
 								  }
 							  }
 						  }
 					  }
 				  }
+
 #       		  &eprof_end('new parsing');				
 				  lock_nstore(\%config,$file_name);
 			  }
-#   		  warn Dumper(\%config);					
+#  		      warn "config = ",Dumper(\%config);					
 			  $tree->{'VEGA_COMPARA_CONF'} = \%config;
 		  }
 #		  &eprof_dump(\*STDERR);		

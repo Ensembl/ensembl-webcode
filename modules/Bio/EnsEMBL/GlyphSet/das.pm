@@ -531,7 +531,7 @@ sub gmenu{
 #      warn(Data::Dumper::Dumper($f));
   foreach my $group ($f->das_groups) {
     my $txt = $group->{'group_label'} || $group->{'group_id'};
-    next if ($txt !~ $f->{'grouped_by'});
+    next if ($txt !~ quotemeta( $f->{'grouped_by'} ));
     $id = $txt if (! $id);
     my $dlabel = sprintf("%02d:GROUP : %s", $ids++, $txt);
     $zmenu->{$dlabel} = '';
@@ -553,18 +553,21 @@ sub gmenu{
       my $dlabel = sprintf("%02d:&nbsp;&nbsp;DAS LINK: %s", $ids++, $txt);
       $zmenu->{$dlabel} = $dlink->{'href'};
     }
-      
+     
     if (my $note = $group->{'note'}) {
       my $note_txt = '';
       if (ref $note eq 'ARRAY') {
         foreach my $n (@$note) {
-          $note_txt .= (decode_entities($n) . '<br/>');
+          $note_txt = decode_entities($n);
+          $zmenu->{"$ids:NOTE: $note_txt"} = '';
+          $ids++;
         }
       } else {
         $note_txt = decode_entities($note);
+        $zmenu->{"$ids:NOTE: $note_txt"} = '';
       }
-      $zmenu->{"$ids:NOTES: $note_txt"} = '';
     }
+ 
     $ids ++;
   }
 
@@ -629,17 +632,19 @@ sub zmenu {
     $zmenu->{$dlabel} = $dlink->{'href'};
   }
 
-  if (my $note = $f->das_note()) {
-    my $note_txt = '';
-    if (ref $note eq 'ARRAY') {
-      foreach my $n (@$note) {
-        $note_txt .= (decode_entities($n) . '<br/>');
+   if (my $note = $f->das_note) {
+      my $note_txt = '';
+      if (ref $note eq 'ARRAY') {
+        foreach my $n (@$note) {
+          $note_txt = decode_entities($n);
+          $zmenu->{"$ids:NOTE: $note_txt"} = '';
+          $ids++;
+        }
+      } else {
+        $note_txt = decode_entities($note);
+        $zmenu->{"$ids:NOTE: $note_txt"} = '';
       }
-    } else {
-      $note_txt = decode_entities($note);
     }
-    $zmenu->{"70:NOTES: $note_txt"} = '';
-  }
 
   my $href = undef;
 

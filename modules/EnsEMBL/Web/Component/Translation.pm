@@ -125,7 +125,11 @@ sub das {
             $uhash{$id}->{label} = $feature->das_feature_label;
           }
 
+
           if( my $note = $feature->das_note ){
+	if (ref $note eq 'ARRAY') {
+	   $note = join ('<br/>', @$note);
+        }
             $uhash{$id}->{note} = parseHTML(decode_entities($note));
           }
         }
@@ -183,6 +187,9 @@ sub das {
         my $score  = ($feature->das_score > 0) ? sprintf("%.02f",$feature->das_score) : '&nbsp;';
         my $note;
         if( $note = $feature->das_note ) {
+	  if (ref $note eq 'ARRAY') {
+             $note = join('<br/>', @$note);
+          }
           $note=~s|((\S+?):(http://\S+))      |<a href="$3" target="$segment">[$2]</a>|igx;
           $note=~s|([^"])(http://\S+)([^"])   |$1<a href="$2" target="$segment">$2</a>$3|igx;
           $note=~s|((\S+?):navigation://(\S+))|<a href="$script?gene=$3" >[$2]</a>|igx;
@@ -827,11 +834,12 @@ sub das_annotation {
     if( ! scalar( @features ) ){
       push( @rhs_rows, "No annotation" );
     }
-    foreach my $feature( sort{ 
-      $a->das_type_id    cmp $b->das_type_id ||
-      $a->das_feature_id cmp $b->das_feature_id ||
-      $a->das_note       cmp $b->das_note
-    } @features ){
+#    foreach my $feature( sort{ 
+#      $a->das_type_id    cmp $b->das_type_id ||
+#      $a->das_feature_id cmp $b->das_feature_id ||
+#      $a->das_note       cmp $b->das_note
+#    } @features ){
+   foreach my $feature (@features) {
       my $segment = $feature->das_segment->ref;
       my $id = $feature->das_feature_id;
       if( my $href = $feature->das_link ){
@@ -839,6 +847,9 @@ sub das_annotation {
       }
       my $note;
       if( $note = $feature->das_note ){
+        if (ref $note eq 'ARRAY') {
+           $note = join('<BR/>', @$note);
+        }
         $note=~s|((\S+?):(http://\S+))      |<a href="$3" target="$segment">[$2]</a>|igx;
         $note=~s|([^"])(http://\S+)([^"])   |$1<a href="$2" target="$segment">$2</a>$3|igx;
         $note=~s|((\S+?):navigation://(\S+))|<a href="protview?gene=$3" >[$2]</a>|igx;

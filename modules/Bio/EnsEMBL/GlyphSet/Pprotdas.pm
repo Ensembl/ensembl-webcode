@@ -86,7 +86,16 @@ sub _init {
       $zmenu->{$dlabel} = $dlink->{'href'};
       $href =  $dlink->{'href'} if (! $href);
     }
-    if( my $m = $f->das_note       ){ $zmenu->{"40:NOTE: $m"}   = undef }
+    if( my $m = $f->das_note       ){
+      if (ref $m eq 'ARRAY') {
+	foreach my $n (@$m) { 
+      	  $zmenu->{"$ids:NOTE: $n"}   = undef;
+	  $ids ++;
+        }
+     } else {
+      	$zmenu->{"40:NOTE: $m"}   = undef;
+     }
+    }
     my $Composite = new Sanger::Graphics::Glyph::Composite({
       'x'     => $f->{translation_start},
       'y'     => $y,
@@ -144,7 +153,17 @@ sub _init {
       $zmenu->{$dlabel} = $dlink->{'href'};
       $href =  $dlink->{'href'} if (! $href);
     }
-    if( my $m = $f->das_note       ){ $zmenu->{"40:NOTE: $m"}   = undef }
+ if( my $m = $f->das_note       ){
+      if (ref $m eq 'ARRAY') {
+        foreach my $n (@$m) {
+          $zmenu->{"$ids:NOTE: $n"}   = undef;
+          $ids ++;
+        }
+     } else {
+        $zmenu->{"40:NOTE: $m"}   = undef;
+    }
+}
+
     my $Composite = new Sanger::Graphics::Glyph::Composite({
       'x'     => floor($f->start),
       'y'     => $y,

@@ -670,7 +670,7 @@ sub _parse {
 		  if ($self_comparisons) {
 			  #get the stored data structure
 			  my $file_name = $SiteDefs::ENSEMBL_CONF_DIRS[0].'/'.'Multi.config';
-			  if (0) { #-e $file_name) {
+			  if (-e $file_name) {
 				  print STDERR "          [WARN]Retrieving alignment data from $file_name\n";
 				  %config = %{lock_retrieve($file_name)};		
 			  }

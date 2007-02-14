@@ -11,7 +11,11 @@ sub init {
 
   #retrieve the colour sets for each type of vega gene, replacing the name in the colourmap with the logicname
   my $vega_colours;
-  foreach my $name  ( ['vega_gene_havana','otter'],['vega_gene_corf','otter_corf'],['vega_gene_external','otter_external'],['vega_gene_igsf','otter_igsf']) {
+  foreach my $name  ( ['vega_gene_havana'  ,'otter'],
+					  ['vega_gene_corf'    ,'otter_corf'],
+					  ['vega_gene_external','otter_external'],
+					  ['vega_gene_igsf'    ,'otter_igsf'],
+					  ['vega_gene_eucomm'  ,'otter_eucomm'] ) {
 	  $vega_colours->{$name->[1]} = { $self->{'_colourmap'}->colourSet($name->[0]) };
   }
 

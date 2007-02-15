@@ -942,7 +942,7 @@ sub das_wizard_3 {
       'value' => $option,
       'on_change' => 'submit'
     );
-    if ($option eq 'l') {
+    if ($option eq 'n') {
       $option = $das_conf->{fg_max} || 100;
       $form->add_element('type'=>'String', 'name'=>'DASfg_max', 'label'=>'Max score:', 'value'=> $option);
       $option = $das_conf->{fg_min} || 0;

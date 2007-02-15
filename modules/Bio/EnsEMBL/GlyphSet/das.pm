@@ -1439,7 +1439,7 @@ sub RENDER_colourgradient{
       'absolutey' => 1,
     });
 
-    my $grade = int(($score - $min_score) / $score_per_grade);
+    my $grade = ($score == $max_score) ? $configuration->{'fg_grades'} - 1 : int(($score - $min_score) / $score_per_grade);
     #warn("S:$score: $grade\n");
     my $y_offset =     0;
     my ($href, $zmenu ) = $self->zmenu( $f );

@@ -698,7 +698,7 @@ sub _parse {
 													   coord_system => $coord_system,
 													  };
 				  }
-#			      warn Dumper(\%genomic_regions);
+#			      warn "genomic regions are ",Dumper(\%genomic_regions);
 
 				  #get details of methods in the database -
 				  $q = qq(select mlss.method_link_species_set_id, ml.type
@@ -711,7 +711,7 @@ sub _parse {
 				  while (my ($mlss, $type) = $sth->fetchrow_array ) {
 					  $methods{$mlss} = $type;
 				  }
-#			      warn Dumper(\%methods);
+#			      warn "methods are ",Dumper(\%methods);
 
 				  #get details of alignments
 				  $q = qq(select genomic_align_block_id,
@@ -720,7 +720,8 @@ sub _parse {
                                  dnafrag_end,
                                  dnafrag_id
                             from genomic_align
-                        order by genomic_align_block_id);
+                        order by genomic_align_block_id,
+                                 dnafrag_id);
 				  $sth = $dbh->prepare( $q );
 				  $rv  = $sth->execute || die( $sth->errstr );
 
@@ -764,7 +765,7 @@ sub _parse {
 					  }	
 				  }
 
-				  #add reciprocal entries for each chromosome to chromosome comparison
+				  #add reciprocal entries for each comparison
 				  foreach my $method (keys %config) {
 					  foreach my $p_species (keys %{$config{$method}}) {
 						  foreach my $s_species ( keys %{$config{$method}{$p_species}} ) {						

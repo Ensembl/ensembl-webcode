@@ -81,6 +81,7 @@ BEGIN {
 ##      BioMart biomart  biomart biomart
     qw(
       common  common   Common  common
+      BioMart Multi    biomart Multi
       Multi   Multi    multi   Multi
     ),
     ( 'perl' => $SiteDefs::ENSEMBL_PRIMARY_SPECIES ),

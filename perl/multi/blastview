@@ -183,7 +183,7 @@ MAIN:{
   $page->add_body_attr( 'onload', "LOADED = 1;"  );
   $page->stylesheet->add_sheet( 'all', '/css/blastview.css' );
   $page->javascript->add_script( 'var LOADED = 0;' );
-  $page->javascript->add_source( '/js/zmenu_32.js' );
+  $page->javascript->add_source( '/js/zmenu_42.js' );
   $page->javascript_div->add_div( 'jstooldiv', { 'style' => 'z-index: 200; position: absolute; visibility: hidden' } , '' );
 
 

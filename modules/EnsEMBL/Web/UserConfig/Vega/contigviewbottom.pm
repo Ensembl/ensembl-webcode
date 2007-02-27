@@ -220,7 +220,7 @@ sub init {
     },
     'rss' => {
         'on' => "on",
-        'pos' => '2540',
+        'pos' => '1030',
         'str' => 'b',
         'col' => 'darkolivegreen4',
         'label' => 'T-cell RSS motif.',

@@ -6,6 +6,7 @@ use warnings;
 use Class::Std;
 use CGI;
 
+use EnsEMBL::Web::RegObj;
 use EnsEMBL::Web::Object::Data::SpeciesList;
 use EnsEMBL::Web::Document::HTML::SpeciesList;
 
@@ -33,7 +34,7 @@ sub render {
 
 sub render_page {
   my $self = shift;
-  my $user = $self->filters->user;
+  my $user = $self->filters->user($ENSEMBL_WEB_REGISTRY->get_user->id);
   warn "RENDERING PAGE for RESET";
   foreach my $list (@{ $user->specieslists }) {
     warn "LIST: " . $list->id;

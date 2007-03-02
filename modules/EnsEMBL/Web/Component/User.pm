@@ -1040,7 +1040,7 @@ sub _render_group_settings {
     $html .= "<h5>Configurations</h5>\n";
     my @records = ();
     foreach my $configuration (@configurations) {
-      my $description = $configuration->blurb || '&nbsp;';
+      my $description = $configuration->description || '&nbsp;';
       push @records, {  'id' => $configuration->id, 
                         'group_id' => $group->id,
                         'ident' => 'user',
@@ -1048,7 +1048,7 @@ sub _render_group_settings {
                         'edit_url' => 'edit_config', 
                         'delete_url' => 'remove_group_record', 
                         'data' => [
-        '<a href="' . $configuration->config_url . '" title="' . $configuration->blurb . '">' . $configuration->name . '</a>', '&nbsp;' 
+        '<a href="' . $configuration->url . '" title="' . $configuration->description . '">' . $configuration->name . '</a>', '&nbsp;' 
       ]};
     }
     $html .= _render_settings_table(\@records);

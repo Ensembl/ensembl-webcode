@@ -70,6 +70,7 @@ sub das {
 # Use Bio::EnsEMBL::Gene / Translation - so all the features are retrieved by the same function
   my $obj = $object->[1]->{_object};
   my ($featref, $styleref) = $obj->get_all_DAS_Features();
+warn "FEATURE REFERENCE is $featref";
 
  foreach my $das ( grep {$_->adaptor->active} @das_objs ){
     my $source = $das->adaptor;
@@ -175,7 +176,8 @@ sub das {
         ) );
       }
     } else {
-      my @features = @{$featref->{$source_nm} || []};
+      my @features = ();
+      @features = @{$featref->{$source_nm}} if ref($featref->{$source_nm})=~/ARRAY/;
 
       foreach my $feature (@features) {
         next if ($feature->das_type_id() =~ /^(contig|component|karyotype|INIT_MET)$/i ||

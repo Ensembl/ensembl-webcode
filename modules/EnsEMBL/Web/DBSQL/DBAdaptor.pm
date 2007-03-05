@@ -44,6 +44,7 @@ use strict;
   sub selectall_arrayref {
 ### wrapper around DBI
     my $self = shift;
+#warn "SQL: ", @_;
     $self->get_dbhandle->selectall_arrayref( @_ );
   }
 

@@ -53,7 +53,7 @@ sub get_das {
  
   foreach my $das (@{ $user->dases }) {
     $Das_sources_of{ ident $self }{$das->name} = $das->get_das_config;
-    warn $Das_sources_of{ ident $self }{$das->name};
+#    warn $Das_sources_of{ ident $self }{$das->name};
   }
 
   foreach (keys %$session_das) {
@@ -66,7 +66,9 @@ sub get_das {
 sub get_das_filtered_and_sorted {
   my( $self, $species ) = @_;
   my $T = $self->get_das;# "GET DAS...", warn $T;
-#  warn join "\n","KEYS", keys %{$T||{}},"VALUES",map { join '; ',keys %{$_->get_data||{}} } values %{$T||{}};
+# warn "\n\n\n\nGETTING DAS\n\n";
+#   warn join "\n","KEYS", keys %{$T||{}},"VALUES",map { join '; ',keys %{$_->get_data||{}} } values %{$T||{}};
+# warn "\n\n\n\n";
   my @T =
     map  { $_->[1] }
     sort { $a->[0] cmp $b->[0] }

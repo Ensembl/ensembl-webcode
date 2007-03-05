@@ -29,7 +29,7 @@ var Scriptaculous = {
     // inserting via DOM fails in Safari 2.0, so brute force approach
     document.write('<script type="text/javascript" src="'+libraryName+'"></script>');
   },
-  load: function() {
+  load: function() { 
     if((typeof Prototype=='undefined') || 
        (typeof Element == 'undefined') || 
        (typeof Element.Methods=='undefined') ||
@@ -42,7 +42,8 @@ var Scriptaculous = {
     }).each( function(s) {
       var path = s.src.replace(/scriptaculous\.js(\?.*)?$/,'');
       var includes = s.src.match(/\?.*load=([a-z,]*)/);
-      (includes ? includes[1] : 'builder,effects,dragdrop,controls,slider').split(',').each(
+//      (includes ? includes[1] : 'builder,effects,dragdrop,controls,slider').split(',').each(
+      (includes ? includes[1] : 'builder,effects,dragdrop').split(',').each(
        function(include) { Scriptaculous.require(path+include+'.js') });
     });
   }

@@ -9,7 +9,7 @@
 #
 package Sanger::Graphics::Renderer::gif;
 use strict;
-use warnings;
+#use warnings;
 use base qw(Sanger::Graphics::Renderer);
 use GD;
 ## use GD::Text::Align;

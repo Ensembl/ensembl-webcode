@@ -63,13 +63,15 @@ sub init_label {
 ## Add a link to the zmenu which allows people to look at the raw DAS response (or 
 ## the pretty one if that is styled with CSS.. Need the URL and the segments list.
 
-$Data::Dumper::Indent = 1;
-warn Data::Dumper::Dumper( $self->{'extras'} );
-  my( $features, $das_styles, $segments ) = @{
-    $self->{'container'}->get_all_DASFeatures(
-      $self->{'extras'}{'type'}
-    )->{$self->{'extras'}{'dsn'}} || []
-  };
+##$Data::Dumper::Indent = 1;
+##warn Data::Dumper::Dumper( $self->{'extras'} );
+##  my( $features, $das_styles, $segments ) = @{
+##    $self->{'container'}->get_all_DASFeatures(
+##      $self->{'extras'}{'type'}
+##    )->{$self->{'extras'}{'dsn'}} || []
+##  };
+
+  my( $features, $das_styles, $segments ) = @{ $self->{'container'}->get_all_DASFeatures_dsn( $self->{'extras'}{'type'}, $self->{'extras'}{'dsn'} ) || [] };
   $zmenu->{'99:View DAS response'} = join '/', $das_url, 'features?'.  join ';', map { "segment=$_" } @$segments;
 
 ## Now we render the actual link...

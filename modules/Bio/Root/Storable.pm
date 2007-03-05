@@ -315,15 +315,19 @@ sub token{
 
 sub store{
   my $self = shift;
+#warn "STORE:.... serailizing object...";
 
   # Prepare the serialised string
   my $serialised_obj = $self->serialise;
 
   # Check for explicit adaptor, and ensure it works.
+#warn "STORE:.... checking for adaptor...";
   if( $self->adaptor ){
     my $ret;
+#warn "STORE:.... storing on adaptor... ",$self, "....",$self->adaptor,"...";
     eval{ $ret = $self->adaptor->store($self, $serialised_obj, @_) };
     $@ && $self->debug( @$ );
+#warn "STORE:.... returning with $ret ...";
     if( $ret ){
       $self->debug( "STORE $self to ".ref($self->adaptor)."\n" );
       $self->modified(0); # Unset modified flag
@@ -332,11 +336,14 @@ sub store{
   }
 
   # Use default adaptor
+#warn "STORE:.... getting statefile...";
   my $statefile = $self->statefile;
   my $io = Bio::Root::IO->new( ">$statefile" );
+#warn "STORE: printing serialized obj";
   $io->_print( $serialised_obj );
   $self->debug( "STORE $self to $statefile\n" );
   $self->modified(0); # Unset modified flag
+#warn "STORE: RETURNING  statefile";
   return $statefile;
 }
 

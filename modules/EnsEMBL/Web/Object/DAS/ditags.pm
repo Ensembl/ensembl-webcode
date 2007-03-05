@@ -102,9 +102,9 @@ sub Features {
 #		'TYPE'        => $ftype,
 	#	'CATEGORY'        => $ft->ditag_side || '', 
 		'METHOD'      => $ftype,
-		'START'       => $ft->start ,
-		'END'         => $ft->end ,
-		'ORIENTATION' => $ft->strand+0,
+		'START'       => $ft->seq_region_start ,
+		'END'         => $ft->seq_region_end ,
+		'ORIENTATION' => $ft->seq_region_strand+0,
 		'NOTE'        => ["tag_count: $tag_count"],
 		'GROUP' => [$group], 
 	    };

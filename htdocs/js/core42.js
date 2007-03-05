@@ -86,6 +86,12 @@ function save_drawer_change(ident) {
 function drawer_change_saved(response) {
 }
 
+function das_link() {
+  URL = escape(document.location.href);
+  document.location = '/common/user/save_das?url=' + URL;
+  return true;
+}
+
 function set_style_for_class(new_class,style) {
   var elements = getElementsByClass(new_class);
   for (var i = 0; i < elements.length; i++) {

@@ -77,14 +77,15 @@ if( $exalead->__status eq 'failure') {
     'caption' => "$sitetype text search",
     'content' => $renderer->render_form. 
                  $renderer->render_spelling.
+#                 &render_note . 
       $renderer->render_summary.
       $renderer->render_navigation.
       $renderer->render_hits
   );
   $page->page->content->add_panel($panel);
 
-  if( 1 ) {
-warn $exalead->{'raw_XML'};
+  if( 0 ) {
+#warn $exalead->{'raw_XML'};
     use XML::Simple;
     $page->page->content->add_panel( new EnsEMBL::Web::Document::Panel(
       'caption' => 'RAW',
@@ -159,5 +160,9 @@ sub _render_category {
   }
   return "$out</dt>\n";
 }
+
+#sub render_note {
+#  return "<i>Please note:</i> Searching by gene ID is currently unavailable. Please search by gene name instead.";
+#}
 
 1;

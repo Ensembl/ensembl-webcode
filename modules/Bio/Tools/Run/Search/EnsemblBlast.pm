@@ -242,12 +242,23 @@ sub dispatch_bsub {
    my $queue = $self->priority || 'offline';
    my $jobid;
    my $host = hostname();
-    my $pid;
-    local *BSUB;
+   my $pid;
+   local *BSUB;
    
    my $repeatmask_command = '/data/bin/RepeatMasker';
-
-   if( open(BSUB, qq(|bsub -c 120 -q $queue -J $ticket -o /dev/null -f "$client_fasta_file > $server_fasta_file") )) {
+ 
+   my $db_name = $self->database;
+   my ($g,$s) = $db_name =~ /^([A-Z]{1})[a-z]*_(\w{3})\w+/;
+   my $sp = $g.$s;
+   $db_name =~ s/\.fa$//;
+   my ($st) = $db_name =~ /\w+.(\w+).?/;
+   my ($t) = $db_name =~ /(\w+\.\w+)$/;
+   my $name = join '.', $st, $sp, $t;
+   my $project_name = join ':',
+      $self->program_name, $name,
+      $self->seq->length, $self->seq->alphabet;
+   my $command_line = qq(|bsub -c 120 -q $queue -J $ticket -o /dev/null -P "$project_name" -f "$client_fasta_file > $server_fasta_file" );
+   if( open(BSUB, $command_line )) {
       if( open(FH,">$client_sent_file" ) ) {
         print FH "$state_file";
         close FH;

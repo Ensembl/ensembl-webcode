@@ -11,7 +11,7 @@ sub init {
     $self->{'general'}->{'altsplice'} = {
 	'_artefacts' => [qw(
 	    ruler
-            contig
+            contig scalebar
 	)],
 	
 	'_options' => [qw(pos col known unknown)],
@@ -33,6 +33,19 @@ sub init {
 	    'str'   => 'r',
 	    'col' => 'black',
 	},
+
+  'scalebar' => {
+      'on' => 'on',
+      'pos' => '100000',
+      'col'       => 'black',
+      'label'     => 'on',
+      'max_division'  => '12',
+      'str'       => 'b',
+      'subdivs'     => 'on',
+      'abbrev'    => 'on',
+      'navigation'  => 'off'
+  },
+                                                            
         
     'contig' => {
 	    'on'  => "on",

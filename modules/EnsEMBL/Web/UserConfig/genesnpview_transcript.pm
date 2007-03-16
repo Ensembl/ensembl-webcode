@@ -4,13 +4,26 @@ use EnsEMBL::Web::UserConfig;
 use vars qw(@ISA);
 @ISA = qw(EnsEMBL::Web::UserConfig);
 
+#despite it's name this is the config for vega genespliceview !
+
 sub init {
   my ($self) = @_;
+
+  #retrieve the colour sets for each type of vega gene, replacing the name in the colourmap with the logicname
+  my $vega_colours;
+  foreach my $name  ( ['vega_gene_havana'  ,'otter'],
+					  ['vega_gene_corf'    ,'otter_corf'],
+					  ['vega_gene_external','otter_external'],
+					  ['vega_gene_igsf'    ,'otter_igsf'],
+					  ['vega_gene_eucomm'  ,'otter_eucomm'] ) {
+	  $vega_colours->{$name->[1]} = { $self->{'_colourmap'}->colourSet($name->[0]) };
+  }
+
   $self->{'_userdatatype_ID'} = 36;
   $self->{'_transcript_names_'} = 'yes';
   $self->{'_add_labels' }  = 1;
   $self->{'general'}->{'genesnpview_transcript'} = {
-    '_artefacts' => [qw(GSV_transcript GSV_snps)],
+    '_artefacts' => [qw(vega_GSV_transcript)],
     '_options'  => [qw(pos col known unknown)],
     '_settings' => {
       'opt_pdf' => 0, 'opt_svg' => 0, 'opt_postscript' => 0,
@@ -20,60 +33,21 @@ sub init {
       'bgcolor'   => 'background1',
       'bgcolour1' => 'background1',
       'bgcolour2' => 'background1',
-      'validation' => [
-        [ 'opt_freq'       => 'By frequency' ],
-        [ 'opt_cluster'    => 'By cluster' ],
-        [ 'opt_doublehit'  => 'By doublehit' ],
-        [ 'opt_submitter'  => 'By submitter' ],
-        [ 'opt_hapmap'     => 'Hapmap' ],
-        [ 'opt_noinfo'     => 'No information' ],
-      ],
-      'classes' => [
-        [ 'opt_in-del'   => 'In-dels' ],
-        [ 'opt_snp'      => 'SNPs' ],
-        [ 'opt_mixed'    => 'Mixed variations' ],
-        [ 'opt_microsat' => 'Micro-satellite repeats' ],
-        [ 'opt_named'    => 'Named variations' ],
-        [ 'opt_mnp'      => 'MNPs' ],
-        [ 'opt_het'      => 'Hetrozygous variations' ],
-        [ 'opt_'         => 'Unclassified' ],
-      ],
-      'types' => [
-       [ 'opt_non_synonymous_coding' => 'Non-synonymous' ],
-       [ 'opt_synonymous_coding'     => 'Synonymous' ],
-       [ 'opt_frameshift_coding'     => 'Frameshift' ],
-       [ 'opt_stop_lost',            => 'Stop lost' ],
-       [ 'opt_stop_gained',          => 'Stop gained' ],
-       [ 'opt_essential_splice_site' => 'Essential splice site' ],
-       [ 'opt_splice_site'           => 'Splice site' ],
-       [ 'opt_upstream'              => 'Upstream' ],
-       [ 'opt_regulatory_region',    => 'Regulatory region' ],
-       [ 'opt_5prime_utr'            => "5' UTR" ],
-       [ 'opt_intronic'              => 'Intronic' ],
-       [ 'opt_3prime_utr'            => "3' UTR" ],
-       [ 'opt_downstream'            => 'Downstream' ],
-       [ 'opt_intergenic'            => 'Intergenic' ], 
-      ],
+
       'features' => [],
-    'snphelp' => [
-        [ 'genesnpview'  => 'GeneSNPView' ],
-      ],
      },
-    'GSV_transcript' => {
+    'vega_GSV_transcript' => {
       'on'          => "on",
       'pos'         => '100',
       'str'         => 'b',
-      'src'         => 'all', # 'ens' or 'all'
-      'colours' => {$self->{'_colourmap'}->colourSet( 'all_genes' )} ,
-    },
-    'GSV_snps' => {
-      'on'          => "on",
-      'pos'         => '200',
-      'str'         => 'r',
-      'colours'=>{$self->{'_colourmap'}->colourSet('variation')},
-    },
-
+	  'src'         => 'all',
+      'colours'     => $vega_colours,
+    },													
   };
+
+#  warn Data::Dumper::Dumper($vega_colours);
+#warn "in vega---"Data::Dumper::Dumper($self->{'_colourmap'});													
+
   $self->ADD_ALL_PROTEIN_FEATURE_TRACKS_GSV;
 } 
 1;

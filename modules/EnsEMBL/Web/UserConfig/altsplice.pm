@@ -22,6 +22,7 @@ sub init {
 	        'opt_shortlabels'     => 1,
             'opt_zclick'     => 1,
 	        'width'       => 600,
+          'opt_lines'   => 1,
 	        'bgcolor'     => 'background1',
 	        'bgcolour1'   => 'background1',
 	        'bgcolour2'   => 'background1',

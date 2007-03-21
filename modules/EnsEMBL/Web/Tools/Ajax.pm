@@ -9,7 +9,6 @@ sub is_enabled {
   my $ajax = 0;
   if ($cookies{'ENSEMBL_AJAX'} ne 'none' && $cookies{'ENSEMBL_AJAX'} ne '') {
     $ajax = 1;
-    warn "AJAX IS AVAILABLE: " . $cookies{'ENSEMBL_AJAX'};
   }
   return $ajax;
 }

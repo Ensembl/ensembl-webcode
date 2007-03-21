@@ -3,8 +3,7 @@ package EnsEMBL::Web::Configuration::Location;
 use strict;
 
 use EnsEMBL::Web::Configuration;
-use EnsEMBL::Web::Interface::FragmentCollection;
-use Apache2::RequestUtil;
+use EnsEMBL::Web::Tools::Ajax;
 
 use CGI;
 
@@ -495,9 +494,7 @@ sub contigview {
   my $ajax_detailed = 'off';
   my $ajax_zoom     = 'off';
 
-  my $r = Apache2::RequestUtil->request();
-  my %cookies = CGI::Cookie->parse($r->headers_in->{'Cookie'});
-  if ($cookies{'ENSEMBL_AJAX'} ne 'none') {
+  if (EnsEMBL::Web::Tools::Ajax::is_enabled()) {
     $ajax_overview = 'on';
     $ajax_detailed = 'on';
     $ajax_zoom = 'on';

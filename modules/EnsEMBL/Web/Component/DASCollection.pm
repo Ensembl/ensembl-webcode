@@ -477,7 +477,7 @@ sub added_sources {
       }
     }
     my $add_link = sprintf("%sadd_das_source=(name=%s+url=%s+dsn=%s+type=%s",
-      $url, $das_name, $das_adapt->domain, $das_adapt->dsn, $das_adapt->type
+      $url, $das_name, $das_adapt->domain, $das_adapt->dsn, $das_adapt->type || $das_adapt->mapping->[0]
     );
     $add_link .= '+color='.     $das_adapt->color       if $das_adapt->color      ne 'blue';
     $add_link .= '+strand='.    $das_adapt->strand      if $das_adapt->strand     ne 'b';
@@ -516,7 +516,8 @@ sub added_sources {
     my $das_send = qq{<a href="$js"><img src="/img/buttons/mail.png" alt="Send source to a friend"/></a>};
     my $das_url = $das_adapt->domain;
     my $das_dsn = $das_adapt->dsn || '&nbsp;';
-    my $das_type = $das_adapt->type ? $object->getCoordinateSystem($das_adapt->type) : '&nbsp';
+#    my $das_type = $das_adapt->type ? $object->getCoordinateSystem($das_adapt->type) : '&nbsp';
+my $das_type = $das_adapt->type ? $object->getCoordinateSystem($das_adapt->type) : join('+', map {$object->getCoordinateSystem($_)} @{$das_adapt->mapping});
 # If type is 'mixed' then it is mixed mapping source
     if ($das_type eq 'mixed') {
       $das_type = join('+', map {$object->getCoordinateSystem($_)} @{$das_adapt->mapping});

@@ -128,6 +128,7 @@ sub createObjects {
     if( $source_config->{url} =~ /\/das$/ ) {
       $source_config->{url} .= "/$source_config->{dsn}";
     }
+ $source_config->{type} = $source_config->{mapping}->[0] unless $source_config->{type};
 #  warn("ADD EXTERNAL: $source");
 #  warn(Dumper($source_confdata)) if ($source =~ /colour/i);
     $source_config->{conftype} ||= 'external';

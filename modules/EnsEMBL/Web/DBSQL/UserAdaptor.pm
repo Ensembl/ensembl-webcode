@@ -110,7 +110,7 @@ sub find_user_by_email_and_password {
     FROM ) . $self->user_table . qq(
     WHERE email = "$email" and password = "$password"; 
   );
-  #warn "SQL: " . $sql;
+  warn "SQL: " . $sql;
 
   my $R = $self->{'_handle'}->selectall_arrayref($sql); 
   return {} unless $R->[0];
@@ -336,7 +336,7 @@ sub delete_record {
   if ($params{table}) {
     $table = $params{table};
   }
-  #warn "DELETING: " . $id;
+  warn "DELETING: " . $id;
   my $sql = qq(
     DELETE FROM ) . $table . qq(_record 
     WHERE ) . $table . qq(_record_id = $id

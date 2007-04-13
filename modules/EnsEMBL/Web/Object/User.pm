@@ -72,15 +72,15 @@ sub populate {
     $self->is_populated(1);
     my %params = %{ $self->parameters };
     if ($params{'id'}) {
-      #warn "Populating user with ID: " . $params{'id'};
-      #warn "Using: " . $self->adaptor;
+      warn "Populating user with ID: " . $params{'id'};
+      warn "Using: " . $self->adaptor;
       my $details = $self->adaptor->find_user_by_user_id($params{'id'}, { adaptor => $self->adaptor });
       $self->assign_fields($details);
       my @records = $self->find_records_by_user_id($params{'id'}, { adaptor => $self->adaptor });
       $self->records(\@records);
       $self->groups($self->find_groups_by_user_id($params{'id'}, { adaptor => $self->adaptor }));
     } elsif ($params{'username'} && $params{'password'}) {
-      #warn "FIND BY USERNAME AND PASSWORD: " . $self->adaptor;
+      warn "FIND BY USERNAME AND PASSWORD: " . $self->adaptor;
       my $encrypted = $self->encrypt($params{'password'});
       my $details = $self->adaptor->find_user_by_email_and_password(( email => $params{'username'}, password => $encrypted ));
 

@@ -20,7 +20,7 @@ sub common_menu_items {
     my $user_adaptor = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->userAdaptor;
 
     my $flag = 'ac_mini';
-    $doc->menu->add_block( $flag, 'bulleted', "Your Ensembl", 'priority' => 0 );
+    $doc->menu->add_block( $flag, 'bulleted', "Your Vega", 'priority' => 0 );
     my @bookmark_sections = ();
 
     if ($user_id) {

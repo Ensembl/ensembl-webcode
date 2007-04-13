@@ -10,6 +10,7 @@ no warnings "uninitialized";
 use EnsEMBL::Web::Component::Slice;
 use EnsEMBL::Web::Component::Transcript qw(_sort_similarity_links);
 use EnsEMBL::Web::RegObj;
+use EnsEMBL::Web::Object::Data::User;
 
 use EnsEMBL::Web::Form;
 
@@ -315,11 +316,13 @@ sub align_markup_options_form {
 
 sub user_notes {
   my( $panel, $object ) = @_;
-  my $user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;
+  my $session_user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;
+  my $user = EnsEMBL::Web::Object::Data::User->new({ id => $session_user->id });
   my $uri = CGI::escape($ENV{'REQUEST_URI'});
   my $html = "";
   my $stable_id = $object->stable_id;
-  my @annotations = $user->annotation_records;
+  warn "GETTING USER NOTES";
+  my @annotations = @{ $user->annotations };
   if ($#annotations > -1) {
     $html .= "<ul>";
     foreach my $annotation (sort { $a->created_at cmp $b->created_at } @annotations) {
@@ -344,14 +347,15 @@ sub user_notes {
 
 sub group_notes {
   my( $panel, $object ) = @_;
-  my $user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;
+  my $reg_user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;
+  my $user = EnsEMBL::Web::Object::Data::User->new({ id => $reg_user->id });
   my @groups = @{ $user->groups };
   my $uri = CGI::escape($ENV{'REQUEST_URI'});
   my $stable_id = $object->stable_id;
   my $html = "";
   my $found = 0;
   my %included_annotations = ();
-  foreach my $annotation ($user->annotation_records) {
+  foreach my $annotation (@{ $user->annotations }) {
     if ($annotation->stable_id eq $stable_id) {
       $included_annotations{$annotation->id} = "yes";
     }
@@ -359,7 +363,7 @@ sub group_notes {
   foreach my $group (@groups) {
     my $title_added = 0;
     my $group_annotations = 0;
-    my @annotations = $group->annotation_records;
+    my @annotations = @{ $group->annotations };
     foreach my $annotation (@annotations) {
       if ($annotation->stable_id eq $stable_id) {
         $group_annotations = 1;
@@ -385,9 +389,9 @@ sub group_notes {
     }
   }
   if ($found) {
-    $panel->add_row('Group notes', $html); 
+    $panel->add_row('Group notes', $html);
   }
-}
+} 
 
 
 sub name {
@@ -1149,7 +1153,8 @@ sub transcripts {
   my $gene_slice = $gene->Obj->feature_Slice->expand( 10e3, 10e3 );
   $gene_slice = $gene_slice->invert if $gene->seq_region_strand < 0;
 ## Get the web_user_config
-  my $wuc        = $gene->user_config_hash( 'altsplice' ); 
+  my $wuc        = $gene->user_config_hash( 'altsplice' );
+  
 ## We now need to select the correct track to turn on....
   ## We need to do the turn on turn off for the checkboxes here!!
   foreach( $trans[0]->default_track_by_gene ) {

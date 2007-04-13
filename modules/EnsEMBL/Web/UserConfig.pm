@@ -1223,7 +1223,7 @@ sub ADD_ALL_TRANSCRIPTS {
     'available'=>'features VEGA_GENES_OTTER_EXTERNAL', @_);
 ## OTHER FEATURES DATABASE TRANSCRIPTS....
   $self->add_new_track_transcript( 'est',       'EST genes',       'est_gene', $POS++,'db' => 'otherfeatures',
-    'available' => 'databases_features ENSEMBL_OTHERFEATURES.estgene', @_ );
+    'available' => 'database_features ENSEMBL_OTHERFEATURES.estgene', @_ );
 
   $self->add_new_track_transcript( 'oxford_fgu_ext', 'Oxford FGU Genes', 'oxford_fgu', $POS++, 'db' => 'otherfeatures', 
     'available' => "database_features ENSEMBL_OTHERFEATURES.oxford_fgu", @_ );

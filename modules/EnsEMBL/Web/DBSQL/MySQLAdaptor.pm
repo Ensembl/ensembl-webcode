@@ -8,12 +8,13 @@ use EnsEMBL::Web::RegObj;
 use EnsEMBL::Web::Object::Data;
 use EnsEMBL::Web::DBSQL::SQL::Result;
 use EnsEMBL::Web::DBSQL::SQL::Request;
+use EnsEMBL::Web::Tools::DBSQL::TableName;
 use Data::Dumper;
 
 {
 
 my %Handle :ATTR(:set<handle> :get<handle>);
-my %Table :ATTR(:set<table> :get<table>);
+my %Table :ATTR(:set<table_name> :get<table_name>);
 
 }
 
@@ -50,6 +51,37 @@ sub BUILD {
     warn( "Unable to connect to database: $DBI::errstr" );
     $self->set_handle(undef);
   }
+}
+
+sub set_table {
+  my ($self, $name) = @_;
+  return $self->set_table_name($name);
+}
+
+sub get_table {
+  my $self = shift;
+  my $name = $self->get_table_name;
+  return $self->parse_table_name($name);
+}
+
+sub parse_table_name {
+  my ($self, $string) = @_;
+  if ($string=~ /%%(.*)%%/) {
+    warn "TEMPLATING: " . $string;
+    warn "CHECKING:" . $1;
+    my $name;
+    my $species_defs = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->species_defs;
+    if ($1 eq 'user_record') {
+      $name = $species_defs->ENSEMBL_USER_DATA_TABLE;
+    } elsif ($1 eq 'group_record') {
+      $name = $species_defs->ENSEMBL_GROUP_DATA_TABLE;
+    } else {
+      $name = $1;
+    }
+    $string =~ s/%%(.*)%%/$name/;
+  }
+  warn "USING: " . $string;
+  return $string;
 }
 
 sub save {
@@ -125,9 +157,13 @@ sub update {
   my ($self, $data) = @_;
   my $result = EnsEMBL::Web::DBSQL::SQL::Result->new();
   $result->set_action('update');
+  
+  my $primary_key= $self->parse_table_name($data->get_primary_key);
+  
   my $sql = 'UPDATE ' . $self->get_table . " ";
   $sql .= "SET " . $self->set_clause($data);
-  $sql .= " WHERE " . $data->get_primary_key . "='" . $data->id . "'";
+  #$sql .= " WHERE " . $data->get_primary_key . "='" . $data->id . "'";
+  $sql .= " WHERE " . $primary_key . "='" . $data->id . "'";
   $sql .= ";";
   $self->get_handle->prepare($sql);
   if ($self->get_handle->do($sql)) {
@@ -138,36 +174,44 @@ sub update {
 
 sub destroy {
   my ($self, $request) = @_;
+  warn "DESTROYING with $request";
   my $result = EnsEMBL::Web::DBSQL::SQL::Result->new();
   $result->set_action('destroy');
   my $sql = $self->template($request->get_sql);
+  warn "SQL: " . $sql;
   $self->get_handle->prepare($sql);
   if ($self->get_handle->do($sql)) {
     $result->set_success(1);
+    warn "SUCCESS";
   }
   return $result;
 }
 
 sub find {
   my ($self, $data) = @_;
+  warn "FIND";
   my $result = EnsEMBL::Web::DBSQL::SQL::Result->new();
   $result->set_action('find');
-  my $sql = "SELECT * FROM " . $self->get_table . " WHERE " . $data->get_primary_key . "='" . $data->id . "';";
-  #warn $sql;
-  my $hashref = $self->get_handle->selectall_hashref($sql, $data->get_primary_key);
+  my $primary_key = EnsEMBL::Web::Tools::DBSQL::TableName::parse_table_name($data->get_primary_key);
+  my $sql = "SELECT * FROM " . $self->get_table . " WHERE " . $primary_key . "='" . $data->id . "';";
+  warn $sql;
+  my $hashref = $self->get_handle->selectall_hashref($sql, $primary_key);
   $result->set_result_hash($hashref->{$data->id});
   return $result;
 }
 
 sub find_many {
   my ($self, $request) = @_;
+  warn "FIND MANY";
   my $result = EnsEMBL::Web::DBSQL::SQL::Result->new();
   $result->set_action('find');
   my $sql = $self->template($request->get_sql);
-  #warn "MANY: " . $sql;
-  my $hashref = $self->get_handle->selectall_hashref($sql, $request->get_index_by);
-  #warn "OK";
-  #warn "\n";
+  warn "MANY: " . $sql;
+  my $index_by = $self->parse_table_name($request->get_index_by); 
+  warn "INDEX: " . $index_by;
+  my $hashref = $self->get_handle->selectall_hashref($sql, $index_by);
+  warn "OK";
+  warn "\n";
   $result->set_result_hash($hashref);
   return $result;
 }
@@ -204,7 +248,7 @@ sub template {
     my $get = $self->$get_accessor;
     $template =~ s/<$1>/$get/g;
   }
-  return $template;
+  return $self->parse_table_name($template);
 }
 
 

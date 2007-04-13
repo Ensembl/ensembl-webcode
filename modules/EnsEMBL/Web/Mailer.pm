@@ -96,16 +96,20 @@ sub base_url {
 
 sub send {
   my $self = shift;
-  my $mailer = new Mail::Mailer 'smtp', Server => $self->mail_server;
+  #my $mailer = new Mail::Mailer 'smtp', Server => $self->mail_server;
+  my $mailer = new Mail::Mailer 'smtp', Server => "localhost";
   my $time = localtime;
+
   $mailer->open({
                 'To'      => $self->email,
                 'From'    => $self->from,
-                'Reply-To'=> $self->reply_to,
                 'Subject' => $self->subject,
-                'Date'    => $time 
+                'Reply-To'=> $self->reply_to,
+                'Date'    => $time
                 });
-  print $mailer $self->message;
+  
+  my $message= $self->message . "\n\n";
+  print $mailer $message;
   $mailer->close();
 }
 

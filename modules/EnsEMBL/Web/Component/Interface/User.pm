@@ -179,7 +179,6 @@ password is more than 6 characters long and contains both letters and numbers.</
     $html = qq(<h3 class="plain">Password Error</h3>
 <p>Sorry - there was a problem validating your password.</p>);
   }
-  }
   $html .= qq(<p>Please click on the Back button and try again.</p>);
 
   $panel->print($html);

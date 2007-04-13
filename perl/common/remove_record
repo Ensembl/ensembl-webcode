@@ -5,25 +5,38 @@ package remove_record;
 use CGI;
 use EnsEMBL::Web::Object::Data::User;
 use EnsEMBL::Web::RegObj;
+#use CGI::Carp;
 
 my $cgi = new CGI;
 
 my $url = "/index.html";
 my $registry_user = $ENSEMBL_WEB_REGISTRY->get_user;
+
+#my $sr7_id= $registry_user->id;
+#warn "sr7 id:$sr7_id\n";
+
 my $user = EnsEMBL::Web::Object::Data::User->new({ id => $registry_user->id });
 
 if ($user) {
+ # warn "sr7: user is real\n";
+
   $url = "/common/user/account";
   if ($cgi->param('url')) {
     $url = $cgi->param('url');
   }
 
+ # my $count= @ { $user->records };
+ # warn "count is $count\n";
+ 
   foreach my $record (@ { $user->records }) {
     if ($record->id eq $cgi->param('id')) {
      $record->destroy;
+    # warn "sr7:called record destroy\n";
     }
+
   }
 }
+
 
 CGI::redirect($url);
 

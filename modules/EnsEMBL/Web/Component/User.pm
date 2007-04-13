@@ -609,7 +609,7 @@ sub _render_notes {
     my $description = $note->annotation || '&nbsp;';
     push @records, {  'id' => $note->id, 
                       'ident' => 'user',
-                      'sortable' => $note->name,
+                      'sortable' => $note->title,
                       'shareable' => 1,
                       'absolute_url' => 'yes',
                       'edit_url' => '/common/gene_annotation?url=/common/user/account&stable_id=' . $note->stable_id . "&id=" . $note->id, 
@@ -624,7 +624,7 @@ sub _render_notes {
       my $description = $note->annotation || '&nbsp;';
       push @records, {'id' => $note->id, 
                       'ident' => $note->id, 
-                      'sortable' => $note->name,
+                      'sortable' => $note->title,
                       'data' => [
         '<a href="/default/geneview?gene=' . $note->stable_id . '" title="' . $note->title. '">' . $note->stable_id . ': ' . $note->title . '</a>', $group->name
       ]};

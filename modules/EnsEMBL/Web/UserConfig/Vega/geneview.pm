@@ -2,10 +2,12 @@ package EnsEMBL::Web::UserConfig::Vega::geneview;
 use strict;
 use EnsEMBL::Web::UserConfig;
 use vars qw(@ISA);
+
 @ISA = qw(EnsEMBL::Web::UserConfig);
 
 sub init {
     my ($self) = @_;
+    
     $self->{'_userdatatype_ID'} = 11; 
 
     $self->{'general'}->{'geneview'} = {

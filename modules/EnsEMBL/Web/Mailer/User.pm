@@ -45,7 +45,9 @@ You activation code is: $code
 
 );
   $message .= $self->email_footer;
-
+  
+warn "sr7:email:$message\n";
+  
   $self->subject("Your new $sitename account");
   $self->message($message);
   $self->send();

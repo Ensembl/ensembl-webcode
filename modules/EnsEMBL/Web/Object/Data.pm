@@ -46,6 +46,8 @@ sub populate_with_arguments {
 sub populate {
   my ($self, $id) = @_;
   $self->id($id);
+  warn "POPULATING OBJECT: " . $self;
+  warn "PRIMARY KEY: " . $self->get_primary_key;
   my $result = $self->get_adaptor->find($self);
   foreach my $key (@{ $result->fields }) {
     my $field = $self->mapped_field($key);
@@ -69,7 +71,9 @@ sub populate_data {
 
 sub mapped_field {
   my ($self, $field) = @_;
-  if ($field eq $self->get_primary_key) {
+  warn "MAPPING FIELD: " . $field;
+  warn "MAPPING TO: " . $self->get_primary_key;
+  if ($field eq EnsEMBL::Web::Tools::DBSQL::TableName::parse_table_name($self->get_primary_key)) {
     $field = 'id';
   }
   if ($field eq 'webgroup_id') {

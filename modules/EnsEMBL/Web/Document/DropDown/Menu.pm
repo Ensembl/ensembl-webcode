@@ -67,6 +67,7 @@ sub add_checkbox {
       $label, $name, $value
     ) );
     $self->{'missing_tracks'}++ if $value==0;
+    
   }
 }
 sub add_radiobutton {

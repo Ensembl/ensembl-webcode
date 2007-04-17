@@ -327,6 +327,130 @@ sub _get_history {
 
 =cut
 
+sub historypanel{
+  my($panel, $object) = @_;
+  my @temp = @{$panel->params};
+  my %releases;
+
+  foreach my $id (@temp){
+    my $history = $id->get_history_tree;
+    my @temp = @{$history->get_release_display_names};
+    my @rel = sort ({$a <=> $b} @temp);
+    foreach my $r (@rel){
+	   unless ($r =~/18\./){
+	     unless (exists $releases{$r}){$releases{$r} =$r;}
+       }
+    }
+  }
+  $panel->add_option('triangular',1); 	
+  $panel->add_columns(
+    { 'key' => 'request', 'align'=>'left', 'title' => 'Requested ID'},
+    { 'key' => 'match', 'align'=>'left', 'title' => 'Matched ID(s)' },
+    { 'key' => 'rel', 'align'=>'left', 'title' => 'Release:' },
+  );
+  foreach my $key (sort {$a <=> $b} keys %releases){
+	  $panel->add_columns(
+	    { 'key' => $key, 'align'=>'left', 'title' => $key   },
+	  );	
+  }
+
+  foreach my $id (@temp){
+	my %seen; 
+	my $history = $id->get_history_tree;
+	my @events = @{ $history->get_all_StableIdEvents };
+    my $stable_id = $id->stable_id .".". $id->version;
+    foreach my $a_id (@{ $history->get_all_ArchiveStableIds }) {
+	 my @info;
+	 my $a_stable = $a_id->stable_id;
+	 my %rel_matches;
+	 foreach my $key (keys %releases){
+	   $rel_matches{$key} = "";	
+	 }
+	 foreach my $e (@events){
+	  my $old = $e->old_ArchiveStableId;
+      my $new = $e->new_ArchiveStableId;
+      if (defined $new){ 
+       if ($new->stable_id eq $a_stable){
+         my $new_release = $new->release;
+         if ($rel_matches{$new_release}=~/^\w/){
+	       ## compensate for strange data from release 42   
+	       if ($new->release eq '43') {$rel_matches{$new_release} = $new->version}
+	       my @temp = split(/\//,$rel_matches{$new_release});
+	        my $s =0;
+	       foreach my $a (@temp){ if ($a eq $new->version){$s = 1;}} 
+	       unless ($s =~/1/){ push (@temp, $new->version); }
+	       @temp = sort @temp;
+	       my $new_value = join ('/', @temp);
+	       $rel_matches{$new_release} = $new_value;
+         }else {
+	      $rel_matches{$new_release} =$new->version; 	 
+         } 
+       }
+      }
+	  if (defined $old){
+	   if ($old->stable_id eq $a_stable){
+          my $old_release = $old->release;
+		  if ($rel_matches{$old_release}=~/^\w/){
+			if ($old_release =~/43/){$rel_matches{$old_release} = $old->version}
+			else{  
+	         my @temp = split(/\//,$rel_matches{$old_release});
+	         my $s =0;
+	         foreach my $a (@temp){if ($a eq $old->version){$s = 1;}} 
+	         unless ($s =~/1/){ push (@temp, $old->version); }
+	         @temp = sort @temp;
+	         my $new_value = join ('/', @temp);
+	         $rel_matches{$old_release} = $new_value;
+            }
+          } else{
+           $rel_matches{$old_release} =  $old->version; 	 
+         }
+        }
+      }	
+	 }
+
+    ## Try and backfill any empty gaps ##
+      my %rel_pos;
+      my @rel = sort ({$a <=> $b} keys %rel_matches);
+      my $count = 0;
+      foreach my $r (@rel){
+	    $rel_pos{$r} = $count;
+	    $count++; 
+      }
+      my $size = @rel;
+      $size -=1; 
+      foreach my $key (%rel_matches){
+        my $value = $rel_matches{$key};
+	    unless ($value =~/^\w/){
+		  my $previous_value; 
+          my $pos = $rel_pos{$key};
+          unless ($pos == 0){
+           my $previous = $pos -= 1; 
+           my $previous_rel = $rel[$previous];
+           $previous_value = $rel_matches{$previous_rel}; 
+          }
+          my $i = $pos + 1;
+          for ( $i; $i<=$size; $i++){
+	         my $next = $rel[$i];
+	         my $next_value = $rel_matches{$next};
+	         if ($next_value=~/^\w/){ $rel_matches{$key} = $previous_value; next;}
+          }
+	    }
+      }       
+      my $combination = $stable_id . $a_stable;
+      unless (exists $seen{$combination}){
+        $panel->add_row({
+	     'request' => $stable_id,
+	     'match'   => $a_stable,
+	     'rel'     => '',
+	     %rel_matches
+	   });
+	   $seen{$combination} = "";
+	  }
+   } 
+  }
+
+  return 1;
+}
 
 sub history {
   my($panel, $object) = @_;
@@ -403,23 +527,21 @@ sub _flip_URL {
 sub tree {
   my($panel, $object) = @_;
   my $name = $object->stable_id .".". $object->version;
-  my $status   = 'status_idhistory_tree';
+  my $status   = 'status_tree';
   my $label = "ID History Map";
   my $URL = _flip_URL($object);
   if( $object->param( $status ) eq 'off' ) { $panel->add_row( '', "$URL=on" ); return 0; }
-   
+  my $historytree = $object->history;
+  my @temp = @{$historytree->get_release_display_names};
+  my $size = @temp;
+  unless ($size >=2 ){$panel->add_row( $label, qq(<p style="text-align:center"><b>There is no history for $name stored in the database.</b></p>) ) and return 1;}
   if ($panel->is_asynchronous('tree')) {
     warn "Asynchronously load history tree";
     my $json = "{ components: [ 'EnsEMBL::Web::Component::ArchiveStableId::tree'], fragment: {stable_id: '" . $object->stable_id . "." . $object->version . "', species: '" . $object->species . "'} }";
     my $html = "<div id='component_0' class='info'>Loading history tree...</div><div class='fragment'>$json</div>";
     $panel->add_row($label ." <img src='/img/ajax-loader.gif' width='16' height='16' alt='(loading)' id='loading' />", $html, "$URL=odd") ;
   } else{ 
-  #  foreach my $arch_id ( @{ $object->history} ) {
-   #   my $temp = $arch_id->stable_id.".".$arch_id->version;
-   #   if ($temp eq $name){$archive_id = $arch_id;}	
-   # }
-    my $historytree = $object->history;
-    ( $panel->print( qq(<p style="text-align:center"><b>There are too many stable IDs related to $name to draw a history tree.</b></p>) ) and return 1) unless (defined $historytree);
+    ( $panel->add_row($label, qq(<p style="text-align:center"><b>There are too many stable IDs related to $name to draw a history tree.</b></p>) ) and return 1) unless (defined $historytree);
     my $tree = _create_idhistory_tree ($object, $historytree);
     my $T = $tree->render;
     $panel->add_row($label, $tree->render, "$URL=off");

@@ -63,11 +63,12 @@ eval{
 };
 if( $@ ){
   warn "Renaming $filename -> $FN3";
+  warn $@;
   rename $filename, $FN3;
   open O, ">>$FN3";
   print O $@;
   close O;
-  die( $@ );
+  die $@;
 } else {
   warn "Renaming $filename -> $FN2";
   rename $filename, $FN2;

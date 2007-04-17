@@ -800,7 +800,7 @@ sub get_synonyms {
   foreach my $m (@matches){
     my $dbname = $m->db_display_name;
     my $disp_id = $m->display_id();
-    if ( $dbname =~/HGNC/ && $disp_id=~/$match_id/){
+    if ( $dbname =~/(HGNC|ZFIN)/ && $disp_id=~/$match_id/){
       my $synonyms = $m->get_all_synonyms();
       foreach my $syn (@$synonyms){
       $ids = $ids .", " .$syn;

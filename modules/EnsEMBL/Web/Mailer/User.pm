@@ -113,7 +113,7 @@ not, please disregard this email.
 
 );
 
-  $message .= $self->activation_link('id=' . $user->id . "&code=" . $user->salt);
+  $message .= $self->activation_link('user_id=' . $user->id . "&code=" . $user->salt);
 
   $message .= $self->email_footer;
   $self->subject("Your $sitename account");

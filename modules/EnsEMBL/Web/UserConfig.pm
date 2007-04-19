@@ -1136,7 +1136,7 @@ sub ADD_ALL_PREDICTIONTRANSCRIPTS {
   my $self = shift;
   my $POS  = shift || 2100;
   $self->add_new_track_predictiontranscript( 'fgenesh', 'Fgenesh', 'darkkhaki', $POS ++, {}, @_ );
-  $self->add_new_track_predictiontranscript( 'Augustus','Augustus', 'plum', $POS ++, {}, @_ );
+  $self->add_new_track_predictiontranscript( 'augustus','Augustus', 'darkseagreen3', $POS ++, {}, @_ );
   $self->add_new_track_predictiontranscript( 'genscan',   'Genscan',    'lightseagreen',   $POS ++, {}, @_ );
   $self->add_new_track_predictiontranscript( 'genefinder','Genefinder', 'darkolivegreen4', $POS ++, {}, @_ );
   $self->add_new_track_predictiontranscript( 'snap',      'SNAP',       'darkseagreen4',   $POS ++, {}, @_ );

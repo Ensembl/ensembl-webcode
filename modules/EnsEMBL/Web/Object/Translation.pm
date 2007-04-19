@@ -360,7 +360,9 @@ sub get_prediction_method {
 
 sub get_author_name {
     my $self = shift;
-    my $attribs = $self->gene->get_all_Attributes('author');
+    my $attribs;
+    eval { $attribs = $self->gene->get_all_Attributes('author');};
+    return if $@;
     if (@$attribs) {
         return $attribs->[0]->value;
     } else {

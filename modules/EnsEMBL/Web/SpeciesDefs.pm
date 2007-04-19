@@ -1037,7 +1037,8 @@ sub _parse {
             $query->finish();
           };
 ## for annotated datasets (e.g. Vega)
-          if( $tree->{'TABLE_SIZE'}->{'ENSEMBL_DB'}->{'author'} ) {
+		if ($SiteDefs::ENSEMBL_SITETYPE eq 'Vega') {
+ #         if( $tree->{'TABLE_SIZE'}->{'ENSEMBL_DB'}->{'author'} ) {
 ## authors by chromosome
             $sql = qq(
                 SELECT distinct(a.logic_name)
@@ -1051,7 +1052,7 @@ sub _parse {
                 $tree->{'DB_FEATURES'}->{uc("VEGA_GENES_$row->[0]")} = 1;
               }
             };
-          }
+		}
 
           ## alternative assembly
           if ($tree->{'ALTERNATIVE_ASSEMBLY'}) {
@@ -1545,6 +1546,8 @@ sub _is_available_artefact{
   my $self     = shift;
   my $def_species  = shift || $ENV{'ENSEMBL_SPECIES'};
   my $available = shift;
+
+#warn "**$available**";
 
   my @test = split( ' ', $available );
   if( ! $test[0] ){ return 999; } # No test found - return pass.

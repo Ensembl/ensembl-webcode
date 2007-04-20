@@ -18,9 +18,10 @@ sub helpview {
   $self->{'page'}->close->URL   = "/$ENV{'ENSEMBL_SPECIES'}/$ENV{'ENSEMBL_SCRIPT'}";
   $self->{'page'}->close->kw    = $object->param('kw');
   $self->{'page'}->helplink->label  = 'Contact helpdesk';
-  $self->{'page'}->helplink->action = 'form';
+  $self->{'page'}->helplink->action = $object->param('form');
   $self->{'page'}->helplink->kw     = $object->param('kw');
   $self->{'page'}->helplink->ref    = $object->referer;
+warn "Referer ", $object->referer;
 
   $self->{'page'}->menu->add_block( '___', 'bulleted', 'Help with help!' );
   $self->{'page'}->menu->add_entry( '___', 'href' => $object->_help_URL( {'kw'=>'helpview'} ), 'text' => 'General' ) ;

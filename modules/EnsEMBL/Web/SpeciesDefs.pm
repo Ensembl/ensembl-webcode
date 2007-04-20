@@ -447,6 +447,7 @@ sub _parse {
         'assembly.name'               => 'ASSEMBLY_ID',
       );
 
+warn "CONNECTING TO ENSEMBLDB";
       my $dbh = $self->db_connect( $tree, 'ENSEMBL_DB' );
       my $sql = qq(SELECT * FROM meta WHERE meta_key != 'patch' ORDER BY meta_id);
       my $sth = $dbh->prepare( $sql );
@@ -508,6 +509,7 @@ sub _parse {
       }
       
       ## Also get archive assembly info for each species
+warn "CONNECTING TO ENSEMBL WEBSITE";
       $dbh = $self->db_connect( $tree, 'ENSEMBL_WEBSITE' );
       $tree->{'archive'} = {};
 
@@ -531,6 +533,7 @@ sub _parse {
 
     ## Also cache miniad data
     my @miniads;
+warn "CONNECTING TO ENSEMBL WEBSITE";
     my $dbh = $self->db_connect( $tree, 'ENSEMBL_WEBSITE' );
     my $sql = qq(SELECT image, alt, url 
               FROM miniad
@@ -603,6 +606,7 @@ sub _parse {
     delete $tree->{'general'};
     if( $filename eq 'MULTI' ) { ## This is the multispecies hash...
       my $dbh;
+warn "CONNECTING TO ENSEMBL COMPARA";
       if( $tree->{'databases'}->{'ENSEMBL_COMPARA_MULTIPLE'} ){
         $dbh = $self->db_connect( $tree, 'ENSEMBL_COMPARA_MULTIPLE' );
       } elsif(  $tree->{'databases'}->{'ENSEMBL_COMPARA'} ) {

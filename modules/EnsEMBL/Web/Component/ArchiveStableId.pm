@@ -542,7 +542,7 @@ sub tree {
     $panel->add_row($label ." <img src='/img/ajax-loader.gif' width='16' height='16' alt='(loading)' id='loading' />", $html, "$URL=odd") ;
   } else{ 
     ( $panel->add_row($label, qq(<p style="text-align:center"><b>There are too many stable IDs related to $name to draw a history tree.</b></p>) ) and return 1) unless (defined $historytree);
-    my $tree = _create_idhistory_tree ($object, $historytree);
+    my $tree = _create_idhistory_tree ($object, $historytree,$panel);
     my $T = $tree->render;
     $panel->add_row($label, $tree->render, "$URL=off");
    }
@@ -552,7 +552,7 @@ sub tree {
 
 
 sub _create_idhistory_tree {
- my ($object, $tree ) = @_;
+ my ($object, $tree,$panel ) = @_;
  my $base_URL = _flip_URL($object);
  my $wuc        = $object->user_config_hash( 'idhistoryview' );
  my $image_width  =  $object->param( 'image_width' ) || 1200; 
@@ -561,6 +561,7 @@ sub _create_idhistory_tree {
  $wuc->set( '_settings', 'LINK',  $base_URL );
  $wuc->{_object} = $object;
  my $mc =  _id_history_tree_menu($object, 'idhistoryview', [qw(IdhImageSize )]);
+ $mc->{'ajax'} = $panel->{'ajax'};
  my $image  = $object->new_image( $tree, $wuc, [$object->stable_id] );
  $image->image_type  = 'idhistorytree';
  $image->image_name  = ($object->param('image_width')).'-'.$object->stable_id;

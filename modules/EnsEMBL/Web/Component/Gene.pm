@@ -1185,6 +1185,7 @@ sub transcripts {
       'panel'      => 'altsplice',
       'leftmenus' => ['Features']
     );
+    $mc->{'ajax'}=$panel->{'ajax'};
     ## Now
     my  $image  = $gene->new_image( $gene_slice, $wuc, [$gene->Obj->stable_id] );
     $image->introduction       = qq($extra\n<table style="width:100%">$rows</table>\n);
@@ -1312,6 +1313,7 @@ sub genetreeview_menu {
                                          'leftmenus'  => $left,
                                          'rightmenus' => $right
                                          );
+   
     $panel->print( $mc->render_html );
     $panel->print( $mc->render_js );
     return 0;

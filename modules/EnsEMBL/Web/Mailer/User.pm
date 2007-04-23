@@ -82,12 +82,14 @@ sub send_invite_email {
 
  To accept this invitation, click on the following link:
 
- ) . $group->name . qq( 
+ ) . $group->name . qq(
  ) . $self->base_url . qq(/common/accept?id=) . $invite->id . qq(
+
+ Your invitation code is: ) . $invite->code . qq(
 
  If you do not wish to accept, please just disregard this email.
 
- If you have any problems please don't hesitate to contact ) . $user->name . qq( 
+ If you have any problems please don't hesitate to contact ) . $user->name . qq(
  or the Ensembl help desk, on helpdesk\@ensembl.org.
 
  Many thanks,
@@ -100,6 +102,7 @@ sub send_invite_email {
   $self->message($message);
   $self->send();
 }
+
 
 sub send_reactivation_email {
   my ($self, $user) = @_;

@@ -489,15 +489,17 @@ sub contigviewbottom_config {
   my $html = "";
   if ($ENV{'ENSEMBL_USER_ID'}) {
     my $user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;
-    my @current_configs = $user->current_config_records;
+    my $data_user = EnsEMBL::Web::Object::Data::User->new({ id => $user->id });
+    my @current_configs = @{ $data_user->currentconfigs };
     my $current_config = $current_configs[0];
+    warn "---------------> CONFIG CHECK: " . $current_config->config;
     if ($current_config) {
-      my @configurations = $user->configuration_records;
-      foreach my $configuration (@configurations) {
+      foreach my $configuration (@{ $data_user->configurations }) {
+        warn "SEACHING FOR CONFIG: " . $configuration->id;
         if ($configuration->id eq $current_config->config) {
           my $saved_string = $configuration->scriptconfig . "\n";
-          $string =~ s/\n|\r|\f//g; 
-          $saved_string =~ s/\n|\r|\f//g; 
+          $string =~ s/\n|\r|\f//g;
+          $saved_string =~ s/\n|\r|\f//g;
           $html = "<div style='text-align: center; padding-bottom: 4px;'>";
           if (length($saved_string) != length($string)) {
             $html .= "You have changed the '" . $configuration->name . "' view configuration &middot; <a href='javascript:void(0);' onclick='config_link(" . $configuration->id . ");'><b>Save changes</b></a>";
@@ -509,7 +511,7 @@ sub contigviewbottom_config {
       }
     }
   }
-  $panel->print($html); 
+  $panel->print($html);
   return 0;
 }
 

@@ -121,13 +121,13 @@ sub AUTOLOAD {
       if ($find eq "group_records") {
         $find = "";
         $table = "group";
-        #warn "FINDING GROUP RECORDS";
+        warn "ACC FINDING GROUP RECORDS";
       }
       if ($by =~ /group_record/) {
         $table = "group";  
         $record_type = "Group";
       }
-      #warn "RECORD TYPE: " . $record_type;
+      warn "ACC RECORD TYPE: " . $record_type;
       return find_records(( record_type => $record_type, type => $find, $by => $value, table => $table, options => $options));
     } else {
       if (my ($type) = ($key =~ /(.*)_records/)) {
@@ -405,6 +405,7 @@ public use.
 sub find_records {
   my (%params) = @_;
   my $record_type = "User";
+  warn "ACC finding records";
   if ($params{record_type}) {
     $record_type = $params{record_type};
     delete $params{record_type};
@@ -413,9 +414,9 @@ sub find_records {
   my $user_adaptor = undef;
   if ($params{options}->{adaptor}) {
     $user_adaptor = $params{options}->{adaptor};  
-    #warn "ADAPTOR for FIND: " . $user_adaptor;
+    warn "ADAPTOR for FIND: " . $user_adaptor;
   }
-  #warn "PERFORMING FIND RECORDS";
+  warn "PERFORMING FIND RECORDS";
   my $results = $user_adaptor->find_records(%params);
   my @records = ();
   foreach my $result (@{ $results }) {
@@ -424,6 +425,7 @@ sub find_records {
                                          id => $result->{id},
                                        type => $result->{type},
                                        user => $result->{user},
+                                      group => $result->{group},
                                        data => $result->{data},
                                  created_at => $result->{created_at},
                                  created_by => $result->{created_by},

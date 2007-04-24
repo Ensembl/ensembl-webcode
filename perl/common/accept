@@ -17,10 +17,11 @@ use EnsEMBL::Web::Record::Group;
 use EnsEMBL::Web::Object::Group;
 use EnsEMBL::Web::RegObj;
 
-warn "FINDING RECORDS";
+warn "ACCEPTING INVITE";
+warn "ACC FINDING RECORDS";
 my @records = EnsEMBL::Web::Record::Group->find_invite_by_group_record_id($cgi->param('id'), { adaptor => $ENSEMBL_WEB_REGISTRY->userAdaptor });
 
-warn "FOUND: " . $records[0]->group;
+warn "ACCEPT: FOUND: " . $records[0]->group;
 my $email = $records[0]->email;
 my $group_id = $records[0]->group;
 my $group = EnsEMBL::Web::Object::Group->new(( id => $group_id ));

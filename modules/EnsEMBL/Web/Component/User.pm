@@ -285,7 +285,7 @@ sub user_prefs {
   my @sortables = @{ $user->sortables };
   my $sortable = $sortables[0];
   my $html = "";
-  $html = qq(<div class="white boxed" style="width:770px;">
+  $html = qq(<div class="white boxed">
 <h3 class="plain">Ensembl preferences</h3>
 <ul>);
 

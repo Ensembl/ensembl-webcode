@@ -437,8 +437,9 @@ sub _render_groups {
   else {
     $html .= qq(<p class="center">You are not subscribed to any Ensembl groups. &middot; <a href='/info/help/groups.html'>Learn more &rarr;</a> </p>);
   }  
-  $html .= "<br />";
-  $html .= &_render_all_groups($user, \%included);
+  ## This is an unimplemented feature - we don't have any open groups yet.
+  #$html .= "<br />";
+  #$html .= &_render_all_groups($user, \%included);
   $html .= "<br />";
   $html .= qq(<p><a href="/common/create_group">Create a new group &rarr;</a></p>);
   return $html;

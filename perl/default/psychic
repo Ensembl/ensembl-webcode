@@ -16,10 +16,9 @@ use CGI qw(escape);
 my $webpage = new EnsEMBL::Web::Document::WebPage;
 my $q = $ENSEMBL_WEB_REGISTRY->get_session->get_input;
 my $species = $q->param('species') || undef;
-   $species = $webpage->{'species_defs'}->ENSEMBL_SPECIES_ALIASES->{$species};
+   $species = $webpage->{'species_defs'}->ENSEMBL_SPECIES_ALIASES->{lc($species)};
 my $site    = $q->param('site') || undef;
 my $index   = $q->param('idx')     || undef;
-warn "SPECIES: $species";
 my $query   = $q->param('query');
 my $URL;
 

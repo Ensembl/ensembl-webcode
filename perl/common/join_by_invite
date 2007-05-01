@@ -37,7 +37,7 @@ if (!$user->id) {
 my $page = EnsEMBL::Web::Interface::PageDefinition->new();
 my $data = EnsEMBL::Web::DBSQL::DataDefinition->new();
 my $form = EnsEMBL::Web::Interface::FormDefinition->new();
-my $db = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->userAdaptor;
+my $db = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->dbAdaptor;
 $data->adaptor(EnsEMBL::Web::DBSQL::ViewAdaptor->new((
                                                        handle => $db,
                                                        table  => 'user'

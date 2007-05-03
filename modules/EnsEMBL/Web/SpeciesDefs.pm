@@ -816,6 +816,9 @@ sub _parse {
 							  foreach my $comp ( keys %{$config{$method}{$p_species}{$s_species}} ) {
 								  my $revcomp = join ':', reverse(split ':',$comp);
 								  unless ( exists($config{$method}{$s_species}{$p_species}{$revcomp} ) ) {
+									  my $coords = $config{$method}{$p_species}{$s_species}{$comp}{'coord_systems'};
+									  my ($a,$b) = split ':',$coords;
+									  $coords = $b.':'.$a;
 									  my $record = {
 													'source_name'    => $config{$method}{$p_species}{$s_species}{$comp}{'target_name'},
 													'source_species' => $config{$method}{$p_species}{$s_species}{$comp}{'target_species'},
@@ -826,7 +829,7 @@ sub _parse {
 													'target_start'   => $config{$method}{$p_species}{$s_species}{$comp}{'source_start'},
 													'target_end'     => $config{$method}{$p_species}{$s_species}{$comp}{'source_end'},
 													'mlss_id'        => $config{$method}{$p_species}{$s_species}{$comp}{'mlss_id'},
-													'coord_systems' => 'chromosome:chromosome',
+													'coord_systems'  => $coords,
 												   };
 									  $config{$method}{$s_species}{$p_species}{$revcomp} = $record;
 								  }

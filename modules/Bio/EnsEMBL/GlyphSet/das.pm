@@ -1428,10 +1428,10 @@ sub RENDER_colourgradient{
     my $width = ($END - $START +1);
     my $score = $configuration->{'fg_data'} eq 'o' ? ($f->das_score || 0) : ((($f->das_score || 0) - $min_value) * 100 / $score_range);
 
-    if ($score < $min_value) {
-      $score = $min_value;
-    } elsif ($score > $max_value) {
-      $score = $max_value;
+    if ($score < $min_score) {
+      $score = $min_score;
+    } elsif ($score > $max_score) {
+      $score = $max_score;
     }
     my $Composite = new Sanger::Graphics::Glyph::Composite({
       'y'         => 0,
@@ -1446,7 +1446,7 @@ sub RENDER_colourgradient{
     my ($href, $zmenu ) = $self->zmenu( $f );
 
     my $col = $cg[$grade];
-    $zmenu->{"90:Colour: \#$col ($score : $grade)"} = '';
+#    $zmenu->{"90:Colour: \#$col ($score : $grade)"} = '';
     $Composite->{'href'} = $href if $href;
     $Composite->{'zmenu'} = $zmenu;
 

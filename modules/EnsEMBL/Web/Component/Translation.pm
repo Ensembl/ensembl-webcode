@@ -23,8 +23,8 @@ sub _flip_URL_gene {
   return sprintf '/%s/%s?gene=%s;db=%s;%s', $object->species, $object->script, $object->stable_id, $object->get_db, $code;
 }
 
-sub das 
- my( $panel, $object ) = @_;
+sub das { 
+  my( $panel, $object ) = @_;
   my $status   = 'status_das_sources';
   my $URL = $object->__objecttype eq 'Gene' ? _flip_URL_gene( $object, $status ) :_flip_URL( $object, $status );
 # Get parameters to be passed to dasconfview script

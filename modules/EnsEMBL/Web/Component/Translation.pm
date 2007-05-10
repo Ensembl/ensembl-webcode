@@ -23,7 +23,7 @@ sub _flip_URL_gene {
   return sprintf '/%s/%s?gene=%s;db=%s;%s', $object->species, $object->script, $object->stable_id, $object->get_db, $code;
 }
 
-sub das {
+sub das 
  my( $panel, $object ) = @_;
   my $status   = 'status_das_sources';
   my $URL = $object->__objecttype eq 'Gene' ? _flip_URL_gene( $object, $status ) :_flip_URL( $object, $status );
@@ -175,6 +175,7 @@ sub das {
         ) );
       }
     } else {
+my $fhash = {};
       my @features = ();
       @features = @{$featref->{$source_nm}} if ref($featref->{$source_nm})=~/ARRAY/;
 
@@ -185,6 +186,11 @@ sub das {
           $location_features ++;
           next;
         }
+# Added this bit to remove duplicate features coming from sources that serve annotations in multiple coordinate systems. EK
+my $fid = $feature->das_feature_id;
+next if (exists $fhash->{$fid});
+$fhash->{$fid} = 1;
+
         my $segment = $feature->das_segment->ref;
         my $label = $feature->das_feature_label;
         if (my $flink = $feature->das_link) {

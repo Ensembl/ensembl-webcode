@@ -1047,7 +1047,9 @@ sub ADD_ALL_PROTEIN_FEATURES {
   my $POS  = shift || 2200;
   $self->add_new_track_protein( 'swall',               'Proteins',       $POS++, @_ );
   $self->add_new_track_protein( 'swall_blastx',        'Proteins',       $POS++, @_ );
-  $self->add_new_track_protein( 'uniprot',             'UniProtKB',       $POS++, 'on'=>'on',@_ );
+  $self->add_new_track_protein( 'uniprot',             'UniProtKB',      $POS++, @_ );
+  $self->add_new_track_protein( 'uniprot_SW',          'UniProtKB_SW',   $POS++, @_ );
+  $self->add_new_track_protein( 'uniprot_TR',          'UniProtKB_TR',   $POS++, @_ );
   $self->add_new_track_protein( 'Uniprot_wublastx',    'UniProtKB (v. genscans)',       $POS++, @_ );
   $self->add_new_track_protein( 'Uniprot_mammal',      'UniProtKB (mammal)',       $POS++, @_ );
   $self->add_new_track_protein( 'Uniprot_non_mammal',  'UniProtKB (non-mammal)',       $POS++, @_ );

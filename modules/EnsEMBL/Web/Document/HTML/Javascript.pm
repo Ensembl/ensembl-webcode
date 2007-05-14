@@ -20,7 +20,7 @@ sub add_source {
   $self->{'scripts'}.=qq(  <script type="text/javascript" src="/js/scriptaculous.js"></script>\n);
   
   $self->{'scripts'}.=qq(  <script type="text/javascript" src="$src"></script>\n);
-  warn "sr7: added $src\n";
+#  warn "sr7: added $src\n";
   
 }
 sub add_script {

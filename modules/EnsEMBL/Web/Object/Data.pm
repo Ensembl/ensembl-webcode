@@ -46,8 +46,8 @@ sub populate_with_arguments {
 sub populate {
   my ($self, $id) = @_;
   $self->id($id);
-  warn "POPULATING OBJECT: " . $self;
-  warn "PRIMARY KEY: " . $self->get_primary_key;
+#  warn "POPULATING OBJECT: " . $self;
+#  warn "PRIMARY KEY: " . $self->get_primary_key;
   my $result = $self->get_adaptor->find($self);
   foreach my $key (@{ $result->fields }) {
     my $field = $self->mapped_field($key);
@@ -71,8 +71,8 @@ sub populate_data {
 
 sub mapped_field {
   my ($self, $field) = @_;
-  warn "MAPPING FIELD: " . $field;
-  warn "MAPPING TO: " . $self->get_primary_key;
+#  warn "MAPPING FIELD: " . $field;
+#  warn "MAPPING TO: " . $self->get_primary_key;
   if ($field eq EnsEMBL::Web::Tools::DBSQL::TableName::parse_table_name($self->get_primary_key)) {
     $field = 'id';
   }
@@ -463,7 +463,7 @@ sub find_all {
   my $request = EnsEMBL::Web::DBSQL::SQL::Request->new();
   $request->set_action('select');
   $request->set_index_by($object->get_primary_key);
-  warn $request->get_sql;
+#  warn $request->get_sql;
   my $result = $object->get_adaptor->find_many($request);
   my @objects = ();
   foreach my $id (keys %{ $result->get_result_hash }) {

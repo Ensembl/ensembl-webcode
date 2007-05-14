@@ -67,8 +67,8 @@ sub get_table {
 sub parse_table_name {
   my ($self, $string) = @_;
   if ($string=~ /%%(.*)%%/) {
-    warn "TEMPLATING: " . $string;
-    warn "CHECKING:" . $1;
+#    warn "TEMPLATING: " . $string;
+#    warn "CHECKING:" . $1;
     my $name;
     my $species_defs = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->species_defs;
     if ($1 eq 'user_record') {
@@ -80,7 +80,7 @@ sub parse_table_name {
     }
     $string =~ s/%%(.*)%%/$name/;
   }
-  warn "USING: " . $string;
+#  warn "USING: " . $string;
   return $string;
 }
 
@@ -174,27 +174,27 @@ sub update {
 
 sub destroy {
   my ($self, $request) = @_;
-  warn "DESTROYING with $request";
+#  warn "DESTROYING with $request";
   my $result = EnsEMBL::Web::DBSQL::SQL::Result->new();
   $result->set_action('destroy');
   my $sql = $self->template($request->get_sql);
-  warn "SQL: " . $sql;
+#  warn "SQL: " . $sql;
   $self->get_handle->prepare($sql);
   if ($self->get_handle->do($sql)) {
     $result->set_success(1);
-    warn "SUCCESS";
+#    warn "SUCCESS";
   }
   return $result;
 }
 
 sub find {
   my ($self, $data) = @_;
-  warn "FIND";
+#  warn "FIND";
   my $result = EnsEMBL::Web::DBSQL::SQL::Result->new();
   $result->set_action('find');
   my $primary_key = EnsEMBL::Web::Tools::DBSQL::TableName::parse_table_name($data->get_primary_key);
   my $sql = "SELECT * FROM " . $self->get_table . " WHERE " . $primary_key . "='" . $data->id . "';";
-  warn $sql;
+#  warn $sql;
   my $hashref = $self->get_handle->selectall_hashref($sql, $primary_key);
   $result->set_result_hash($hashref->{$data->id});
   return $result;
@@ -202,16 +202,16 @@ sub find {
 
 sub find_many {
   my ($self, $request) = @_;
-  warn "FIND MANY";
+#  warn "FIND MANY";
   my $result = EnsEMBL::Web::DBSQL::SQL::Result->new();
   $result->set_action('find');
   my $sql = $self->template($request->get_sql);
-  warn "MANY: " . $sql;
+#  warn "MANY: " . $sql;
   my $index_by = $self->parse_table_name($request->get_index_by); 
-  warn "INDEX: " . $index_by;
+#  warn "INDEX: " . $index_by;
   my $hashref = $self->get_handle->selectall_hashref($sql, $index_by);
-  warn "OK";
-  warn "\n";
+#  warn "OK";
+#  warn "\n";
   $result->set_result_hash($hashref);
   return $result;
 }

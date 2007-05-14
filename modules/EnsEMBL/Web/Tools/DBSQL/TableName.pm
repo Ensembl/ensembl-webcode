@@ -1,4 +1,5 @@
 package EnsEMBL::Web::Tools::DBSQL::TableName;
+use warnings;
 
 sub parse_table_name {
   my ($string) = @_;

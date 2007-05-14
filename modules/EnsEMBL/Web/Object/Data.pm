@@ -71,8 +71,8 @@ sub populate_data {
 
 sub mapped_field {
   my ($self, $field) = @_;
-#  warn "MAPPING FIELD: " . $field;
-#  warn "MAPPING TO: " . $self->get_primary_key;
+  #warn "MAPPING FIELD: " . $field;
+  #warn "MAPPING TO: " . $self->get_primary_key;
   if ($field eq EnsEMBL::Web::Tools::DBSQL::TableName::parse_table_name($self->get_primary_key)) {
     $field = 'id';
   }

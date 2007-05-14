@@ -14,7 +14,7 @@ my $cgi = new CGI;
 my $url = "/common/groupview";
 my $user = $ENSEMBL_WEB_REGISTRY->get_user;
 if ($user) {
-  my $group = EnsEMBL::Web::Object::Group->new(( adaptor => $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->userAdaptor,  id => $cgi->param('group_id') ));
+  my $group = EnsEMBL::Web::Object::Group->new(( adaptor => $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->userAdaptor,  id => $cgi->param('group_id') )); 
   $url = "/common/groupview?id=" . $group->id;
   if ($cgi->param('user_id') eq $user->id) {
     if ($user->is_administrator($group)) {
@@ -34,4 +34,3 @@ if ($user) {
 CGI::redirect($url);
 
 1;
-

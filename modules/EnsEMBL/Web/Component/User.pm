@@ -437,8 +437,8 @@ sub _render_groups {
   else {
     $html .= qq(<p class="center">You are not subscribed to any Ensembl groups. &middot; <a href='/info/help/groups.html'>Learn more &rarr;</a> </p>);
   }  
-  ## This is an unimplemented feature - we don't have any open groups yet.
   #$html .= "<br />";
+  ## An unimplemented feature - we don't have any public groups yet.
   #$html .= &_render_all_groups($user, \%included);
   $html .= "<br />";
   $html .= qq(<p><a href="/common/create_group">Create a new group &rarr;</a></p>);
@@ -569,6 +569,7 @@ sub _render_configs {
 
   foreach my $configuration (@configurations) {
     my $description = $configuration->description || '&nbsp;';
+    my $link = "<a href='javascript:void(0);' onclick='javascript:load_config_link(" . $configuration->id . ");'>";
     push @records, {  'id' => $configuration->id, 
                       'ident' => 'user',
                       'sortable' => $configuration->name,
@@ -576,19 +577,20 @@ sub _render_configs {
                       'edit_url' => 'edit_config', 
                       'delete_url' => 'remove_record',
                       'data' => [
-      '<a href="' . $configuration->url . '" title="' . $configuration->description . '">' . $configuration->name . '</a>', '&nbsp;' 
-    ]};
+                         $link . $configuration->name . '</a>', '&nbsp;' 
+                      ]};
   }
 
   foreach my $group (@{ $user->groups }) {
     foreach my $configuration (@{ $group->configurations }) {
       my $description = $configuration->description || '&nbsp;';
+      my $link = "<a href='javascript:void(0);' onclick='javascript:load_config_link(" . $configuration->id . ");'>";
       push @records, {'id' => $configuration->id, 
                       'ident' => $group->id, 
                       'sortable' => $configuration->name,
                       'data' => [
-        '<a href="' . $configuration->url . '" title="' . $configuration->description . '">' . $configuration->name . '</a>', $group->name
-      ]};
+                        $link . $configuration->name . '</a>', $group->name
+                      ]};
     }
   }
 
@@ -1047,6 +1049,7 @@ sub _render_group_settings {
     my @records = ();
     foreach my $configuration (@configurations) {
       my $description = $configuration->description || '&nbsp;';
+      my $link = "<a href='javascript:void(0);' onclick='javascript:load_config_link(" . $configuration->id . ");'>";
       push @records, {  'id' => $configuration->id, 
                         'group_id' => $group->id,
                         'ident' => 'user',
@@ -1054,8 +1057,8 @@ sub _render_group_settings {
                         'edit_url' => 'edit_config', 
                         'delete_url' => 'remove_group_record', 
                         'data' => [
-        '<a href="' . $configuration->url . '" title="' . $configuration->description. '">' . $configuration->name . '</a>', '&nbsp;' 
-      ]};
+                          $link . $configuration->name . '</a>', '&nbsp;' 
+                        ]};
     }
     $html .= _render_settings_table(\@records);
   }
@@ -1135,7 +1138,7 @@ sub _render_group_invite {
   $html .= "To invite a new member into this group, enter their email address. Users not already registered with Ensembl will be asked to do so before accepting your invite.<br /><br />\n";
   $html .= "<input type='hidden' value='" . $user->id . "' name='user_id' />"; 
   $html .= "<input type='hidden' value='" . $group->id . "' name='group_id' />"; 
-  $html .= "<input type='text' value='' size='30' name='invite_email' />"; 
+  $html .= "<textarea name='invite_email' cols='35' rows='6'></textarea><br />Multiple email addresses can be separated by commas.<br /><br />";
   $html .= "<input type='submit' value='Invite' />";
   $html .= "</form>";
   $html .= "<br />";

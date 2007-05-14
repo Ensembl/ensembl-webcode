@@ -23,6 +23,7 @@ use Bio::EnsEMBL::ExternalData::DAS::DASAdaptor;
 use Bio::EnsEMBL::ExternalData::DAS::DAS;
 use EnsEMBL::Web::RegObj;
 use EnsEMBL::Web::Form;
+use EnsEMBL::Web::Object::Data::User;
 
 use Data::Dumper;
 our @ISA = qw( EnsEMBL::Web::Component);
@@ -424,6 +425,38 @@ sub contigviewtop {
   return 1;
 }
 
+sub cytoview_config {
+  my ($panel, $object) = @_;
+  my $user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;
+  my $data_user = EnsEMBL::Web::Object::Data::User->new({ id => $user->id });
+  my @current_configs = @{ $data_user->currentconfigs };
+  my $current_config = $current_configs[0];
+  my $script_name = "cytoview";
+  my $session = $ENSEMBL_WEB_REGISTRY->get_session;
+  my $string = $session->get_script_config_as_string($script_name);
+  my $html = "";
+  if ($current_config) {
+    warn "CHECKING FOR CURRENT CONFIG: " . $current_config->config;
+    foreach my $configuration (@{ $data_user->configurations }) {
+      if ($configuration->id eq $current_config->config) {
+        warn "LOADED CONFIG " . $configuration->id;
+	my $saved_string = $configuration->scriptconfig . "\n";
+	$string =~ s/\n|\r|\f//g;
+	$saved_string =~ s/\n|\r|\f//g;
+
+        $html = "<div style='text-align: center; padding-bottom: 4px;'>";
+        if (length($saved_string) != length($string)) {
+	  $html .= "You have changed the '" . $configuration->name . "' view configuration &middot; <a href='javascript:void(0);' onclick='config_link(" . $configuration->id . ");'><b>Save changes</b></a>";
+        } else {
+          $html .= "You are using the " . $configuration->name . " configuration";
+	}
+        $html .= "</div>";
+      }
+    }
+  }
+  $panel->print($html); 
+}
+
 sub cytoview {
   my($panel, $object) = @_;
   my $slice = $object->database('core')->get_SliceAdaptor()->fetch_by_region(
@@ -495,11 +528,11 @@ sub contigviewbottom_config {
     if ($current_config) {
       warn "---------------> CONFIG CHECK: " . $current_config->config;
       foreach my $configuration (@{ $data_user->configurations }) {
-        warn "SEACHING FOR CONFIG: " . $configuration->id;
+        warn "SEACHING FOR CONFIG: " . $configuration->id; 
         if ($configuration->id eq $current_config->config) {
           my $saved_string = $configuration->scriptconfig . "\n";
-          $string =~ s/\n|\r|\f//g;
-          $saved_string =~ s/\n|\r|\f//g;
+          $string =~ s/\n|\r|\f//g; 
+          $saved_string =~ s/\n|\r|\f//g; 
           $html = "<div style='text-align: center; padding-bottom: 4px;'>";
           if (length($saved_string) != length($string)) {
             $html .= "You have changed the '" . $configuration->name . "' view configuration &middot; <a href='javascript:void(0);' onclick='config_link(" . $configuration->id . ");'><b>Save changes</b></a>";
@@ -511,7 +544,7 @@ sub contigviewbottom_config {
       }
     }
   }
-  $panel->print($html);
+  $panel->print($html); 
   return 0;
 }
 
@@ -933,6 +966,7 @@ sub contigviewbottom_menu {  return bottom_menu( @_, 'contigviewbottom' ); }
 
 sub bottom_menu {
   my($panel, $object, $configname ) = @_;
+  warn "BOTTOM MENU SETUP";
   my $mc = $object->new_menu_container(
     'configname' => $configname,
     'panel'      => 'bottom',
@@ -942,7 +976,8 @@ sub bottom_menu {
   my $html = $mc->render_html;
   $html .= $mc->render_js;
   $panel->print( $html );
-  return 0;
+  warn "MISSING: " . $mc->{'config'}->{'missing_tracks'};
+  return $mc;
 }
 
 sub alignsliceviewbottom_menu {  

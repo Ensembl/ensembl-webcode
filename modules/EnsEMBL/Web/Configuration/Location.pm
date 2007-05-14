@@ -376,9 +376,10 @@ sub cytoview {
   my @H = map { /^URL:(.*)/ ? $1 : () } @{ $obj->highlights( $URL ? "URL:$URL" : () ) };
 
   $bottom->add_components(qw(
-    menu  EnsEMBL::Web::Component::Location::cytoview_menu
-    nav   EnsEMBL::Web::Component::Location::cytoview_nav
-    image EnsEMBL::Web::Component::Location::cytoview
+    config EnsEMBL::Web::Component::Location::cytoview_config
+    menu   EnsEMBL::Web::Component::Location::cytoview_menu
+    nav    EnsEMBL::Web::Component::Location::cytoview_nav
+    image  EnsEMBL::Web::Component::Location::cytoview
   ));
   if( $obj->param('panel_bottom') ne 'off' ) {
     push @URL_configs, $obj->user_config_hash( 'cytoview' ) if @H;
@@ -495,9 +496,9 @@ sub contigview {
   my $ajax_zoom     = 'off';
 
   if (EnsEMBL::Web::Tools::Ajax::is_enabled()) {
-    $ajax_overview = 'on';
-    $ajax_detailed = 'on';
-    $ajax_zoom = 'on';
+   $ajax_overview = 'on';
+   $ajax_detailed = 'on';
+   $ajax_zoom = 'on';
   }
 
   my $max_length = ($obj->species_defs->ENSEMBL_GENOME_SIZE||1) * 1.001e6;
@@ -611,7 +612,7 @@ sub contigview {
       nav    EnsEMBL::Web::Component::Location::contigviewbottom_nav
       image  EnsEMBL::Web::Component::Location::contigviewbottom
     ));
-
+    warn "SETTING UP VIEW FRAGMENT";
     $view_fragment->asynchronously_load(qw(image));
     my $width = $obj->param('image_width');
     $view_fragment->add_option( 'image_width', $width);

@@ -65,6 +65,7 @@ sub toggle_class {
 sub settings_mixer {
   my ($panel) = @_;
   my $user = $panel->{user};
+  warn "CHECKING FOR GROUPS: " . $user;
   my $html = "<div>";
   my @groups = @{ $user->groups };
   if ($#groups > -1) {
@@ -149,6 +150,7 @@ sub user_tabs {
 sub render_settings_mixer {
   my ($user) = @_;
   my @groups = @{ $user->groups };
+  warn "RENDER SETTINGS MIXER";
   my @presets = &mixer_presets_for_user($user);
   my $html = "<script type='text/javascript'>\n";
   my $count = 0;
@@ -178,8 +180,10 @@ sub render_settings_mixer {
 
 sub mixer_presets_for_user {
   my ($user) = @_;
+  warn "CHECKING FOR MIXERS: " . $user;
   my @mixers = @{ $user->mixers };
   my @presets = ();
+  warn "MIXER OK";
   if ($#mixers > -1) {
     my $mixer = $mixers[0];
     @presets = split(/,/, $mixer->settings);
@@ -281,7 +285,7 @@ sub user_prefs {
   my @sortables = @{ $user->sortables };
   my $sortable = $sortables[0];
   my $html = "";
-  $html = qq(<div class="white boxed" style="width:770px;">
+  $html = qq(<div class="white boxed">
 <h3 class="plain">Ensembl preferences</h3>
 <ul>);
 
@@ -433,8 +437,9 @@ sub _render_groups {
   else {
     $html .= qq(<p class="center">You are not subscribed to any Ensembl groups. &middot; <a href='/info/help/groups.html'>Learn more &rarr;</a> </p>);
   }  
-  $html .= "<br />";
-  $html .= &_render_all_groups($user, \%included);
+  #$html .= "<br />";
+  ## An unimplemented feature - we don't have any public groups yet.
+  #$html .= &_render_all_groups($user, \%included);
   $html .= "<br />";
   $html .= qq(<p><a href="/common/create_group">Create a new group &rarr;</a></p>);
   return $html;
@@ -607,6 +612,7 @@ sub _render_notes {
 
   foreach my $note (@notes) {
     my $description = $note->annotation || '&nbsp;';
+    warn "NOTE: " . $note;
     push @records, {  'id' => $note->id, 
                       'ident' => 'user',
                       'sortable' => $note->title,
@@ -1040,7 +1046,7 @@ sub _render_group_settings {
     $html .= "<h5>Configurations</h5>\n";
     my @records = ();
     foreach my $configuration (@configurations) {
-      my $description = $configuration->blurb || '&nbsp;';
+      my $description = $configuration->description || '&nbsp;';
       push @records, {  'id' => $configuration->id, 
                         'group_id' => $group->id,
                         'ident' => 'user',
@@ -1048,7 +1054,7 @@ sub _render_group_settings {
                         'edit_url' => 'edit_config', 
                         'delete_url' => 'remove_group_record', 
                         'data' => [
-        '<a href="' . $configuration->config_url . '" title="' . $configuration->blurb . '">' . $configuration->name . '</a>', '&nbsp;' 
+        '<a href="' . $configuration->url . '" title="' . $configuration->description . '">' . $configuration->name . '</a>', '&nbsp;' 
       ]};
     }
     $html .= _render_settings_table(\@records);
@@ -1129,7 +1135,7 @@ sub _render_group_invite {
   $html .= "To invite a new member into this group, enter their email address. Users not already registered with Ensembl will be asked to do so before accepting your invite.<br /><br />\n";
   $html .= "<input type='hidden' value='" . $user->id . "' name='user_id' />"; 
   $html .= "<input type='hidden' value='" . $group->id . "' name='group_id' />"; 
-  $html .= "<input type='text' value='' size='30' name='invite_email' />"; 
+  $html .= "<textarea name='invite_email' cols='35' rows='6'></textarea><br />Multiple email addresses can be separated by commas.<br /><br />";
   $html .= "<input type='submit' value='Invite' />";
   $html .= "</form>";
   $html .= "<br />";

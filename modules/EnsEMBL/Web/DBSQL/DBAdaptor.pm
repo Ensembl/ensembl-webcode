@@ -64,7 +64,7 @@ use strict;
   sub do {
 ### wrapper around DBI
     my $self = shift;
-warn "@_";
+#warn "@_";
     $self->get_dbhandle->do( @_ );
   }
 

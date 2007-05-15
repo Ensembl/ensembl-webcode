@@ -1,76 +1,30 @@
-#! /usr/bin/perl
-
-package join_by_invite;
+#!/usr/local/bin/perl
 
 use strict;
 use warnings;
 
-use CGI;
-use EnsEMBL::Web::Record::Group;
-use EnsEMBL::Web::Object::User;
-use EnsEMBL::Web::Object::Group;
+package join_by_invite;
 
-use EnsEMBL::Web::Document::DataView;
-use EnsEMBL::Web::Interface::PageDefinition;
-use EnsEMBL::Web::Interface::FormDefinition;
-use EnsEMBL::Web::DBSQL::DataDefinition;
-use EnsEMBL::Web::DBSQL::ViewAdaptor;
-use EnsEMBL::Web::Tools::RandomString;
-use EnsEMBL::Web::RegObj;
+use EnsEMBL::Web::Document::Interface;
+use EnsEMBL::Web::Interface::InterfaceDef;
+use EnsEMBL::Web::Object::Data::User;
+use EnsEMBL::Web::SpeciesDefs;
 
-my $cgi = new CGI;
+## Create basic page object, so we can access CGI parameters
+my $webpage = EnsEMBL::Web::Document::Interface::simple('User');
 
-my $record_id = $cgi->param('record_id');
-warn "RECORD ID: " . $record_id;
-my @records = EnsEMBL::Web::Record::Group->find_invite_by_group_record_id($record_id, { adaptor => $ENSEMBL_WEB_REGISTRY->userAdaptor });
-my $record = $records[0];
-my $email = $record->email;
-my $group_id = $record->group;
+## Create interface object, which controls the forms
+my $interface = EnsEMBL::Web::Interface::InterfaceDef->new();
+my $data =EnsEMBL::Web::Object::Data::User->new();
+$interface->data($data);
+$interface->discover;
 
-my $user = EnsEMBL::Web::Object::User->new({ adaptor => $ENSEMBL_WEB_REGISTRY->userAdapator,  email => $email });
+## Customization
+## Page components
+$interface->default_view('join_by_invite');
 
-if (!$user->id) {
-
-my $page = EnsEMBL::Web::Interface::PageDefinition->new();
-my $data = EnsEMBL::Web::DBSQL::DataDefinition->new();
-my $form = EnsEMBL::Web::Interface::FormDefinition->new();
-my $db = $ENSEMBL_WEB_REGISTRY->dbAdaptor;
-$data->adaptor(EnsEMBL::Web::DBSQL::ViewAdaptor->new((
-                                                       handle => $db,
-                                                       table  => 'user'
-                                                    )) );
-
-$data->discover;
-$page->data_definition($data);
-$page->title('Register for '.$sitename);
-$page->action('create');
-$page->send_params({ id => 'yes', group_id => 'yes' });
-$page->on_complete('/common/activate');
-$page->on_error('/register/error.html');
-
-$form->add_value({'email' => $email });
-
-$page->add_text("You have been invited to join $article $sitename group. In order to do so, you first need to create a new $sitename account.");
-$page->add_configuration_element('salt', EnsEMBL::Web::Tools::RandomString::random_string(8));
-$page->add_configuration_element('group_id', $group_id);
-$page->add_configuration_element('record_id', $record_id);
-$page->add_form_element('name', "Your name");
-$page->add_form_element('email', "Your email address. You'll use this to log in to $sitename", $form);
-$page->add_form_element('organisation', "Organisation");
-
-EnsEMBL::Web::Document::DataView::simple('User', $page);
-
-} else {
-  my $group = EnsEMBL::Web::Object::Group->new(( adaptor => $ENSEMBL_WEB_REGISTRY->userAdaptor, id => $group_id ));
-  warn "WORKING WITH USER: " . $user->id . ": " . $user->email;
-  $user->add_group($group);
-  $user->save;
-  $record->status('accepted');
-  $record->save;
-
-  my $url = "/common/user/account";
-  CGI::redirect($url);
-}
-
+## Render page or munge data, as appropriate
+## N.B. Force use of Configuration subclass
+$webpage->process($interface, 'EnsEMBL::Web::Configuration::Interface::User');
 
 1;

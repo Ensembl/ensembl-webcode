@@ -42,15 +42,29 @@ sub confirm_form {
           'label' => 'Organisation',
           'value' => $panel->interface->data->organisation,
         );
-  $form->add_element(
+  if ($object->param('code') ) {
+    $form->add_element(
+          'type'  => 'NoEdit',
+          'name'  => 'code',
+          'label' => 'Code',
+          'value' => $object->param('code'),
+        );
+    $form->add_element(
+          'type'  => 'Hidden',
+          'name'  => 'salt',
+          'value' => $object->param('code'),  
+        );
+  }
+  else {
+    $form->add_element(
           'type'  => 'String',
           'name'  => 'salt',
           'label' => 'Activation Code',
-          'value' => '',
         );
+  }
   $form->add_element(
           'type'  => 'Password',
-          'name'  => 'password',
+          'name'  => 'enter_password',
           'label' => 'Password',
         );
   $form->add_element(
@@ -63,11 +77,28 @@ sub confirm_form {
           'name'  => $primary_key,
           'value' => $id,  
         );
+  $form->add_element(
+          'type'  => 'Hidden',
+          'name'  => 'record_id',
+          'value' => $object->param('record_id'),  
+        );
 
   ## navigation elements
   $form->add_element( 'type' => 'Hidden', 'name' => 'dataview', 'value' => 'activate');
   $form->add_element( 'type' => 'Submit', 'value' => 'Activate');
   return $form ;
+}
+
+sub deny {
+  my( $panel, $user) = @_;
+  my $html = qq(
+<h3 class="plain">Account already activated</h3>
+<p>This account has already been activated. If you have forgotten your password, <a href="/forgotten.html">please click here to reset it</a>.</p>
+
+<p>If you continue to have problems, please <a href="/common/helpview?node=hv_contact">contact Helpdesk</a>.</p>
+
+);
+  $panel->print($html);
 }
 
 sub password {

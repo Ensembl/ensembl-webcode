@@ -7,6 +7,7 @@ use Class::Std;
 use EnsEMBL::Web::DBSQL::SQL::Result;
 use EnsEMBL::Web::DBSQL::SQL::Request;
 use EnsEMBL::Web::Object::DataField;
+use EnsEMBL::Web::Tools::DBSQL::TableName;
 use EnsEMBL::Web::Root;
 
 {
@@ -46,10 +47,9 @@ sub populate_with_arguments {
 sub populate {
   my ($self, $id) = @_;
   $self->id($id);
-#  warn "POPULATING OBJECT: " . $self;
-#  warn "PRIMARY KEY: " . $self->get_primary_key;
   my $result = $self->get_adaptor->find($self);
   foreach my $key (@{ $result->fields }) {
+    next if $key eq EnsEMBL::Web::Tools::DBSQL::TableName::parse_primary_key($self->get_primary_key);
     my $field = $self->mapped_field($key);
     if ($self->get_data_field_name && ($field eq $self->get_data_field_name)) {
       $self->populate_data($result->get_value($key));
@@ -71,9 +71,7 @@ sub populate_data {
 
 sub mapped_field {
   my ($self, $field) = @_;
-  #warn "MAPPING FIELD: " . $field;
-  #warn "MAPPING TO: " . $self->get_primary_key;
-  if ($field eq EnsEMBL::Web::Tools::DBSQL::TableName::parse_table_name($self->get_primary_key)) {
+  if ($field eq $self->get_primary_key) {
     $field = 'id';
   }
   if ($field eq 'webgroup_id') {
@@ -463,7 +461,7 @@ sub find_all {
   my $request = EnsEMBL::Web::DBSQL::SQL::Request->new();
   $request->set_action('select');
   $request->set_index_by($object->get_primary_key);
-#  warn $request->get_sql;
+  warn $request->get_sql;
   my $result = $object->get_adaptor->find_many($request);
   my @objects = ();
   foreach my $id (keys %{ $result->get_result_hash }) {
@@ -529,9 +527,9 @@ sub singular {
     $found = 1;
   }
 
-  ## Words ending in ses
-  if (!$found && $word =~ /ses$/) {
-    $singular =~ s/ses$/s/;
+  ## Words ending in sses
+  if (!$found && $word =~ /sses$/) {
+    $singular =~ s/es$//;
     $found = 1;
   }
 

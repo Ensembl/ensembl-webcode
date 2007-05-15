@@ -78,6 +78,11 @@ sub save {
   } 
 }
 
+sub quote {
+  my ($self, $value) = @_;
+  return $self->get_handle->quote($value);
+}
+
 sub set_clause {
   my ($self, $data) = @_;
   my $data_hash = {};
@@ -99,7 +104,7 @@ sub set_clause {
     }
   }
   if ($has_data) {
-    $sql .= "data = '" . $self->dump_data($data_hash) . "'";
+    $sql .= "data = " . $self->quote($self->dump_data($data_hash));
   }
   if (defined $data->get_belongs_to) {
   }

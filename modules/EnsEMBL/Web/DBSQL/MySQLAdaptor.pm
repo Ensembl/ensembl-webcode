@@ -177,7 +177,7 @@ sub find {
   $result->set_action('find');
   my $key = EnsEMBL::Web::Tools::DBSQL::TableName::parse_primary_key($data->get_primary_key);
   my $sql = "SELECT * FROM " . $self->get_table . " WHERE " . $key . "='" . $data->id . "';";
-  warn $sql;
+#  warn $sql;
   my $hashref = $self->get_handle->selectall_hashref($sql, $key);
   $result->set_result_hash($hashref->{$data->id});
   return $result;

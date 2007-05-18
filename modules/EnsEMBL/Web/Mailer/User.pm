@@ -92,7 +92,7 @@ sub send_invite_email {
  If you do not wish to accept, please just disregard this email.
 
  If you have any problems please don't hesitate to contact ) . $user->name . qq( 
- or the ) . $SiteDefs::ENSEMBL_SITETYPE . qq(help desk, on ) . 
+ or the ) . $SiteDefs::ENSEMBL_SITETYPE . qq( help desk, on ) . 
  $SiteDefs::ENSEMBL_HELPDESK_EMAIL;
 
   $message .= $self->email_footer;

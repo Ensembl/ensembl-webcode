@@ -87,9 +87,9 @@ sub send_invite_email {
  ) . $group->name . qq( 
  ) . $self->base_url . qq(/common/accept?id=) . $invite->id . qq(
 
- Your activation code is: ) . $invite->code . qq(
- 
  If you do not wish to accept, please just disregard this email.
+
+ Note: When accepting, please leave the user-code box blank.
 
  If you have any problems please don't hesitate to contact ) . $user->name . qq( 
  or the ) . $SiteDefs::ENSEMBL_SITETYPE . qq( help desk, on ) . 

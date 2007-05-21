@@ -108,8 +108,17 @@ sub send {
                 'Date'    => $time
                 });
   
-  my $message= $self->message . "\n\n";
-  print $mailer $message;
+  #my $message= $self->message . "\n\n";
+  my $message= $self->message;
+ 
+ 
+ # temporary hack to enable mail to be sent outside of sanger
+# my $mail_comm= '/ensweb/sr7/myemail -s "' . $self->subject . '" -f ' . $self->from . ' -t ' . $self->email . ' -S mail.sanger.ac.uk  -m "' . $message . '"';
+
+#warn "$mail_comm";
+# system($mail_comm);
+ 
+ print $mailer $message;
   $mailer->close();
 }
 

@@ -20,10 +20,13 @@ sub render {
   my %species_description = setup_species_descriptions($species_defs);
 
   my $reg_user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;
-  my $user = EnsEMBL::Web::Object::Data::User->new({ id => $reg_user->id });
+  my $user = undef;
+  if ($reg_user->id > 0) {
+    $user = EnsEMBL::Web::Object::Data::User->new({ id => $reg_user->id });
+  }
 
   my $html = "";
-  warn "RENDERING SPECIES LIST WITH USER: " . $user->id;
+  warn "RENDERING SPECIES LIST WITH USER: " . $reg_user->id;
   if ($request && $request eq 'fragment') {
     $html .= render_species_list($user, $species_defs, \%id_to_species, \%species_description); 
   } else {
@@ -35,7 +38,7 @@ sub render {
     $html .= "<div id='full_species'>\n";
     $html .= render_species_list($user, $species_defs, \%id_to_species, \%species_description); 
     $html .= "</div>\n";
-    if ($species_defs->ENSEMBL_LOGINS && !$user->name) {
+    if ($species_defs->ENSEMBL_LOGINS && !$user) {
       $html .= "<div id='login_message'>";
       $html .= "<a href='javascript:login_link()'>Log in</a> to customise this list &middot; <a href='/common/register'>Register</a>";
       $html .= "</div>\n";
@@ -116,7 +119,11 @@ sub render_species_list {
   my %description = %{ $species_description };
   my %id_to_species = %{ $id_to_species };
   my %species_id = reverse %id_to_species;
-  my @specieslists = @{ $user->specieslists };
+  my @specieslists = ();
+  if ($user && $user->id) {
+    @specieslists = @{ $user->specieslists };
+  }
+
   my %favourites = ();
   my @favourite_species = ();
   my @species_list = ();
@@ -142,7 +149,7 @@ sub render_species_list {
   @species_list = @{check_lists(\@favourite_species, \@species_list, \%id_to_species)};
 
   ## output list
-  if (!$user->name) {
+  if (!$user) {
     $html .= "<b>Popular genomes</b><br />\n";
   } else {
     $html .= "<b>Popular genomes</b> &middot; \n";
@@ -164,7 +171,7 @@ sub render_species_list {
   $html .= "</div>\n";
   $html .= "</div>\n";
 
-  if (!$user->name) {
+  if (!$user) {
     $html .= "<b>More genomes</b><br />\n";
   } else {
     $html .= "<b>More genomes</b> &middot; \n";
@@ -200,7 +207,11 @@ sub render_ajax_reorder_list {
 
   $html .= "<div id='favourite_species'>\n";
 
-  my @specieslists = @{ $user->specieslists };
+  my @specieslists;
+  if ($user) {
+    @specieslists = @{ $user->specieslists };
+  }
+
   my %favourites = ();
   my @favourite_species = ();
   my @species_list = ();

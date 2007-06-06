@@ -8,10 +8,9 @@ sub init {
   my ($self) = @_;
 
   $self->{'_userdatatype_ID'} = 6;
-  $self->{'no_image_frame'} = 1;
 
   $self->{'general'}->{'chromosome'} = {
-    '_artefacts' => [qw(ideogram assemblyexception)],
+    '_artefacts' => [qw(ideogram assemblyexception annotation_status hap_clone_matches)],
     '_options'  => [],
     '_settings' => {
       'simplehap' => 1,
@@ -32,12 +31,31 @@ sub init {
       'pos'       => '9998',
       'str'       => 'x',
       'height'         => 1,
-      'dep'         => 6,
-      'lab'       => 'black',
+      'label'       => 'off',
       'navigation'  => 'on',
     },
+    'annotation_status' => {
+      'on'      => "on",
+      'pos'       => '9999',
+      'str'       => 'x',
+      'lab'       => 'black',
+      'label' => '',
+      'height'  => 1,
+      'navigation'  => 'on',
+      'available' => 'features mapset_noannotation',
+    },
+
+	'hap_clone_matches', => {
+	  'on' => "on", 
+      'pos' => '10000', 
+      'colour' => 'gold1', 
+      'label'  => '',
+      'height' => 1,
+      'navigation' => 'on',
+      'str' => 'r',
+      'available' => 'features mapset_hclone',
+	},
 
     };
-##  $self->add_track( 'redbox', 'on'=>'off', 'col' => 'red', 'zindex' => -20, 'pos' => 1000100 );
 }
 1;

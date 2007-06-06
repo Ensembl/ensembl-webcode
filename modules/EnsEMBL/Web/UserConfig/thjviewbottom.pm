@@ -19,11 +19,22 @@ sub init {
     '_artefacts' => [
 ## The following are the extra fugu bits... 
 ## Only features whose key is in this array gets displayed as a track....
-       qw( blast_new repeat_lite ),
-       qw( stranded_contig ruler scalebar navigation assemblyexception), # quote),
-       qw( all_affy
-        variation trna cpg eponine marker operon rnai ex_profile qtl first_ef qtl
-       ),
+       qw( blast_new ssaha ),
+       qw( stranded_contig ruler scalebar navigation assemblyexception 
+		   annotation_status polyA_site polyA_signal pseudo_polyA
+		   repeat_lite snp_lite haplotype 
+		   trna   cpg eponine marker operon rnai ex_profile qtl
+		   first_ef
+		   
+		   matepairs tilepath  tilepath2
+		   ruler     scalebar  stranded_contig  
+		   sequence  codonseq  codons gap gcplot    
+		   
+		   gene_legend missing
+		   ),
+
+           qw(glovar_snp glovar_haplotype glovar_sts)
+ 
     ],
     '_options'  => [qw(on pos col hi low dep str src known unknown ext)],
     '_names'   => {
@@ -97,24 +108,36 @@ sub init {
       'features' => [
          # 'name'          => 'caption'       
 ## SIMPLE FEATURES ##
-         [ 'variation'        => 'SNPs'        ],
-         [ 'trna'            => 'tRNA'        ],
-         [ 'cpg'             => 'CpG Islands'     ],
-         [ 'eponine'         => 'Eponine Regions'   ],
-         [ 'first_ef'        => 'First EF'    ],
-         [ 'marker'          => 'Markers'       ],
-         [ 'qtl'             => 'QTLs'     ],
-         [ 'operon'          => 'Operon'      ],
-         [ 'rnai'            => 'RNAi'        ],
-         [ 'ex_profile'      => 'Exp. profile'    ],
+                 [ 'snp_lite'            => 'SNPs'               ],
+                 [ 'glovar_snp'          => 'SNPs'        ],
+                 [ 'glovar_sts'          => 'STSs'         ],
+                 [ 'glovar_haplotype'    => 'Haplotypes'  ],
+                 #[ 'glovar_trace'        => 'Glovar Traces'      ],
+                 [ 'trna'                => 'tRNA'               ],
+                 [ 'cpg'                 => 'CpG Islands'        ],
+                 [ 'eponine'             => 'Eponine Regions'    ],
+                 [ 'haplotype'           => 'Haplotypes'         ],
+                 [ 'first_ef'        => 'First EF'    ],
+                 [ 'marker'              => 'Markers'            ],
+                 [ 'qtl'             => 'QTLs'     ],
+                 [ 'operon'          => 'Operon'      ],
+                 [ 'rnai'            => 'RNAi'        ],
+                 [ 'ex_profile'      => 'Exp. profile'    ],
+                 [ 'polyA_site'          => 'PolyA sites'        ],
+                 [ 'polyA_signal'        => 'PolyA signals'        ],
+                 [ 'pseudo_polyA'        => 'Pseudo PolyA'        ],
+                 [ 'ensemblclones'       => 'Ensembl clones' ],
       ],
       'compara' => [ 
-        ['opt_match'            => 'Blastz net'],
-        ['opt_tblat'            => 'Translated BLAT'],
-        ['opt_join_match'       => 'Join Blastz net'],
-        ['opt_join_tblat'       => 'Join tr. BLAT'],
-        ['opt_join_transcript'  => 'Join transcripts'],
-        ['opt_group_match'      => 'Group Blastz net'],
+        ['opt_match' => 'Conserved'],
+   #     ['opt_hcr'   => 'Highly conserved'],
+   #     ['opt_tblat' => 'Translated BLAT'],
+        ['opt_join_match' => 'Join conserved'],
+   #     ['opt_join_hcr'   => 'Join high. cons.'],
+   #     ['opt_join_tblat'   => 'Join tr. BLAT'],
+        ['opt_join_transcript'   => 'Join transcripts'],
+        ['opt_group_match' => 'Group conserved'],
+   #     ['opt_group_hcr'   => 'Group high. cons.'],
       ],
       'options' => [
          # 'name'            => 'caption'
@@ -131,44 +154,40 @@ sub init {
     },
 
 ## Stranded contig is the central track so should always have pos set to 0...
-  
     'stranded_contig' => {
-      'on'  => "off",
+      'on'  => "on",
       'navigation' => 'on',
       'pos' => '0',
     },
 
 ## Blast and SSAHA tracks displayed if linked to from Blast/SSAHA...
-## These get put beside the central track and so are numbered 4 and 6
-
-    'blast_new' => {
-      'on'  => "on",
-      'pos' => '7',
-      'col' => 'red',
-      'dep' => '6',
-      'str' => 'b',
-      'force_cigar' => 'yes',
-    },
-  
+## These get put beside the central track and so are numbered 5 and 7
     'blast' => {
-      'on'  => "on",
-      'pos' => '5',
+      'on'  => "off",
+      'pos' => '15',
       'col' => 'red',
       'str' => 'b',
     },
-  
+    'blast_new' => {
+       'on'  => "on",
+       'pos' => '17',
+       'col' => 'red',
+       'str' => 'b',
+    },
     'ssaha' => {
       'on'  => "on",
-      'pos' => '6',
+      'pos' => '16',
       'col' => 'red',
       'str' => 'b',
     },
 
-## Now for the simple features....
+### Now we will follow by the "grouped features" tracks
+
+### Now for the simple features....
     'trna' => {
       'on'  => "off",
       'pos' => '2500',
-      'str'   => 'b',
+      'str'     => 'b',
       'col' => 'gold3',
       'available'=> 'features tRNAscan', 
     },
@@ -187,6 +206,38 @@ sub init {
       'col'      => 'red',
       'available'=> 'features FirstEF', 
     },
+
+    'polyA_site' => {
+        'on' => "on",
+        'pos' => '1027',
+        'str' => 'b',
+        'col' => 'red3',
+        'label' => 'PolyA site',
+        'logic_name' => 'polyA_site',
+        'glyphset' => 'polyA',
+        'available' => 'features polyA_site',
+    },
+    'polyA_signal' => {
+        'on' => "on",
+        'pos' => '1028',
+        'str' => 'b',
+        'col' => 'red4',
+        'label' => 'PolyA signal',
+        'logic_name' => 'polyA_signal',
+        'glyphset' => 'polyA',
+        'available' => 'features polyA_signal',
+    },
+    'pseudo_polyA' => {
+        'on' => "on",
+        'pos' => '1029',
+        'str' => 'b',
+        'col' => 'red2',
+        'label' => 'Pseudo PolyA',
+        'logic_name' => 'pseudo_polyA',
+        'glyphset' => 'polyA',
+        'available' => 'features polyA_site',
+    },
+
 ## Markers and other features...
     'codons' => {
       'on'  => "off",
@@ -195,15 +246,15 @@ sub init {
       'col' => 'purple1',
       'threshold' => '50'
     },
-  'bacends' => {
-    'on'      => "off",
-    'pos'       => '4090',
-    'col'      => 'red',
-    'lab'      => 'black',
-    'available'   => 'features bacends',
-    'dep' => 6,
-    'str' => 'r'
-  },
+    'bacends' => {
+      'on'      => "off",
+      'pos'       => '4090',
+      'col'      => 'red',
+      'lab'      => 'black',
+      'available'   => 'features bacends',
+      'dep' => 6,
+      'str' => 'r'
+    },
 
     'marker' => {
       'on'  => "on",
@@ -224,46 +275,45 @@ sub init {
       'str' => 'r',
     },
 
-     'operon' => {
+    'operon' => {
       'on'  => "off",
       'pos' => '4511',
       'str' => 'r',
       'col' => 'lightseagreen',
       'available'=> 'features operon', 
     },
-     'rnai' => {
+    'rnai' => {
       'on'  => "off",
       'pos' => '4512',
       'str' => 'r',
       'col' => 'lightseagreen',
       'available'=> 'features RNAi', 
     },
-     'ex_profile' => {
+    'ex_profile' => {
       'on'  => "off",
       'pos' => '4513',
       'str' => 'r',
       'col' => 'lightseagreen',
       'available'=> 'features Expression_profile', 
     },
-    
-## Strand independent tracks...
 
-     'cpg' => {
-      'on'  => "off",
+## Strand independent tracks...
+    'cpg' => {
+      'on'  => "on",
       'pos' => '4510',
       'str' => 'r',
       'col' => 'purple4',
       'available'=> 'features CpG', 
     },
-    'variation' => {
+    'snp_lite' => {
       'on'  => "off",
       'bump_width' => 0,
       'dep' => 0.1,
       'pos' => '4520',
       'str' => 'r',
       'col' => 'blue',
-      'colours' => {$self->{'_colourmap'}->colourSet('variation')},
-      'available'=> 'databases ENSEMBL_VARIATION', 
+      'colours' => {$self->{'_colourmap'}->colourSet('snp')},
+      'available'=> 'database_tables ENSEMBL_LITE.snp', 
     },
 
     'glovar_snp' => {
@@ -272,8 +322,28 @@ sub init {
       'dep' => 0.1,
       'pos' => '4521',
       'str' => 'r',
+      'threshold'     => '200',
       'col' => 'blue',
-      'colours' => {$self->{'_colourmap'}->colourSet('snp')},
+      'colours' => {$self->{'_colourmap'}->colourSet('variation')},
+      'available'=> 'databases ENSEMBL_GLOVAR', 
+    },
+
+    'glovar_haplotype' => {
+      'on'  => "off",
+      'dep' => 6,
+      'pos' => '4523',
+      'str' => 'r',
+      'threshold'     => '200',
+      'available'=> 'databases ENSEMBL_GLOVAR', 
+    },
+
+    'glovar_sts' => {
+      'on'  => "off",
+      'dep' => 6,
+      'pos' => '4524',
+      'str' => 'r',
+      'threshold'     => '200',
+      'colours' => {$self->{'_colourmap'}->colourSet('glovar_sts')},
       'available'=> 'databases ENSEMBL_GLOVAR', 
     },
 
@@ -298,51 +368,44 @@ sub init {
       'available'=> 'databases ENSEMBL_HAPLOTYPE', 
     },
 
-#    'blat' => {
-#      'on'      => "off",
-#      'pos'       => '80',
-#      'col'       => 'pink',
-#      'str'       => 'b',
-#    },
-
 ## Repeats 
     'codonseq' => {
-      'on'      => "off",
-      'pos'       => '4',
-      'str'       => 'b',
-      'bump_width'   => 0,
-      'lab'       => 'black',
-      'dep'       => 3,
-      'colours'     => {
+      'on'            => "off",
+      'pos'           => '4',
+      'str'           => 'b',
+      'bump_width'     => 0,
+      'lab'           => 'black',
+      'dep'           => 3,
+      'colours'       => {
 # hydrophobic
-'A' => 'darkseagreen1',  # Alanine
-'G' => 'mediumseagreen',  # Glycine
-'I' => 'greenyellow',  # Isoleucine
-'L' => 'olivedrab1',  # Leucine
-'M' => 'green',  # Methionine
-'P' => 'springgreen1',  # Proline
-'V' => 'darkseagreen3',  # Valine
+						  'A' => 'darkseagreen1',  # Alanine
+						  'G' => 'mediumseagreen',  # Glycine
+						  'I' => 'greenyellow',  # Isoleucine
+						  'L' => 'olivedrab1',  # Leucine
+						  'M' => 'green',  # Methionine
+						  'P' => 'springgreen1',  # Proline
+						  'V' => 'darkseagreen3',  # Valine
 # large hydrophobic
-'F' => 'paleturquoise',  # Phenylalanine
-'H' => 'darkturquoise',  # Histidine
-'W' => 'skyblue',  # Tryptophan
-'Y' => 'lightskyblue',  # Tyrosine
-# Cysteine
-'C' => 'khaki',  # Cysteine
-# Negative charge
-'D' => 'gold',  # Aspartic Acid
-'E' => 'darkgoldenrod1',  # Glutamic Acid
-# Positive charge
-'K' => 'lightcoral',  # Lysine
-'R' => 'rosybrown',  # Arginine
-# Polar 
-'N' => 'plum2',  # Asparagine
-'Q' => 'thistle1',  # Glutamine
-'S' => 'mediumpurple1',  # Serine
-'T' => 'mediumorchid1',  # Threonine
-# Stop codon...
-'*' => 'red',  # Stop
-    },
+						  'F' => 'paleturquoise',  # Phenylalanine
+						  'H' => 'darkturquoise',  # Histidine
+						  'W' => 'skyblue',  # Tryptophan
+						  'Y' => 'lightskyblue',  # Tyrosine
+						  # Cysteine
+						  'C' => 'khaki',  # Cysteine
+						  # Negative charge
+						  'D' => 'gold',  # Aspartic Acid
+						  'E' => 'darkgoldenrod1',  # Glutamic Acid
+						  # Positive charge
+						  'K' => 'lightcoral',  # Lysine
+						  'R' => 'rosybrown',  # Arginine
+						  # Polar 
+						  'N' => 'plum2',  # Asparagine
+						  'Q' => 'thistle1',  # Glutamine
+						  'S' => 'mediumpurple1',  # Serine
+						  'T' => 'mediumorchid1',  # Threonine
+						  # Stop codon...
+						  '*' => 'red',  # Stop
+						 },
       'navigation'  => 'on',
       'navigation_threshold' => '0',
       'threshold'   => '0.5',
@@ -350,7 +413,6 @@ sub init {
     'assemblyexception' => {
       'on'      => "on",
       'pos'       => '8498932',
-      'dep' => 6,
       'str'       => 'x',
       'lab'       => 'black',
       'navigation'  => 'on',
@@ -419,6 +481,16 @@ sub init {
     },
     
 ## "Clone" level structural tracks
+
+    'annotation_status' => {
+        'on'      => "on",
+        'pos'       => '9998',
+        'str'       => 'x',
+        'lab'       => 'black',
+        'label' => 'Annotation status',
+        'navigation'  => 'on',
+        'available' => 'features mapset_noannotation',
+    },
 
     'tp32k' => {
       'on'  => "on",
@@ -545,6 +617,7 @@ sub init {
       'str'       => 'r',
       'threshold'   => 2 
     },
+
     'assembly_contig' => {
       'on'      => "on",
       'pos'       => '8030',
@@ -581,7 +654,7 @@ sub init {
       'str'       => 'r',
       'type'      => 'square',
       'pos'       => '10000',
-      'available'   => 'databases EMSEMBL_VARIATION'
+      'available'   => 'database_tables EMSEMBL_LITE.snp'
     },
     'missing' => {
       'on'      => "on",
@@ -614,19 +687,6 @@ sub init {
       'str' => 'r',
       'pos' => 1.1e9
     },
-    'all_affy' => {
-      'on' => 'off',
-      'pos' => '4030',
-      'col' => 'springgreen4',
-      'src' => 'all',
-      'dep' => '6',
-      'str' => 'b',
-      'compact'   => 0,
-      'available' => 'features mapset_all_affy',
-      'glyphset'  => 'generic_microarray',
-      'FEATURES'  => 'All_Affy',
-    },
-
   };
 
   my $POS = $self->ADD_ALL_TRANSCRIPTS( 0 );
@@ -637,48 +697,48 @@ sub init {
   $self->ADD_ALL_DNA_FEATURES( 0, 'on' => 'off' );
   $self->ADD_ALL_EST_FEATURES( 0, 'on' => 'off' );
   $self->ADD_ALL_OLIGO_TRACKS( 0, 'on' => 'off' );
-  $self->ADD_SIMPLE_TRACKS( );
+
+#  use Data::Dumper;
+#  $Data::Dumper::Indent = 1;
+#  $Data::Dumper::MaxDepth = 2;
+#  warn Dumper($self);
+
+
+
 }
 
 sub mult {
-  my $self = shift;
-  my @species = @{$self->{'species_defs'}->ENSEMBL_SPECIES};
-  my $compara = 3000;
-  my @methods = (
-    [ 'BLASTZ_NET'           ,'pink',  'cons',  'darkseagreen1', -20  ],
-    [ 'BLASTZ_NET_TIGHT'     ,'pink3', 'high cons','darkolivegreen2', -19   ],
-    [ 'BLASTZ_GROUP'         ,'pink',  'cons', 'darkseagreen1', -20  ],
-    [ 'BLASTZ_GROUP_TIGHT'   ,'pink3', 'high cons','darkolivegreen2', -19   ],
-    [ 'PHUSION_BLASTN'       ,'pink',  'cons', 'darkseagreen1', -20  ],
-    [ 'PHUSION_BLASTN_TIGHT' ,'pink3', 'high cons','darkolivegreen2', -19   ],
-    [ 'BLASTZ_RECIP_NET'     ,'pink',  'cons', 'darkseagreen1', -20  ],
-    [ 'TRANSLATED_BLAT'      ,'orchid1', 'trans BLAT','chartreuse', -18 ],
-  );
-
-  foreach my $METHOD (@methods) {
-    foreach my $SPECIES (@species) {
-      (my $species = $SPECIES ) =~ s/_\d+//;
-      (my $short = $species ) =~ s/^(\w)\w+_(\w)\w+$/\1\2/g;
-      $compara++;
-      my $KEY = lc($SPECIES).'_'.lc($METHOD->[0]).'_match';
-      $self->{'general'}->{'thjviewbottom'}{$KEY} = {
-        'glyphset' => 'generic_alignment',
-        'species'  => $species,
-        'on'       => 'off',
-        'compact'  => 'yes',
-        'dep'      => 6,
-        'pos'      => $compara+300,
-        'col'      => $METHOD->[1],
-        'join' => 0,
-        'join_col' => $METHOD->[3],
-        'join_z'   => $METHOD->[4],
-        'str'      => 'f',
-        'available'=> "multi ".$METHOD->[0]."|$species",
-        'method'   => $METHOD->[0],
-        'label'    => "$short $METHOD->[2]",
-      };
-      push @{ $self->{'general'}->{'thjviewbottom'}{ '_artefacts'} }, $KEY;
-    }
-  }
+	my $self = shift;
+	my @species = @{$self->species_defs->ENSEMBL_SPECIES};
+	my $compara = 3000;
+	my @methods = (
+       [ 'BLASTZ_RAW'           ,'pink',  'cons',  'darkseagreen1', -20 ],
+       [ 'BLASTZ_CHAIN'         ,'pink',  'cons bz chain', 'darkolivegreen2', -19  ],
+	  );
+	foreach my $METHOD (@methods) {
+		foreach my $SPECIES (@species) {
+			(my $species = $SPECIES ) =~ s/_\d+//;
+			(my $short = $species ) =~ s/^(\w)\w+_(\w)\w+$/\1\2/g;
+			$compara++;
+			my $KEY = lc($SPECIES).'_'.lc($METHOD->[0]).'_match';
+			$self->{'general'}->{'thjviewbottom'}{$KEY} = {
+														   'glyphset' => 'generic_alignment',
+														   'species'  => $species,
+														   'on'       => 'off',
+														   'compact'  => 'yes',
+														   'dep'      => 6,
+														   'pos'      => $compara+300,
+														   'col'      => $METHOD->[1],
+														   'join'     => 0,
+														   'join_col' => $METHOD->[3],
+														   'join_z'   => $METHOD->[4],
+														   'str'      => 'f',
+														   'available'=> "multi ".$METHOD->[0]."|$species",
+														   'method'   => $METHOD->[0],
+														   'label'    => "$short $METHOD->[2]",
+														  };
+			push @{ $self->{'general'}->{'thjviewbottom'}{ '_artefacts'} }, $KEY;
+		}
+	}
 }
 1;

@@ -41,7 +41,7 @@ if( $not_fresh ) {
         $CAT .= '/'.$q->param('idx');
         $CAT2 = "Top/Feature type/".$q->param('idx').'/'.$q->param('species');
       }
-    } elsif( $q->param('idx') && ($q->param('idx')) ne 'all' ) {
+    } elsif( $q->param('idx') && lc($q->param('idx')) ne 'all' ) {
       $CAT = "Top/Feature type/".$q->param('idx');
     }
     if( $CAT ) {

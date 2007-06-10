@@ -10,6 +10,8 @@ use EnsEMBL::Web::Record::Help;
 our @ISA = qw(EnsEMBL::Web::Object);
 use Mail::Mailer;
 
+our $SPAM_THRESHOLD_PARAMETER = 60;
+
 sub adaptor     { return $_[0]->Obj->{'adaptor'}; }
 sub modular     { return $_[0]->Obj->{'modular'}; }
 
@@ -18,20 +20,35 @@ sub send_email {
   my @mail_attributes = ();
   my @T = localtime();
   my $date = sprintf "%04d-%02d-%02d %02d:%02d:%02d", $T[5]+1900, $T[4]+1, $T[3], $T[2], $T[1], $T[0];
+  my $email = $self->param('email');
+  ## Do some email address sanitation!
+  $email =~ s/"//g;
+  $email =~ s/''/'/g;
   push @mail_attributes,
     [ 'Date',         $date ],
     [ 'Name',         $self->param('name') ],
-    [ 'Email',        $self->param('email') ],
+    [ 'Email',        $email ],
     [ 'Referrer',     $self->referer ],
     [ 'Last Keyword', $self->param('kw')||'-none-' ],
     [ 'Problem',      $self->param('category')],
     [ 'User agent',   $ENV{'HTTP_USER_AGENT'}],
     [ 'Request URI',  $ENV{'REQUEST_URI'}];
+  my $comments = $self->param('comments');
+  return if $comments =~ /777-777/;
+## HACK OUT BLOG SPAM!
+  my $recipient = $self->species_defs->ENSEMBL_HELPDESK_EMAIL;
+
+  (my $check = $comments) =~ s/<a\s+href=".*?"\s*>.*?<\/a>//smg;
+  $check =~ s/\[url=.*?\].*?\[\/url\]//smg;
+  $check =~s/\s+//gsm;
+  if( $check eq '' || length($check)<length($comments)/$SPAM_THRESHOLD_PARAMETER ) {
+    warn "MAIL FILTERED DUE TO BLOG SPAM.....";
+    return 1;
+  } 
   my $message = '';
   $message .= join "\n", map {sprintf("%-16.16s %s","$_->[0]:",$_->[1])} @mail_attributes;
   $message .= "\n\nComments:\n\n@{[$self->param('comments')]}\n\n";
   my $mailer = new Mail::Mailer 'smtp', Server => "localhost";
-  my $recipient = $self->species_defs->ENSEMBL_HELPDESK_EMAIL;
   my $sitetype = $self->species_defs->ENSEMBL_SITETYPE;
   my $sitename = $sitetype eq 'EnsEMBL' ? 'Ensembl' : $sitetype;
   my $subject = $self->param('category') || "$sitename website Helpdesk";

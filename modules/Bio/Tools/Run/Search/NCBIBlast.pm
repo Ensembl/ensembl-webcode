@@ -195,7 +195,7 @@ sub command{
     else{ $param_str .= " $param" }
   }
 
-  $param_str =~ s/[;`&|<>]/ /g;
+  $param_str =~ s/[;`&|<>\s]+/ /g;
 
   my $blast_command = join( ' ',
 			    $self->program_path,

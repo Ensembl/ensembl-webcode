@@ -33,10 +33,10 @@ sub set_cache_filename {
   my ($self, $prefix, $filename) = @_;
   
   $self->{'cache'}      = 1;
+  $filename ||= $self->ticket();  
   my $MD5 = hex(substr( md5_hex($filename), 0, 6 )); ## Just the first 6 characters will do!
   my $c1  = $EnsEMBL::Web::Root::random_ticket_chars[($MD5>>5)&31];
   my $c2  = $EnsEMBL::Web::Root::random_ticket_chars[$MD5&31];
-  
   $self->{'token'}      = "$prefix:$c1$c2$filename";
   $self->{'filename'}   = "$prefix/$c1/$c2/$filename";
   $self->{'file_root' } = $self->{'species_defs'}->ENSEMBL_TMP_DIR_CACHE;

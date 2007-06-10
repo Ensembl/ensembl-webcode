@@ -1161,7 +1161,7 @@ sub transcripts {
     warn "Asynchronously load transcripts";
     my $json = "{ components: [ 'EnsEMBL::Web::Component::Gene::transcripts'], fragment: {db: '".$db."', stable_id: '" . $gene->stable_id . "', species: '" . $gene->species . "'} }";
     my $html = "<div id='component_0' class='info'>Loading transcripts...</div><div class='fragment'>$json</div>";
-    $panel->add_row($label . " <img src='/img/ajax-loader.gif' width='16' height='16' alt='(loading)' id='loading' />", $html, "$URL=odd");
+    $panel->add_row($label . " <img src='/img/ajax-loader.gif' width='16' height='16' alt='(loading)' id='loading' />", $html, "$URL=off");
   } else {
     ## Get a slice of the gene +/- 10k either side...
 

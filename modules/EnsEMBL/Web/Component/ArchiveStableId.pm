@@ -539,7 +539,7 @@ sub tree {
     warn "Asynchronously load history tree";
     my $json = "{ components: [ 'EnsEMBL::Web::Component::ArchiveStableId::tree'], fragment: {stable_id: '" . $object->stable_id . "." . $object->version . "', species: '" . $object->species . "'} }";
     my $html = "<div id='component_0' class='info'>Loading history tree...</div><div class='fragment'>$json</div>";
-    $panel->add_row($label ." <img src='/img/ajax-loader.gif' width='16' height='16' alt='(loading)' id='loading' />", $html, "$URL=odd") ;
+    $panel->add_row($label ." <img src='/img/ajax-loader.gif' width='16' height='16' alt='(loading)' id='loading' />", $html, "$URL=off") ;
   } else{ 
     ( $panel->add_row($label, qq(<p style="text-align:center"><b>There are too many stable IDs related to $name to draw a history tree.</b></p>) ) and return 1) unless (defined $historytree);
     my $tree = _create_idhistory_tree ($object, $historytree,$panel);

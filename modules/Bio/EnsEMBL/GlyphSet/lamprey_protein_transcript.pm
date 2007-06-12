@@ -1,16 +1,16 @@
-package Bio::EnsEMBL::GlyphSet::horse_protein_transcript;
+package Bio::EnsEMBL::GlyphSet::lamprey_protein_transcript;
 use strict;
 use vars qw(@ISA);
 use Bio::EnsEMBL::GlyphSet_transcript;
 @ISA = qw(Bio::EnsEMBL::GlyphSet_transcript);
 
 sub my_label {
-    return 'Horse trans.';
+    return 'Lamprey trans.';
 }
 
 sub colours {
     my $self = shift;
-    my $Config = $self->{'config'}->get('horse_protein_transcript','colours');
+    my $Config = $self->{'config'}->get('lamprey_protein_transcript','colours');
 }
 
 sub colour {
@@ -25,7 +25,7 @@ sub colour {
     $highlight = $colours->{'hi'};
   }
 
-  return (@{$colours->{'horse_protein'}}, $highlight);
+  return (@{$colours->{'lamprey_protein'}}, $highlight);
 }
 
 sub gene_colour {
@@ -38,7 +38,7 @@ sub gene_colour {
     $highlight = $colours->{'hi'};
   }
 
-  return (@{$colours->{'horse_protein'}}, $highlight);
+  return (@{$colours->{'lamprey_protein'}}, $highlight);
 }
 
 sub href {
@@ -46,7 +46,7 @@ sub href {
   my $gid = $gene->stable_id();
   my $tid = $transcript->stable_id();
 
-  return ( $self->{'config'}->get('horse_protein_transcript','_href_only') eq '#tid' && exists $highlights{lc($gene->stable_id())} ) ?
+  return ( $self->{'config'}->get('lamprey_protein_transcript','_href_only') eq '#tid' && exists $highlights{lc($gene->stable_id())} ) ?
         "#$tid" : 
         qq(/@{[$self->{container}{_config_file_name_}]}/geneview?gene=$gid);
 
@@ -55,7 +55,7 @@ sub href {
 sub gene_href {
   my ($self, $gene, %highlights) = @_;
   my $gid = $gene->stable_id();
-  return ( $self->{'config'}->get('horse_protein_transcript','_href_only') eq '#gid' && exists $highlights{lc($gid)} ) ?
+  return ( $self->{'config'}->get('lamprey_protein_transcript','_href_only') eq '#gid' && exists $highlights{lc($gid)} ) ?
     "#$gid" : qq(/@{[$self->{container}{_config_file_name_}]}/geneview?gene=$gid);
 }
 
@@ -69,7 +69,7 @@ sub zmenu {
   my $gid = $gene->stable_id();
   
   my $zmenu = {
-    'caption'         => "Horse Gene",
+    'caption'         => "Lamprey Gene",
     "01:Gene:$gid"    => "/@{[$self->{container}{_config_file_name_}]}/geneview?gene=$gid",
     "02:Transcr:$tid" => "/@{[$self->{container}{_config_file_name_}]}/transview?transcript=$tid",                	
     '04:Export cDNA'  => "/@{[$self->{container}{_config_file_name_}]}/exportview?option=cdna;action=select;format=fasta;type1=transcript;anchor1=$tid",
@@ -91,7 +91,7 @@ sub gene_zmenu {
   my ($self, $gene ) = @_;
   my $gid = $gene->stable_id();
   my $zmenu = {
-    'caption'                   => "Horse Gene",
+    'caption'                   => "Lamprey Gene",
     "01:Gene:$gid"          => "/@{[$self->{container}{_config_file_name_}]}/geneview?gene=$gid",
   };
   $zmenu->{"00:@{[$gene->external_name()]}"} = '' if $gene->external_name();
@@ -123,10 +123,10 @@ sub gene_text_label {
 
 sub features {
   my ($self) = @_;
-  my $track = 'horse_protein_transcript';
+  my $track = 'lamprey_protein_transcript';
   my $slice = $self->{'container'};
   my @genes;
-  foreach my $analysis( 'horse_protein' ){
+  foreach my $analysis( 'lamprey_protein' ){
 warn "... $analysis ...";
     push @genes, @{ $slice->get_all_Genes( $analysis ) }
   }
@@ -136,11 +136,11 @@ warn @genes;
 
 sub legend {
   my ($self, $colours) = @_;
-  return ('horse_protein', 1000, 
-    [ 'Horse genes' => $colours->{'horse_protein'}[0], ]
+  return ('lamprey_protein', 1000, 
+    [ 'Lamprey genes' => $colours->{'lamprey_protein'}[0], ]
   );
 }
 
-sub error_track_name { return 'Horse proteins'; }
+sub error_track_name { return 'Lamprey proteins'; }
 
 1;

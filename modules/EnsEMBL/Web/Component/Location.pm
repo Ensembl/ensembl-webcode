@@ -436,7 +436,7 @@ sub cytoview_config {
   my $string = $session->get_script_config_as_string($script_name);
   my $html = "";
 
-  warn "CHECKING FOR CURRENT CONFIG: " . $current_config->config;
+#  warn "CHECKING FOR CURRENT CONFIG: " . $current_config->config;
   if ($current_config) {
     foreach my $configuration (@{ $data_user->configurations }) {
       if ($configuration->id eq $current_config->config) {

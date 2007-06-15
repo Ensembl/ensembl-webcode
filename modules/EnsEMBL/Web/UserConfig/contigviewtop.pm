@@ -31,10 +31,10 @@ sub init {
 	    },
 					     
     };
-	$self->ADD_GENE_TRACKS();
-#	$self->ADD_SYNTENY_TRACKS();
 	my $POS = 0;
-	
+	$self->ADD_GENE_TRACKS();
+	$self->add_track( 'encode', 'on' => 'on', 'pos' => 9997, 'colour' => 'salmon', 'label'  => 'Encode regions',
+                      'str' => 'r', 'available' => 'features mapset_encode');
 	$self->add_track( 'annotation_status', 'on'=>'on', 'pos'=> 9998, 'str'=>'x', 'lab'=>'black',
 					  'label' => 'Annotation status', 'height'  => 5, 'navigation'  => 'on',
 					  'available' => 'features mapset_noannotation');
@@ -45,13 +45,12 @@ sub init {
 					  'labels'    => 'on',
 					  'available' => 'features markers'),
 	$self->add_track( 'chr_band', 'on'=>'on', 'pos' => $POS++ );
+	$self->add_clone_track( 'hclone',   'Haplotype scaffolds', 99999,  on => 'on', 'height' => 5, 'depth' => 3,
+						  'available' => 'features mapset_hclone', 'outline_threshold' => '3000000',
+						  'colour_set' => 'scaffolds', 'no_label' => 1);
+	$self->add_track( 'gene_legend', 'str' => 'r', 'on'=>'on', 'pos' => 100000 );
 	$self->add_track( 'redbox', 'on'=>'off', 'col' => 'red', 'pos' => 1000100 );
-	$self->add_track( 'encode', 'on' => 'on', 'pos' => 9997, 'colour' => 'salmon', 'label'  => 'Encode regions',
-                      'str' => 'r', 'available' => 'features mapset_encode');
-	$self->add_track( 'hap_clone_matches', 'on' => 'on', 'pos' => 9999, 'colour' => 'gold1', 'label'  => 'Haplotype clones',
-                      'height' => 5, 'depth' => 3, 'str' => 'r', 'available' => 'features mapset_hclone');
-	$POS = 100000;
-	$self->add_track( 'gene_legend', 'str' => 'r', 'on'=>'on', 'pos' => $POS++ );
+
 }
 
 1;

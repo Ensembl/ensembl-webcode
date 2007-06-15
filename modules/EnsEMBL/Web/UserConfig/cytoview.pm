@@ -164,16 +164,6 @@ sub init {
         'available' => 'features alternative_assembly',
     },
 
-	'hap_clone_matches' => {
-	    'on' => 'on',
-        'pos' => 9999, 
-        'colour' => 'gold1', 
-        'height' => 5, 
-        'depth' => 3, 
-        'str' => 'r', 
-        'available' => 'features mapset_hclone'
-    },
-
     'nod_bacs' => {
       'on'  => "on",
       'pos' => '997',
@@ -460,9 +450,10 @@ sub init {
       'navigation'  => 'on',
     },
 
-
   };
-  
   $self->ADD_GENE_TRACKS();
+  $self->add_clone_track( 'hclone',   'Haplotype scaffolds', 99999,  on => 'on', 'height' => 5, 'depth' => 3,
+						  'available' => 'features mapset_hclone', 'outline_threshold' => '3000000',
+						  'colour_set' => 'scaffolds', 'no_label' => 1);
 }
 1;

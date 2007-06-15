@@ -967,7 +967,7 @@ sub contigviewbottom_menu {  return bottom_menu( @_, 'contigviewbottom' ); }
 
 sub bottom_menu {
   my($panel, $object, $configname ) = @_;
-  warn "BOTTOM MENU SETUP";
+#  warn "BOTTOM MENU SETUP";
   my $mc = $object->new_menu_container(
     'configname' => $configname,
     'panel'      => 'bottom',
@@ -977,7 +977,7 @@ sub bottom_menu {
   my $html = $mc->render_html;
   $html .= $mc->render_js;
   $panel->print( $html );
-  warn "MISSING: " . $mc->{'config'}->{'missing_tracks'};
+#  warn "MISSING: " . $mc->{'config'}->{'missing_tracks'};
   return $mc;
 }
 

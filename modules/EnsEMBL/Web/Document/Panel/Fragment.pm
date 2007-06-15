@@ -62,15 +62,15 @@ sub placeholder {
     unless ($self->panel_is_closed) {
       foreach my $name (@{ $self->static_components }) {
         my $command = $self->{components}{$name}->[0];
-	warn "PLACEHOLDER FOR: " . $command;
+#	warn "PLACEHOLDER FOR: " . $command;
         no strict 'refs';
         my $result = &$command($self, $self->{'object'});
         use strict 'refs';
 	if ($result) {
-	  warn "RESULT: " . $result;
+#	  warn "RESULT: " . $result;
 	  foreach my $key (keys %{ $result->{'config'} }) {
 	     if ($result->{'config'}->{$key}) {
-	       warn "CONFIG KEY: " . $key;
+#	       warn "CONFIG KEY: " . $key;
 	       $config_options->{$key} = $result->{'config'}->{$key};
 	     }
 	  }
@@ -143,7 +143,7 @@ sub json {
     $self->code, $ENV{'ENSEMBL_SPECIES'}, $self->caption, $self->code,
     $self->json_params, $self->json_components, $self->json_options($self->{'_options'}), $self->json_options($config_options)
   );
-  warn "JSON: " . $json;
+#  warn "JSON: " . $json;
   return $json;
 }
 

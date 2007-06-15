@@ -615,11 +615,11 @@ sub contigview {
       nav    EnsEMBL::Web::Component::Location::contigviewbottom_nav
       image  EnsEMBL::Web::Component::Location::contigviewbottom
     ));
-    warn "SETTING UP VIEW FRAGMENT";
+#    warn "SETTING UP VIEW FRAGMENT";
     $view_fragment->asynchronously_load(qw(image));
     my $width = $obj->param('image_width');
     $view_fragment->add_option( 'image_width', $width);
-    warn "IMAGE WIDTH (Config): " . $width;
+#    warn "IMAGE WIDTH (Config): " . $width;
   
     my ($start,$end) = $self->top_start_end( $obj, $max_length );
     $view_fragment->add_option( 'start', $obj->seq_region_start );

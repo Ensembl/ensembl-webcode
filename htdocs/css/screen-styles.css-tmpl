@@ -42,4 +42,12 @@ div#mart_bottom_bar { border: 0px; border-top: 1px solid black }
 
 .mart_btnhov_go:hover, .mart_btnhov:hover { background-color: #933 }
 
-.mart_summarypanel_listheader_highlighted, .mart_summarypanel_AttFiltHeader_highlighted { background-color: #fc9 }
+
+.mart_summarypanel_listheader_highlighted, .mart_summarypanel_AttFiltHeader_highlighted, .mart_summarypanel_listheaderTable_highlighted { background-color: #fc9 }
+
+.mart_summarypanel_dataset_entrycount_highlighted { color: #426fbf }
+
+.mart_tableSummaryPanel { border-left-width: 1px }
+
+.mart_filtergroup, .mart_filtercollection, .mart_attributegroup, .mart_attributecollection, .mart_attributepage_selection, .mart_outputformats, .mart_outputformats_list, .mart_compression_list, .mart_compression { border-color: #ddd }
+

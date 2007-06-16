@@ -917,8 +917,8 @@ sub ADD_ALL_DNA_FEATURES {
                               'THRESHOLD' => 0, 'DATABASE' => 'otherfeatures', @T, @_ );
   }
 
-  $self->add_new_track_cdna( 'community_models', 'Community models',    $POS++, @_ );
-  $self->add_new_track_cdna( 'manual_models',    'Manual models',    $POS++, @_ );
+  $self->add_new_track_cdna( 'community_models', 'Community models', $POS++,  'ZMENU'       => [ '###ID###' ],  'URL_KEY' => 'NONE', @_ );
+  $self->add_new_track_cdna( 'manual_models',    'Manual models', $POS++,  'ZMENU'       => [ '###ID###' ],  'URL_KEY' => 'NONE', @_ );
 
   return $POS;
 }
@@ -1055,7 +1055,7 @@ sub ADD_ALL_CLONE_TRACKS {
   $self->add_clone_track( 'extra_bacs',     'Extra BACs',     $POS++, 'thresholds' => { 20000 => { 'navigation' => 'off', 'height' => 4, 'threshold' => 50000 } }, @_ );
   $self->add_clone_track( 'ex_bac_map',        'BAC map',     $POS++, 'FEATURES' => 'bac_map', 'DATABASE' => 'otherfeatures', 'available' => 'database_tables ENSEMBL_OTHERFEATURES.misc_set',  @_ );
   $self->add_clone_track( 'tilepath_cloneset', 'Mouse Tilepath', $POS++, 'on' => 'on', @_ );
-  $self->add_clone_track( 'tilepath',       'Human tilepath clones', $POS++, 'on' => 'on', @_ );
+  $self->add_clone_track( 'tilepath',       'Human tilepath clones', $POS++, 'on' => $ENV{'ENSEMBL_SCRIPT'} eq 'contigview' ? 'off' : 'on', @_ );
   $self->add_clone_track( 'fosmid_map',     'Fosmid map',     $POS++, 'colour_set' => 'fosmids', 'thresholds' => { 20000 => { 'navigation' => 'off', 'height' => 4, 'threshold' => 50000 }}, @_ );
 }
 
@@ -1098,7 +1098,7 @@ sub ADD_ALL_PROTEIN_FEATURES {
 
   $self->add_new_track_protein( 'Btaurus_Exonerate_Protein',         'Cow proteins', $POS++, @_ );
   $self->add_new_track_protein( 'cow_proteins',        'Cow proteins', $POS++, @_ );
-  $self->add_new_track_protein( 'aedes_protein',       'Aedes proteins', $POS++, @_ );
+  $self->add_new_track_protein( 'aedes_protein',       'Aedes proteins', $POS++, 'URL_KEY' => 'AEDES_TRANSVIEW', @_ );
   $self->add_new_track_protein( 'cow_protein',         'Cow proteins', $POS++, @_ );
   $self->add_new_track_protein( 'horse_protein',    'Horse proteins',      $POS++, @_ );
   $self->add_new_track_protein( 'medaka_protein',      'Medaka proteins', $POS++, @_ );
@@ -1132,7 +1132,7 @@ sub ADD_ALL_PROTEIN_FEATURES {
   $self->add_new_track_protein( 'Similarity_Metazoa',   "Similarity Metazoa", $POS++, @_ );
   $self->add_new_track_protein( 'Similarity_Eukaryota', "Similarity Eukaryota", $POS++, @_ );
 
-  $self->add_new_track_protein( 'AedesBlast',      "BLAST Drosophila", $POS++, @_ );
+  $self->add_new_track_protein( 'AedesBlast',      "BLAST Aedes", $POS++, 'URL_KEY' => 'AEDES_TRANSVIEW',  @_ );
   $self->add_new_track_protein( 'DrosophilaBlast',      "BLAST Drosophila", $POS++, 'URL_KEY' => 'DROSOPHILABLAST', @_ );
   $self->add_new_track_protein( 'UniprotBlast',         "BLAST UniProtKB", $POS++, @_ );
   $self->add_new_track_protein( 'anopheles_protein',    "Anopheles protein", $POS++, @_ );
@@ -1339,13 +1339,13 @@ sub ADD_GENE_TRACKS {
                              'database' => 'vega', 'available' => 'database_features ENSEMBL_VEGA.OTTER',
                              'gene_col'             => sub { return $_[0]->biotype.'_'.$_[0]->status; },
                              'gene_label'           => sub { $_[0]->external_name || $_[0]->stable_id; },
-                             'glyphset' => 'evega_gene', 'label_threshold' => 500, 'on' => 'off', 
+                             'glyphset' => 'evega_gene', 'label_threshold' => 500,# 'on' => 'off', 
                                @_ );
   $self->add_new_track_gene( 'otter_external', 'Vega External Genes', 'vega_gene_external', $POS++,
                              'database' => 'vega', 'available' => 'database_features ENSEMBL_VEGA.OTTER_EXTERNAL',
                               'gene_col'            => sub { return $_[0]->biotype.'_'.$_[0]->status; },
                              'gene_label'           => sub { $_[0]->external_name || $_[0]->stable_id; },
-                             'glyphset' => 'evega_gene', 'label_threshold' => 500, 'on' => 'off', 
+                             'glyphset' => 'evega_gene', 'label_threshold' => 500,# 'on' => 'off', 
                               @_ );
   $self->add_new_track_gene( 'flybase', 'Flybase Genes', 'flybase_gene', $POS++,
     'gene_label'           => sub { return $_[0]->biotype eq 'bacterial_contaminant' ? 'Bac. cont.' : ( $_[0]->biotype eq 'pseudogene' ? 'Pseudogene' : ( $_[0]->external_name || 'NOVEL' ) ) },

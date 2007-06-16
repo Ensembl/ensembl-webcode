@@ -133,7 +133,7 @@ warn "Parsing species $sp ".gmtime();
 
   my $mapmaster = sprintf("%s.%s.reference", $sp, $species_defs->get_config($sp,'ENSEMBL_GOLDEN_PATH'));
   $shash->{$mapmaster}->{mapmaster} = "$SiteDefs::ENSEMBL_BASE_URL/das/$mapmaster";
-  $shash->{$mapmaster}->{description} = sprintf("%s Reference server based on %s assembly. Contains %d top level entries.", $sp, $species_defs->get_config($sp,'ENSEMBL_GOLDEN_PATH'), @$toplevel_slices );
+  $shash->{$mapmaster}->{description} = sprintf("%s Reference server based on %s assembly. Contains %d top level entries.", $sp, $species_defs->get_config($sp,'ENSEMBL_GOLDEN_PATH'), 0+@$toplevel_slices );
 # my $sl = $thash{$search_info->{'MAPVIEW1_TEXT'} || $search_info->{'DEFAULT1_TEXT'}} || $toplevel_slices[0];
     #warn Data::Dumper::Dumper(\%thash);
 
@@ -192,8 +192,7 @@ sub entry_points {
 sub dsn {
   my( $sources, $file ) = @_;
   open FH, ">$file";
-  print FH qq(
-<?xml version="1.0" standalone="no"?>
+  print FH qq(<?xml version="1.0" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="/das/das.xsl"?>
 <!DOCTYPE DASDSN SYSTEM "http://www.biodas.org/dtd/dasdsn.dtd">
 <DASDSN>);

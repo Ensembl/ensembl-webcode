@@ -1,5 +1,3 @@
-# This is ditag data showing regulatory regions
-#
 package EnsEMBL::Web::Object::DAS::ditags_rr;
 
 use strict;
@@ -70,7 +68,7 @@ sub Features {
 
 	    my $group = {
 		'ID' => $id,
-		'LINK' => [ {text => 'More info', href => "http://www.ensembl.org/$species/CAGE.html"} ],
+		'LINK' => [ {text => 'More info', href => "http://www.ensembl.org/$species/ditags/CHIP_PET.html"} ],
 		'TYPE' =>  $ft->analysis->logic_name,
 		'NOTE'        => ["tag_count: $tag_count", $g_location],
 	    };
@@ -82,7 +80,7 @@ sub Features {
 		'TYPE'        => $ft->ditag_side || '', 
 		'METHOD'      => $ft->analysis->logic_name,
 		'START'       => $ft->seq_region_start,
-		'END'         => $ft->seq_region_end
+		'END'         => $ft->seq_region_end,
 		'ORIENTATION' => $self->ori($ft->seq_region_strand),
 		'NOTE'        => ["tag_count: $tag_count"],
 		'GROUP' => [$group], 

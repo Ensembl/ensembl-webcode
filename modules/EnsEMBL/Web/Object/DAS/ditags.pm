@@ -12,8 +12,8 @@ my %ditag_analysis = (
 	FANTOM_GIS_PET => 1,
 	GIS_PET_Encode => 1,
 	GIS_PET => 1,
-	CHIP_PET => 1,
-	FANTOM_CAGE => 1
+#	CHIP_PET => 1,
+#	FANTOM_CAGE => 1
 	);
 
 sub Types {
@@ -126,84 +126,6 @@ sub Stylesheet {
     return qq{
 <STYLESHEET version="1.0">
  <CATEGORY id="default">
-    <TYPE id="FANTOM_GSC_PET-R">
-      <GLYPH>
-         <ANCHORED_ARROW>
-           <HEIGHT>10</HEIGHT>
-           <BGCOLOR>darkolivegreen1</BGCOLOR>
-           <FGCOLOR>darkolivegreen1</FGCOLOR>
-           <BAR_STYLE>line</BAR_STYLE>
-           <NO_ANCHOR>1</NO_ANCHOR>
-           <BUMP>1</BUMP>
-           <FONT>sanserif</FONT>
-         </ANCHORED_ARROW>
-      </GLYPH>
-    </TYPE>
-    <TYPE id="FANTOM_GSC_PET-L">
-      <GLYPH>
-         <ANCHORED_ARROW>
-           <HEIGHT>10</HEIGHT>
-           <BGCOLOR>darkolivegreen1</BGCOLOR>
-           <FGCOLOR>darkolivegreen1</FGCOLOR>
-           <BAR_STYLE>line</BAR_STYLE>
-           <NO_ANCHOR>1</NO_ANCHOR>
-           <BUMP>1</BUMP>
-           <FONT>sanserif</FONT>
-         </ANCHORED_ARROW>
-      </GLYPH>
-    </TYPE>
-    <TYPE id="FANTOM_GIS_PET-R">
-      <GLYPH>
-         <ANCHORED_ARROW>
-           <HEIGHT>10</HEIGHT>
-           <BGCOLOR>lightblue1</BGCOLOR>
-           <FGCOLOR>lightblue1</FGCOLOR>
-           <BAR_STYLE>line</BAR_STYLE>
-           <NO_ANCHOR>1</NO_ANCHOR>
-           <BUMP>1</BUMP>
-           <FONT>sanserif</FONT>
-         </ANCHORED_ARROW>
-      </GLYPH>
-    </TYPE>
-    <TYPE id="FANTOM_GIS_PET-L">
-      <GLYPH>
-         <ANCHORED_ARROW>
-           <HEIGHT>10</HEIGHT>
-           <BGCOLOR>lightblue1</BGCOLOR>
-           <FGCOLOR>lightblue1</FGCOLOR>
-           <BAR_STYLE>line</BAR_STYLE>
-           <NO_ANCHOR>1</NO_ANCHOR>
-           <BUMP>1</BUMP>
-           <FONT>sanserif</FONT>
-         </ANCHORED_ARROW>
-      </GLYPH>
-    </TYPE>
-    <TYPE id="GIS_PET-R">
-      <GLYPH>
-         <ANCHORED_ARROW>
-           <HEIGHT>10</HEIGHT>
-           <BGCOLOR>lightblue1</BGCOLOR>
-           <FGCOLOR>lightblue1</FGCOLOR>
-           <BAR_STYLE>line</BAR_STYLE>
-           <NO_ANCHOR>1</NO_ANCHOR>
-           <BUMP>1</BUMP>
-           <FONT>sanserif</FONT>
-         </ANCHORED_ARROW>
-      </GLYPH>
-    </TYPE>
-    <TYPE id="GIS_PET-L">
-      <GLYPH>
-         <ANCHORED_ARROW>
-           <HEIGHT>10</HEIGHT>
-           <BGCOLOR>lightblue1</BGCOLOR>
-           <FGCOLOR>lightblue1</FGCOLOR>
-           <BAR_STYLE>line</BAR_STYLE>
-           <NO_ANCHOR>1</NO_ANCHOR>
-           <BUMP>1</BUMP>
-           <FONT>sanserif</FONT>
-         </ANCHORED_ARROW>
-      </GLYPH>
-    </TYPE>
     <TYPE id="CHIP_PET-R">
       <GLYPH>
          <ANCHORED_ARROW>
@@ -248,84 +170,6 @@ sub Stylesheet {
 
  
   <CATEGORY id="group">
-    <TYPE id="FANTOM_GSC_PET-R">
-      <GLYPH>
-         <ANCHORED_ARROW>
-           <HEIGHT>10</HEIGHT>
-           <BGCOLOR>darkolivegreen1</BGCOLOR>
-           <FGCOLOR>darkolivegreen1</FGCOLOR>
-           <BAR_STYLE>line</BAR_STYLE>
-           <NO_ANCHOR>1</NO_ANCHOR>
-           <BUMP>1</BUMP>
-           <FONT>sanserif</FONT>
-         </ANCHORED_ARROW>
-      </GLYPH>
-    </TYPE>
-    <TYPE id="FANTOM_GSC_PET-L">
-      <GLYPH>
-         <ANCHORED_ARROW>
-           <HEIGHT>10</HEIGHT>
-           <BGCOLOR>darkolivegreen1</BGCOLOR>
-           <FGCOLOR>darkolivegreen1</FGCOLOR>
-           <BAR_STYLE>line</BAR_STYLE>
-           <NO_ANCHOR>1</NO_ANCHOR>
-           <BUMP>1</BUMP>
-           <FONT>sanserif</FONT>
-         </ANCHORED_ARROW>
-      </GLYPH>
-    </TYPE>
-    <TYPE id="FANTOM_GIS_PET-R">
-      <GLYPH>
-         <ANCHORED_ARROW>
-           <HEIGHT>10</HEIGHT>
-           <BGCOLOR>lightblue1</BGCOLOR>
-           <FGCOLOR>lightblue1</FGCOLOR>
-           <BAR_STYLE>line</BAR_STYLE>
-           <NO_ANCHOR>1</NO_ANCHOR>
-           <BUMP>1</BUMP>
-           <FONT>sanserif</FONT>
-         </ANCHORED_ARROW>
-      </GLYPH>
-    </TYPE>
-    <TYPE id="FANTOM_GIS_PET-L">
-      <GLYPH>
-         <ANCHORED_ARROW>
-           <HEIGHT>10</HEIGHT>
-           <BGCOLOR>lightblue1</BGCOLOR>
-           <FGCOLOR>lightblue1</FGCOLOR>
-           <BAR_STYLE>line</BAR_STYLE>
-           <NO_ANCHOR>1</NO_ANCHOR>
-           <BUMP>1</BUMP>
-           <FONT>sanserif</FONT>
-         </ANCHORED_ARROW>
-      </GLYPH>
-    </TYPE>
-    <TYPE id="GIS_PET-R">
-      <GLYPH>
-         <ANCHORED_ARROW>
-           <HEIGHT>10</HEIGHT>
-           <BGCOLOR>lightblue1</BGCOLOR>
-           <FGCOLOR>lightblue1</FGCOLOR>
-           <BAR_STYLE>line</BAR_STYLE>
-           <NO_ANCHOR>1</NO_ANCHOR>
-           <BUMP>1</BUMP>
-           <FONT>sanserif</FONT>
-         </ANCHORED_ARROW>
-      </GLYPH>
-    </TYPE>
-    <TYPE id="GIS_PET-L">
-      <GLYPH>
-         <ANCHORED_ARROW>
-           <HEIGHT>10</HEIGHT>
-           <BGCOLOR>lightblue1</BGCOLOR>
-           <FGCOLOR>lightblue1</FGCOLOR>
-           <BAR_STYLE>line</BAR_STYLE>
-           <NO_ANCHOR>1</NO_ANCHOR>
-           <BUMP>1</BUMP>
-           <FONT>sanserif</FONT>
-         </ANCHORED_ARROW>
-      </GLYPH>
-    </TYPE>
     <TYPE id="CHIP_PET-R">
       <GLYPH>
          <ANCHORED_ARROW>

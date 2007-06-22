@@ -158,7 +158,7 @@ sub init {
         'on'      => "off",
         'pos'       => '6',
         'dep'       => '6',
-        'str'       => 'b',
+        'str'       => 'f',
         'other'     => 'Ensembl',
         'col'       => 'chartreuse3',
         'available' => 'features alternative_assembly',

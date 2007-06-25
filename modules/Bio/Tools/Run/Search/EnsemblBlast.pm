@@ -200,6 +200,8 @@ sub command{
     else{ $param_str .= " $param" }
   }
 
+  $param_str =~ s/[;`<>|&]/ /g;
+
   return join( ' ', $SPECIES_DEFS->ENSEMBL_BLAST_BIN_PATH."/".$self->program_path,
                     $SPECIES_DEFS->ENSEMBL_BLAST_DATA_PATH."/$database", '[[]]', $param_str);
 }

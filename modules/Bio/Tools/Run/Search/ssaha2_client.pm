@@ -118,6 +118,8 @@ sub command {
     my $val = $self->option($param);
     $param_str .= " $param $val";
   }
+  $param_str =~ s/[;`<>|&]/ /g;
+
   my $command = 
     join( ' ',  $exe, -server, $host, -port, $port, $param_str );
 

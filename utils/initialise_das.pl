@@ -93,6 +93,7 @@ my $cdb = Bio::EnsEMBL::Compara::DBSQL::DBAdaptor->new(
   -driver => $cdb_info->{'DRIVER'},
 );
 
+
 my $ta = $cdb->get_NCBITaxonAdaptor();
 my $hash = $species_defs;
 
@@ -192,8 +193,7 @@ sub entry_points {
 sub dsn {
   my( $sources, $file ) = @_;
   open FH, ">$file";
-  print FH qq(
-<?xml version="1.0" standalone="no"?>
+  print FH qq(<?xml version="1.0" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="/das/das.xsl"?>
 <!DOCTYPE DASDSN SYSTEM "http://www.biodas.org/dtd/dasdsn.dtd">
 <DASDSN>);

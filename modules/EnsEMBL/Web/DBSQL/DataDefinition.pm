@@ -69,7 +69,7 @@ sub populate_for_this_user {
   if( $id ) {
     $self->id($id);
   }
-  $self->data($self->adaptor->fetch_id_for_this_user($self- >id)->{$self->id});
+  $self->data($self->adaptor->fetch_id_for_this_user($self->id)->{$self->id});
 }
               
 sub populate {

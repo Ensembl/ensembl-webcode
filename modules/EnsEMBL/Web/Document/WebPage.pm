@@ -17,6 +17,8 @@ use strict;
 use constant 'DEFAULT_RENDERER'   => 'Apache';
 use constant 'DEFAULT_OUTPUTTYPE' => 'HTML';
 use constant 'DEFAULT_DOCUMENT'   => 'Dynamic';
+#use warnings;
+#use Data::Dumper;
 
 use Bio::EnsEMBL::Registry; # Required so we can do the disconnect all call!!
 our @ISA = qw(EnsEMBL::Web::Root Exporter);
@@ -212,7 +214,8 @@ sub groups  {
 
 sub get_user_id {
   my $self = shift;
-  ## do we have one in the current session?
+
+## do we have one in the current session?
   my $user_id = $ENV{'ENSEMBL_USER_ID'};
 
   return $user_id;
@@ -330,8 +333,12 @@ sub _node_hop {
 sub check_access {
   my ($self, $access) = @_;
   my $ok = 0;
-  if ($access eq 'login' && $self->get_user_id) {
-    $ok = 1;
+  
+ # if ($access eq 'login' && $self->get_user_id) {
+   
+  if ($access->{login} && $self->get_user_id) {
+   
+   $ok = 1;
   }
   else {
     return unless $self->get_user_id;

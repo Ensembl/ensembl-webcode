@@ -84,6 +84,7 @@ my %sourcesIds          = ('reference'=>1, map { ( $_ => $sources->{$_}{'source_
 require EnsEMBL::Web::SpeciesDefs; 
 my $species_info;
 my $species_defs = EnsEMBL::Web::SpeciesDefs->new();
+my $sitetype = ucfirst(lc($species_defs->ENSEMBL_SITETYPE)) || 'Ensembl';
 my $cdb_info = $species_defs->{_storage}->{Multi}->{databases}->{ENSEMBL_COMPARA};
 my $cdb = Bio::EnsEMBL::Compara::DBSQL::DBAdaptor->new(
   -dbname => $cdb_info->{'NAME'},
@@ -92,7 +93,6 @@ my $cdb = Bio::EnsEMBL::Compara::DBSQL::DBAdaptor->new(
   -user   => $cdb_info->{'USER'},
   -driver => $cdb_info->{'DRIVER'},
 );
-
 
 my $ta = $cdb->get_NCBITaxonAdaptor();
 my $hash = $species_defs;
@@ -163,7 +163,7 @@ warn "Parsing species $sp ".gmtime();
   }
 }
 
-sources( $shash, "$SERVERROOT/htdocs/das/sources" );
+sources( $shash, "$SERVERROOT/htdocs/das/sources", $sitetype );
 dsn(     $shash, "$SERVERROOT/htdocs/das/dsn"     );
 
 print STDERR sprintf("%d sources are active\n", scalar(keys %$shash));
@@ -213,10 +213,11 @@ sub dsn {
 }
 
 sub sources {
-  my( $sources, $file ) = @_;
+  my( $sources, $file,$sitetype ) = @_;
   open FH, ">$file";
   my ($day, $month, $year) = (localtime)[3,4,5];
   my $today = sprintf("%04d-%02d-%02d", $year + 1900, $month + 1, $day);
+  my $email = ($sitetype eq 'Vega') ? "vega-helpdesk\@sanger.ac.uk" : "helpdesk\@ensembl.org";
   my %taxon_ids = ();
   print FH qq(<?xml version="1.0" encoding="UTF-8" ?>
 <?xml-stylesheet type="text/xsl" href="/das/das.xsl"?>
@@ -227,7 +228,15 @@ sub sources {
     (my $vsp = $species) =~ s/\_/ /g;
     my $source = pop @n;
     my $assembly = join('.', @n);
-    my $id = sprintf("ENSEMBL_%s_%s", $sourcesIds{$source} || $source, $assembly);
+	my $id;
+	if ($sitetype eq 'Vega') {
+		my $sp = $species;
+		$sp =~ s/^(\w)[A-Za-z]*_(\w{3}).*/$1$2/;
+		$id = sprintf("VEGA_%s_%s_%s", $sourcesIds{$source} || $source, $sp, $assembly);
+	}
+	else {
+		$id = sprintf("ENSEMBL_%s_%s", $sourcesIds{$source} || $source, $assembly);
+	}
     my $capability = $source eq 'reference' ?  qq(
       <CAPABILITY  type="das1:entry_points"
                    query_uri="$SiteDefs::ENSEMBL_BASE_URL/das/$dsn/entry_points" />
@@ -243,7 +252,7 @@ sub sources {
     $taxon_ids{$vsp} ||= $ta->fetch_node_by_name($vsp)->taxon_id;
     print FH qq( 
   <SOURCE uri="$id" title="$dsn" description="$description">
-    <MAINTAINER    email="helpdesk\@ensembl.org" />
+    <MAINTAINER    email="$email" />
     <VERSION       uri="latest"
                    created="$today">
       <PROPERTY    name="label"

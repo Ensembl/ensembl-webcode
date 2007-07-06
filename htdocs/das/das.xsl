@@ -126,7 +126,7 @@ body { background-image: none }
 
 <xsl:template name="release_and_links">
 <div id="release-t">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</div>
-<div id="release"><div>Vega release 25 - <a href="/Multi/newsview?rel=25" title="What's New">July 2007</a></div></div>
+<div id="release"><div>Vega release 25 - <a href="/Multi/newsview?rel=25" title="What's New">June 2007</a></div></div>
 <div id="help"><strong>
   <a href="/">HOME</a> &#183;
   <a href="/das/sources">DAS&#160;SOURCES</a> &#183;

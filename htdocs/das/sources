@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xml-stylesheet type="text/xsl" href="/das/das.xsl"?>
+<SOURCES> 
+  <SOURCE uri="VEGA_6_Cfam_VEGA" title="Canis_familiaris.VEGA.prediction_transcript" description="Annotation source for Canis_familiaris prediction_transcript">
+    <MAINTAINER    email="vega-helpdesk@sanger.ac.uk" />
+    <VERSION       uri="latest"
+                   created="2007-07-06">
+      <PROPERTY    name="label"
+                   value="ENSEMBL" />
+      <COORDINATES uri="ensembl_location" 
+                   taxid="9615"
+                   source="Chromosome"
+                   authority="VEGA"
+                   version="VEGA"
+                   test_range="AJ630363.1.1.180560:4950,60442"/>
+      <CAPABILITY  type="das1:stylesheet"  
+                   query_uri="http://vega.sanger.ac.uk/das/Canis_familiaris.VEGA.prediction_transcript/stylesheet"   />
+      <CAPABILITY  type="das1:features"
+                   query_uri="http://vega.sanger.ac.uk/das/Canis_familiaris.VEGA.prediction_transcript/features"     />
+    </VERSION>
+  </SOURCE> 
+  <SOURCE uri="VEGA_1_Cfam_VEGA" title="Canis_familiaris.VEGA.reference" description="Canis_familiaris Reference server based on VEGA assembly. Contains 154725064 top level entries.">
+    <MAINTAINER    email="vega-helpdesk@sanger.ac.uk" />
+    <VERSION       uri="latest"
+                   created="2007-07-06">
+      <PROPERTY    name="label"
+                   value="ENSEMBL" />
+      <COORDINATES uri="ensembl_location" 
+                   taxid="9615"
+                   source="Chromosome"
+                   authority="VEGA"
+                   version="VEGA"
+                   test_range="12-MHC:1,100000"/>
+      <CAPABILITY  type="das1:entry_points"
+                   query_uri="http://vega.sanger.ac.uk/das/Canis_familiaris.VEGA.reference/entry_points" />
+      <CAPABILITY  type="das1:sequence"
+                   query_uri="http://vega.sanger.ac.uk/das/Canis_familiaris.VEGA.reference/sequence"     />
+      <CAPABILITY  type="das1:features"
+                   query_uri="http://vega.sanger.ac.uk/das/Canis_familiaris.VEGA.reference/features"     />
+    </VERSION>
+  </SOURCE> 
+  <SOURCE uri="VEGA_3_Cfam_VEGA" title="Canis_familiaris.VEGA.transcript" description="Annotation source for Canis_familiaris transcript">
+    <MAINTAINER    email="vega-helpdesk@sanger.ac.uk" />
+    <VERSION       uri="latest"
+                   created="2007-07-06">
+      <PROPERTY    name="label"
+                   value="ENSEMBL" />
+      <COORDINATES uri="ensembl_location" 
+                   taxid="9615"
+                   source="Chromosome"
+                   authority="VEGA"
+                   version="VEGA"
+                   test_range="12-MHC:39954,40266"/>
+      <CAPABILITY  type="das1:stylesheet"  
+                   query_uri="http://vega.sanger.ac.uk/das/Canis_familiaris.VEGA.transcript/stylesheet"   />
+      <CAPABILITY  type="das1:features"
+                   query_uri="http://vega.sanger.ac.uk/das/Canis_familiaris.VEGA.transcript/features"     />
+    </VERSION>
+  </SOURCE> 
+  <SOURCE uri="VEGA_2_Drer_VEGA" title="Danio_rerio.VEGA.karyotype" description="Annotation source for Danio_rerio karyotype">
+    <MAINTAINER    email="vega-helpdesk@sanger.ac.uk" />
+    <VERSION       uri="latest"
+                   created="2007-07-06">
+      <PROPERTY    name="label"
+                   value="ENSEMBL" />
+      <COORDINATES uri="ensembl_location" 
+                   taxid="7955"
+                   source="Chromosome"
+                   authority="VEGA"
+                   version="VEGA"
+                   test_range="1:1,39260753"/>
+      <CAPABILITY  type="das1:stylesheet"  
+                   query_uri="http://vega.sanger.ac.uk/das/Danio_rerio.VEGA.karyotype/stylesheet"   />
+      <CAPABILITY  type="das1:features"
+                   query_uri="http://vega.sanger.ac.uk/das/Danio_rerio.VEGA.karyotype/features"     />
+    </VERSION>
+  </SOURCE> 
+  <SOURCE uri="VEGA_6_Drer_VEGA" title="Danio_rerio.VEGA.prediction_transcript" description="Annotation source for Danio_rerio prediction_transcript">
+    <MAINTAINER    email="vega-helpdesk@sanger.ac.uk" />
+    <VERSION       uri="latest"
+                   created="2007-07-06">
+      <PROPERTY    name="label"
+                   value="ENSEMBL" />
+      <COORDINATES uri="ensembl_location" 
+                   taxid="7955"
+                   source="Chromosome"
+                   authority="VEGA"
+                   version="VEGA"
+                   test_range="BX005006.10.1.232594:3286,36410"/>
+      <CAPABILITY  type="das1:stylesheet"  
+                   query_uri="http://vega.sanger.ac.uk/das/Danio_rerio.VEGA.prediction_transcript/stylesheet"   />
+      <CAPABILITY  type="das1:features"
+                   query_uri="http://vega.sanger.ac.uk/das/Danio_rerio.VEGA.prediction_transcript/features"     />
+    </VERSION>
+  </SOURCE> 
+  <SOURCE uri="VEGA_1_Drer_VEGA" title="Danio_rerio.VEGA.reference" description="Danio_rerio Reference server based on VEGA assembly. Contains 154779840 top level entries.">
+    <MAINTAINER    email="vega-helpdesk@sanger.ac.uk" />
+    <VERSION       uri="latest"
+                   created="2007-07-06">
+      <PROPERTY    name="label"
+                   value="ENSEMBL" />
+      <COORDINATES uri="ensembl_location" 
+                   taxid="7955"
+                   source="Chromosome"
+                   authority="VEGA"
+                   version="VEGA"
+                   test_range="AB:1,100000"/>
+      <CAPABILITY  type="das1:entry_points"
+                   query_uri="http://vega.sanger.ac.uk/das/Danio_rerio.VEGA.reference/entry_points" />
+      <CAPABILITY  type="das1:sequence"
+                   query_uri="http://vega.sanger.ac.uk/das/Danio_rerio.VEGA.reference/sequence"     />
+      <CAPABILITY  type="das1:features"
+                   query_uri="http://vega.sanger.ac.uk/das/Danio_rerio.VEGA.reference/features"     />
+    </VERSION>
+  </SOURCE> 
+  <SOURCE uri="VEGA_3_Drer_VEGA" title="Danio_rerio.VEGA.transcript" description="Annotation source for Danio_rerio transcript">
+    <MAINTAINER    email="vega-helpdesk@sanger.ac.uk" />
+    <VERSION       uri="latest"
+                   created="2007-07-06">
+      <PROPERTY    name="label"
+                   value="ENSEMBL" />
+      <COORDINATES uri="ensembl_location" 
+                   taxid="7955"
+                   source="Chromosome"
+                   authority="VEGA"
+                   version="VEGA"
+                   test_range="1:33600387,33714283"/>
+      <CAPABILITY  type="das1:stylesheet"  
+                   query_uri="http://vega.sanger.ac.uk/das/Danio_rerio.VEGA.transcript/stylesheet"   />
+      <CAPABILITY  type="das1:features"
+                   query_uri="http://vega.sanger.ac.uk/das/Danio_rerio.VEGA.transcript/features"     />
+    </VERSION>
+  </SOURCE> 
+  <SOURCE uri="VEGA_2_Hsap_VEGA" title="Homo_sapiens.VEGA.karyotype" description="Annotation source for Homo_sapiens karyotype">
+    <MAINTAINER    email="vega-helpdesk@sanger.ac.uk" />
+    <VERSION       uri="latest"
+                   created="2007-07-06">
+      <PROPERTY    name="label"
+                   value="ENSEMBL" />
+      <COORDINATES uri="ensembl_location" 
+                   taxid="9606"
+                   source="Chromosome"
+                   authority="VEGA"
+                   version="VEGA"
+                   test_range="11:1,2920189"/>
+      <CAPABILITY  type="das1:stylesheet"  
+                   query_uri="http://vega.sanger.ac.uk/das/Homo_sapiens.VEGA.karyotype/stylesheet"   />
+      <CAPABILITY  type="das1:features"
+                   query_uri="http://vega.sanger.ac.uk/das/Homo_sapiens.VEGA.karyotype/features"     />
+    </VERSION>
+  </SOURCE> 
+  <SOURCE uri="VEGA_6_Hsap_VEGA" title="Homo_sapiens.VEGA.prediction_transcript" description="Annotation source for Homo_sapiens prediction_transcript">
+    <MAINTAINER    email="vega-helpdesk@sanger.ac.uk" />
+    <VERSION       uri="latest"
+                   created="2007-07-06">
+      <PROPERTY    name="label"
+                   value="ENSEMBL" />
+      <COORDINATES uri="ensembl_location" 
+                   taxid="9606"
+                   source="Chromosome"
+                   authority="VEGA"
+                   version="VEGA"
+                   test_range="AP003087.2.1.100403:5972,97651"/>
+      <CAPABILITY  type="das1:stylesheet"  
+                   query_uri="http://vega.sanger.ac.uk/das/Homo_sapiens.VEGA.prediction_transcript/stylesheet"   />
+      <CAPABILITY  type="das1:features"
+                   query_uri="http://vega.sanger.ac.uk/das/Homo_sapiens.VEGA.prediction_transcript/features"     />
+    </VERSION>
+  </SOURCE> 
+  <SOURCE uri="VEGA_1_Hsap_VEGA" title="Homo_sapiens.VEGA.reference" description="Homo_sapiens Reference server based on VEGA assembly. Contains 154781712 top level entries.">
+    <MAINTAINER    email="vega-helpdesk@sanger.ac.uk" />
+    <VERSION       uri="latest"
+                   created="2007-07-06">
+      <PROPERTY    name="label"
+                   value="ENSEMBL" />
+      <COORDINATES uri="ensembl_location" 
+                   taxid="9606"
+                   source="Chromosome"
+                   authority="VEGA"
+                   version="VEGA"
+                   test_range="20:8001,108000"/>
+      <CAPABILITY  type="das1:entry_points"
+                   query_uri="http://vega.sanger.ac.uk/das/Homo_sapiens.VEGA.reference/entry_points" />
+      <CAPABILITY  type="das1:sequence"
+                   query_uri="http://vega.sanger.ac.uk/das/Homo_sapiens.VEGA.reference/sequence"     />
+      <CAPABILITY  type="das1:features"
+                   query_uri="http://vega.sanger.ac.uk/das/Homo_sapiens.VEGA.reference/features"     />
+    </VERSION>
+  </SOURCE> 
+  <SOURCE uri="VEGA_3_Hsap_VEGA" title="Homo_sapiens.VEGA.transcript" description="Annotation source for Homo_sapiens transcript">
+    <MAINTAINER    email="vega-helpdesk@sanger.ac.uk" />
+    <VERSION       uri="latest"
+                   created="2007-07-06">
+      <PROPERTY    name="label"
+                   value="ENSEMBL" />
+      <COORDINATES uri="ensembl_location" 
+                   taxid="9606"
+                   source="Chromosome"
+                   authority="VEGA"
+                   version="VEGA"
+                   test_range="1:54291848,54350780"/>
+      <CAPABILITY  type="das1:stylesheet"  
+                   query_uri="http://vega.sanger.ac.uk/das/Homo_sapiens.VEGA.transcript/stylesheet"   />
+      <CAPABILITY  type="das1:features"
+                   query_uri="http://vega.sanger.ac.uk/das/Homo_sapiens.VEGA.transcript/features"     />
+    </VERSION>
+  </SOURCE> 
+  <SOURCE uri="VEGA_2_Mmus_VEGA" title="Mus_musculus.VEGA.karyotype" description="Annotation source for Mus_musculus karyotype">
+    <MAINTAINER    email="vega-helpdesk@sanger.ac.uk" />
+    <VERSION       uri="latest"
+                   created="2007-07-06">
+      <PROPERTY    name="label"
+                   value="ENSEMBL" />
+      <COORDINATES uri="ensembl_location" 
+                   taxid="10090"
+                   source="Chromosome"
+                   authority="VEGA"
+                   version="VEGA"
+                   test_range="11:1,999986"/>
+      <CAPABILITY  type="das1:stylesheet"  
+                   query_uri="http://vega.sanger.ac.uk/das/Mus_musculus.VEGA.karyotype/stylesheet"   />
+      <CAPABILITY  type="das1:features"
+                   query_uri="http://vega.sanger.ac.uk/das/Mus_musculus.VEGA.karyotype/features"     />
+    </VERSION>
+  </SOURCE> 
+  <SOURCE uri="VEGA_6_Mmus_VEGA" title="Mus_musculus.VEGA.prediction_transcript" description="Annotation source for Mus_musculus prediction_transcript">
+    <MAINTAINER    email="vega-helpdesk@sanger.ac.uk" />
+    <VERSION       uri="latest"
+                   created="2007-07-06">
+      <PROPERTY    name="label"
+                   value="ENSEMBL" />
+      <COORDINATES uri="ensembl_location" 
+                   taxid="10090"
+                   source="Chromosome"
+                   authority="VEGA"
+                   version="VEGA"
+                   test_range="AC102159.10.1.197134:23067,64631"/>
+      <CAPABILITY  type="das1:stylesheet"  
+                   query_uri="http://vega.sanger.ac.uk/das/Mus_musculus.VEGA.prediction_transcript/stylesheet"   />
+      <CAPABILITY  type="das1:features"
+                   query_uri="http://vega.sanger.ac.uk/das/Mus_musculus.VEGA.prediction_transcript/features"     />
+    </VERSION>
+  </SOURCE> 
+  <SOURCE uri="VEGA_1_Mmus_VEGA" title="Mus_musculus.VEGA.reference" description="Mus_musculus Reference server based on VEGA assembly. Contains 154783584 top level entries.">
+    <MAINTAINER    email="vega-helpdesk@sanger.ac.uk" />
+    <VERSION       uri="latest"
+                   created="2007-07-06">
+      <PROPERTY    name="label"
+                   value="ENSEMBL" />
+      <COORDINATES uri="ensembl_location" 
+                   taxid="10090"
+                   source="Chromosome"
+                   authority="VEGA"
+                   version="VEGA"
+                   test_range="3-IDD18_NOD:1,100000"/>
+      <CAPABILITY  type="das1:entry_points"
+                   query_uri="http://vega.sanger.ac.uk/das/Mus_musculus.VEGA.reference/entry_points" />
+      <CAPABILITY  type="das1:sequence"
+                   query_uri="http://vega.sanger.ac.uk/das/Mus_musculus.VEGA.reference/sequence"     />
+      <CAPABILITY  type="das1:features"
+                   query_uri="http://vega.sanger.ac.uk/das/Mus_musculus.VEGA.reference/features"     />
+    </VERSION>
+  </SOURCE> 
+  <SOURCE uri="VEGA_3_Mmus_VEGA" title="Mus_musculus.VEGA.transcript" description="Annotation source for Mus_musculus transcript">
+    <MAINTAINER    email="vega-helpdesk@sanger.ac.uk" />
+    <VERSION       uri="latest"
+                   created="2007-07-06">
+      <PROPERTY    name="label"
+                   value="ENSEMBL" />
+      <COORDINATES uri="ensembl_location" 
+                   taxid="10090"
+                   source="Chromosome"
+                   authority="VEGA"
+                   version="VEGA"
+                   test_range="1-IDD5.1_NOD:76296,125738"/>
+      <CAPABILITY  type="das1:stylesheet"  
+                   query_uri="http://vega.sanger.ac.uk/das/Mus_musculus.VEGA.transcript/stylesheet"   />
+      <CAPABILITY  type="das1:features"
+                   query_uri="http://vega.sanger.ac.uk/das/Mus_musculus.VEGA.transcript/features"     />
+    </VERSION>
+  </SOURCE> 
+  <SOURCE uri="VEGA_2_Sscr_VEGA" title="Sus_scrofa.VEGA.karyotype" description="Annotation source for Sus_scrofa karyotype">
+    <MAINTAINER    email="vega-helpdesk@sanger.ac.uk" />
+    <VERSION       uri="latest"
+                   created="2007-07-06">
+      <PROPERTY    name="label"
+                   value="ENSEMBL" />
+      <COORDINATES uri="ensembl_location" 
+                   taxid="9823"
+                   source="Chromosome"
+                   authority="VEGA"
+                   version="VEGA"
+                   test_range="17-H20q13:1,8199405"/>
+      <CAPABILITY  type="das1:stylesheet"  
+                   query_uri="http://vega.sanger.ac.uk/das/Sus_scrofa.VEGA.karyotype/stylesheet"   />
+      <CAPABILITY  type="das1:features"
+                   query_uri="http://vega.sanger.ac.uk/das/Sus_scrofa.VEGA.karyotype/features"     />
+    </VERSION>
+  </SOURCE> 
+  <SOURCE uri="VEGA_6_Sscr_VEGA" title="Sus_scrofa.VEGA.prediction_transcript" description="Annotation source for Sus_scrofa prediction_transcript">
+    <MAINTAINER    email="vega-helpdesk@sanger.ac.uk" />
+    <VERSION       uri="latest"
+                   created="2007-07-06">
+      <PROPERTY    name="label"
+                   value="ENSEMBL" />
+      <COORDINATES uri="ensembl_location" 
+                   taxid="9823"
+                   source="Chromosome"
+                   authority="VEGA"
+                   version="VEGA"
+                   test_range="CR974569.7.1.104107:14510,53414"/>
+      <CAPABILITY  type="das1:stylesheet"  
+                   query_uri="http://vega.sanger.ac.uk/das/Sus_scrofa.VEGA.prediction_transcript/stylesheet"   />
+      <CAPABILITY  type="das1:features"
+                   query_uri="http://vega.sanger.ac.uk/das/Sus_scrofa.VEGA.prediction_transcript/features"     />
+    </VERSION>
+  </SOURCE> 
+  <SOURCE uri="VEGA_1_Sscr_VEGA" title="Sus_scrofa.VEGA.reference" description="Sus_scrofa Reference server based on VEGA assembly. Contains 154900676 top level entries.">
+    <MAINTAINER    email="vega-helpdesk@sanger.ac.uk" />
+    <VERSION       uri="latest"
+                   created="2007-07-06">
+      <PROPERTY    name="label"
+                   value="ENSEMBL" />
+      <COORDINATES uri="ensembl_location" 
+                   taxid="9823"
+                   source="Chromosome"
+                   authority="VEGA"
+                   version="VEGA"
+                   test_range="6-LRC:1,100000"/>
+      <CAPABILITY  type="das1:entry_points"
+                   query_uri="http://vega.sanger.ac.uk/das/Sus_scrofa.VEGA.reference/entry_points" />
+      <CAPABILITY  type="das1:sequence"
+                   query_uri="http://vega.sanger.ac.uk/das/Sus_scrofa.VEGA.reference/sequence"     />
+      <CAPABILITY  type="das1:features"
+                   query_uri="http://vega.sanger.ac.uk/das/Sus_scrofa.VEGA.reference/features"     />
+    </VERSION>
+  </SOURCE> 
+  <SOURCE uri="VEGA_3_Sscr_VEGA" title="Sus_scrofa.VEGA.transcript" description="Annotation source for Sus_scrofa transcript">
+    <MAINTAINER    email="vega-helpdesk@sanger.ac.uk" />
+    <VERSION       uri="latest"
+                   created="2007-07-06">
+      <PROPERTY    name="label"
+                   value="ENSEMBL" />
+      <COORDINATES uri="ensembl_location" 
+                   taxid="9823"
+                   source="Chromosome"
+                   authority="VEGA"
+                   version="VEGA"
+                   test_range="7-MHC:1172555,1174271"/>
+      <CAPABILITY  type="das1:stylesheet"  
+                   query_uri="http://vega.sanger.ac.uk/das/Sus_scrofa.VEGA.transcript/stylesheet"   />
+      <CAPABILITY  type="das1:features"
+                   query_uri="http://vega.sanger.ac.uk/das/Sus_scrofa.VEGA.transcript/features"     />
+    </VERSION>
+  </SOURCE>
+</SOURCES>

@@ -17,7 +17,7 @@
   <body>
 
 <div id="masthead">
-  <h1><a href="/"><img src="/img/vega.gif" style="width: 111px; height: 40px; vertical-align:bottom; border:0px; padding-bottom:2px" alt="" title="Home" /></a><a href="/" class="home serif">Vega</a>
+  <h1><a href="/"><img src="/img/vega.gif" style="width: 111px; height: 40px; vertical-align:bottom; border:0px; padding-bottom:2px" alt="" title="Home" /></a><a href="/" class="home serif"></a>
   <xsl:apply-templates select="*" mode="masthead" />
   </h1>
 </div>

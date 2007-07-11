@@ -243,6 +243,7 @@ sub check_types {
      blast => [ qw( rna cdna pep dna_seqlevel dna_seqlevel_masked ) ],
      pre       => [ qw( dna_toplevel rna cdna pep dna_seqlevel dna_seqlevel_masked ) ],
      all       => [ qw( cdna pep dna rna) ],
+     nodna     => [ qw( cdna pep rna) ],
     );
 
 
@@ -846,7 +847,7 @@ sub xdformat_blast_indexes {
     system ("$xdformat_command -n $fh");
   }
 
-  my $xdformat_dir = "/mysqlg/dumps/$release_dir/xdformat";
+  my $xdformat_dir = "/dumps/$release_dir/xdformat";
   utils::Tool::check_dir($xdformat_dir);
 
   my $xdformat_files = {};
@@ -866,10 +867,10 @@ sub ssaha_servers {
 
   my $dna_dir;
   if ($DUMPDIR eq $basedir."release-$release/") {
-    $dna_dir  = "/mysqlg/dumps/ssaha2/dna/";  #$basedir."ssaha2/dna/";
+    $dna_dir  = "/dumps/ssaha2/dna/";  #$basedir."ssaha2/dna/";
   } 
   elsif ( $DUMPDIR =~ /^$basedir/ ) {
-    $dna_dir  = "/mysqlg/dumps/ssaha2/dna/"; #$basedir."ssaha2/dna/";
+    $dna_dir  = "/dumps/ssaha2/dna/"; #$basedir."ssaha2/dna/";
   }
   else {
     $dna_dir = $DUMPDIR."/ssaha2/dna/"; 

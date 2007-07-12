@@ -8,8 +8,8 @@ use EnsEMBL::Web::Object::DAS;
 our @ISA = qw(EnsEMBL::Web::Object::DAS);
 
 #originally I was going to group exons to both peptides and transcripts, however this causes
-#duplication of the features by the drawing code - therefore decided to just group to peptides.
-#some code left in case used in future
+#duplication of the features by the drawing code - therefore decided to just group to peptides
+#for now some code left in case used in future.
 
 sub Types {
 	my $self = shift;
@@ -153,7 +153,31 @@ sub Features {
 }
 	
 sub Stylesheet {
-	my $self = shift;
+  my $self = shift;
+  my $stylesheet_structure = {};
+  my $colour_hash = { 
+    'default' => 'grey50',
+    'havana'  => 'dodgerblue4',
+    'ensembl' => 'rust',
+    'flybase' => 'rust',
+    'wornbase' => 'rust',
+    'ensembl_havana_transcript' => 'goldendrod3',
+    'estgene' => 'purple1',
+    'otter'   => 'dodgerblue4',
+  };
+  foreach my $key ( keys %$colour_hash ) {
+    my $colour = $colour_hash->{$key};
+    $stylesheet_structure->{"translation"}{$key ne 'default' ? "exon:$key" : 'default'}=
+      [{ 'type' => 'box', 'attrs' => { 'FGCOLOR' => $colour, 'BGCOLOR' => 'white', 'HEIGHT' => 6  } },
+      ];
+    $stylesheet_structure->{'translation'}{$key ne 'default' ? "exon:$key" : 'default'} =
+      [{ 'type' => 'box', 'attrs' => { 'BGCOLOR' => $colour, 'FGCOLOR' => $colour, 'HEIGHT' => 10  } }];
+    $stylesheet_structure->{"group"}{$key ne 'default' ? "translation:$key" : 'default'} =
+      [{ 'type' => 'line', 'attrs' => { 'STYLE' => 'intron', 'HEIGHT' => 10, 'FGCOLOR' => $colour, 'POINT' => 1 } }];
+  }
+#  warn "in DAS stylesheet";
+#  warn Data::Dumper::Dumper($stylesheet_structure);
+  return $self->_Stylesheet( $stylesheet_structure );
 }
 
 1;

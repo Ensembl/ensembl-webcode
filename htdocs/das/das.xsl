@@ -17,7 +17,7 @@
   <body>
 
 <div id="masthead">
-  <h1><a href="/"><img src="/img/vega.gif" style="width: 111px; height: 40px; vertical-align:bottom; border:0px; padding-bottom:2px" alt="" title="Home" /></a><a href="/" class="home serif">Vega</a>
+  <h1><a href="/"><img src="/img/vega.gif" style="width: 111px; height: 40px; vertical-align:bottom; border:0px; padding-bottom:2px" alt="" title="Home" /></a><a href="/" class="home serif"></a>
   <xsl:apply-templates select="*" mode="masthead" />
   </h1>
 </div>
@@ -351,7 +351,7 @@ body { background-image: none }
 <xsl:template match="DASEP" mode="hack"><xsl:call-template name="hack_js" /></xsl:template>
 
 <xsl:template match="DASEP" mode="title">
-  Ensembl DAS EntryPoints
+  Vega DAS EntryPoints
 </xsl:template>
 
 <xsl:template match="DASEP" mode="masthead">
@@ -422,8 +422,8 @@ body { background-image: none }
 
 <xsl:template match="DASSEQUENCE" mode="hack"><xsl:call-template name="hack_js" /></xsl:template>
 <xsl:template match="DASDNA"      mode="hack"><xsl:call-template name="hack_js" /></xsl:template>
-<xsl:template match="DASSEQUENCE" mode="title">Ensembl Sequence</xsl:template>
-<xsl:template match="DASDNA"      mode="title">Ensembl DNA Sequence</xsl:template>
+<xsl:template match="DASSEQUENCE" mode="title">Vega Sequence</xsl:template>
+<xsl:template match="DASDNA"      mode="title">Vega DNA Sequence</xsl:template>
 
 <xsl:template match="DASSEQUENCE" mode="masthead">
   <a class="section" id="masthead_species"><i>DAS</i></a>
@@ -510,7 +510,7 @@ body { background-image: none }
 
 <xsl:template match="DASTYPES" mode="hack"></xsl:template>
 <xsl:template match="DASTYPES" mode="title">
-  Ensembl <xsl:call-template name="species_name">
+  Vega <xsl:call-template name="species_name">
     <xsl:with-param name="string" select="substring-after( GFF/@href, '/das/' )" />
   </xsl:call-template>&#160;<xsl:call-template name="last_bit">
     <xsl:with-param name="string" select="substring-before( GFF/@href, '/types?' )" />
@@ -538,7 +538,7 @@ body { background-image: none }
 
 <xsl:template match="DASGFF" mode="hack"></xsl:template>
 <xsl:template match="DASGFF" mode="title">
-  Ensembl <xsl:call-template name="species_name">
+  Vega <xsl:call-template name="species_name">
     <xsl:with-param name="string" select="substring-after( GFF/@href, '/das/' )" />
   </xsl:call-template>&#160;<xsl:call-template name="last_bit">
     <xsl:with-param name="string" select="substring-before( GFF/@href, '/features?' )" />
@@ -856,7 +856,7 @@ body { background-image: none }
 <!-- LAST BUT NOT LEAST STYLESHEETS -->
 
 <xsl:template match="DASSTYLE" mode="title">
-  Ensembl DAS StyleSheet
+  Vega DAS StyleSheet
 </xsl:template>
 
 <xsl:template match="DASSTYLE" mode="masthead">

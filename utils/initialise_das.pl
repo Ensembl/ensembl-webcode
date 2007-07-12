@@ -47,6 +47,17 @@ my $sources = {
    where t.seq_region_id = s.seq_region_id',
     'source_id'    => 3,
   },
+  'translation' => {
+	'master_table' => 'gene',
+	'name'         => 'Translation',
+	'query'        => '
+  select sr.name, g.seq_region_start, g.seq_region_end
+    from seq_region sr, gene g, transcript t, translation tr
+   where sr.seq_region_id = g.seq_region_id
+     and g.gene_id = t.gene_id
+     and t.transcript_id = tr.translation_id',
+	'source_id'   => 4,
+  },
   'cagetags' => {
     'master_table' => 'ditag_feature',
     'name'         => 'CAGETags',

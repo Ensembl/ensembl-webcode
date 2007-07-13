@@ -14,17 +14,19 @@ sub Types {
 		];
 }
 
+#gets features on a slice, and adds to those any other features / groups requested
+
 sub Features {
 	my $self = shift;
 	
-	my @segments = $self->Locations;      ##segments requested
 	#parse input parameters
+	my @segments = $self->Locations;      ##segments requested
 	my %fts      = map { $_=>1 } grep { $_ } @{$self->FeatureTypes  || []};
 	my @groups   =               grep { $_ } @{$self->GroupIDs      || []};
 	my @ftids    =               grep { $_ } @{$self->FeatureIDs    || []};
-	my $filters    = {
-		map( { ( $_, 'exon'       ) } @ftids  ),  ## Filter for exon features...
-		map( { ( $_, 'translation' ) } @groups ),  ## Filter for translation features...
+	my $additions    = {
+		map( { ( $_, 'exon'       ) } @ftids  ),  ## other exon features...
+		map( { ( $_, 'translation' ) } @groups ), ## other translation features...
 	};
 
 	my @features;        ## Final array whose reference is returned - simplest way to handle errors/unknowns...
@@ -59,7 +61,7 @@ sub Features {
 				my $transcript_id = $transcript->stable_id;
 				my $strand = $transcript->strand;
 				my $transl_id = $transl->stable_id;
-				delete $filters->{$transl_id}; 				
+				delete $additions->{$transl_id}; #delete this ID if it's in the filter list since				
 				my $translation_group = {
 					'ID'   => $transl_id,
 					'TYPE' => 'translation:'.$transcript->analysis->logic_name,
@@ -71,44 +73,41 @@ sub Features {
 						],
 				};
 				
-				#get positions of translation with respect to the slice requested by das
+				#get positions of coding region with respect to the DAS slice
 				my $cr_start_slice = $transcript->coding_region_start;
 				my $cr_end_slice   = $transcript->coding_region_end;
 				
-				#get positions of translation in chromosome coords
+				#get positions of coding region in genomic coords
 				my $cr_start_genomic = $transcript->coding_region_start + $seg->slice->start -1;
 				my $cr_end_genomic   = $transcript->coding_region_end + $seg->slice->start -1;
 				
-				#get positions of translation in transcript coords
+				#get positions of coding region in transcript coords
 				my $cr_start_transcript = $transcript->cdna_coding_start;
 				my $cr_end_transcript   = $transcript->cdna_coding_end;
 				
-#				warn "$transcript_id:$transl_id:$cr_start_slice-$cr_end_slice:$cr_start_genomic-$cr_end_genomic:$strand";
-#				warn "$transcript_id:$transl_id:$cr_start_slice-$cr_end_slice:$strand";
-				
 			EXON:
 				foreach my $exon (@{$transcript->get_all_Exons()}) {
-					#positions of coding region in slice coordinates
-					my ($exon_coding_start,$exon_coding_end);
-					#positions of coding region in chromosome coordinates
+					my $exon_stable_id = $exon->stable_id;
+
+					#positions of exon coding region in slice coordinates
+					my ($slice_coding_start,$slice_coding_end);
+					#positions of exon coding region in chromosome coordinates
 					my ($genomic_coding_start,$genomic_coding_end);
-					#positions of exon CDS with respect to transcript
+					#positions of exon coding region with respect to transcript
 					my ($transcript_coding_start,$transcript_coding_end);
 					
-					my $exon_stable_id = $exon->stable_id;
-					
-					#get positions of exon with respect to the slice requested by das
-					my $exon_start = $exon->start;
-					my $exon_end = $exon->end;
-#					warn "$exon_stable_id:$exon_end:$exon_start";
+					#get positions of exon with respect to the DAS slice
+					my $slice_exon_start = $exon->start;
+					my $slice_exon_end = $exon->end;
+#					warn "$exon_stable_id:$slice_exon_end:$slice_exon_start";
 					
 					##get genomic coordinates of coding portions of exons
-					if( $exon_start <= $cr_end_slice && $exon_end >= $cr_start_slice ) {
-						delete $filters->{$exon_stable_id};
-						$exon_coding_start = $exon_start < $cr_start_slice ? $cr_start_slice : $exon_start;
-						$exon_coding_end   = $exon_end   > $cr_end_slice   ? $cr_end_slice   : $exon_end;
-						$genomic_coding_start = $exon_coding_start + $seg->slice->start - 1;
-						$genomic_coding_end = $exon_coding_end + $seg->slice->start - 1;
+					if( $slice_exon_start <= $cr_end_slice && $slice_exon_end >= $cr_start_slice ) {
+						delete $additions->{$exon_stable_id};
+						$slice_coding_start = $slice_exon_start < $cr_start_slice ? $cr_start_slice : $slice_exon_start;
+						$slice_coding_end   = $slice_exon_end   > $cr_end_slice   ? $cr_end_slice   : $slice_exon_end;
+						$genomic_coding_start = $slice_coding_start + $seg->slice->start - 1;
+						$genomic_coding_end = $slice_coding_end + $seg->slice->start - 1;
 						
 						##get transcript coordinates of coding portions of exons
 						#positions of this exon in transcript coordinates
@@ -120,6 +119,7 @@ sub Features {
 						$transcript_coding_start = ($coding_start_cdna > $cdna_start ) ? $coding_start_cdna : $cdna_start;
 						$transcript_coding_end = ($coding_end_cdna < $cdna_end) ? $coding_end_cdna : $cdna_end;
 					}
+					#get the next exon if this one is non coding
 					else {
 						next EXON;
 					}
@@ -144,18 +144,19 @@ sub Features {
 	}
 
 	#get additional requested features
-	if ($filters) {
+	if ($additions) {
+
+		#need to go via the gene since cannot get eg transcript from a translation
 		my $geneadap = $self->{data}->{_databases}->get_DBAdaptor($db,$self->real_species)->get_GeneAdaptor;
-		while ( my ($id,$type) = each %{$filters} ) {
-			#need to go via the gene since cannot get eg transcript from a translation
+		while ( my ($extra_id,$type) = each %{$additions} ) {
 			my $gene;
 			if ($type eq 'translation') {
-				next unless ($gene = $geneadap->fetch_by_translation_stable_id($id));
+				next unless ($gene = $geneadap->fetch_by_translation_stable_id($extra_id));
 			}
 			elsif ($type eq 'exon') {
-				next unless ($gene = $geneadap->fetch_by_exon_stable_id($id));
+				next unless ($gene = $geneadap->fetch_by_exon_stable_id($extra_id));
 			}
-			#only allow transcript/translation/exon stable IDs
+			#only allow translation and exon stable IDs
 			else {
 				next;
 			}
@@ -170,16 +171,16 @@ sub Features {
 		TRANS:
 			foreach my $transcript (@{$gene->get_all_Transcripts}) {
 				if ($type eq 'transcript') {
-					next TRANS if ($transcript->stable_id ne $id);
+					next TRANS if ($transcript->stable_id ne $extra_id);
 				}
 				if (my $transl = $transcript->translation()) {
 					if ($type eq 'translation') {
-						next TRANS if ($transl->stable_id ne $id);
+						next TRANS if ($transl->stable_id ne $extra_id);
 					}
 					my $transcript_id = $transcript->stable_id;
 					my $strand = $transcript->strand;
 					my $transl_id = $transl->stable_id;
-					delete $filters->{$transl_id}; 				
+					delete $additions->{$transl_id}; 				
 					my $translation_group = {
 						'ID'   => $transl_id,
 						'TYPE' => 'translation:'.$transcript->analysis->logic_name,
@@ -191,11 +192,11 @@ sub Features {
 							],
 					};
 					
-					#get positions of translation with respect to the genomic slice
+					#get positions of translation in genomic coordinates
 					my $cr_start_genomic = $transcript->coding_region_start;
 					my $cr_end_genomic   = $transcript->coding_region_end;
 
-#					warn "1.$cr_start_genomic--$cr_end_genomic"; 				   
+#					warn "1.$cr_start_genomic--$cr_end_genomic";
 					
 					#get positions of translation in transcript coords
 					my $cr_start_transcript = $transcript->cdna_coding_start;
@@ -204,17 +205,15 @@ sub Features {
 #					warn "2.$cr_start_transcript--$cr_end_transcript";
 				EXON:
 					foreach my $exon (@{$transcript->get_all_Exons()}) {
+						my $exon_stable_id = $exon->stable_id;
 						if ($type eq 'exon') {
-							next EXON if ($exon->stable_id ne $id);
+							next EXON if ($exon_stable_id ne $extra_id);
 						}
-						#positions of coding region in slice coordinates
-						my ($exon_coding_start,$exon_coding_end);
+
 						#positions of coding region in chromosome coordinates
 						my ($genomic_coding_start,$genomic_coding_end);
 						#positions of exon CDS with respect to transcript
 						my ($transcript_coding_start,$transcript_coding_end);
-						
-						my $exon_stable_id = $exon->stable_id;
 						
 						#get positions of exon with respect to the slice requested by das
 						my $exon_start = $exon->start;
@@ -223,10 +222,8 @@ sub Features {
 						
 						##get genomic coordinates of coding portions of exons
 						if( $exon_start <= $cr_end_genomic && $exon_end >= $cr_start_genomic ) {
-							$exon_coding_start = $exon_start < $cr_start_genomic ? $cr_start_genomic : $exon_start;
-							$exon_coding_end   = $exon_end   > $cr_end_genomic   ? $cr_end_genomic   : $exon_end;
-							$genomic_coding_start = $exon_coding_start;
-							$genomic_coding_end = $exon_coding_end;
+							$genomic_coding_start = $exon_start < $cr_start_genomic ? $cr_start_genomic : $exon_start;
+							$genomic_coding_end = $exon_end   > $cr_end_genomic   ? $cr_end_genomic   : $exon_end;
 							
 							##get transcript coordinates of coding portions of exons
 							#positions of this exon in transcript coordinates
@@ -268,8 +265,7 @@ sub Features {
 	return \@features;
 }
 
-
-#copied amost exactly from the transcript stylesheet
+#copied almost exactly from the transcript stylesheet
 sub Stylesheet {
 	my $self = shift;
 	my $stylesheet_structure = {};

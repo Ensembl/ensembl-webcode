@@ -57,7 +57,7 @@ sub Features {
   } else {
     @dbs = ('core');  ## default = core...;
   }
-warn @logic_names;
+#warn @logic_names;
   foreach (@dbs) {
     my $T = $self->{data}->{_databases}->get_DBAdaptor($_,$self->real_species);
     $dba_hashref->{$_}=$T if $T;
@@ -78,6 +78,7 @@ warn @logic_names;
     map( { ( $_, 'transcript' ) } @groups )   ## Filter for transcript features...
   };
   my $no_filters = {};
+
 
 ## First let us look at feature IDs - these prediction transcript exons...
 ## Prediction transcript exons have form 
@@ -109,10 +110,9 @@ warn @logic_names;
         my $gsi = $gene->stable_id;
         delete $filters->{$gsi}; # This comes off a segment so make sure it isn't filtered!
         $no_filters->{$gsi} = 1;
-warn $gsi;
         my $trans_arrayref = [];
         foreach my $transcript ( @{$gene->get_all_Transcripts} ) {
-          warn $transcript->analysis->logic_name," (",join(',',@logic_names),")";
+#          warn $transcript->analysis->logic_name," (",join(',',@logic_names),")";
           next if  defined $logic_names[0] && 
                !$logic_name_filter{ $transcript->analysis->logic_name };
           my $tsi = $transcript->stable_id;
@@ -327,6 +327,8 @@ warn $gsi;
       }
     }
   }
+
+
 ### Part 7: Return the reference to an array of the slice specific hashes.
   push @features, values %features;
   return \@features;
@@ -336,7 +338,7 @@ sub _group_info {
 ## Return the links... note main difference between two tracks is the "enhanced transcript" returns more links (GV/PV) and external entries...
   my( $self, $transcript, $gene, $db ) = @_;
   return
-    'LINK' => [ { 'text' => 'e! TransView '.$transcript->stable_id ,
+    'LINK' => [ { 'text' => 'TransView '.$transcript->stable_id ,
                   'href' => sprintf( $self->{'templates'}{'transview_URL'}, $transcript->stable_id, $db ) }
     ];
 }

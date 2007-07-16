@@ -1087,8 +1087,8 @@ sub get_groupsymbol{
 sub RENDER_histogram_simple {
   my( $self, $configuration ) = @_;
 
-# Display histogram only on a reverse strand
-  return if ($configuration->{'STRAND'} == 1);
+# Display histogram only on a reverse strand if the track is configured to be shown on both strands
+  return if ($configuration->{'strand'} eq 'b' && $self->strand == 1);
 
   my $empty_flag = 1;
 
@@ -1235,8 +1235,8 @@ sub RENDER_histogram_simple {
 sub RENDER_signalmap {
   my( $self, $configuration ) = @_;
 
-# Display histogram only on a reverse strand
-  return if ($configuration->{'STRAND'} == 1);
+# Display histogram only on a reverse strand if the track is configured to be shown on both strands
+  return if ($configuration->{'strand'} eq 'b' && $self->strand == 1);
 
   my @features = sort { $a->das_score <=> $b->das_score  } @{$configuration->{'features'}};
     
@@ -1376,8 +1376,8 @@ sub RENDER_signalmap {
 sub RENDER_colourgradient{
   my( $self, $configuration ) = @_;
 
-# Display histogram only on a reverse strand
-  return if ($configuration->{'STRAND'} == 1);
+# Display histogram only on a reverse strand if the track is configured to be shown on both strands
+  return if ($configuration->{'strand'} eq 'b' && $self->strand == 1);
 #    my @features = sort { abs($a->das_score) <=> abs($b->das_score)  } @{$configuration->{'features'}};
   my @features = sort { ($a->das_score) <=> ($b->das_score)  } @{$configuration->{'features'}};
     
@@ -1428,10 +1428,15 @@ sub RENDER_colourgradient{
     my $width = ($END - $START +1);
     my $score = $configuration->{'fg_data'} eq 'o' ? ($f->das_score || 0) : ((($f->das_score || 0) - $min_value) * 100 / $score_range);
 
-    if ($score < $min_value) {
-      $score = $min_value;
-    } elsif ($score > $max_value) {
-      $score = $max_value;
+#    if ($score < $min_value) {
+#      $score = $min_value;
+#    } elsif ($score > $max_value) {
+#      $score = $max_value;
+#    }
+    if ($score < $min_score) {
+      $score = $min_score;
+    } elsif ($score > $max_score) {
+      $score = $max_score;
     }
     my $Composite = new Sanger::Graphics::Glyph::Composite({
       'y'         => 0,

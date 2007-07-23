@@ -47,11 +47,14 @@ sub Features {
 			next;
 		}
 		#each slice is added irrespective of whether there is any data
-		my $slice_name = $seg->slice->seq_region_name.':'.$seg->slice->start.','.$seg->slice->end.':'.$seg->slice->strand;
+		my $slice_genomic_start = $seg->slice->start;
+		my $slice_genomic_end = $seg->slice->end;
+
+		my $slice_name = $seg->slice->seq_region_name.":$slice_genomic_start,$slice_genomic_end:".$seg->slice->strand;
 		$features->{$slice_name}= {
 			'REGION'   => $seg->slice->seq_region_name,
-			'START'    => $seg->slice->start,
-			'STOP'     => $seg->slice->end,
+			'START'    => $slice_genomic_start,
+			'STOP'     => $slice_genomic_end,
 			'FEATURES' => [],
 		};
 
@@ -78,8 +81,8 @@ sub Features {
 				my $cr_end_slice   = $transcript->coding_region_end;
 				
 				#get positions of coding region in genomic coords
-				my $cr_start_genomic = $transcript->coding_region_start + $seg->slice->start -1;
-				my $cr_end_genomic   = $transcript->coding_region_end + $seg->slice->start -1;
+				my $cr_start_genomic = $transcript->coding_region_start + $slice_genomic_start -1;
+				my $cr_end_genomic   = $transcript->coding_region_end +$slice_genomic_end -1;
 				
 				#get positions of coding region in transcript coords
 				my $cr_start_transcript = $transcript->cdna_coding_start;
@@ -88,6 +91,12 @@ sub Features {
 			EXON:
 				foreach my $exon (@{$transcript->get_all_Exons()}) {
 					my $exon_stable_id = $exon->stable_id;
+
+					#positions of CDS of this exon in transcript coordinates
+					my $coding_start_cdna = $exon->cdna_coding_start($transcript);
+					my $coding_end_cdna = $exon->cdna_coding_end($transcript);
+					#skip if the exon is not coding
+					next EXON unless ($coding_start_cdna && $coding_end_cdna);
 
 					#positions of exon coding region in slice coordinates
 					my ($slice_coding_start,$slice_coding_end);
@@ -99,30 +108,62 @@ sub Features {
 					#get positions of exon with respect to the DAS slice
 					my $slice_exon_start = $exon->start;
 					my $slice_exon_end = $exon->end;
-#					warn "$exon_stable_id:$slice_exon_end:$slice_exon_start";
+
+					#get positions of exons in chromosome coordinates
+					my $exon_start_genomic = $slice_genomic_start + $slice_exon_start;
+					my $exon_end_genomic =  $slice_genomic_start + $slice_exon_end;
+#					if ($exon_stable_id eq 'OTTHUME00000732636') {
+#						warn "$exon_stable_id:$slice_exon_start:$slice_exon_end";
+#						warn "$exon_stable_id:$exon_start_genomic:$exon_end_genomic";
+#						warn "slice coordinates are $slice_genomic_start:$slice_genomic_end";
+#					}
 					
-					##get genomic coordinates of coding portions of exons
-					if( $slice_exon_start <= $cr_end_slice && $slice_exon_end >= $cr_start_slice ) {
-						delete $additions->{$exon_stable_id};
-						$slice_coding_start = $slice_exon_start < $cr_start_slice ? $cr_start_slice : $slice_exon_start;
-						$slice_coding_end   = $slice_exon_end   > $cr_end_slice   ? $cr_end_slice   : $slice_exon_end;
-						$genomic_coding_start = $slice_coding_start + $seg->slice->start - 1;
-						$genomic_coding_end = $slice_coding_end + $seg->slice->start - 1;
-						
-						##get transcript coordinates of coding portions of exons
-						#positions of this exon in transcript coordinates
-						my $cdna_start = $exon->cdna_start($transcript);
-						my $cdna_end   = $exon->cdna_end($transcript);
-						#positions of CDS of this exon in transcript coordinates
-						my $coding_start_cdna = $exon->cdna_coding_start($transcript);
-						my $coding_end_cdna = $exon->cdna_coding_end($transcript);
+#					warn "end too long:$exon_stable_id" if ($exon_end_genomic > $slice_genomic_end);
+#					warn "start too short $exon_stable_id" if ($exon_start_genomic < 1);
+
+					#filter exons to only show that which overlaps the slice
+					next EXON unless ($exon_start_genomic < $slice_genomic_end && $exon_end_genomic > $slice_genomic_start);
+
+					delete $additions->{$exon_stable_id};
+					$slice_coding_start = $slice_exon_start < $cr_start_slice ? $cr_start_slice : $slice_exon_start;
+					$slice_coding_end   = $slice_exon_end   > $cr_end_slice   ? $cr_end_slice   : $slice_exon_end;
+					$genomic_coding_start = $slice_coding_start + $seg->slice->start - 1;
+					$genomic_coding_end = $slice_coding_end + $seg->slice->start - 1;
+					
+					if ($exon_stable_id eq 'OTTHUME00000732636') {
+						warn "$exon_stable_id:\$slice_exon_start=$slice_exon_start:\$slice_exon_end=$slice_exon_end";
+						warn "$exon_stable_id:\$exon_start_genomic = $exon_start_genomic:\$exon_end_genomic = $exon_end_genomic";
+						warn "\$slice_genomic_start = $slice_genomic_start:\$slice_genomic_end = $slice_genomic_end";
+						warn "\$genomic_coding_start = $genomic_coding_start:\$genomic_coding_end = $genomic_coding_end";
+					}	
+					
+					##get transcript coordinates of coding portions of exons
+					#positions of this exon in transcript coordinates
+					my $cdna_start = $exon->cdna_start($transcript);
+					my $cdna_end   = $exon->cdna_end($transcript);
+					#positions of CDS of this exon in transcript coordinates
+#					my $coding_start_cdna = $exon->cdna_coding_start($transcript);
+#					my $coding_end_cdna = $exon->cdna_coding_end($transcript);
+					warn "non-coding? $exon_stable_id" unless ($coding_start_cdna);
+#					if ($coding_start_cdna) { 
 						$transcript_coding_start = ($coding_start_cdna > $cdna_start ) ? $coding_start_cdna : $cdna_start;
-						$transcript_coding_end = ($coding_end_cdna < $cdna_end) ? $coding_end_cdna : $cdna_end;
+#					} else {
+#						$transcript_coding_start = 	
+					$transcript_coding_end = ($coding_end_cdna < $cdna_end) ? $coding_end_cdna : $cdna_end;
+					
+					#adjust if these regions are beyond either end of the slice requested
+					if  ($genomic_coding_start < $slice_genomic_start) {
+						$transcript_coding_start = $transcript_coding_start - $genomic_coding_start + $slice_genomic_start;
+						$genomic_coding_start = $slice_genomic_start;
+
 					}
-					#get the next exon if this one is non coding
-					else {
-						next EXON;
-					}
+					
+					if ($genomic_coding_end > $slice_genomic_end) {
+						if ($exon_stable_id eq 'OTTHUME00000732636') {warn "diff = ",$genomic_coding_end - $slice_genomic_end;}
+						$transcript_coding_end = $transcript_coding_end - ($genomic_coding_end - $slice_genomic_end);
+						$genomic_coding_end = $slice_genomic_end;
+					}				
+
 					push @{$features->{$slice_name}{'FEATURES'}}, {
 						'ID'          => $exon_stable_id,
 						'TYPE'        => 'exon:'.$transcript->analysis->logic_name,

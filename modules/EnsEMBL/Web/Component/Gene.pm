@@ -1160,7 +1160,7 @@ sub transcripts {
 ##----------------------------------------------------------------##
 
   if ($panel->is_asynchronous('transcripts')) {
-    warn "Asynchronously load transcripts";
+#    warn "Asynchronously load transcripts";
     my $json = "{ components: [ 'EnsEMBL::Web::Component::Gene::transcripts'], fragment: {db: '".$db."', stable_id: '" . $gene->stable_id . "', species: '" . $gene->species . "'} }";
     my $html = "<div id='component_0' class='info'>Loading transcripts...</div><div class='fragment'>$json</div>";
     $panel->add_row($label . " <img src='/img/ajax-loader.gif' width='16' height='16' alt='(loading)' id='loading' />", $html, "$URL=odd");
@@ -1187,6 +1187,7 @@ sub transcripts {
       'panel'      => 'altsplice',
       'leftmenus' => ['Features']
     );
+	$mc->{'ajax'} = $panel->{'ajax'};
     ## Now
     my  $image  = $gene->new_image( $gene_slice, $wuc, [$gene->Obj->stable_id] );
     $image->introduction       = qq($extra\n<table style="width:100%">$rows</table>\n);
@@ -1194,7 +1195,7 @@ sub transcripts {
     $image->menu_container     = $mc;
     $image->set_extra( $gene );
 
-    $panel->add_row( $label, $image->render, "$URL=off" );
+    $panel->add_row( $label, $image->render, "$URL=odd" );
   }
 
 }

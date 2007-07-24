@@ -12,7 +12,7 @@ use strict;
 use warnings;
 use base qw(Sanger::Graphics::Renderer);
 use Sanger::Graphics::JSTools;
-use EnsEMBL::Web::Interface::ZMenuCollection;
+# use EnsEMBL::Web::Interface::ZMenuCollection;
 
 our $VERSION = do { my @r = (q$Revision$ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 

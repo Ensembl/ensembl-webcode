@@ -18,21 +18,28 @@ sub Types {
 }
 
 sub Features {
+
+#when clone coordinates requested, also return chromosomal coordinates to check
+	my $debug = 1;
+
+#for further debugging - allows dumping of coordinates
+	my @dumping_ids = qw(OTTHUME00000732636 OTTHUME00001727300 OTTHUME00001727274 OTTHUME00000721948 OTTHUME00000649284 OTTHUME00001592478  OTTHUME00001594320 OTTHUME00001725389);
+
 ### Return das features...
 ### structure returned is an arrayref of hashrefs, each array element refers to
 ### a different segment, the hashrefs contain segment info (seg type, seg name,
 ### seg start, seg end) and an array of feature hashes
 
-  my $self = shift;
+	my $self = shift;
 
 ###_ Part 1: initialize data structures...
-  my @features;          ## Final array whose reference is returned - simplest way to handle errors/unknowns...
-  my %features;          ## Temporary hash to store segments and features there on...
-  my %genes;             ## Temporary hash to store ensembl gene objects...
-  my $dba_hashref;       ## Hash ref of database handles...
-
+	my @features;          ## Final array whose reference is returned - simplest way to handle errors/unknowns...
+	my %features;          ## Temporary hash to store segments and features there on...
+	my %genes;             ## Temporary hash to store ensembl gene objects...
+	my $dba_hashref;       ## Hash ref of database handles...
+	
 ## (although not implemented at the moment may allow multiple dbs to be connected to..)
-  my @logic_names;       ## List of logic names of transcripts to return...
+	my @logic_names;       ## List of logic names of transcripts to return...
 
 ###_ Part 2: parse the DSN to work out what we want to display
 ### Relevant part of DSN is stored in $ENV{'ENSEMBL_DAS_SUBTYPE'}
@@ -51,43 +58,42 @@ sub Features {
 ###* /das/Homo_sapiens.NCBI36-toplevel.transcript-vega
 ###
 
-  my @dbs = ();
-  my $db;
+	my @dbs = ();
+	my $db;
 
 #  warn  $ENV{'ENSEMBL_DAS_SUBTYPE'};
 #  warn  $ENV{'ENSEMBL_DAS_TYPE'};
 
-  #coordinate system on which features are to be returned
-  my ($assembly,$cs_wanted) = split '-', $ENV{'ENSEMBL_DAS_ASSEMBLY'};
-
-  if( $ENV{'ENSEMBL_DAS_SUBTYPE'} ) {
-    ( $db, @logic_names ) = split /-/, $ENV{'ENSEMBL_DAS_SUBTYPE'};
-    push @dbs, $db;
-  } else {
-    @dbs = ('core');  ## default = core...;
-  }
+	if( $ENV{'ENSEMBL_DAS_SUBTYPE'} ) {
+		( $db, @logic_names ) = split /-/, $ENV{'ENSEMBL_DAS_SUBTYPE'};
+		push @dbs, $db;
+	} else {
+		@dbs = ('core');  ## default = core...;
+	}
 #warn @logic_names;
-  foreach (@dbs) {
-    my $T = $self->{data}->{_databases}->get_DBAdaptor($_,$self->real_species);
-    $dba_hashref->{$_}=$T if $T;
-  }
-  @logic_names = (undef) unless @logic_names;  ## default is all features of this type
-
+	foreach (@dbs) {
+		my $T = $self->{data}->{_databases}->get_DBAdaptor($_,$self->real_species);
+		$dba_hashref->{$_}=$T if $T;
+	}
+	@logic_names = (undef) unless @logic_names;  ## default is all features of this type
+	
 ###_ Part 3: parse CGI parameters to get out feature types, group ids and feature ids
 ###* FeatureTypes - Currently ignored...
 ###* Group IDs    - filter in this case transcripts
 ###* Feature IDs  - filter in ths case exons
-  my @segments = $self->Locations;
-  my %fts      = map { $_=>1 } grep { $_ } @{$self->FeatureTypes  || []};
-  my @groups   =               grep { $_ } @{$self->GroupIDs      || []};
-  my @ftids    =               grep { $_ } @{$self->FeatureIDs    || []};
-
-  my $filters    = {
-    map( { ( $_, 'exon'       ) } @ftids  ),  ## Filter for exon features...
-    map( { ( $_, 'transcript' ) } @groups )   ## Filter for transcript features...
-  };
-  my $no_filters = {};
-
+	my @segments = $self->Locations;
+	my %fts      = map { $_=>1 } grep { $_ } @{$self->FeatureTypes  || []};
+	my @groups   =               grep { $_ } @{$self->GroupIDs      || []};
+	my @ftids    =               grep { $_ } @{$self->FeatureIDs    || []};
+	
+	my $filters    = {
+		map( { ( $_, 'exon'       ) } @ftids  ),  ## Filter for exon features...
+		map( { ( $_, 'transcript' ) } @groups )   ## Filter for transcript features...
+	};
+	my $no_filters = {};
+	
+	#logic names filter
+	my %logic_name_filter = map { $_ ? ($_,1) : () } @logic_names;
 
 ## First let us look at feature IDs - these prediction transcript exons...
 ## Prediction transcript exons have form 
@@ -96,340 +102,540 @@ sub Features {
 
 ## The following are exons ids'
 
-###_ Part 4: Fetch features on the segments requested...
 
-  my %logic_name_filter = map { $_ ? ($_,1) : () } @logic_names;
-  my @projected_segments;
-  foreach my $segment (@segments) {
-	  if( ref($segment) eq 'HASH' && ($segment->{'TYPE'} eq 'ERROR' || $segment->{'TYPE'} eq 'UNKNOWN') ) {
-		  push @features, $segment;
-		  next;
-	  }
-	  if ($cs_wanted) { 
-		  my $projections = $segment->slice->project($cs_wanted);		  
-		  foreach my $proj (@$projections) {
-			  my $slice = $proj->to_Slice();
-			  my $slice_name = $slice->seq_region_name.':'.$slice->start.','.$slice->end.':'.$slice->strand;
-			  warn "new slice name = $slice_name";
-		  }
-	  }
-		 
-	  my $slice_name = $segment->slice->seq_region_name.':'.$segment->slice->start.','.$segment->slice->end.':'.$segment->slice->strand;
-	  ## Each slice is added irrespective of whether there is any data, so we "push"
-	  ## on an empty slice entry...
-	  $features{$slice_name}= {
-		  'REGION'   => $segment->slice->seq_region_name,
-		  'START'    => $segment->slice->start,
-		  'STOP'     => $segment->slice->end,
-		  'FEATURES' => [],
-	  };
-	  $Data::Dumper::Maxdepth=2;
-	  #	warn "SEG = ",Dumper($segment);#->{'type'};
-##	  warn $segment->type;
-	  my $sr_type = $segment->seq_region_type;
-	  warn $sr_type;
-	  #	warn "OBJ = ",Dumper($segment->[1]{'_object'});
-	  
-	  foreach my $db_key ( keys %$dba_hashref ) {
-		  #		warn "SLICE= ",Dumper($segment->slice);
-		  foreach my $gene ( @{$segment->slice->get_all_Genes(undef,$db_key) } ) {
-			  my $gsi = $gene->stable_id;
-			  #		warn "stable-id = $gsi";
-			  delete $filters->{$gsi}; # This comes off a segment so make sure it isn't filtered!
-			  $no_filters->{$gsi} = 1;
-			  my $trans_arrayref = [];
-			  foreach my $transcript ( @{$gene->get_all_Transcripts} ) {
-				  #          warn $transcript->analysis->logic_name," (",join(',',@logic_names),")";
-				  next if  defined $logic_names[0] && 
-					  !$logic_name_filter{ $transcript->analysis->logic_name };
-				  #		  warn $transcript->seq_region_start,":",$transcript->seq_region_end,":",$transcript->strand;
-				  my $tsi = $transcript->stable_id;
-				  my $transobj = { 'obj' => $transcript, 'exons' => [] };
-				  delete $filters->{$tsi}; # This comes off a segment so make sure it isn't filtered!
-				  $no_filters->{$tsi} = 1;
-				  my $start = 1;
-				  foreach my $exon ( @{$transcript->get_all_Exons} ) {
-					  #filter exons to only show that which overlaps the slice
-					  #			next if ($exon->seq_region_start <  $segment->slice->start  $exon->seq_region_end > $segment->slice->end);
-					  my $esi = $exon->stable_id;
-					  delete $filters->{$esi}; # This comes off a segment so make sure it isn't filtered!
-					  push @{ $transobj->{'exons'} }, [ $exon , $start, $start+$exon->length-1 ];
-					  $start += $exon->length;
-					  $no_filters->{$esi} = 1;
-				  }
-#				  warn "$tsi is transcript ID";
-				  if ($tsi eq 'OTTHUMT00000145620') {
-					  warn Dumper($transobj->{'exons'});
-				  }
+###
+#Part 4: Fetch features on the segments requested...
+#The approach is to map all requested slices onto top level, irrespective of their actual coord system
+#- this is done in the Factory. All features are retrieved on this top level coord_system so that partially
+#overlapping features can be retrieved. When features are requested to be returned on a different coordinate
+#system, then this change in coordinates is done at the very end, using the %projection_mappings hash.
+###
 
-				  push @$trans_arrayref,$transobj;
-			  }
-			  $genes{ $gsi } = { 'db' => $db_key, 'obj' => $gene, 'transcripts' => $trans_arrayref  } if @$trans_arrayref;
-		  }
-	  }
-  } ## end of segment loop....
+	#coordinate system on which features are to be returned
+	my ($assembly,$cs_wanted) = split '-', $ENV{'ENSEMBL_DAS_ASSEMBLY'};
 
-###_ Part 5: Fetch features based on group_id and filter_id
+	#identify coordinates of the wanted slice on the requested coordinate system
+	my %projection_mappings;
+	foreach my $segment (@segments) {
+		if( ref($segment) eq 'HASH' && ($segment->{'TYPE'} eq 'ERROR' || $segment->{'TYPE'} eq 'UNKNOWN') ) {
+			push @features, $segment;
+			next;
+		}
+		my $top_level_name = $segment->slice->seq_region_name.':'.$segment->slice->start.','.$segment->slice->end.':'.$segment->slice->strand;
+		if ($cs_wanted) {
+			my $projections = $segment->slice->project($cs_wanted);
+			#need to subtract the previous slice coordinates since positions of all subsequent slices are relative
+			my $last_end = 0;
+			foreach my $proj (@$projections) {
+				my $mappings;
+				my $slice = $proj->to_Slice();				
 
-  my $ga_hashref = {};
+				#get positions of start and end of each projection slice on the original slice
+				my $start_pos = ($slice->strand == 1 ) ? $proj->from_start - $last_end : $proj->from_end - $last_end;
+				my $end_pos   = ($slice->strand == 1 ) ? $proj->from_end   - $last_end : $proj->from_start - $last_end;
+				my $start_pos_slice = $slice->sub_Slice($start_pos,$start_pos,$slice->strand);
+				my $top_level_start = $start_pos_slice->project('toplevel')->[0]->to_Slice->start;
+				my $end_pos_slice   = $slice->sub_Slice($end_pos,$end_pos,$slice->strand);
+				my $top_level_end   = $end_pos_slice->project('toplevel')->[0]->to_Slice->start;
+				$last_end = $proj->from_end;
 
-  foreach my $id ( keys %$filters ) {
-    next unless $filters->{$id};
-    my $gene;
-    my $filter;
-    my $db_key;
-    foreach my $db ( keys %$dba_hashref ) {
-#      foreach my $logic_name (@logic_names) { // should probably filter here - but have to do it post fetch!?!
-      $db_key = $db;
-      $ga_hashref->{$db} ||= $dba_hashref->{$db}->get_GeneAdaptor;
-      if( $filters->{$id} eq 'exon' ) {
-        $gene = $ga_hashref->{$db}->fetch_by_exon_stable_id( $id );
-        $filter = 'exon';
-      } elsif( $gene = $ga_hashref->{$db}->fetch_by_stable_id( $id ) ) {
-        $filter = 'gene';
-      } else {
-        $gene = $ga_hashref->{$db}->fetch_by_transcript_stable_id( $id );
-        $filter = 'transcript';
-      }
-#      $gene = undef if $gene
-#                    && defined $logic_names[0]
-#                    && ! $logic_name_filter{$gene->analysis->logic_name};
-      last if $gene;
-    }
-    next unless $gene;
-    my $gsi = $gene->stable_id;
-    unless( exists $genes{$gsi} ) { ## Gene doesn't exist so we have to store it and grab transcripts and exons...
-      my $trans_arrayref = [];
-      foreach my $transcript ( @{$gene->get_all_Transcripts} ) {
-        next if  defined $logic_names[0] &&
-             !$logic_name_filter{ $transcript->analysis->logic_name };
-        my $tsi = $transcript->stable_id;
-        my $transobj = { 'obj' => $transcript, 'exons' => [] };
-        my $start = 1;
-        foreach my $exon ( @{$transcript->get_all_Exons} ) {
-          my $esi = $exon->stable_id;
-          push @{ $transobj->{'exons'} }, [ $exon , $start, $start+$exon->length-1 ];
-          $start += $exon->length;
-        }
+				my $proj_slice_name = $slice->seq_region_name.':'.$slice->start.','.$slice->end.':'.$slice->strand;
+				$mappings->{'slice_full_name'} = $proj_slice_name;
+				$mappings->{'slice_name'}      = $slice->seq_region_name;
+				$mappings->{'slice_start'}     = $slice->start;
+				$mappings->{'slice_end'}       = $slice->end;
+				$mappings->{'top_level_strand'}= $slice->strand;
+				#reverse start and stop if the strand is negative
+				$mappings->{'top_level_start'} = ($slice->strand == 1) ? $top_level_start : $top_level_end;
+				$mappings->{'top_level_end'}   = ($slice->strand == 1) ? $top_level_end : $top_level_start;
+				push @{$projection_mappings{$top_level_name}}, $mappings; 
+			}
+		}
+	}
+
+	foreach my $segment (@segments) {
+		my $segment_name   = $segment->slice->seq_region_name;
+		my $segment_start  = $segment->slice->start;
+		my $segment_end    = $segment->slice->end;
+		my $segment_strand = $segment->slice->strand;
+		my $slice_name  = "$segment_name:$segment_start,$segment_end:$segment_strand";
+
+		## Each slice is added irrespective of whether there is any data, so we "push"
+		## on an empty slice entry...
+		if ($projection_mappings{$slice_name}) {
+			foreach my $proj (@{$projection_mappings{$slice_name}}) {	
+				$features{$proj->{'slice_full_name'}}= {
+					'REGION'   => $proj->{'slice_name'},
+					'START'    => $proj->{'slice_start'},
+					'STOP'     => $proj->{'slice_end'},
+					'FEATURES' => [],
+				}
+			}
+			if ($debug) {
+				$features{$slice_name}= {
+					'REGION'   => $segment->slice->seq_region_name,
+					'START'    => $segment->slice->start,
+					'STOP'     => $segment->slice->end,
+					'FEATURES' => [],
+				};
+			}
+		}
+		else {
+			$features{$slice_name}= {
+				'REGION'   => $segment->slice->seq_region_name,
+				'START'    => $segment->slice->start,
+				'STOP'     => $segment->slice->end,
+				'FEATURES' => [],
+			};
+		}
+
+		#foreach database get all genes on the
+		foreach my $db_key ( keys %$dba_hashref ) {
+			foreach my $gene ( @{$segment->slice->get_all_Genes(undef,$db_key) } ) {
+				my $gsi = $gene->stable_id;
+				delete $filters->{$gsi}; # This comes off a segment so make sure it isn't filtered!
+				$no_filters->{$gsi} = 1;
+				my $trans_arrayref = [];
+				foreach my $transcript ( @{$gene->get_all_Transcripts} ) {
+					next if  defined $logic_names[0] && 
+						!$logic_name_filter{ $transcript->analysis->logic_name };
+					my $tsi = $transcript->stable_id;
+					my $transobj = { 'obj' => $transcript, 'exons' => [] };
+					delete $filters->{$tsi}; # This comes off a segment so make sure it isn't filtered!
+					$no_filters->{$tsi} = 1;
+					my $start = 1;
+					foreach my $exon ( @{$transcript->get_all_Exons} ) {
+						my $esi = $exon->stable_id;
+						delete $filters->{$esi}; # This comes off a segment so make sure it isn't filtered!
+						push @{ $transobj->{'exons'} }, [ $exon , $start, $start+$exon->length-1 ];
+						$start += $exon->length;
+						$no_filters->{$esi} = 1;
+					}
+					
+					push @$trans_arrayref,$transobj;
+				}
+				$genes{ $gsi } = { 'db' => $db_key, 'obj' => $gene, 'transcripts' => $trans_arrayref  } if @$trans_arrayref;
+			}
+		}
+	} ## end of segment loop....
+
+	###_ Part 5: Fetch features based on group_id and filter_id
+	my $ga_hashref = {};
 	
-        push @{ $genes{$gsi}->{'transcripts'} },$transobj;
-# warn "PU**ED transcript $tsi onto gene $gsi";
-      }
-      $genes{ $gsi } = { 'obj' => $gene, 'transcripts' => $trans_arrayref  } if @$trans_arrayref;
-    }
-    if( $filter eq 'gene' ) { ## Delete all filters on Gene and subsequent exons
-      delete $filters->{$gsi};
-      $no_filters->{$gsi} = 1;
-      foreach my $transobj ( @{ $genes{$gsi}{'transcripts'} } ) {
-        my $transcript = $transobj->{'obj'}; 
-        delete $filters->{$transcript->stable_id};
-        $no_filters->{$transcript->stable_id} = 1;
-        foreach my $exon ( @{$transobj->{'exons'}} ) {
-          $no_filters->{$exon->[0]->stable_id} = 1;
-          delete $filters->{$exon->[0]->stable_id};
-        }
-      }
-    } elsif( $filter eq 'transcript' ) { ## Delete filter on Transcript...
-      foreach my $transobj ( @{ $genes{$gsi}{'transcripts'} } ) {
-        my $transcript = $transobj->{'obj'}; 
-        next unless $transcript->stable_id eq $id;
-        foreach my $exon ( @{$transobj->{'exons'}} ) {
-          $no_filters->{$exon->[0]->stable_id} = 1;
-          delete $filters->{$exon->[0]->stable_id};
-        }
-      }
-    }
-  } ## end of segment loop....
+	foreach my $id ( keys %$filters ) {
+		next unless $filters->{$id};
+		my $gene;
+		my $filter;
+		my $db_key;
+		foreach my $db ( keys %$dba_hashref ) {
+			$db_key = $db;
+			$ga_hashref->{$db} ||= $dba_hashref->{$db}->get_GeneAdaptor;
+			if( $filters->{$id} eq 'exon' ) {
+				$gene = $ga_hashref->{$db}->fetch_by_exon_stable_id( $id );
+				$filter = 'exon';
+			} elsif( $gene = $ga_hashref->{$db}->fetch_by_stable_id( $id ) ) {
+				$filter = 'gene';
+			} else {
+				$gene = $ga_hashref->{$db}->fetch_by_transcript_stable_id( $id );
+				$filter = 'transcript';
+			}
+			last if $gene;
+		}
+		next unless $gene;
+		my $gsi = $gene->stable_id;
+		unless( exists $genes{$gsi} ) { ## Gene doesn't exist so we have to store it and grab transcripts and exons...
+			my $trans_arrayref = [];
+			foreach my $transcript ( @{$gene->get_all_Transcripts} ) {
+				next if  defined $logic_names[0] &&
+					!$logic_name_filter{ $transcript->analysis->logic_name };
+				my $tsi = $transcript->stable_id;
+				my $transobj = { 'obj' => $transcript, 'exons' => [] };
+				my $start = 1;
+				foreach my $exon ( @{$transcript->get_all_Exons} ) {
+					my $esi = $exon->stable_id;
+					push @{ $transobj->{'exons'} }, [ $exon , $start, $start+$exon->length-1 ];
+					$start += $exon->length;
+				}
+				push @{ $genes{$gsi}->{'transcripts'} },$transobj;
+			}
+			$genes{ $gsi } = { 'obj' => $gene, 'transcripts' => $trans_arrayref  } if @$trans_arrayref;
+		}
+		if( $filter eq 'gene' ) { ## Delete all filters on Gene and subsequent exons
+			delete $filters->{$gsi};
+			$no_filters->{$gsi} = 1;
+			foreach my $transobj ( @{ $genes{$gsi}{'transcripts'} } ) {
+				my $transcript = $transobj->{'obj'}; 
+				delete $filters->{$transcript->stable_id};
+				$no_filters->{$transcript->stable_id} = 1;
+				foreach my $exon ( @{$transobj->{'exons'}} ) {
+					$no_filters->{$exon->[0]->stable_id} = 1;
+					delete $filters->{$exon->[0]->stable_id};
+				}
+			}
+		} elsif( $filter eq 'transcript' ) { ## Delete filter on Transcript...
+			foreach my $transobj ( @{ $genes{$gsi}{'transcripts'} } ) {
+				my $transcript = $transobj->{'obj'}; 
+				next unless $transcript->stable_id eq $id;
+				foreach my $exon ( @{$transobj->{'exons'}} ) {
+					$no_filters->{$exon->[0]->stable_id} = 1;
+					delete $filters->{$exon->[0]->stable_id};
+				}
+			}
+		}
+	} ## end of segment loop....
 
 
-## Transview template...
-  $self->{'templates'} ||= {};
-  $self->{'templates'}{'transview_URL'} = sprintf( '%s/%s/transview?transcript=%%s;db=%%s', $self->species_defs->ENSEMBL_BASE_URL, $self->real_species );
-  $self->{'templates'}{'geneview_URL'}  = sprintf( '%s/%s/geneview?gene=%%s;db=%%s',        $self->species_defs->ENSEMBL_BASE_URL, $self->real_species );
-  $self->{'templates'}{'protview_URL'}  = sprintf( '%s/%s/protview?peptide=%%s;db=%%s',     $self->species_defs->ENSEMBL_BASE_URL, $self->real_species );
-  $self->{'templates'}{'r_URL'}         = sprintf( '%s/%s/r?d=%%s;ID=%%s',                  $self->species_defs->ENSEMBL_BASE_URL, $self->real_species );
-
+	## Transview template...
+	$self->{'templates'} ||= {};
+	$self->{'templates'}{'transview_URL'} = sprintf( '%s/%s/transview?transcript=%%s;db=%%s', $self->species_defs->ENSEMBL_BASE_URL, $self->real_species );
+	$self->{'templates'}{'geneview_URL'}  = sprintf( '%s/%s/geneview?gene=%%s;db=%%s',        $self->species_defs->ENSEMBL_BASE_URL, $self->real_species );
+	$self->{'templates'}{'protview_URL'}  = sprintf( '%s/%s/protview?peptide=%%s;db=%%s',     $self->species_defs->ENSEMBL_BASE_URL, $self->real_species );
+	$self->{'templates'}{'r_URL'}         = sprintf( '%s/%s/r?d=%%s;ID=%%s',                  $self->species_defs->ENSEMBL_BASE_URL, $self->real_species );
+	
 ### Part 6: Grab and return features
 ### Now we do all the nasty stuff of retrieving features and creating DAS objects for them...
-  my %slice_hack;
-  foreach my $gene_stable_id ( keys %genes ) {
-    my $gene = $genes{$gene_stable_id}{'obj'};
-    my $db   = $genes{$gene_stable_id}{'db'};
-    foreach my $transobj ( @{ $genes{$gene_stable_id}{'transcripts'} } ) {
-      my $transcript = $transobj->{'obj'};
-      my $transcript_stable_id = $transcript->stable_id;
-      my $transcript_group = {
-        'ID'    => $transcript_stable_id, 
-        'TYPE'  => 'transcript:'.$transcript->analysis->logic_name,
-        'LABEL' =>  sprintf( '%s (%s)', $transcript_stable_id, $transcript->external_name || 'Novel' ),
-        $self->_group_info( $transcript, $gene, $db ) ## Over-riden in enhnced transcripts...
-      };
+	foreach my $gene_stable_id ( keys %genes ) {
+		my $gene = $genes{$gene_stable_id}{'obj'};
+		my $db   = $genes{$gene_stable_id}{'db'};
+		foreach my $transobj ( @{ $genes{$gene_stable_id}{'transcripts'} } ) {
+			my $transcript = $transobj->{'obj'};
+			my $transcript_stable_id = $transcript->stable_id;
+			my $transcript_group = {
+				'ID'    => $transcript_stable_id, 
+				'TYPE'  => 'transcript:'.$transcript->analysis->logic_name,
+				'LABEL' =>  sprintf( '%s (%s)', $transcript_stable_id, $transcript->external_name || 'Novel' ),
+				$self->_group_info( $transcript, $gene, $db ) ## Over-riden in enhnced transcripts...
+			};
+			
+			#get positions of coding region in genomic coordinates
+			my $cr_start_genomic = $transcript->coding_region_start;
+			my $cr_end_genomic   = $transcript->coding_region_end;
+			
+			if( $transobj->{'exons'}[0][0]->slice->strand > 0 ) {
+				$cr_start_genomic += $transobj->{'exons'}[0][0]->slice->start - 1;
+				$cr_end_genomic   += $transobj->{'exons'}[0][0]->slice->start - 1;
+			} else {
+				$cr_start_genomic *= -1;
+				$cr_end_genomic   *= -1;
+				$cr_start_genomic += $transobj->{'exons'}[0][0]->slice->end + 1;
+				$cr_end_genomic   += $transobj->{'exons'}[0][0]->slice->end + 1;
+			}
+			
+		EXON:
+			foreach my $exon_ref ( @{$transobj->{'exons'}}) {
+				my $exon = $exon_ref->[0];
+				
+				#filter exons to only show that which overlaps the slice
+				next EXON unless ($exon->seq_region_start <  $exon->slice->end && $exon->seq_region_end > $exon->slice->start);
+				
+				my $exon_stable_id = $exon->stable_id;
+				my $slice_name = $exon->slice->seq_region_name.':'.$exon->slice->start.','.$exon->slice->end.':'.$exon->slice->strand;
+				
+				$features{$slice_name} = {
+					'REGION' => $exon->slice->seq_region_name,
+					'START'  => $exon->slice->start,
+					'STOP'   => $exon->slice->end,
+					'FEATURES' => [],
+				};
 
-	  #get positions of coding region in genomic coordinates
-      my $cr_start_genomic = $transcript->coding_region_start;
-      my $cr_end_genomic   = $transcript->coding_region_end;
-#	  if ($transcript_stable_id eq 'OTTHUMT00000145620') { warn "1. \$cr_start_genomic = $cr_start_genomic; \$cr_end_genomic = $cr_end_genomic";}
-      if( $transobj->{'exons'}[0][0]->slice->strand > 0 ) {
-        $cr_start_genomic += $transobj->{'exons'}[0][0]->slice->start - 1;
-        $cr_end_genomic   += $transobj->{'exons'}[0][0]->slice->start - 1;
-      } else {
-        $cr_start_genomic *= -1;
-        $cr_end_genomic   *= -1;
-        $cr_start_genomic += $transobj->{'exons'}[0][0]->slice->end + 1;
-        $cr_end_genomic   += $transobj->{'exons'}[0][0]->slice->end + 1;
-      }
-	    if ($transcript_stable_id eq 'OTTHUMT00000152640') { warn "2. \$cr_start_genomic = $cr_start_genomic; \$cr_end_genomic = $cr_end_genomic";}
-  EXON:
-      foreach my $exon_ref ( @{$transobj->{'exons'}}) {
-        my $exon = $exon_ref->[0];
-
-		#filter exons to only show that which overlaps the slice
-		next EXON unless ($exon->seq_region_start <  $exon->slice->end && $exon->seq_region_end > $exon->slice->start);
-
-        my $exon_stable_id = $exon->stable_id;
-        my $slice_name = $exon->slice->seq_region_name.':'.$exon->slice->start.','.$exon->slice->end.':'.$exon->slice->strand;
-#		warn $slice_name;
-        unless( exists $features{$slice_name} ) {
-          $features{$slice_name} = {
-            'REGION' => $exon->slice->seq_region_name,
-            'START'  => $exon->slice->start,
-            'STOP'   => $exon->slice->end,
-            'FEATURES' => [],
-          };
-        }
-
-        unless( exists $no_filters->{$gene_stable_id} || exists $no_filters->{$transcript_stable_id } || exists $no_filters->{$gene_stable_id} ) { ## WE WILL DRAW THIS!!
-          unless( exists $filters->{$exon_stable_id} || exists $filters->{$transcript_stable_id} ) {
-            next;
-          }
-        }
-## Push the features on to the slice specific array
-## Now we have to work out the overlap with coding sequence...
-        my $exon_start_genomic = $exon->seq_region_start;
-        my $exon_end_genomic   = $exon->seq_region_end;
-if ($exon_stable_id eq 'OTTHUME00000732636') {	warn "\$exon_start_genomic = $exon_start_genomic; \$exon_end_genomic = $exon_end_genomic, strand = ",$exon->strand;}
-        my @sub_exons  = ();
-        if( defined $cr_start_genomic ) { ## Translatable genes...
-          my $exon_coding_start;
-          my $exon_coding_end;
-          my $target_start;
-          my $target_end;
-          if( $exon->strand > 0 ) { ## Forward strand...
-            if( $exon_start_genomic < $cr_end_genomic && $exon_end_genomic > $cr_start_genomic ) {
-              $exon_coding_start = $exon_start_genomic < $cr_start_genomic ? $cr_start_genomic : $exon_start_genomic;
-			  $exon_coding_end   = $exon_end_genomic   > $cr_end_genomic   ? $cr_end_genomic   : $exon_end_genomic;
-		
-              $target_start = $exon_start_genomic < $cr_start_genomic ? $cr_start_genomic - $exon_start_genomic + $exon_ref->[1] : $exon_ref->[1];
-              $target_end   = $exon_end_genomic   > $cr_end_genomic   ? $cr_end_genomic   - $exon_start_genomic + $exon_ref->[1] : $exon_ref->[2];
-
-			  #only show region that overlaps the slice requested
-			  if ($exon_coding_start < $exon->slice->start) {
-#				  warn "adjusting start- $exon_coding_start minus ",$exon->slice->start;
-				  $target_start = $target_start + ($exon->slice->start - $exon_coding_start);
-				  $exon_coding_start = $exon->slice->start;
-				  $exon_start_genomic = $exon->slice->start;
+#				warn Dumper(\%features);
+#				exit;
+				
+				unless( exists $no_filters->{$gene_stable_id} || exists $no_filters->{$transcript_stable_id } || exists $no_filters->{$gene_stable_id} ) { ## WE WILL DRAW THIS!!
+					unless( exists $filters->{$exon_stable_id} || exists $filters->{$transcript_stable_id} ) {
+						next;
+					}
+				}
+				## Push the features on to the slice specific array
+				## Now we have to work out the overlap with coding sequence...
+				my $exon_start_genomic = $exon->seq_region_start;
+				my $exon_end_genomic   = $exon->seq_region_end;
+				my @sub_exons  = ();
+				if( defined $cr_start_genomic ) { ## Translatable genes...
+					my $exon_coding_start;
+					my $exon_coding_end;
+					my $target_start;
+					my $target_end;
+					if( $exon->strand > 0 ) { ## Forward strand...
+						if( $exon_start_genomic < $cr_end_genomic && $exon_end_genomic > $cr_start_genomic ) {
+							$exon_coding_start = $exon_start_genomic < $cr_start_genomic ? $cr_start_genomic : $exon_start_genomic;
+							$exon_coding_end   = $exon_end_genomic   > $cr_end_genomic   ? $cr_end_genomic   : $exon_end_genomic;
+							
+							$target_start = $exon_start_genomic < $cr_start_genomic ? $cr_start_genomic - $exon_start_genomic + $exon_ref->[1] : $exon_ref->[1];
+							$target_end   = $exon_end_genomic   > $cr_end_genomic   ? $cr_end_genomic   - $exon_start_genomic + $exon_ref->[1] : $exon_ref->[2];
+							
+							#only show region that overlaps the slice requested
+							if ($exon_coding_start < $exon->slice->start) {
+								$target_start = $target_start + ($exon->slice->start - $exon_coding_start);
+								$exon_coding_start = $exon->slice->start;
+								$exon_start_genomic = $exon->slice->start;
 				  }
-			  if ($exon_coding_end > $exon->slice->end) {
-#				  warn "adjusting end - $exon_coding_end minus ",$exon->slice->end;
-				  $target_end = $target_end - ($exon_coding_end - $exon->slice->end);
-				  $exon_coding_end = $exon->slice->end;
-				  $exon_end_genomic = $exon->slice->end;
+							if ($exon_coding_end > $exon->slice->end) {
+								$target_end = $target_end - ($exon_coding_end - $exon->slice->end);
+								$exon_coding_end = $exon->slice->end;
+								$exon_end_genomic = $exon->slice->end;
 			  }
-              if( $exon_end_genomic > $exon_coding_end ) {
-                push @sub_exons, [ "3'UTR", $exon_coding_end+1, $exon_end_genomic      , $target_end +1, $exon_ref->[2]  ];
-              }
-              push @sub_exons, [ "coding", $exon_coding_start, $exon_coding_end, $target_start, $target_end ];
-              if( $exon_start_genomic < $exon_coding_start ) {
-                push @sub_exons, [ "5'UTR", $exon_start_genomic, $exon_coding_start - 1, $exon_ref->[1], $target_start - 1 ];
-              }
-            } elsif( $exon_end_genomic < $cr_start_genomic ) {
-              push @sub_exons, [ "5'UTR", $exon_start_genomic, $exon_end_genomic,                $exon_ref->[1], $exon_ref->[2] ];
-            } else {
-              push @sub_exons, [ "3'UTR", $exon_start_genomic, $exon_end_genomic,                $exon_ref->[1], $exon_ref->[2] ];
-            }
-          } else {  ## Reverse strand...
-            if( $exon_start_genomic < $cr_end_genomic && $exon_end_genomic > $cr_start_genomic ) {
-#				if ($exon_stable_id eq 'OTTHUME00000680211') {
-#					warn Dumper($exon_ref);
-#					warn "$exon_start_genomic--$cr_start_genomic";
-#					warn "$exon_end_genomic--$cr_end_genomic";
-#					warn $exon->slice->end;
-#				}
-				
-				$exon_coding_start = $exon_start_genomic < $cr_start_genomic ? $cr_start_genomic : $exon_start_genomic;
-				$exon_coding_end   = $exon_end_genomic   > $cr_end_genomic   ? $cr_end_genomic   : $exon_end_genomic;
-				
-				$target_end = $exon_start_genomic < $cr_start_genomic ? $exon_ref->[2] - $cr_start_genomic + $exon_start_genomic : $exon_ref->[2];
-				$target_start = $exon_end_genomic > $cr_end_genomic ? $exon_ref->[1] + $exon_end_genomic - $cr_end_genomic -1 : $exon_ref->[1];
+							if( $exon_end_genomic > $exon_coding_end ) {
+								push @sub_exons, [ "3'UTR", $exon_coding_end+1, $exon_end_genomic, $target_end +1, $exon_ref->[2], $exon->strand ];
+							}
+							push @sub_exons, [ "coding", $exon_coding_start, $exon_coding_end, $target_start, $target_end, $exon->strand ];
+							if( $exon_start_genomic < $exon_coding_start ) {
+								push @sub_exons, [ "5'UTR", $exon_start_genomic, $exon_coding_start - 1, $exon_ref->[1], $target_start - 1, $exon->strand ];
+							}
+						} elsif( $exon_end_genomic < $cr_start_genomic ) {
+							push @sub_exons, [ "5'UTR", $exon_start_genomic, $exon_end_genomic, $exon_ref->[1], $exon_ref->[2],$exon->strand ];
+						} else {
+							push @sub_exons, [ "3'UTR", $exon_start_genomic, $exon_end_genomic, $exon_ref->[1], $exon_ref->[2],$exon->strand ];
+						}
+					} else {  ## Reverse strand...
+						if( $exon_start_genomic < $cr_end_genomic && $exon_end_genomic > $cr_start_genomic ) {							
+							$exon_coding_start = $exon_start_genomic < $cr_start_genomic ? $cr_start_genomic : $exon_start_genomic;
+							$exon_coding_end   = $exon_end_genomic   > $cr_end_genomic   ? $cr_end_genomic   : $exon_end_genomic;
+							
+							$target_end = $exon_start_genomic < $cr_start_genomic ? $exon_ref->[2] - $cr_start_genomic + $exon_start_genomic : $exon_ref->[2];
+							$target_start = $exon_end_genomic > $cr_end_genomic ? $exon_ref->[1] + $exon_end_genomic - $cr_end_genomic -1 : $exon_ref->[1];
+							
+							#only show region that overlaps the slice requested (for clone requests)
+							if ($exon_coding_start < $exon->slice->start) {	
+								$target_end = $target_end - ($exon->slice->start - $exon_coding_start);	
+								$exon_coding_start = $exon->slice->start;
+								$exon_start_genomic = $exon->slice->start;
+							}
+							if ($exon_coding_end > $exon->slice->end) {
+								$target_start = $target_start + ($exon_coding_end - $exon->slice->end);	
+								$exon_coding_end = $exon->slice->end;
+								$exon_end_genomic = $exon->slice->end;
+							}
+							
+							#note coding and non-coding regions
+							push @sub_exons, [ "coding", $exon_coding_start, $exon_coding_end, $target_start, $target_end,$exon->strand ];
+							if( $exon_end_genomic > $exon_coding_end ) {
+								push @sub_exons, [ "5'UTR", $exon_coding_end+1, $exon_end_genomic      , $exon_ref->[1], $target_start - 1,$exon->strand  ];
+							}
+							if( $exon_start_genomic < $exon_coding_start ) {
+								push @sub_exons, [ "3'UTR", $exon_start_genomic, $exon_coding_start - 1, $target_end+1, $exon_ref->[2], $exon->strand];
+							}
+						} elsif( $exon_end_genomic < $cr_start_genomic ) {
+							push @sub_exons, [ "3'UTR", $exon_start_genomic, $exon_end_genomic, $exon_ref->[1], $exon_ref->[2],$exon->strand ];
+						} else {
+							push @sub_exons, [ "5'UTR", $exon_start_genomic, $exon_end_genomic, $exon_ref->[1], $exon_ref->[2],$exon->strand ];
+						}
+					}
+				} else {  ## Easier one... non-translatable genes...
+					@sub_exons = ( [ 'non_coding', $exon_start_genomic, $exon_end_genomic,'','',$exon->strand ] );
+				}
 
-#				$target_start        = $exon_start_genomic < $cr_start_genomic ? $cr_start_genomic - $exon_start_genomic + $exon_ref->[1] : $exon_ref->[1];
-#				$target_end       = $exon_end_genomic   > $cr_end_genomic   ? $cr_end_genomic   - $exon_start_genomic + $exon_ref->[1] : $exon_ref->[2];
-				if ($exon_stable_id eq 'OTTHUME00000732636') {
-					warn "1.\$exon_coding_start = $exon_coding_start; \$exon_coding_end = $exon_coding_end";
-					warn "1.\$target_start = $target_start; \$target_end = $target_end";
-					warn "1.from exon_ref- ",$exon_ref->[1],":",$exon_ref->[2];
-					warn "exon_slice: ".$exon->slice->start."--".$exon->slice->end;
-				}
-				#only show region that overlaps the slice requested (for clone requests)
-				if ($exon_coding_start < $exon->slice->start) {	
-					$target_end = $target_end - ($exon->slice->start - $exon_coding_start);	
-					$exon_coding_start = $exon->slice->start;
-					$exon_start_genomic = $exon->slice->start;
-				}
-				if ($exon_coding_end > $exon->slice->end) {
-					$target_start = $target_start + ($exon_coding_end - $exon->slice->end);	
-					$exon_coding_end = $exon->slice->end;
-					$exon_end_genomic = $exon->slice->end;
-				}
+				#now retrieve the details of the exons and add to the correct seq_region
+				foreach my $se (@sub_exons ) {
+					my $tl_exon_strand = $se->[5];
+					my $tl_exon_start  = $se->[1];
+					my $orig_start = $tl_exon_start;
+					my $tl_exon_end    = $se->[2];
+					my $orig_end = $tl_exon_end;
+					my $det = {
+						'ID'          => $exon_stable_id,
+						'TYPE'        => 'exon:'.$se->[0].':'.$transcript->analysis->logic_name,
+						'METHOD'      => $transcript->analysis->logic_name,
+						'CATEGORY'    => 'transcription',
+						'GROUP'       => [ $transcript_group ],
+					};
 
-				if ($exon_stable_id eq 'OTTHUME00000732636') {
-					warn "2.\$exon_coding_start = $exon_coding_start; \$exon_coding_end = $exon_coding_end";
-					warn "2.\$target_start = $target_start; \$target_end = $target_end";
-					warn "2.from exon_ref- ",$exon_ref->[1],":",$exon_ref->[2];
+					if ($projection_mappings{$slice_name}) {						
+					PROJ:
+						foreach my $proj (@{$projection_mappings{$slice_name}}) {
+							if ( grep {$exon_stable_id eq $_} @dumping_ids)  {
+								warn Dumper($proj);
+							}
+							my $new_det = {%{$det}}; #make a copy for debugging						
+
+							#reverse the start and stop positions if the exon is on the reverse strand
+							$tl_exon_start  = ($tl_exon_strand > 0 ) ? $se->[1] : $se->[2];
+							$tl_exon_end    = ($tl_exon_strand > 0 ) ? $se->[2] : $se->[1];
+
+							if ( grep {$exon_stable_id eq $_} @dumping_ids)  {
+								warn "\n\nproperties of sub exon ($exon_stable_id) are-- ",Dumper($se);
+								warn "strand = $tl_exon_strand--\$tl_exon_start = $tl_exon_start--\$tl_exon_end = $tl_exon_end";
+							}	
+
+							#skip to next projection if the exon is not on this one
+							if ($orig_start > $proj->{'top_level_end'}
+									|| $orig_end < $proj->{'top_level_start'}) {
+								if ( grep {$exon_stable_id eq $_} @dumping_ids)  { warn "skipping to next projection";}	
+								next PROJ;
+							}
+							elsif ($orig_start >= $proj->{'top_level_start'}) {
+
+								#if the exon is fully enclosed within this projection...
+								if ($orig_end <= $proj->{'top_level_end'}) {
+									if ( grep {$exon_stable_id eq $_} @dumping_ids)  { warn "$exon_stable_id contained within slice";}
+									$new_det->{'TARGET'}      = {
+										'ID'    => $transcript_stable_id,
+										'START' => $se->[3],
+										'STOP'  => $se->[4],
+									};
+
+									if ($proj->{'top_level_strand'} == 1) {
+										my $ori = ($proj->{'top_level_strand'} == $tl_exon_strand) ? 1 : -1;
+										$new_det->{'ORIENTATION'} = $self->ori($ori);
+										$new_det->{'START'} = $proj->{'slice_start'} + ($tl_exon_start - $proj->{'top_level_start'});
+										$new_det->{'END'} =  $proj->{'slice_start'} + ($tl_exon_end - $proj->{'top_level_start'});
+									}
+									else {
+										my $ori = ($proj->{'top_level_strand'} == $tl_exon_strand) ? 1 : -1;
+										$new_det->{'ORIENTATION'} = $self->ori($ori);
+										$new_det->{'START'} = $proj->{'slice_end'} - ($tl_exon_start - $proj->{'top_level_start'});
+										$new_det->{'END'} = $proj->{'slice_end'} - ($tl_exon_end - $proj->{'top_level_start'});
+									}
+								}
+
+								#if the start of the exon is within the projection but the end isn't...
+								else {
+									if ( grep {$exon_stable_id eq $_} @dumping_ids)  { warn "exon end off the end of the slice";}
+									if ($proj->{'top_level_strand'} == 1) {
+										if ($tl_exon_strand == 1) { #A
+											$new_det->{'ORIENTATION'} = $self->ori(1);
+											$new_det->{'START'}	= $proj->{'slice_end'} - ($proj->{'top_level_end'} - $tl_exon_start);
+											$new_det->{'END'}	= $proj->{'slice_end'};
+											$new_det->{'TARGET'}      = {
+												'ID'    => $transcript_stable_id,
+												'START' => $se->[3],
+												'STOP'  => $se->[3] + ($proj->{'top_level_end'} - $tl_exon_start),
+											};
+										}
+										else { #B
+											$new_det->{'ORIENTATION'} = $self->ori(-1);
+											$new_det->{'START'}	= $proj->{'slice_end'};
+											$new_det->{'END'}	= $proj->{'slice_end'} - ($proj->{'top_level_end'} - $tl_exon_end);
+											#swap the above round ?
+											$new_det->{'TARGET'}      = {
+												'ID'    => $transcript_stable_id,
+												'START' => $se->[4] - ($proj->{'top_level_end'} - $tl_exon_end),
+												'STOP'  => $se->[4],
+											};
+										}
+									}
+									else { #C
+										if ($tl_exon_strand == 1) {
+											$new_det->{'ORIENTATION'} = $self->ori(-1);
+											$new_det->{'START'}	= $proj->{'slice_start'} + ($proj->{'top_level_end'} - $tl_exon_start);
+											$new_det->{'END'}	= $proj->{'slice_start'};
+											$new_det->{'TARGET'}      = {
+												'ID'    => $transcript_stable_id,
+												'START' => $se->[3],
+												'STOP'  => $se->[3] + ($proj->{'top_level_end'} - $tl_exon_start),
+											};
+										}
+										else { #D
+											$new_det->{'ORIENTATION'} = $self->ori(1);
+											$new_det->{'START'}	= $proj->{'slice_start'};
+											$new_det->{'END'}	= $proj->{'slice_start'} + ($proj->{'top_level_end'} - $tl_exon_end);
+											$new_det->{'TARGET'}      = {
+												'ID'    => $transcript_stable_id,
+												'START' => $se->[4] - ($proj->{'top_level_end'} - $tl_exon_end),
+												'STOP'  => $se->[4],
+											};
+										}
+									}
+								}
+							}
+
+							#if the end of the exon is within the projection but the start isn't...
+							elsif ($orig_end <= $proj->{'top_level_end'}) {
+								if ( grep {$exon_stable_id eq $_} @dumping_ids)  { warn "exon start before the start of the slice";}
+								if ($proj->{'top_level_strand'} == 1) {
+									if ($tl_exon_strand == 1) { #E
+										$new_det->{'ORIENTATION'} = $self->ori(1);
+										$new_det->{'START'}	= $proj->{'slice_start'};
+										$new_det->{'END'} = $proj->{'slice_start'} + ( $tl_exon_end - $proj->{'top_level_start'} );
+										$new_det->{'TARGET'}      = {
+											'ID'    => $transcript_stable_id,
+											'START' => $se->[4] -  ( $tl_exon_end - $proj->{'top_level_start'} ),
+											'STOP'  => $se->[4],
+											};
+									}
+									else { #F
+										$new_det->{'ORIENTATION'} = $self->ori(-1);
+										$new_det->{'START'}	= $proj->{'slice_start'} + ($tl_exon_start - $proj->{'top_level_start'});
+										$new_det->{'END'} =  $proj->{'slice_start'};
+										$new_det->{'TARGET'} = {
+											'ID'    => $transcript_stable_id,
+											'START' => $se->[3],
+											'STOP'  => $se->[3] + ($tl_exon_start - $proj->{'top_level_start'} ),
+											};
+									}
+								}
+								else {
+									if ($tl_exon_strand == 1) {	#G
+										$new_det->{'ORIENTATION'} = $self->ori(-1);
+										$new_det->{'START'}	= $proj->{'slice_end'};
+										$new_det->{'END'} = $proj->{'slice_end'} - ($tl_exon_end - $proj->{'top_level_start'});
+										$new_det->{'TARGET'} = {
+											'ID'    => $transcript_stable_id,
+											'START' => $se->[4] - ($tl_exon_end - $proj->{'top_level_start'} ),
+											'STOP'  => $se->[4],
+											};
+									}
+									else { #H
+										$new_det->{'ORIENTATION'} = $self->ori(1);
+										$new_det->{'START'}	= $proj->{'slice_end'} - ($tl_exon_start - $proj->{'top_level_start'});
+										$new_det->{'END'} = $proj->{'slice_end'} ;
+										$new_det->{'TARGET'}= {
+											'ID'    => $transcript_stable_id,
+											'START' => $se->[3],
+											'STOP'  => $se->[3] + ($tl_exon_start - $proj->{'top_level_start'} ),
+										};
+									}
+								}
+							}
+
+							else {
+								warn "***Shouldn't be here!";
+							}
+
+
+							push @{$features{$proj->{'slice_full_name'}}{'FEATURES'}}, $new_det;
+
+							#store top level coords if debugging requested
+							if ($debug) {
+								$det->{'START'} = $orig_start;
+								$det->{'END'}   = $orig_end;
+								$det->{'ORIENTATION'} = $self->ori($exon->strand);					
+								$det->{'TARGET'}      = {
+									'ID'    => $transcript_stable_id,
+									'START' => $se->[3], 
+									'STOP'  => $se->[4],
+								};
+								push @{$features{$slice_name}{'FEATURES'}}, $det;
+							}
+							
+							if ( grep {$exon_stable_id eq $_} @dumping_ids)  {
+								warn "features are ",Dumper($new_det);
+							}							
+						}
+					}
+
+					#store top level coords if no projection mapppings
+					else {
+						$det->{'START'} = $tl_exon_start; 
+						$det->{'END'}   = $tl_exon_end;
+						$det->{'ORIENTATION'} = $self->ori($exon->strand);					
+						$det->{'TARGET'}      = {
+							'ID'    => $transcript_stable_id,
+							'START' => $se->[3], 
+							'STOP'  => $se->[4],
+						};
+						push @{$features{$slice_name}{'FEATURES'}}, $det;
+					}
 				}
-	
-				#note coding and non-coding regions
-				push @sub_exons, [ "coding", $exon_coding_start, $exon_coding_end, $target_start, $target_end ];
-				if( $exon_end_genomic > $exon_coding_end ) {
-					push @sub_exons, [ "5'UTR", $exon_coding_end+1, $exon_end_genomic      , $exon_ref->[1], $target_start - 1  ];
-				}
-				if( $exon_start_genomic < $exon_coding_start ) {
-					push @sub_exons, [ "3'UTR", $exon_start_genomic, $exon_coding_start - 1, $target_end+1, $exon_ref->[2] ];
-				}
-            } elsif( $exon_end_genomic < $cr_start_genomic ) {
-				push @sub_exons, [ "3'UTR", $exon_start_genomic, $exon_end_genomic,                $exon_ref->[1], $exon_ref->[2] ];
-            } else {
-				push @sub_exons, [ "5'UTR", $exon_start_genomic, $exon_end_genomic,                $exon_ref->[1], $exon_ref->[2] ];
-            }
-          }
-        } else {  ## Easier one... non-translatable genes...
-          @sub_exons = ( [ 'non_coding', $exon_start_genomic, $exon_end_genomic ] );
-        }
-        foreach my $se (@sub_exons ) {
-          push @{$features{$slice_name}{'FEATURES'}}, {
-           'ID'          => $exon_stable_id,
-            'TYPE'        => 'exon:'.$se->[0].':'.$transcript->analysis->logic_name,
-            'METHOD'      => $transcript->analysis->logic_name,
-            'CATEGORY'    => 'transcription',
-            'START'       => $se->[1],
-            'END'         => $se->[2],
-            'ORIENTATION' => $self->ori($exon->strand),
-            'GROUP'       => [$transcript_group],
-            'TARGET'      => {
-              'ID'    => $transcript_stable_id,
-              'START' => $se->[3], 
-              'STOP'  => $se->[4]
-            }
-          };
-        }
-      }
+			}
+		}
     }
-  }
+#	warn Dumper(\%features);
+#	warn Dumper(\%projection_mappings);
 
-
-### Part 7: Return the reference to an array of the slice specific hashes.
-  push @features, values %features;
-  return \@features;
+	### Part 7: Return the reference to an array of the slice specific hashes.
+	push @features, values %features;
+	return \@features;
 }
 
 sub _group_info {

@@ -127,8 +127,15 @@ sub check_status {
     $interface->data->populate($id);
     my $salt = $interface->data->salt;
     my $code = $object->param('code');
-    if ($code && $salt eq $code) {
-      $url = "/common/activate?dataview=confirm;user_id=$id;code=$code";
+
+    warn "sr7: salt is $salt, code is $code \n";
+    
+    
+    #if ($code && $salt eq $code) {
+
+    if ($salt) {
+    
+      $url = "/common/activate?dataview=confirm;user_id=$id;code=$salt";
       ## has this user got pending invites?
       if ($object->param('record_id') && $object->param('record_id') =~ /^\d+$/) {
         $url .= ";record_id=".$object->param('record_id');
@@ -136,77 +143,18 @@ sub check_status {
     }
     else {
       $url = '/common/activate?dataview=deny';
+      warn "deny at 1\n";
     }
   }
   else {
     $url = '/common/activate?dataview=deny';
-  }
-  return $url;
-}
-
-sub join_by_invite {
-  my ($self, $object, $interface) = @_;
-
-  my $record_id = $object->param('record_id');
-  #warn "RECORD ID: " . $record_id;
-  my @records = EnsEMBL::Web::Record::Group->find_invite_by_group_record_id($record_id, { adaptor => $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->userAdaptor });
-  my $record = $records[0];
-  $record->adaptor($EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->userAdaptor);
-  my $email = $record->email;
-
-  my $user = EnsEMBL::Web::Object::User->new({ adaptor => $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->userAdaptor,  email => $email });
-
-  my $url;
-  if ($user->id) {
-    my $invite = EnsEMBL::Web::Object::Data::Invite->new({id => $object->param('record_id')});
-    my $group_id = $invite->group->id;
-
-    my $group = EnsEMBL::Web::Object::Group->new(( adaptor => $ENSEMBL_WEB_REGISTRY->userAdaptor, id => $group_id ));
-    # warn "WORKING WITH USER: " . $user->id . ": " . $user->email;
-    $user->add_group($group);
-    # warn "SAVING USER";
-    $user->save;
-    $invite->status('accepted');
-    # warn "SAVING RECORD";
-    $invite->save;
+    warn "deny at 2\n";
     
-    if ($ENV{'ENSEMBL_USER_ID'}) {
-      $url = "/common/user/account";
-    }
-    else {
-      $url = '/login.html';
-    }
-  }
-  else {
-    $url = "/common/register?email=$email;status=active;record_id=$record_id";
   }
   return $url;
 }
 
-sub check_status {
-  my ($self, $object, $interface) = @_;
 
-  my $script = $interface->script_name || $object->script;
-  my $url;
-  my $primary_key = $interface->data->get_primary_key;
-  my $id = $object->param($primary_key);
-
-  if ($id) {
-    $interface->data->populate($id);
-    my $salt = $interface->data->salt;
-    ## has this user got pending invites?
-    if ($object->param('record_id')) {
-      $url = "/common/activate?dataview=confirm;user_id=$id;code=$salt;record_id=".$object->param('record_id');
-    }
-    else {
-      $url = '/common/activate?dataview=deny';
-    }
-  }
-  else {
-    $url = '/common/activate?dataview=confirm';
-  }
-  return $url;
-}
 
 sub confirm {
   ### Creates a panel containing a record form populated with data
@@ -230,22 +178,17 @@ sub confirm {
       }
     }
     $url = '/common/activate?dataview=deny';
+    warn "deny at 3\n";
+    
   }
   else {
     $url = '/common/activate?dataview=deny';
+    warn "deny at 4\n";
+    
   }
   return $url;
 }
 
-sub deny {
-  my ($self, $object, $interface) = @_;
-  if (my $panel = $self->interface_panel($interface, 'deny', 'Account Error')) {
-    $panel->add_components(qw(deny    EnsEMBL::Web::Component::Interface::User::deny));
-    $self->{page}->content->add_panel($panel);
-    $self->{page}->set_title("Account already activated");
-  }
-  return undef;
-}
 
 sub deny {
   my ($self, $object, $interface) = @_;

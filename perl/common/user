@@ -4,6 +4,9 @@ package user;
 
 use strict;
 use warnings;
+use CGI;
+
+warn "sr7: in perl/common/user\n";
 
 use EnsEMBL::Web::Controller;
 
@@ -22,7 +25,19 @@ $controller->add_connection({ 'remove_invite' => 'EnsEMBL::Web::Controller::Comm
 $controller->add_connection({ 'save_das' => 'EnsEMBL::Web::Controller::Command::User::SaveDas' }); 
 $controller->add_connection({ 'annotation' => 'EnsEMBL::Web::Controller::Command::User::SaveAnnotation' }); 
 
+warn "sr7: in perl/common/user, just before dispatch to : $ENV{REQUEST_URI} \n";
+if($ENV{REQUEST_URI} =~ /common\/user\/register\?dataview=success;user_id=/){
+  #redirect to vega home
+  CGI::redirect('/user_register_message.html');
+
+}
+else{
+
+  warn "failed to capture $ENV{REQUEST_URI} \n";
+
 $controller->dispatch($ENV{REQUEST_URI});
+}
+
 
 }
 

@@ -1126,15 +1126,8 @@ sub transcripts {
   my @trans = sort { $a->stable_id cmp $b->stable_id } @{$gene->get_all_transcripts()};
   my $extra = @trans>17?'<p><strong>A large number of transcripts have been returned for this gene. To reduce render time for this page the protein and transcript  information will not be displayed. To view this information please follow the transview and protview links below. </strong></p>':'';
   foreach my $transcript ( @trans ) {
-    my $trans_stable_id = $transcript->stable_id;
-    $rows .= qq(\n  <tr>\n    <td><a href="#$trans_stable_id">$trans_stable_id</a></td>);
-    if( $transcript->translation_object ) {
-      my $pep_stable_id = $transcript->translation_object->stable_id;
-      $rows .= "<td>$pep_stable_id</td>";
-    } else {
-      $rows .= "<td>no translation</td>";
-    }
-    if( $transcript->display_xref ) {
+    $rows .= qq(\n  <tr>\n);
+	if( $transcript->display_xref ) {
       my ($trans_display_id, $db_name, $ext_id) = $transcript->display_xref();
       if( $ext_id ) {
         $trans_display_id = $gene->get_ExtURL_link( $trans_display_id, $db_name, $ext_id );
@@ -1142,6 +1135,14 @@ sub transcripts {
       $rows .= "<td>$trans_display_id</td>";
     } else {
       $rows.= "<td>novel transcript</td>";
+    }
+	my $trans_stable_id = $transcript->stable_id;
+#	$rows .= qq(<td><a href="$trans_stable_id">$trans_stable_id</a></td>);
+    if( $transcript->translation_object ) {
+      my $pep_stable_id = $transcript->translation_object->stable_id;
+      $rows .= "<td>$pep_stable_id</td>";
+    } else {
+      $rows .= "<td>no translation</td>";
     }
     $rows .= sprintf '
     <td>[<a href="%s">Transcript&nbsp;info</a>]</td>', $gene->URL( 'script' => 'transview', 'db' => $db, 'transcript' => $trans_stable_id );

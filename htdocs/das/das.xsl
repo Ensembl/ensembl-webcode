@@ -126,10 +126,9 @@ body { background-image: none }
 
 <xsl:template name="release_and_links">
 <div id="release-t">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</div>
-<div id="release"><div>Vega release 26 - <a href="/Multi/newsview?rel=25" title="What's New">July 2007</a></div></div>
+<div id="release"><div>Vega release 27 - <a href="/Multi/newsview?rel=27" title="What's New">August 2007</a></div></div>
 <div id="help"><strong>
   <a href="/">HOME</a> &#183;
-  <a href="/das/sources">DAS&#160;SOURCES</a> &#183;
   <a href="/multi/blastview">BLAST</a> &#183;
   <a href="/sitemap.html">SITEMAP</a>
   <a href="javascript:void(window.open('/perl/helpview','helpview','width=700,height=550,resizable,scrollbars'))" class="blue-button">HELP</a>

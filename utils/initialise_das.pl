@@ -167,10 +167,19 @@ warn "Parsing species $sp ".gmtime();
 #   print STDERR "\t $sp : $feature : $table => ", $rv || 'Off',  "\n";
 #   print STDERR "\t\t\tTEST REGION : ", join('*', @r), "\n";
     next unless @r;
-    my $dsn = sprintf("%s.%s.%s", $sp, $species_defs->get_config($sp,'ENSEMBL_GOLDEN_PATH'), $feature);
+	my $type = $species_defs->get_config($sp,'ENSEMBL_GOLDEN_PATH');
+    my $dsn = sprintf("%s.%s.%s", $sp, $type, $feature);
     $shash->{$dsn}->{'test_range'} = sprintf("%s:%s,%s",@r); 
     $shash->{$dsn}->{mapmaster} = "$SiteDefs::ENSEMBL_BASE_URL/das/$mapmaster";
     $shash->{$dsn}->{description} = sprintf("Annotation source for %s %s", $sp, $feature);
+	if (   ($sitetype eq 'Vega')
+	    && ($feature =~ /^trans/) ) {
+		$type .= '-clone';
+		$dsn = sprintf("%s.%s.%s", $sp, $type, $feature);
+		$shash->{$dsn}->{'test_range'} = sprintf("%s:%s,%s",@r); 
+		$shash->{$dsn}->{mapmaster} = "$SiteDefs::ENSEMBL_BASE_URL/das/$mapmaster";
+		$shash->{$dsn}->{description} = sprintf("Annotation source (returns clones) for %s %s", $sp, $feature);
+	}
   }
 }
 
@@ -239,6 +248,7 @@ sub sources {
     (my $vsp = $species) =~ s/\_/ /g;
     my $source = pop @n;
     my $assembly = join('.', @n);
+	my $seq_type = $assembly =~ /-clone/ ? 'Clone' : 'Chromosome';
 	my $id;
 	if ($sitetype eq 'Vega') {
 		my $sp = $species;
@@ -261,6 +271,7 @@ sub sources {
     my $description = $sources->{$dsn}{'description'};
     my $test_range  = $sources->{$dsn}{'test_range' };
     $taxon_ids{$vsp} ||= $ta->fetch_node_by_name($vsp)->taxon_id;
+	$assembly =~ s/-clone//;
     print FH qq( 
   <SOURCE uri="$id" title="$dsn" description="$description">
     <MAINTAINER    email="$email" />
@@ -270,7 +281,7 @@ sub sources {
                    value="ENSEMBL" />
       <COORDINATES uri="ensembl_location" 
                    taxid="$taxon_ids{$vsp}"
-                   source="Chromosome"
+                   source="$seq_type"
                    authority="$assembly"
                    version="$assembly"
                    test_range="$test_range"/>$capability

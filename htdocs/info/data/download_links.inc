@@ -80,7 +80,7 @@
 	    
 <tr>
 <td>
-<a target="ftp" href="ftp://ftp.ensembl.org/pub/current_ciona_intestinalis/"><i>Ciona intestinalis</i></a> (transparent sea squirt)</td>
+<a target="ftp" href="ftp://ftp.ensembl.org/pub/current_ciona_intestinalis/"><i>Ciona intestinalis</i></a> (Sea squirt Ciona intestinalis)</td>
 <td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_ciona_intestinalis/data/fasta/dna/">FTP</a></td>
 <td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_ciona_intestinalis/data/fasta/cdna/">FTP</a></td>
 <td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_ciona_intestinalis/data/fasta/pep/">FTP</a></td>
@@ -91,7 +91,7 @@
 	    
 <tr>
 <td>
-<a target="ftp" href="ftp://ftp.ensembl.org/pub/current_ciona_savignyi/"><i>Ciona savignyi</i></a> (Pacific sea squirt)</td>
+<a target="ftp" href="ftp://ftp.ensembl.org/pub/current_ciona_savignyi/"><i>Ciona savignyi</i></a> (Sea squirt Ciona savignyi)</td>
 <td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_ciona_savignyi/data/fasta/dna/">FTP</a></td>
 <td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_ciona_savignyi/data/fasta/cdna/">FTP</a></td>
 <td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_ciona_savignyi/data/fasta/pep/">FTP</a></td>
@@ -330,10 +330,10 @@
 <td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_saccharomyces_cerevisiae/data/flatfiles/genbank/">FTP</a></td>
 <td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_saccharomyces_cerevisiae/data/mysql/">FTP</a></td>
 </tr>
-		    
+	    
 <tr>
 <td>
-<a target="ftp" href="ftp://ftp.ensembl.org/pub/current_sorex_araneus/"><i>Sorex araneus</i></a> (common shrew)</td>
+<a target="ftp" href="ftp://ftp.ensembl.org/pub/current_sorex_araneus/"><i>Sorex araneus</i></a> (European shrew)</td>
 <td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_sorex_araneus/data/fasta/dna/">FTP</a></td>
 <td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_sorex_araneus/data/fasta/cdna/">FTP</a></td>
 <td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_sorex_araneus/data/fasta/pep/">FTP</a></td>
@@ -366,7 +366,7 @@
 	    
 <tr>
 <td>
-<a target="ftp" href="ftp://ftp.ensembl.org/pub/current_tetraodon_nigroviridis/"><i>Tetraodon nigroviridis</i></a> (freshwater pufferfish)</td>
+<a target="ftp" href="ftp://ftp.ensembl.org/pub/current_tetraodon_nigroviridis/"><i>Tetraodon nigroviridis</i></a> (Fresh water pufferfish)</td>
 <td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_tetraodon_nigroviridis/data/fasta/dna/">FTP</a></td>
 <td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_tetraodon_nigroviridis/data/fasta/cdna/">FTP</a></td>
 <td><a target="ftp" href="ftp://ftp.ensembl.org/pub/current_tetraodon_nigroviridis/data/fasta/pep/">FTP</a></td>

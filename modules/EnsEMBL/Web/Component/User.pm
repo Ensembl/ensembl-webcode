@@ -901,7 +901,7 @@ sub group_details {
 
   my $html = qq(<h3 class="plain">$group_name</h3>\n<p>$group_blurb</p>\n);
   if ($level eq 'Administrator') {
-    $html .= qq(<p><a href="/common/user/group/dataview=edit;id=$group_id">Edit group description</a></p>);
+    $html .= qq(<p><a href="/common/user/group?dataview=edit;id=$group_id">Edit group description</a></p>);
   }
   if ($group->type ne 'open') {
     $html .= qq(<p><strong>Group created by</strong>: $creator_name ($creator_org));

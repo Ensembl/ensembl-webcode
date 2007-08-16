@@ -606,6 +606,7 @@ sub _render_groups {
     $html .= "<table width='100%' cellspacing='0' cellpadding='4'>\n";
     my $class = "bg1";
     foreach my $group (sort {$a->name cmp $b->name} @groups) {
+      next if $group->status ne 'active';
       $class = &toggle_class($class);
       $included{$group->id} = 'yes';
       $html .= "<tr class='$class'>\n";

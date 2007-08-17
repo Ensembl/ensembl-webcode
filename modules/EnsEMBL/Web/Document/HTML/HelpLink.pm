@@ -25,22 +25,18 @@ sub render {
   my $self = shift;
   
   my $help_link;
-  if( $self->action eq 'form' ) {
-    $help_link = sprintf( q(<a href="%s" class="blue-button">%s</a>), $self->URL, $self->label ); 
-  } else {
     my $extra_HTML = join ";",
       $self->kw     ? "kw=@{[$self->kw]}" : (),
       $self->ref    ? "ref=@{[CGI::escape($self->ref)]}" : (),
       $self->action ? "action=@{[$self->action]}" : ();
     my $URL = $self->URL.($extra_HTML?"?$extra_HTML":"");
     if( $self->action ) { ## ALREADY IN HELP FORM!!
-      $help_link = qq(<a href="$URL">@{[$self->label]}</a>);
+      $help_link = qq(<a href="$URL" class="blue-button">@{[$self->label]}</a>);
     } else {
       $help_link = sprintf( q(<a href="javascript:void(window.open('%s','helpview','%s'))" class="blue-button">%s</a>),
         $URL, HELPVIEW_WIN_ATTRIBS, uc($self->label)
       );
     }
-  }
   
   ## Set directories 
   my ($map_link, $blast_dir);

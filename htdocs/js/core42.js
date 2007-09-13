@@ -206,12 +206,12 @@ function bookmark_link() {
 }
 
 function account_return() {
-  var cookieKey = 'ENSEMBL_USER_REFERER';
-  if (!readCookie(cookieKey)) {
+//  var cookieKey = 'ENSEMBL_USER_REFERER';
+//  if (!readCookie(cookieKey)) {
     document.location = '/index.html';
-  } else {
-    document.location = unescape(readCookie(cookieKey));
-  }
+//  } else {
+//    document.location = unescape(readCookie(cookieKey));
+//  }
 }
 
 function ajaxCapability() {

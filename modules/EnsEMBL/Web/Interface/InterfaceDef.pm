@@ -400,16 +400,16 @@ sub discover {
   }
   ## 'Has many' are multiple checkboxes by default
   my $has_many = $self->data->get_has_many;
-  if ($has_many) {
-    foreach my $class (@$has_many) {
-      my ($key, $element) = $self->_create_relational_element('MultiSelect', $class);
-      if ($element) {
-        $elements{$element->name} = $element;
-        push @element_order, $element->name;
-        $self->data->add_queriable_field({ name => $key, type => 'int'});
-      }
-    }
-  }
+ # if ($has_many) {
+ #   foreach my $class (@$has_many) {
+ #     my ($key, $element) = $self->_create_relational_element('MultiSelect', $class);
+ #     if ($element) {
+ #       $elements{$element->name} = $element;
+ #       push @element_order, $element->name;
+ #       $self->data->add_queriable_field({ name => $key, type => 'int'});
+ #     }
+ #   }
+ # }
   $Elements_of{$self} = \%elements;
   $ElementOrder_of{$self} = \@element_order;
 }

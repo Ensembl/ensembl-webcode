@@ -137,11 +137,21 @@ sub show_news {
   my $prev_rel = 0;
   my $rel_selected = $object->param('release_id') || $object->param('rel');
 
+## Get lookup hash of release dates
+  my $releases = $object->releases;
+  my %rel_lookup;
+  foreach my $rel_array (@$releases) {
+    $rel_lookup{$$rel_array{'release_id'}} = $$rel_array{'full_date'};
+  }
+
   if ($rel_selected && $rel_selected ne 'all') {
     if ($rel_selected eq 'current') {
-      $rel_selected = $object->species_defs->ENSEMBL_VERSION; 
+      $rel_selected = $object->species_defs->ENSEMBL_VERSION;
     }
-    $html .= "<h2>Release $rel_selected</h2>";
+	my $date = $rel_lookup{$rel_selected};
+	$date =~ s/.*\(//g;
+    $date =~ s/\)//g;
+    $html .= "<h2>Release $rel_selected ($date)</h2>";
   }
 
   my @generic_items = @{$object->generic_items};
@@ -158,12 +168,7 @@ sub show_news {
     $sp_sorted  = $object->sort_items(\@species_items);
   }
 
-## Get lookup hashes
-  my $releases = $object->releases;
-  my %rel_lookup;
-  foreach my $rel_array (@$releases) {
-    $rel_lookup{$$rel_array{'release_id'}} = $$rel_array{'full_date'};
-  }
+## Get other lookup hashes
   my $cats = $object->all_cats;
   my %cat_lookup;
   foreach my $cat_array (@$cats) {

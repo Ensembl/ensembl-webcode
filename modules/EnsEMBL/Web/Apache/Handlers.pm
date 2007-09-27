@@ -305,14 +305,15 @@ sub transHandler {
            $species, $script, $querystring ) if $ENSEMBL_DEBUG_FLAGS | 8 && ($script ne 'ladist' && $script ne 'la' );
           warn $LOG_INFO;
           $LOG_TIME = time();
-          $r->push_handlers( PerlCleanupHandler => \&cleanupHandler_script      );
+	  }
+		$r->push_handlers( PerlCleanupHandler => \&cleanupHandler_script      );
 #warn "PUSHING BLASTSCRIPTZZ.... $$ - $ENSEMBL_BLASTSCRIPT";
 #if( $ENSEMBL_BLASTSCRIPT ) {
 #          $r->push_handlers( PerlCleanupHandler => \&cleanupHandler_blast       );
 #  warn "YARG $$ ....";
 #}
           $r->push_handlers( PerlCleanupHandler => \&Apache2::SizeLimit::handler );
-        }
+ #       }
         return OK;
       }
     } else {
@@ -482,14 +483,14 @@ sub queue_pending_blast_jobs {
 
 sub cleanupHandler_blast {
   my $r = shift;
-# warn "BLAST CLEANUP HANDLER... $$";
+ warn "BLAST CLEANUP HANDLER... $$";
   my $directory = $ENSEMBL_TMP_DIR_BLAST.'/pending';
   my $FLAG = 0;
   my $count=0;
   my $ticket;
   my $_process_blast_called_at = time();
 
-  #warn "Processing BLAST in Apache: $r";
+  warn "Processing BLAST in Apache: $r";
 
   $ticket = $ENV{'ticket'};
   ## Lets work out when to run this!!
@@ -509,6 +510,7 @@ sub cleanupHandler_blast {
       $FLAG = 1;
     }
   }
+#  warn "$FLAG";
   while( $FLAG ) {
     $count++;
     $FLAG = 0;

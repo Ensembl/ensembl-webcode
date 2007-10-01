@@ -4,7 +4,6 @@ use strict;
 use warnings;
 
 use Class::Std;
-use EnsEMBL::Web::DBSQL::MySQLAdaptor;
 use EnsEMBL::Web::Object::Data::Trackable;
 use EnsEMBL::Web::Object::Data::Record;
 
@@ -15,11 +14,8 @@ our @ISA = qw(EnsEMBL::Web::Object::Data::Trackable  EnsEMBL::Web::Object::Data:
 
 sub BUILD {
   my ($self, $ident, $args) = @_;
-  #warn "Creating bookmark ", $args->{'id'}, " belonging to a ", $args->{'record_type'};
   $self->type('bookmark');
   $self->attach_owner($args->{'record_type'});
-  $self->set_primary_key($self->key);
-  $self->set_adaptor(EnsEMBL::Web::DBSQL::MySQLAdaptor->new({table => $self->table }));
   $self->add_field({ name => 'url', type => 'text' });
   $self->add_field({ name => 'name', type => 'text' });
   $self->add_field({ name => 'description', type => 'text' });

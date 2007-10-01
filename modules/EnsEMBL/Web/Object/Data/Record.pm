@@ -1,5 +1,8 @@
 package EnsEMBL::Web::Object::Data::Record;
 
+## Package which handles correct setting of all parameters relating to 
+## the record's ownership, i.e. whether it belongs to a user or a group
+
 use strict;
 use warnings;
 
@@ -22,6 +25,19 @@ sub attach_owner {
   my $self = shift;
   my $record_type = shift || 'user';
   $self->set_record_type($record_type);
+  $self->set_primary_key($self->key);
+  $self->set_adaptor(EnsEMBL::Web::DBSQL::MySQLAdaptor->new({table => $self->table }));
+  ## Remove any existing owner
+  my $belongs = $self->get_belongs_to;
+  if ($belongs && ref($belongs) eq 'ARRAY') {
+    $self->set_belongs_to([]);
+    my @ok_fields;
+    foreach my $field (@{$self->get_queriable_fields}) {
+      push @ok_fields, $field unless ($field->get_name =~ 'user_id' || $field->get_name =~ 'group_id');
+    }
+    $self->set_queriable_fields(\@ok_fields);
+  }
+  ## Set owner
   if ($record_type eq 'group') {
     $self->add_belongs_to("EnsEMBL::Web::Object::Data::Group");
   }

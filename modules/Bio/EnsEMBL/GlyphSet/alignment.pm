@@ -109,7 +109,8 @@ sub features {
 	my $f = $features[$e->{start}-1];
 	$f->{type} = ($f->{type} || 'mark').'_snp';
 	$f->{source} = $e->{source}; 
-	$f->{consequence_type} = $e->{consequence_type};
+	$f->{consequence_type} = shift @{$e->{consequence_type}||[]};
+        $f->{consequence_type} ||= '_';
 	$f->{variation_name} = $e->{variation_name};
 	$f->{allele_string} = $e->{allele_string};
 	$f->{ambig_code} = $e->{ambig_code};

@@ -483,14 +483,14 @@ sub queue_pending_blast_jobs {
 
 sub cleanupHandler_blast {
   my $r = shift;
- warn "BLAST CLEANUP HANDLER... $$";
+# warn "BLAST CLEANUP HANDLER... $$";
   my $directory = $ENSEMBL_TMP_DIR_BLAST.'/pending';
   my $FLAG = 0;
   my $count=0;
   my $ticket;
   my $_process_blast_called_at = time();
 
-  warn "Processing BLAST in Apache: $r";
+#  warn "Processing BLAST in Apache: $r";
 
   $ticket = $ENV{'ticket'};
   ## Lets work out when to run this!!

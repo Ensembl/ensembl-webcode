@@ -80,6 +80,7 @@ sub stable_id         { my $self = shift; return $self->Obj->stable_id;  }
 sub feature_type      { my $self = shift; return $self->Obj->type;       }
 sub version           { my $self = shift; return $self->Obj->version;    }
 sub logic_name        { my $self = shift; return $self->gene ? $self->gene->analysis->logic_name : $self->Obj->analysis->logic_name; }
+sub status            { my $self = shift; return $self->Obj->status;  }
 sub display_label        {
   my $self = shift;
   return $self->Obj->analysis->display_label || $self->logic_name;

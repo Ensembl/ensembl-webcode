@@ -526,12 +526,10 @@ sub ac_convert {
     my @tabs = split /(\t|  +)/, $old_line;
  
     ## map to new assembly;
-    warn $tabs[0].' '.$tabs[6].' '.$tabs[8].'  '._strand_parser($tabs[12]);
     next unless $tabs[0] && $tabs[6] && $tabs[8];
     @new_coords = $mapper->map($tabs[0], $tabs[6], $tabs[8], _strand_parser($tabs[12]), $m36);
 
     foreach my $new (@new_coords) {
-      warn $new->id, ' ', $new->start, ' ', $new->end;
       my $line;
       my $gap = ref($new) =~ /Gap/ ? 1 : 0;
       my $count = 0;

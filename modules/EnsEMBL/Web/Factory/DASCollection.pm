@@ -352,7 +352,7 @@ sub createObjects {
         }
         $das_data->{active} = 1; # Enable by default
     # Add to the conf list
-        $das_data->{id} = $das_data->{name} if ($das_data->{name} ne $das_name)
+        $das_data->{id} = $das_data->{name} if ($das_data->{name} ne $das_name);
         $das_data->{label} ||= $das_data->{name};
         $das_data->{caption} ||= $das_data->{name};
         @{$das_data->{enable}} = $self->param('DASenable');

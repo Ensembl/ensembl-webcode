@@ -54,7 +54,7 @@ sub render {
   my $html;
   unless ($self->simple) {
     $html .= qq(<a href="/">HOME</a> &middot; <a href="/$blast_dir/blastview">BLAST</a>);
-    if ($ENV{'ENSEMBL_MART_ENABLED'}) {
+    if ( 1 || $ENV{'ENSEMBL_MART_ENABLED'}) {
       $html .= qq( &middot; <a href="/biomart/martview/">BIOMART</a>);
     }
     $html .= qq( &middot; <a href="/$map_link">SITEMAP</a> );

@@ -323,7 +323,9 @@ sub _parse {
   $CONF->{'_storage'} = {};
   my $BC = $self->bread_crumb_creator();
   my $info = [];
+warn "READING WEB TREE";
   read_web_tree($info, 'info');
+warn "READ WEB TREE";
   $BC->{'ENSEMBL_INFO'} = $info;
   my ($defaults, $common);
 
@@ -1591,6 +1593,8 @@ sub read_web_tree {
   $subcount = $nlink - 2;
   foreach my $filename (@$html_files) {
     $name = "$dir/$filename";
+    next if $name =~ m#software/website/docs#;
+    next if $name =~ m#software/Pdoc#;
     next if $name =~ m#software/java#;
     if ($filename =~ /\.html$/) {
       $title = get_title( $filename );
@@ -1618,6 +1622,8 @@ sub read_web_tree {
     }
     $name = "$dir/$dirname";
 
+    next if $name =~ m#software/website/docs#;
+    next if $name =~ m#software/Pdoc#;
     next if $subcount == 0;   ## Seen all the subdirs?
 
     unless ($name =~ m#java/# || $name =~ m#info/website#) {

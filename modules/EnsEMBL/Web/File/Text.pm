@@ -142,6 +142,7 @@ sub exists {
 sub retrieve {
   my( $self, $cache ) = @_;
   $cache ||= $self->filename;
+  warn "FILE $cache";
   
   my $fh = gzopen ( $cache, "rb" ) || warn qq(Cannot open cached upload for parsing: $!);
   my $data;

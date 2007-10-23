@@ -569,7 +569,7 @@ sub ac_preview {
   $html .= "<pre>$output</pre>";
   
   ## link to actual file
-  my $url = 'img-cache'.$object->param('converted');
+  my $url = '/img-cache'.$object->param('converted');
   $html .= qq#<h3>Download converted file</h3>
 <p><a href="$url">Click to download</a> (Gzipped text)#;
 

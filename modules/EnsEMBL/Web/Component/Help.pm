@@ -64,7 +64,7 @@ on the content of the help database. This gives better results than a simple str
 <li>Words that occur in more than 50% of the records are ignored.</li>
 <li>Wildcards such as '%' (zero or one occurences of any character) and '_' (exactly one character) are no longer available.</li>
 </ul>
-<p>For more about the Ensembl Help Search, please go to the <a href="/common/helpview?kw=helpview">HelpView help page</a>.</p>
+<p>For more about the Ensembl Help Search, please go to the <a href="/@{[$object->species]}/helpview?kw=helpview">HelpView help page</a>.</p>
 <h3>Search Ensembl Help</h3>
 );
   $html .= $panel->form('helpsearch')->render();
@@ -124,7 +124,7 @@ sub results {
   <$list_type class="spaced">));
 
   foreach( @{$object->results}) {
-    my $url = '/common/helpview?id='.$_->{'id'}.';hilite='.$object->param('hilite');
+    my $url = "/@{[$object->species]}/helpview?id=".$_->{'id'}.';hilite='.$object->param('hilite');
     if ($modular) {
       my $help = EnsEMBL::Web::Object::Data::View->new({ 'id' => $_->{'id'} }); 
       $panel->printf( qq(\n    <dt><a href="%s">%s</a></dt><dd>%s</dd>), $url, $help->title, $help->summary);

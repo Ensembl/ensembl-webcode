@@ -26,22 +26,29 @@ sub helpview {
   my($panel,$object) = @_;
   my @articles = @{$object->views};
   my $article = $articles[0];
-  my $hilite = $object->param('hilite');
+  my $html;
 
-  my $title = $article->title;
-  if ($hilite) {
-    $title = _kw_hilite($object, $title);
-  }
-  my $html = "<h2>$title</h2>";
+  if ($article) {
+    my $hilite = $object->param('hilite');
 
-  my ($text, $header, $group);
-  $text = $article->content;
-  $text =~ s/\\'/'/g;
-  if ($hilite) {
-    $text   = _kw_hilite($object, $text);
+    my $title = $article->title;
+    if ($hilite) {
+      $title = _kw_hilite($object, $title);
+    }
+    $html = "<h2>$title</h2>";
+
+    my ($text, $header, $group);
+    $text = $article->content;
+    $text =~ s/\\'/'/g;
+    if ($hilite) {
+      $text   = _kw_hilite($object, $text);
+    }
+    $text = _link_mapping($object, $text);
+    $html .= "\n$text\n\n";
   }
-  $text = _link_mapping($object, $text);
-  $html .= "\n$text\n\n";
+  else {
+    $html = "<p>Sorry, no article could be found for that keyword.</p>";
+  }
   $panel->print($html);
   return 1;
 }

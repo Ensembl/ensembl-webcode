@@ -193,6 +193,8 @@ sub _init {
   }
 
   # Draw SNPs for each strain -----------------------------------------------
+#  warn "SNPS:\n", sort map { join '', "   ",$_->[2]->{_variation_id},"::",$_->[2]->start,"\n" } @snps;
+
   foreach my $strain ( sort {$a cmp $b} keys %strain_alleles ) {
     next if $strain eq $reference_name;
 
@@ -200,6 +202,7 @@ sub _init {
     $self->strain_name_text($th,$fontname, $fontsize, $offset, $strain, $Config, $fully_inbred);
 
     my $c = 0;
+    warn "Strain keys:\n", map { "   $_\n" } sort keys %{$strain_alleles{$strain}};
     foreach my $snp_ref ( @snps ) {
       my $snp = $snp_ref->[2];
       my $label =  $snp->allele_string;
@@ -207,6 +210,7 @@ sub _init {
 
       my $allele_string =  $strain_alleles{$strain}{ join "::", $snp->{_variation_id}, $start };
 
+# warn ".... $allele_string ....";
       # If no allele for SNP but there is coverage, allele = reference allele
       unless( $allele_string ) {
 	foreach my $cov ( @{$coverage{$strain}} ) {

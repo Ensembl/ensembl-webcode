@@ -508,8 +508,7 @@ sub ac_convert {
   my ($self, $object) = @_;
   my %parameter;  
 
-  warn "Trying to convert file";
-
+  my $sa    = $object->get_adaptor('get_SliceAdaptor', 'core', $object->species);
   my $ama   = $object->get_adaptor('get_AssemblyMapperAdaptor', 'core', $object->species);
   my $csa   = $object->get_adaptor('get_CoordSystemAdaptor', 'core', $object->species);
 
@@ -521,6 +520,7 @@ sub ac_convert {
   my $data = $cache->retrieve($object->param('cache_file_1'));
 
   my (@new_coords, @lines);
+  my %slice_names = ();
   foreach my $old_line ( split '\n', $data ) {
     next if $old_line =~ /^#/;
     my @tabs = split /(\t|  +)/, $old_line;
@@ -531,6 +531,7 @@ sub ac_convert {
     @new_coords = $mapper->map($tabs[0], $tabs[6], $tabs[8], _strand_parser($tabs[12]), $m36);
 
     foreach my $new (@new_coords) {
+      warn $new->id, ' ', $new->start, ' ', $new->end;
       my $line;
       my $gap = ref($new) =~ /Gap/ ? 1 : 0;
       my $count = 0;
@@ -540,7 +541,7 @@ sub ac_convert {
             $line .= 'GAP';
           }
           else {
-            $line .= $new->id;
+            $line .= $slice_names{$new->id} ||= $sa->fetch_by_seq_region_id($new->id)->seq_region_name;
           }
         }
         elsif ($count == 6) { ## start

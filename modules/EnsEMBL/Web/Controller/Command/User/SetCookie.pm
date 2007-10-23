@@ -43,6 +43,8 @@ sub process {
   if (!$url || $url =~ m#common/user#) { ## Don't want to redirect user to e.g. register or login confirmation!
     $url = '/index.html';
   }
+  $url = CGI::escape($url);
+  warn "SC $url";
   if (!$ENV{'ENSEMBL_USER_ID'}) {
     if ($user && $user->id) {
       my $encrypted = EnsEMBL::Web::Tools::Encryption::encryptID($user->id);

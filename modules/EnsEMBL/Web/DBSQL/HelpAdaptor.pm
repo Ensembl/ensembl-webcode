@@ -150,7 +150,8 @@ sub fetch_index_list {
   return [] unless $self->handle;
   my $T = $self->handle->selectall_arrayref(
     "SELECT a.title, a.keyword, c.name, c.priority
-       FROM article a, category c where a.category_id = c.category_id
+       FROM article a, category c 
+       WHERE a.category_id = c.category_id AND a.status = 'in_use'
       ORDER by priority, name, title"
   );
   return [ map {{

@@ -30,13 +30,14 @@ sub send_email {
   $email =~ s/''/'/g;
   my $server = $self->species_defs->ENSEMBL_SERVERNAME;
   my $url = CGI::unescape($self->param('ref'));
-  push @mail_attributes,
+  push @mail_attributes, (
     [ 'Date',         $date ],
     [ 'Name',         $self->param('name') ],
     [ 'Email',        $email ],
     [ 'Referrer',     $url ],
     [ 'Last Keyword', $self->param('kw')||'-none-' ],
     [ 'User agent',   $ENV{'HTTP_USER_AGENT'}],
+  );
   my $comments = $self->param('comments');
 ## HACK OUT BLOG SPAM!
   my $recipient = $self->species_defs->ENSEMBL_HELPDESK_EMAIL;
@@ -50,7 +51,7 @@ sub send_email {
   } 
   my $message = "Support question from $server\n\n";
   $message .= join "\n", map {sprintf("%-16.16s %s","$_->[0]:",$_->[1])} @mail_attributes;
-  $message .= "\n\nComments:\n\n@{[$self->param('comments')]}\n\n";
+  $message .= "\n\nComments:\n\n".$self->param('comments')."\n\n";
   my $mailer = new Mail::Mailer 'smtp', Server => "localhost";
   my $sitetype = $self->species_defs->ENSEMBL_SITETYPE;
   my $sitename = $sitetype eq 'EnsEMBL' ? 'Ensembl' : $sitetype;

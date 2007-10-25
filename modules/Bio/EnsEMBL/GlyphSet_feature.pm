@@ -443,21 +443,20 @@ sub expanded_init {
   my $dep            = $Config->get(  $type, 'dep' );
   my $h              = $Config->get('_settings','opt_halfheight') ? 4 : 8;
   if( $self->{'extras'} && $self->{'extras'}{'height'} ) {
-    warn
     $h = $self->{'extras'}{'height'};
   }
 
   my ($T,$C1,$C) = (0, 0, 0 );
 
 ## Get array of features and push them into the id hash...
-  foreach my $features ( grep { ref($_) eq 'ARRAY' } $self->features ) {
-    foreach my $f ( @$features ){
+#  foreach my $features ( grep { ref($_) eq 'ARRAY' } $self->features ) {
+    foreach my $f ( @{$self->features || []} ){
       my $hstrand  = 1; #$f->can('hstrand')  ? $f->hstrand : 1;
       my $fgroup_name = $self->feature_group( $f );
       next if $strand_flag eq 'b' && $strand != ( $hstrand*$f->strand || -1 ) || $f->end < 1 || $f->start > $length ;
       push @{$id{$fgroup_name}}, [$f->start,$f->end,$f];
     }
-  }
+#  }
 
 ## Now go through each feature in turn, drawing them
   my $y_pos;
@@ -472,7 +471,7 @@ sub expanded_init {
        $bump_start = 0 if $bump_start < 0;
     my $bump_end   = int($END * $pix_per_bp);
        $bump_end   = $bitmap_length if $bump_end > $bitmap_length;
-warn "$i::: $START, $END, $bump_start, $bump_end, $bitmap_length, $dep ";
+#warn "$i::: $START, $END, $bump_start, $bump_end, $bitmap_length, $dep ";
     my $row = & Sanger::Graphics::Bump::bump_row( $bump_start, $bump_end, $bitmap_length, \@bitmap, $dep );
     if( $row > $dep ) {
       $n_bumped++;
@@ -486,7 +485,7 @@ warn "$i::: $START, $END, $bump_start, $bump_end, $bitmap_length, $dep ";
       'width' => 0,
       'y'     => 0,
       'title' => $i,
-      'zmenu'    => $self->zmenu( $i, $id{$i} ),
+      'zmenu'    => $self->zmenu( $i ),
     });
     my $X = -1000000;
     #my ($feature_colour, $label_colour, $part_to_colour) = $self->colour( $F[0][2]->display_id );

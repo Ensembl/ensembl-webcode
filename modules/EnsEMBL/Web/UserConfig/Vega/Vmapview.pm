@@ -94,7 +94,7 @@ sub init {
     	},
 	    'Vannot_TotIgSeg' => {
 	        'on' => 'on',
-	        'pos' => '15',
+	        'pos' => '18',
 	        'width' => 40,
             'glyphset' => 'Vgenedensity_vega',
             'label' => ["Ig Seg."],

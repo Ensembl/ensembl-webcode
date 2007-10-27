@@ -44,7 +44,6 @@ sub process {
     $url = '/index.html';
   }
   $url = CGI::escape($url);
-  warn "SC $url";
   if (!$ENV{'ENSEMBL_USER_ID'}) {
     if ($user && $user->id) {
       my $encrypted = EnsEMBL::Web::Tools::Encryption::encryptID($user->id);

@@ -69,8 +69,8 @@ sub RENDER_colourgradient{
     $self->errorTrack( "No ".$self->my_label." features in this region" ) unless( $self->{'config'}->get('_settings','opt_empty_tracks')==0 );
     return 0;
   }
-  my $rStart = $self->{'container'}->{'start'};
-  my $rEnd= $self->{'container'}->{'end'};
+  my $rStart = 1; # $self->{'container'}->{'start'};
+  my $rEnd   = $self->{'container'}->length; $self->{'container'}->{'end'};
   my ($min_score, $max_score) = ($self->{_min_score}, $self->{_max_score});
 		   
 				 
@@ -136,8 +136,8 @@ sub RENDER_plot{
     $self->errorTrack( "No ".$self->my_label." features in this region" ) unless( $self->{'config'}->get('_settings','opt_empty_tracks')==0 );
     return 0;
   }
-  my $rStart = $self->{'container'}->{'start'};
-  my $rEnd= $self->{'container'}->{'end'};
+  my $rStart = 1; $self->{'container'}->{'start'};
+  my $rEnd   = $self->{'container'}->length; # $self->{'container'}->{'end'};
   my ($min_score, $max_score) = ($self->{_min_score}, $self->{_max_score});
       
   my $row_height = $configuration->{'height'} || 30;
@@ -233,8 +233,8 @@ sub RENDER_histogram{
     $self->errorTrack( "No ".$self->my_label." features in this region" ) unless( $self->{'config'}->get('_settings','opt_empty_tracks')==0 );
     return 0;
   }
-  my $rStart = $self->{'container'}->{'start'};
-  my $rEnd= $self->{'container'}->{'end'};
+  my $rStart = 1;                            # $self->{'container'}->{'start'};
+  my $rEnd   = $self->{'container'}->length; # $self->{'container'}->{'end'};
   my ($min_score, $max_score) = ($self->{_min_score}, $self->{_max_score});
   my $row_height = $configuration->{'height'} || 30;
   my $pix_per_score = ($max_score - $min_score) / $row_height;
@@ -293,6 +293,7 @@ sub RENDER_histogram{
   }
   return 0;
 }
+
 sub RENDER_signalmap {
   my( $self, $configuration ) = @_;
 
@@ -301,8 +302,8 @@ sub RENDER_signalmap {
     $self->errorTrack( "No ".$self->my_label." features in this region" ) unless( $self->{'config'}->get('_settings','opt_empty_tracks')==0 );
     return 0;
   }
-  my $rStart = $self->{'container'}->{'start'};
-  my $rEnd= $self->{'container'}->{'end'};
+  my $rStart = 1;                            $self->{'container'}->{'start'};
+  my $rEnd   = $self->{'container'}->length; #$self->{'container'}->{'end'};
   my ($min_score, $max_score) = ($self->{_min_score}, $self->{_max_score});
       
   my @positive_features = grep { $_->score >= 0 } @features;
@@ -374,7 +375,7 @@ sub _init {
   my $Config = $self->{'config'};
   my $strand_flag    = $Config->get($type, 'str');
   return if( $strand_flag eq 'r' && $strand != -1 || $strand_flag eq 'f' && $strand != 1 );
-  if (my $wtype = $self->{'extras'}->{'type'} eq 'wiggle_0') {
+  if( my $wtype = $self->{'extras'}->{'type'} eq 'wiggle_0' ) {
      my $gtype = $self->{'extras'}->{'graphType'};
      if ($gtype eq 'points') {
        $self->{'extras'}->{'useScore'} = 4;
@@ -386,22 +387,24 @@ sub _init {
        $self->{'extras'}->{'useScore'} = 3;
      }
   }
-if (0) { 
-warn "CONFIG $type : ", ;
-foreach my $key (sort keys %{$self->{'extras'}}) {
-  warn "$key =>", $self->{'extras'}->{$key};
-}
-}
-  if (my $wdisplay = $self->{'extras'}->{'useScore'}) {
-    return if ($strand != -1);
+  if( 0 ) { 
+    warn "CONFIG $type : ", ;
+    foreach my $key (sort keys %{$self->{'extras'}}) {
+      warn "$key =>", $self->{'extras'}->{$key};
+    }
+  }
+  my $wdisplay = $self->{'extras'}->{'useScore'};
+
+  if( $wdisplay ) {
+    return if( $strand != -1 );
     $self->{'extras'}->{'length'} = $self->{'container'}->{'seq_region_length'};
     $self->{'extras'}->{'colour'} ||= 'contigblue1';
     $self->{'extras'}->{'maxbins'} =  $Config->get('_settings','width');
     $self->merge_features($self->{'extras'});
-    return $self->RENDER_signalmap($self->{'extras'}) if ($wdisplay == 1);
+    return $self->RENDER_signalmap($self->{'extras'})      if ($wdisplay == 1);
     return $self->RENDER_colourgradient($self->{'extras'}) if ($wdisplay == 2);
-    return $self->RENDER_histogram($self->{'extras'}) if ($wdisplay == 3);
-    return $self->RENDER_plot($self->{'extras'}) if ($wdisplay == 4);
+    return $self->RENDER_histogram($self->{'extras'}     ) if ($wdisplay == 3);
+    return $self->RENDER_plot($self->{'extras'})           if ($wdisplay == 4);
   }
 
   $self->{'colours'} = $Config->get( $type, 'colour_set' ) ? 
@@ -449,14 +452,14 @@ sub expanded_init {
   my ($T,$C1,$C) = (0, 0, 0 );
 
 ## Get array of features and push them into the id hash...
-#  foreach my $features ( grep { ref($_) eq 'ARRAY' } $self->features ) {
-    foreach my $f ( @{$self->features || []} ){
+  foreach my $features ( grep { ref($_) eq 'ARRAY' } $self->features ) {
+    foreach my $f ( @{$features || []} ){
       my $hstrand  = 1; #$f->can('hstrand')  ? $f->hstrand : 1;
       my $fgroup_name = $self->feature_group( $f );
       next if $strand_flag eq 'b' && $strand != ( $hstrand*$f->strand || -1 ) || $f->end < 1 || $f->start > $length ;
       push @{$id{$fgroup_name}}, [$f->start,$f->end,$f];
     }
-#  }
+  }
 
 ## Now go through each feature in turn, drawing them
   my $y_pos;
@@ -607,8 +610,8 @@ sub merge_features {
   my $self = shift;
   my ($econfig) = @_;
   my $maxbins    = $econfig->{'maxbins'} or return;
-  my $gStart = $self->{'container'}->start;
-  my $gEnd= $self->{'container'}->end;
+  my $gStart = 1;                            # $self->{'container'}->start;
+  my $gEnd   = $self->{'container'}->length; # $self->{'container'}->end;
   my $resolution = (($gEnd - $gStart+1) / $maxbins);
   my @fA = ();
   my @fBitmap;
@@ -617,7 +620,9 @@ sub merge_features {
   foreach my $f ( @{$self->features || []}) {
     my ($s, $e, $score) = ($f->start, $f->end, $f->score); 
     my $pS = int(($s - $gStart) / $resolution); # start of the region
+    $pS=0 if $pS < 0;
     my $pE = int(($e - $gStart) / $resolution); # end of the region
+    $pE=$maxbins-1 if $pE >= $maxbins;
     for (my $i = $pS; $i <= $pE; $i++) {
       if ( ! $fBitmap[$i] || ($fBitmap[$i] < $score)) {
 	$fBitmap[$i] = $score;

@@ -118,6 +118,7 @@ sub init_label {
 
 ## Now we render the actual link...
   my( $fontname, $fontsize ) = $self->get_font_details( 'label' );
+  $track_label = "[$Extras->{'alt_assembly'}] $track_label" if $Extras->{'alt_assembly'};
   my @res = $self->get_text_width( 0, $track_label, '', 'font'=>$fontname, 'ptsize' => $fontsize );
   $self->label( new Sanger::Graphics::Glyph::Text({
     'text'      => $track_label,

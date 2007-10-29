@@ -488,7 +488,7 @@ sub expanded_init {
       'width' => 0,
       'y'     => 0,
       'title' => $i,
-      'zmenu'    => $self->zmenu( $i ),
+      'zmenu'    => $self->zmenu( $i, $id{$i} ),
     });
     my $X = -1000000;
     #my ($feature_colour, $label_colour, $part_to_colour) = $self->colour( $F[0][2]->display_id );

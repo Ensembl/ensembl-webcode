@@ -1,4 +1,3 @@
-
 <?xml version="1.0" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="/das/das.xsl"?>
 <!DOCTYPE DASDSN SYSTEM "http://www.biodas.org/dtd/dasdsn.dtd">
@@ -7,13 +6,19 @@
     <SOURCE id="Aedes_aegypti.AaegL1.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Aedes_aegypti.AaegL1.reference</MAPMASTER>
-    <DESCRIPTION>Aedes_aegypti Reference server based on AaegL1 assembly. Contains 172793472 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Aedes_aegypti Reference server based on AaegL1 assembly. Contains 153141568 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Aedes_aegypti.AaegL1.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Aedes_aegypti.AaegL1.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Aedes_aegypti transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Aedes_aegypti.AaegL1.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Aedes_aegypti.AaegL1.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Aedes_aegypti translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Anopheles_gambiae.AgamP3.karyotype"
@@ -31,13 +36,19 @@
     <SOURCE id="Anopheles_gambiae.AgamP3.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Anopheles_gambiae.AgamP3.reference</MAPMASTER>
-    <DESCRIPTION>Anopheles_gambiae Reference server based on AgamP3 assembly. Contains 173311588 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Anopheles_gambiae Reference server based on AgamP3 assembly. Contains 153665660 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Anopheles_gambiae.AgamP3.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Anopheles_gambiae.AgamP3.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Anopheles_gambiae transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Anopheles_gambiae.AgamP3.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Anopheles_gambiae.AgamP3.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Anopheles_gambiae translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Bos_taurus.Btau_3.1.prediction_transcript"
@@ -49,7 +60,7 @@
     <SOURCE id="Bos_taurus.Btau_3.1.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Bos_taurus.Btau_3.1.reference</MAPMASTER>
-    <DESCRIPTION>Bos_taurus Reference server based on Btau_3.1 assembly. Contains 173313460 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Bos_taurus Reference server based on Btau_3.1 assembly. Contains 153667604 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Bos_taurus.Btau_3.1.transcript"
@@ -58,16 +69,28 @@
     <DESCRIPTION>Annotation source for Bos_taurus transcript</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
-    <SOURCE id="Caenorhabditis_elegans.WB170.reference"
+    <SOURCE id="Bos_taurus.Btau_3.1.translation"
                 ></SOURCE>
-    <MAPMASTER  >http://www.ensembl.org/das/Caenorhabditis_elegans.WB170.reference</MAPMASTER>
-    <DESCRIPTION>Caenorhabditis_elegans Reference server based on WB170 assembly. Contains 173315332 top level entries.</DESCRIPTION>
+    <MAPMASTER  >http://www.ensembl.org/das/Bos_taurus.Btau_3.1.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Bos_taurus translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
-    <SOURCE id="Caenorhabditis_elegans.WB170.transcript"
+    <SOURCE id="Caenorhabditis_elegans.WS180.reference"
                 ></SOURCE>
-    <MAPMASTER  >http://www.ensembl.org/das/Caenorhabditis_elegans.WB170.reference</MAPMASTER>
+    <MAPMASTER  >http://www.ensembl.org/das/Caenorhabditis_elegans.WS180.reference</MAPMASTER>
+    <DESCRIPTION>Caenorhabditis_elegans Reference server based on WS180 assembly. Contains 153676048 top level entries.</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Caenorhabditis_elegans.WS180.transcript"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Caenorhabditis_elegans.WS180.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Caenorhabditis_elegans transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Caenorhabditis_elegans.WS180.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Caenorhabditis_elegans.WS180.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Caenorhabditis_elegans translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Canis_familiaris.BROADD2.prediction_transcript"
@@ -79,13 +102,19 @@
     <SOURCE id="Canis_familiaris.BROADD2.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Canis_familiaris.BROADD2.reference</MAPMASTER>
-    <DESCRIPTION>Canis_familiaris Reference server based on BROADD2 assembly. Contains 173325296 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Canis_familiaris Reference server based on BROADD2 assembly. Contains 153677848 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Canis_familiaris.BROADD2.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Canis_familiaris.BROADD2.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Canis_familiaris transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Canis_familiaris.BROADD2.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Canis_familiaris.BROADD2.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Canis_familiaris translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Cavia_porcellus.GUINEAPIG.prediction_transcript"
@@ -97,13 +126,19 @@
     <SOURCE id="Cavia_porcellus.GUINEAPIG.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Cavia_porcellus.GUINEAPIG.reference</MAPMASTER>
-    <DESCRIPTION>Cavia_porcellus Reference server based on GUINEAPIG assembly. Contains 173327168 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Cavia_porcellus Reference server based on GUINEAPIG assembly. Contains 153685764 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Cavia_porcellus.GUINEAPIG.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Cavia_porcellus.GUINEAPIG.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Cavia_porcellus transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Cavia_porcellus.GUINEAPIG.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Cavia_porcellus.GUINEAPIG.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Cavia_porcellus translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Ciona_intestinalis.JGI2.prediction_transcript"
@@ -115,13 +150,19 @@
     <SOURCE id="Ciona_intestinalis.JGI2.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Ciona_intestinalis.JGI2.reference</MAPMASTER>
-    <DESCRIPTION>Ciona_intestinalis Reference server based on JGI2 assembly. Contains 173343236 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Ciona_intestinalis Reference server based on JGI2 assembly. Contains 153687636 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Ciona_intestinalis.JGI2.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Ciona_intestinalis.JGI2.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Ciona_intestinalis transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Ciona_intestinalis.JGI2.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Ciona_intestinalis.JGI2.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Ciona_intestinalis translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Ciona_savignyi.CSAV2.0.prediction_transcript"
@@ -133,13 +174,19 @@
     <SOURCE id="Ciona_savignyi.CSAV2.0.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Ciona_savignyi.CSAV2.0.reference</MAPMASTER>
-    <DESCRIPTION>Ciona_savignyi Reference server based on CSAV2.0 assembly. Contains 173345036 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Ciona_savignyi Reference server based on CSAV2.0 assembly. Contains 153704648 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Ciona_savignyi.CSAV2.0.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Ciona_savignyi.CSAV2.0.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Ciona_savignyi transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Ciona_savignyi.CSAV2.0.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Ciona_savignyi.CSAV2.0.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Ciona_savignyi translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Danio_rerio.ZFISH7.prediction_transcript"
@@ -151,13 +198,19 @@
     <SOURCE id="Danio_rerio.ZFISH7.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Danio_rerio.ZFISH7.reference</MAPMASTER>
-    <DESCRIPTION>Danio_rerio Reference server based on ZFISH7 assembly. Contains 173357992 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Danio_rerio Reference server based on ZFISH7 assembly. Contains 153706520 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Danio_rerio.ZFISH7.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Danio_rerio.ZFISH7.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Danio_rerio transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Danio_rerio.ZFISH7.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Danio_rerio.ZFISH7.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Danio_rerio translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Dasypus_novemcinctus.ARMA.prediction_transcript"
@@ -169,13 +222,19 @@
     <SOURCE id="Dasypus_novemcinctus.ARMA.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Dasypus_novemcinctus.ARMA.reference</MAPMASTER>
-    <DESCRIPTION>Dasypus_novemcinctus Reference server based on ARMA assembly. Contains 173359864 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Dasypus_novemcinctus Reference server based on ARMA assembly. Contains 153708392 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Dasypus_novemcinctus.ARMA.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Dasypus_novemcinctus.ARMA.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Dasypus_novemcinctus transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Dasypus_novemcinctus.ARMA.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Dasypus_novemcinctus.ARMA.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Dasypus_novemcinctus translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Drosophila_melanogaster.BDGP4.3.karyotype"
@@ -193,13 +252,19 @@
     <SOURCE id="Drosophila_melanogaster.BDGP4.3.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Drosophila_melanogaster.BDGP4.3.reference</MAPMASTER>
-    <DESCRIPTION>Drosophila_melanogaster Reference server based on BDGP4.3 assembly. Contains 173371580 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Drosophila_melanogaster Reference server based on BDGP4.3 assembly. Contains 153720140 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Drosophila_melanogaster.BDGP4.3.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Drosophila_melanogaster.BDGP4.3.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Drosophila_melanogaster transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Drosophila_melanogaster.BDGP4.3.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Drosophila_melanogaster.BDGP4.3.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Drosophila_melanogaster translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Echinops_telfairi.TENREC.prediction_transcript"
@@ -211,13 +276,19 @@
     <SOURCE id="Echinops_telfairi.TENREC.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Echinops_telfairi.TENREC.reference</MAPMASTER>
-    <DESCRIPTION>Echinops_telfairi Reference server based on TENREC assembly. Contains 173373452 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Echinops_telfairi Reference server based on TENREC assembly. Contains 153722084 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Echinops_telfairi.TENREC.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Echinops_telfairi.TENREC.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Echinops_telfairi transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Echinops_telfairi.TENREC.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Echinops_telfairi.TENREC.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Echinops_telfairi translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Erinaceus_europaeus.HEDGEHOG.prediction_transcript"
@@ -229,13 +300,19 @@
     <SOURCE id="Erinaceus_europaeus.HEDGEHOG.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Erinaceus_europaeus.HEDGEHOG.reference</MAPMASTER>
-    <DESCRIPTION>Erinaceus_europaeus Reference server based on HEDGEHOG assembly. Contains 173375324 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Erinaceus_europaeus Reference server based on HEDGEHOG assembly. Contains 153737880 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Erinaceus_europaeus.HEDGEHOG.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Erinaceus_europaeus.HEDGEHOG.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Erinaceus_europaeus transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Erinaceus_europaeus.HEDGEHOG.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Erinaceus_europaeus.HEDGEHOG.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Erinaceus_europaeus translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Felis_catus.CAT.prediction_transcript"
@@ -247,13 +324,19 @@
     <SOURCE id="Felis_catus.CAT.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Felis_catus.CAT.reference</MAPMASTER>
-    <DESCRIPTION>Felis_catus Reference server based on CAT assembly. Contains 173387064 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Felis_catus Reference server based on CAT assembly. Contains 153739752 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Felis_catus.CAT.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Felis_catus.CAT.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Felis_catus transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Felis_catus.CAT.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Felis_catus.CAT.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Felis_catus translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Gallus_gallus.WASHUC2.prediction_transcript"
@@ -265,13 +348,19 @@
     <SOURCE id="Gallus_gallus.WASHUC2.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Gallus_gallus.WASHUC2.reference</MAPMASTER>
-    <DESCRIPTION>Gallus_gallus Reference server based on WASHUC2 assembly. Contains 173388936 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Gallus_gallus Reference server based on WASHUC2 assembly. Contains 153753952 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Gallus_gallus.WASHUC2.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Gallus_gallus.WASHUC2.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Gallus_gallus transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Gallus_gallus.WASHUC2.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Gallus_gallus.WASHUC2.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Gallus_gallus translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Gasterosteus_aculeatus.BROADS1.prediction_transcript"
@@ -283,13 +372,19 @@
     <SOURCE id="Gasterosteus_aculeatus.BROADS1.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Gasterosteus_aculeatus.BROADS1.reference</MAPMASTER>
-    <DESCRIPTION>Gasterosteus_aculeatus Reference server based on BROADS1 assembly. Contains 173407192 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Gasterosteus_aculeatus Reference server based on BROADS1 assembly. Contains 153755824 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Gasterosteus_aculeatus.BROADS1.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Gasterosteus_aculeatus.BROADS1.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Gasterosteus_aculeatus transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Gasterosteus_aculeatus.BROADS1.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Gasterosteus_aculeatus.BROADS1.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Gasterosteus_aculeatus translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Homo_sapiens.NCBI36.cagetags"
@@ -319,13 +414,19 @@
     <SOURCE id="Homo_sapiens.NCBI36.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Homo_sapiens.NCBI36.reference</MAPMASTER>
-    <DESCRIPTION>Homo_sapiens Reference server based on NCBI36 assembly. Contains 173409064 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Homo_sapiens Reference server based on NCBI36 assembly. Contains 153757696 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Homo_sapiens.NCBI36.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Homo_sapiens.NCBI36.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Homo_sapiens transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Homo_sapiens.NCBI36.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Homo_sapiens.NCBI36.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Homo_sapiens translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Loxodonta_africana.BROADE1.prediction_transcript"
@@ -337,13 +438,19 @@
     <SOURCE id="Loxodonta_africana.BROADE1.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Loxodonta_africana.BROADE1.reference</MAPMASTER>
-    <DESCRIPTION>Loxodonta_africana Reference server based on BROADE1 assembly. Contains 173388912 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Loxodonta_africana Reference server based on BROADE1 assembly. Contains 153702932 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Loxodonta_africana.BROADE1.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Loxodonta_africana.BROADE1.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Loxodonta_africana transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Loxodonta_africana.BROADE1.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Loxodonta_africana.BROADE1.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Loxodonta_africana translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Macaca_mulatta.MMUL_1.prediction_transcript"
@@ -355,13 +462,19 @@
     <SOURCE id="Macaca_mulatta.MMUL_1.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Macaca_mulatta.MMUL_1.reference</MAPMASTER>
-    <DESCRIPTION>Macaca_mulatta Reference server based on MMUL_1 assembly. Contains 173422604 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Macaca_mulatta Reference server based on MMUL_1 assembly. Contains 153771260 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Macaca_mulatta.MMUL_1.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Macaca_mulatta.MMUL_1.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Macaca_mulatta transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Macaca_mulatta.MMUL_1.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Macaca_mulatta.MMUL_1.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Macaca_mulatta translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Monodelphis_domestica.BROADO5.prediction_transcript"
@@ -373,7 +486,7 @@
     <SOURCE id="Monodelphis_domestica.BROADO5.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Monodelphis_domestica.BROADO5.reference</MAPMASTER>
-    <DESCRIPTION>Monodelphis_domestica Reference server based on BROADO5 assembly. Contains 173424476 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Monodelphis_domestica Reference server based on BROADO5 assembly. Contains 153787112 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Monodelphis_domestica.BROADO5.transcript"
@@ -382,40 +495,52 @@
     <DESCRIPTION>Annotation source for Monodelphis_domestica transcript</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
-    <SOURCE id="Mus_musculus.NCBIM36.cagetags"
+    <SOURCE id="Monodelphis_domestica.BROADO5.translation"
                 ></SOURCE>
-    <MAPMASTER  >http://www.ensembl.org/das/Mus_musculus.NCBIM36.reference</MAPMASTER>
+    <MAPMASTER  >http://www.ensembl.org/das/Monodelphis_domestica.BROADO5.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Monodelphis_domestica translation</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Mus_musculus.NCBIM37.cagetags"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Mus_musculus.NCBIM37.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Mus_musculus cagetags</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
-    <SOURCE id="Mus_musculus.NCBIM36.ditags"
+    <SOURCE id="Mus_musculus.NCBIM37.ditags"
                 ></SOURCE>
-    <MAPMASTER  >http://www.ensembl.org/das/Mus_musculus.NCBIM36.reference</MAPMASTER>
+    <MAPMASTER  >http://www.ensembl.org/das/Mus_musculus.NCBIM37.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Mus_musculus ditags</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
-    <SOURCE id="Mus_musculus.NCBIM36.karyotype"
+    <SOURCE id="Mus_musculus.NCBIM37.karyotype"
                 ></SOURCE>
-    <MAPMASTER  >http://www.ensembl.org/das/Mus_musculus.NCBIM36.reference</MAPMASTER>
+    <MAPMASTER  >http://www.ensembl.org/das/Mus_musculus.NCBIM37.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Mus_musculus karyotype</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
-    <SOURCE id="Mus_musculus.NCBIM36.prediction_transcript"
+    <SOURCE id="Mus_musculus.NCBIM37.prediction_transcript"
                 ></SOURCE>
-    <MAPMASTER  >http://www.ensembl.org/das/Mus_musculus.NCBIM36.reference</MAPMASTER>
+    <MAPMASTER  >http://www.ensembl.org/das/Mus_musculus.NCBIM37.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Mus_musculus prediction_transcript</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
-    <SOURCE id="Mus_musculus.NCBIM36.reference"
+    <SOURCE id="Mus_musculus.NCBIM37.reference"
                 ></SOURCE>
-    <MAPMASTER  >http://www.ensembl.org/das/Mus_musculus.NCBIM36.reference</MAPMASTER>
-    <DESCRIPTION>Mus_musculus Reference server based on NCBIM36 assembly. Contains 173432056 top level entries.</DESCRIPTION>
+    <MAPMASTER  >http://www.ensembl.org/das/Mus_musculus.NCBIM37.reference</MAPMASTER>
+    <DESCRIPTION>Mus_musculus Reference server based on NCBIM37 assembly. Contains 153788984 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
-    <SOURCE id="Mus_musculus.NCBIM36.transcript"
+    <SOURCE id="Mus_musculus.NCBIM37.transcript"
                 ></SOURCE>
-    <MAPMASTER  >http://www.ensembl.org/das/Mus_musculus.NCBIM36.reference</MAPMASTER>
+    <MAPMASTER  >http://www.ensembl.org/das/Mus_musculus.NCBIM37.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Mus_musculus transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Mus_musculus.NCBIM37.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Mus_musculus.NCBIM37.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Mus_musculus translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Myotis_lucifugus.MICROBAT1.prediction_transcript"
@@ -427,13 +552,19 @@
     <SOURCE id="Myotis_lucifugus.MICROBAT1.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Myotis_lucifugus.MICROBAT1.reference</MAPMASTER>
-    <DESCRIPTION>Myotis_lucifugus Reference server based on MICROBAT1 assembly. Contains 173433928 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Myotis_lucifugus Reference server based on MICROBAT1 assembly. Contains 153804780 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Myotis_lucifugus.MICROBAT1.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Myotis_lucifugus.MICROBAT1.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Myotis_lucifugus transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Myotis_lucifugus.MICROBAT1.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Myotis_lucifugus.MICROBAT1.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Myotis_lucifugus translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Ornithorhynchus_anatinus.OANA5.prediction_transcript"
@@ -445,13 +576,19 @@
     <SOURCE id="Ornithorhynchus_anatinus.OANA5.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Ornithorhynchus_anatinus.OANA5.reference</MAPMASTER>
-    <DESCRIPTION>Ornithorhynchus_anatinus Reference server based on OANA5 assembly. Contains 173449732 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Ornithorhynchus_anatinus Reference server based on OANA5 assembly. Contains 153757564 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Ornithorhynchus_anatinus.OANA5.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Ornithorhynchus_anatinus.OANA5.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Ornithorhynchus_anatinus transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Ornithorhynchus_anatinus.OANA5.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Ornithorhynchus_anatinus.OANA5.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Ornithorhynchus_anatinus translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Oryctolagus_cuniculus.RABBIT.prediction_transcript"
@@ -463,13 +600,19 @@
     <SOURCE id="Oryctolagus_cuniculus.RABBIT.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Oryctolagus_cuniculus.RABBIT.reference</MAPMASTER>
-    <DESCRIPTION>Oryctolagus_cuniculus Reference server based on RABBIT assembly. Contains 173451748 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Oryctolagus_cuniculus Reference server based on RABBIT assembly. Contains 153818608 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Oryctolagus_cuniculus.RABBIT.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Oryctolagus_cuniculus.RABBIT.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Oryctolagus_cuniculus transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Oryctolagus_cuniculus.RABBIT.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Oryctolagus_cuniculus.RABBIT.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Oryctolagus_cuniculus translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Oryzias_latipes.MEDAKA1.ditags"
@@ -487,13 +630,19 @@
     <SOURCE id="Oryzias_latipes.MEDAKA1.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Oryzias_latipes.MEDAKA1.reference</MAPMASTER>
-    <DESCRIPTION>Oryzias_latipes Reference server based on MEDAKA1 assembly. Contains 173463488 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Oryzias_latipes Reference server based on MEDAKA1 assembly. Contains 153820480 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Oryzias_latipes.MEDAKA1.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Oryzias_latipes.MEDAKA1.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Oryzias_latipes transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Oryzias_latipes.MEDAKA1.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Oryzias_latipes.MEDAKA1.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Oryzias_latipes translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Otolemur_garnettii.BUSHBABY1.prediction_transcript"
@@ -505,13 +654,19 @@
     <SOURCE id="Otolemur_garnettii.BUSHBABY1.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Otolemur_garnettii.BUSHBABY1.reference</MAPMASTER>
-    <DESCRIPTION>Otolemur_garnettii Reference server based on BUSHBABY1 assembly. Contains 173465360 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Otolemur_garnettii Reference server based on BUSHBABY1 assembly. Contains 153832196 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Otolemur_garnettii.BUSHBABY1.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Otolemur_garnettii.BUSHBABY1.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Otolemur_garnettii transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Otolemur_garnettii.BUSHBABY1.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Otolemur_garnettii.BUSHBABY1.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Otolemur_garnettii translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Pan_troglodytes.CHIMP2.1.prediction_transcript"
@@ -523,13 +678,19 @@
     <SOURCE id="Pan_troglodytes.CHIMP2.1.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Pan_troglodytes.CHIMP2.1.reference</MAPMASTER>
-    <DESCRIPTION>Pan_troglodytes Reference server based on CHIMP2.1 assembly. Contains 173481308 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Pan_troglodytes Reference server based on CHIMP2.1 assembly. Contains 153834068 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Pan_troglodytes.CHIMP2.1.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Pan_troglodytes.CHIMP2.1.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Pan_troglodytes transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Pan_troglodytes.CHIMP2.1.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Pan_troglodytes.CHIMP2.1.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Pan_troglodytes translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Rattus_norvegicus.RGSC3.4.karyotype"
@@ -547,13 +708,19 @@
     <SOURCE id="Rattus_norvegicus.RGSC3.4.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Rattus_norvegicus.RGSC3.4.reference</MAPMASTER>
-    <DESCRIPTION>Rattus_norvegicus Reference server based on RGSC3.4 assembly. Contains 173483108 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Rattus_norvegicus Reference server based on RGSC3.4 assembly. Contains 153745144 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Rattus_norvegicus.RGSC3.4.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Rattus_norvegicus.RGSC3.4.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Rattus_norvegicus transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Rattus_norvegicus.RGSC3.4.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Rattus_norvegicus.RGSC3.4.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Rattus_norvegicus translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Saccharomyces_cerevisiae.SGD1.01.prediction_transcript"
@@ -565,13 +732,19 @@
     <SOURCE id="Saccharomyces_cerevisiae.SGD1.01.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Saccharomyces_cerevisiae.SGD1.01.reference</MAPMASTER>
-    <DESCRIPTION>Saccharomyces_cerevisiae Reference server based on SGD1.01 assembly. Contains 173392448 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Saccharomyces_cerevisiae Reference server based on SGD1.01 assembly. Contains 153856664 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Saccharomyces_cerevisiae.SGD1.01.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Saccharomyces_cerevisiae.SGD1.01.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Saccharomyces_cerevisiae transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Saccharomyces_cerevisiae.SGD1.01.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Saccharomyces_cerevisiae.SGD1.01.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Saccharomyces_cerevisiae translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Sorex_araneus.COMMON_SHREW1.prediction_transcript"
@@ -583,13 +756,19 @@
     <SOURCE id="Sorex_araneus.COMMON_SHREW1.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Sorex_araneus.COMMON_SHREW1.reference</MAPMASTER>
-    <DESCRIPTION>Sorex_araneus Reference server based on COMMON_SHREW1 assembly. Contains 173392424 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Sorex_araneus Reference server based on COMMON_SHREW1 assembly. Contains 153746872 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Sorex_araneus.COMMON_SHREW1.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Sorex_araneus.COMMON_SHREW1.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Sorex_araneus transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Sorex_araneus.COMMON_SHREW1.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Sorex_araneus.COMMON_SHREW1.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Sorex_araneus translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Spermophilus_tridecemlineatus.SQUIRREL.prediction_transcript"
@@ -601,13 +780,19 @@
     <SOURCE id="Spermophilus_tridecemlineatus.SQUIRREL.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Spermophilus_tridecemlineatus.SQUIRREL.reference</MAPMASTER>
-    <DESCRIPTION>Spermophilus_tridecemlineatus Reference server based on SQUIRREL assembly. Contains 173507432 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Spermophilus_tridecemlineatus Reference server based on SQUIRREL assembly. Contains 153860480 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Spermophilus_tridecemlineatus.SQUIRREL.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Spermophilus_tridecemlineatus.SQUIRREL.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Spermophilus_tridecemlineatus transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Spermophilus_tridecemlineatus.SQUIRREL.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Spermophilus_tridecemlineatus.SQUIRREL.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Spermophilus_tridecemlineatus translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Takifugu_rubripes.FUGU4.prediction_transcript"
@@ -619,13 +804,19 @@
     <SOURCE id="Takifugu_rubripes.FUGU4.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Takifugu_rubripes.FUGU4.reference</MAPMASTER>
-    <DESCRIPTION>Takifugu_rubripes Reference server based on FUGU4 assembly. Contains 173509304 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Takifugu_rubripes Reference server based on FUGU4 assembly. Contains 153872444 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Takifugu_rubripes.FUGU4.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Takifugu_rubripes.FUGU4.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Takifugu_rubripes transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Takifugu_rubripes.FUGU4.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Takifugu_rubripes.FUGU4.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Takifugu_rubripes translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Tetraodon_nigroviridis.TETRAODON7.prediction_transcript"
@@ -637,13 +828,19 @@
     <SOURCE id="Tetraodon_nigroviridis.TETRAODON7.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Tetraodon_nigroviridis.TETRAODON7.reference</MAPMASTER>
-    <DESCRIPTION>Tetraodon_nigroviridis Reference server based on TETRAODON7 assembly. Contains 173521028 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Tetraodon_nigroviridis Reference server based on TETRAODON7 assembly. Contains 153874316 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Tetraodon_nigroviridis.TETRAODON7.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Tetraodon_nigroviridis.TETRAODON7.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Tetraodon_nigroviridis transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Tetraodon_nigroviridis.TETRAODON7.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Tetraodon_nigroviridis.TETRAODON7.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Tetraodon_nigroviridis translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Tupaia_belangeri.TREESHREW.prediction_transcript"
@@ -655,13 +852,19 @@
     <SOURCE id="Tupaia_belangeri.TREESHREW.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Tupaia_belangeri.TREESHREW.reference</MAPMASTER>
-    <DESCRIPTION>Tupaia_belangeri Reference server based on TREESHREW assembly. Contains 173522900 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Tupaia_belangeri Reference server based on TREESHREW assembly. Contains 153886056 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Tupaia_belangeri.TREESHREW.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Tupaia_belangeri.TREESHREW.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Tupaia_belangeri transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Tupaia_belangeri.TREESHREW.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Tupaia_belangeri.TREESHREW.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Tupaia_belangeri translation</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Xenopus_tropicalis.JGI4.1.prediction_transcript"
@@ -673,12 +876,18 @@
     <SOURCE id="Xenopus_tropicalis.JGI4.1.reference"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Xenopus_tropicalis.JGI4.1.reference</MAPMASTER>
-    <DESCRIPTION>Xenopus_tropicalis Reference server based on JGI4.1 assembly. Contains 173534560 top level entries.</DESCRIPTION>
+    <DESCRIPTION>Xenopus_tropicalis Reference server based on JGI4.1 assembly. Contains 153887928 top level entries.</DESCRIPTION>
   </DSN>
   <DSN href="http://www.ensembl.org/das/dsn">
     <SOURCE id="Xenopus_tropicalis.JGI4.1.transcript"
                 ></SOURCE>
     <MAPMASTER  >http://www.ensembl.org/das/Xenopus_tropicalis.JGI4.1.reference</MAPMASTER>
     <DESCRIPTION>Annotation source for Xenopus_tropicalis transcript</DESCRIPTION>
+  </DSN>
+  <DSN href="http://www.ensembl.org/das/dsn">
+    <SOURCE id="Xenopus_tropicalis.JGI4.1.translation"
+                ></SOURCE>
+    <MAPMASTER  >http://www.ensembl.org/das/Xenopus_tropicalis.JGI4.1.reference</MAPMASTER>
+    <DESCRIPTION>Annotation source for Xenopus_tropicalis translation</DESCRIPTION>
   </DSN>
 </DASDSN>

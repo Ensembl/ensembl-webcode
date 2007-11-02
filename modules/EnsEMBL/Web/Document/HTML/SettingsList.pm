@@ -15,16 +15,17 @@ sub new { return shift->SUPER::new( 'sp_bio' => '?? ??', 'sp_common' => '??', 's
 sub render {
   my ($class, $request) = @_;
   my $html = "";
+=pod
   if ($ENV{'ENSEMBL_USER_ID'}) {
   my $user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;
-  my $data_user = EnsEMBL::Web::Object::Data::User->new({ id => $user->id });
+  my $data_user = EnsEMBL::Web::Record::Account::User->new({ id => $user->id });
 
   my $sitename = $SiteDefs::ENSEMBL_SITETYPE;
 
   my $group_id = undef;
-  foreach my $this ($user->drawer_records) {
-    $group_id = $this->group;
-  }
+  #foreach my $this ($user->drawer_records) {
+  #  $group_id = $this->group;
+  #}
   $html = "<div id='settings' style='display:none;'>\n";
   $html .= "<div id='settings_content'>\n";
   $html .= "<table width='100%' cellpadding='0' cellspacing='0'>\n";
@@ -77,6 +78,7 @@ sub render {
   $html .= "</table>";
   $html .= "</div></div>\n";
   }
+=cut
   return $html;
 }
 

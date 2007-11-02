@@ -8,7 +8,7 @@ use EnsEMBL::Web::DBSQL::NewsAdaptor;
 use EnsEMBL::Web::DBSQL::HelpAdaptor;
 use EnsEMBL::Web::Timer;
 use EnsEMBL::Web::SpeciesDefs;
-use EnsEMBL::Web::Object::Data::User;
+use EnsEMBL::Web::Record::Account::User;
 #use Cache::Memcached;
 #use EnsEMBL::Web::DBCache;
 #use EnsEMBL::Web::FakeMemcached;
@@ -56,7 +56,7 @@ sub get_das {
 
   my $user_id = $self->get_user->id;
   if ($user_id) {
-    my $user = EnsEMBL::Web::Object::Data::User->new({ id => $user_id });
+    my $user = EnsEMBL::Web::Record::Account::User->new({ id => $user_id });
     foreach my $das (@{ $user->dases }) {
       $Das_sources_of{ ident $self }{$das->name} = $das->get_das_config;
       #warn $Das_sources_of{ ident $self }{$das->name};

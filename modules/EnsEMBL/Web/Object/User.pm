@@ -5,7 +5,7 @@ use warnings;
 
 use Digest::MD5 qw(md5_hex);
 
-use EnsEMBL::Web::Record::User;
+#use EnsEMBL::Web::Record::User;
 use EnsEMBL::Web::Tools::Encryption;
 use EnsEMBL::Web::Object::Group;
 
@@ -32,11 +32,13 @@ sub new {
 
   ## Get the params from the hashref sent by the Proxy.
   my %params = ();
+=pod
   if ($param_hashref->{_object}) {
     %params = %{ $param_hashref->{_object} };
   } else {
     %params = %{ $param_hashref };
-  }  
+  } 
+=cut 
 
   ## Get blessed object from superclass
   my $self = $class->SUPER::new(%params);
@@ -54,11 +56,12 @@ sub new {
   $Status_of{$self} = defined $params{'status'} ? $params{'status'} : "";
   $Deferred_of{$self} = defined $params{'defer'} ? $params{'defer'} : undef;
   $Is_Populated_of{$self} = 0;
-  
+ 
+=pod 
   if (!$self->adaptor) {
     warn "ADAPTOR not specified";
   }
-
+=cut
   ## Flesh out the object from the database 
   if (!$params{'defer'}) {
     $self->populate();

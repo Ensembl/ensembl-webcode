@@ -5,7 +5,7 @@ use warnings;
 
 use Class::Std;
 use EnsEMBL::Web::RegObj;
-use EnsEMBL::Web::Object::Data;
+use EnsEMBL::Web::Record;
 use EnsEMBL::Web::DBSQL::SQL::Result;
 use EnsEMBL::Web::DBSQL::SQL::Request;
 use EnsEMBL::Web::Tools::DBSQL::TableName;

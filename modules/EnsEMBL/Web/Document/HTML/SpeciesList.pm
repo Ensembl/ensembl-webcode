@@ -4,7 +4,7 @@ use strict;
 #use warnings;
 
 use EnsEMBL::Web::DBSQL::NewsAdaptor;
-use EnsEMBL::Web::Object::Data::User;
+use EnsEMBL::Web::Record::Account::User;
 use EnsEMBL::Web::RegObj;
 
 {
@@ -22,7 +22,7 @@ sub render {
   my $reg_user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;
   my $user_data = undef; 
   if ($reg_user->id > 0) {
-    $user_data = EnsEMBL::Web::Object::Data::User->new({ id => $reg_user->id });
+    $user_data = EnsEMBL::Web::Record::Account::User->new({ id => $reg_user->id });
   }
 
   my $html = "";

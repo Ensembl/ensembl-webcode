@@ -38,6 +38,7 @@ sub render {
 
   ## get news headlines
   my $criteria = {'release'=>$release_id};
+=pod
   if ($user_id && $user_id > 0) {
     $criteria->{'species'} = [];
     ## check for user filters
@@ -50,6 +51,7 @@ sub render {
       }
     }
   }
+=cut
 
   @headlines = @{$adaptor->fetch_headlines($criteria, '', '5')};
 

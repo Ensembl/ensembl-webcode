@@ -1,4 +1,4 @@
-package EnsEMBL::Web::Object::Data::Article;
+package EnsEMBL::Web::Record::Help::Article;
 
 ## Old-style help article
 
@@ -7,9 +7,9 @@ use warnings;
 
 use Class::Std;
 use EnsEMBL::Web::DBSQL::MySQLAdaptor;
-use EnsEMBL::Web::Object::Data;
+use EnsEMBL::Web::Record;
 
-our @ISA = qw(EnsEMBL::Web::Object::Data);
+our @ISA = qw(EnsEMBL::Web::Record);
 
 
 {
@@ -22,7 +22,7 @@ sub BUILD {
   $self->add_queriable_field({ name => 'title', type => 'string' });
   $self->add_queriable_field({ name => 'content', type => 'text' });
   $self->add_queriable_field({ name => 'status', type => "enum('in_use','obsolete','transferred')" });
-  $self->add_belongs_to('EnsEMBL::Web::Object::Data::Category');
+  $self->add_belongs_to('EnsEMBL::Web::Record::Help::Category');
   $self->populate_with_arguments($args);
 }
 

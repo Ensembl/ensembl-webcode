@@ -1,13 +1,13 @@
-package EnsEMBL::Web::Object::Data::Category;
+package EnsEMBL::Web::Record::Help::Category;
 
 use strict;
 use warnings;
 
 use Class::Std;
 use EnsEMBL::Web::DBSQL::MySQLAdaptor;
-use EnsEMBL::Web::Object::Data;
+use EnsEMBL::Web::Record;
 
-our @ISA = qw(EnsEMBL::Web::Object::Data);
+our @ISA = qw(EnsEMBL::Web::Record);
 
 
 {
@@ -18,7 +18,7 @@ sub BUILD {
   $self->set_primary_key('category_id');
   $self->add_queriable_field({ name => 'name', type => 'string' });
   $self->add_queriable_field({ name => 'priority', type => 'int' });
-  $self->add_has_many({ class => 'EnsEMBL::Web::Object::Data::Article'});
+  $self->add_has_many({ class => 'EnsEMBL::Web::Record::Help::Article'});
   $self->populate_with_arguments($args);
 }
 

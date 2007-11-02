@@ -1,13 +1,13 @@
-package EnsEMBL::Web::Object::Data::Species;
+package EnsEMBL::Web::Record::News::Species;
 
 use strict;
 use warnings;
 
 use Class::Std;
-use EnsEMBL::Web::Object::Data;
+use EnsEMBL::Web::Record;
 use EnsEMBL::Web::DBSQL::MySQLAdaptor;
 
-our @ISA = qw(EnsEMBL::Web::Object::Data);
+our @ISA = qw(EnsEMBL::Web::Record);
 
 {
 
@@ -21,8 +21,8 @@ sub BUILD {
   $self->add_queriable_field({ name => 'common_name', type => 'varchar(32)' });
   $self->add_queriable_field({ name => 'vega', type => "enum('N','Y')" });
   $self->add_queriable_field({ name => 'dump_notes', type => 'text' });
-  $self->add_belongs_to("EnsEMBL::Web::Object::Data::Release");
-  $self->add_has_many({class => "EnsEMBL::Web::Object::Data::NewsItem"});
+  $self->add_belongs_to("EnsEMBL::Web::Record::News::Release");
+  $self->add_has_many({class => "EnsEMBL::Web::Record::News::Item"});
   $self->populate_with_arguments($args);
 }
 

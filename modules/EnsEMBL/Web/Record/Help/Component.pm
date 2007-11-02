@@ -1,4 +1,4 @@
-package EnsEMBL::Web::Object::Data::Component;
+package EnsEMBL::Web::Record::Help::Component;
 
 ## Object representing help for an individual Ensembl component
 ## N.B. the keyword for this type of record links it to the component module
@@ -7,10 +7,10 @@ use strict;
 use warnings;
 
 use Class::Std;
-use EnsEMBL::Web::Object::Data::Trackable;
+use EnsEMBL::Web::Record::Trackable;
 use EnsEMBL::Web::DBSQL::MySQLAdaptor;
 
-our @ISA = qw(EnsEMBL::Web::Object::Data::Trackable);
+our @ISA = qw(EnsEMBL::Web::Record::Trackable);
 
 {
 

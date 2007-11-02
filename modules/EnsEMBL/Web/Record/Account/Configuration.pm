@@ -1,13 +1,13 @@
-package EnsEMBL::Web::Object::Data::Configuration;
+package EnsEMBL::Web::Record::Account::Configuration;
 
 use strict;
 use warnings;
 
 use Class::Std;
-use EnsEMBL::Web::Object::Data::Trackable;
-use EnsEMBL::Web::Object::Data::Owned;
+use EnsEMBL::Web::Record::Trackable;
+use EnsEMBL::Web::Record::Owned;
 
-our @ISA = qw(EnsEMBL::Web::Object::Data::Trackable  EnsEMBL::Web::Object::Data::Owned);
+our @ISA = qw(EnsEMBL::Web::Record::Trackable  EnsEMBL::Web::Record::Owned);
 
 
 {

@@ -1,13 +1,13 @@
-package EnsEMBL::Web::Object::Data::NewsFilter;
+package EnsEMBL::Web::Record::Account::NewsFilter;
 
 use strict;
 use warnings;
 
 use Class::Std;
-use EnsEMBL::Web::Object::Data::Trackable;
-use EnsEMBL::Web::Object::Data::Record;
+use EnsEMBL::Web::Record::Trackable;
+use EnsEMBL::Web::Record::Record;
 
-our @ISA = qw(EnsEMBL::Web::Object::Data::Trackable  EnsEMBL::Web::Object::Data::Record);
+our @ISA = qw(EnsEMBL::Web::Record::Trackable  EnsEMBL::Web::Record::Record);
 
 
 {

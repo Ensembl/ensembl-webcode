@@ -1,13 +1,13 @@
-package EnsEMBL::Web::Object::Data::Release;
+package EnsEMBL::Web::Record::News::Release;
 
 use strict;
 use warnings;
 
 use Class::Std;
-use EnsEMBL::Web::Object::Data;
+use EnsEMBL::Web::Record;
 use EnsEMBL::Web::DBSQL::MySQLAdaptor;
 
-our @ISA = qw(EnsEMBL::Web::Object::Data);
+our @ISA = qw(EnsEMBL::Web::Record);
 
 {
 
@@ -19,8 +19,8 @@ sub BUILD {
   $self->add_queriable_field({ name => 'number', type => 'varchar(5)' });
   $self->add_queriable_field({ name => 'date', type => 'date' });
   $self->add_queriable_field({ name => 'archive', type => 'varchar(7)' });
-  $self->add_has_many({ class => "EnsEMBL::Web::Object::Data::NewsItem"});
-  $self->add_has_many({ class => "EnsEMBL::Web::Object::Data::Species"});
+  $self->add_has_many({ class => "EnsEMBL::Web::Record::News::Item"});
+  $self->add_has_many({ class => "EnsEMBL::Web::Record::News::Species"});
   $self->populate_with_arguments($args);
 }
 

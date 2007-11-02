@@ -1,13 +1,13 @@
-package EnsEMBL::Web::Object::Data::Group;
+package EnsEMBL::Web::Record::Account::Group;
 
 use strict;
 use warnings;
 
 use Class::Std;
-use EnsEMBL::Web::Object::Data::Trackable;
+use EnsEMBL::Web::Record::Trackable;
 use EnsEMBL::Web::DBSQL::MySQLAdaptor;
 
-our @ISA = qw(EnsEMBL::Web::Object::Data::Trackable);
+our @ISA = qw(EnsEMBL::Web::Record::Trackable);
 
 {
 
@@ -20,12 +20,12 @@ sub BUILD {
   $self->add_queriable_field({ name => 'blurb', type => 'text' });
   $self->add_queriable_field({ name => 'type', type => "enum('open','restricted','private')" });
   $self->add_queriable_field({ name => 'status', type => "enum('active','inactive')" });
-  $self->add_has_many({ class => 'EnsEMBL::Web::Object::Data::Bookmark', owner => 'group'});
-  $self->add_has_many({ class => 'EnsEMBL::Web::Object::Data::Configuration', owner => 'group'});
-  $self->add_has_many({ class => 'EnsEMBL::Web::Object::Data::Annotation', owner => 'group'});
-  $self->add_has_many({ class => 'EnsEMBL::Web::Object::Data::DAS', owner => 'group'});
-  $self->add_has_many({ class => 'EnsEMBL::Web::Object::Data::Invite', owner => 'group'});
-  $self->add_has_many({ class => 'EnsEMBL::Web::Object::Data::User', table => 'user', link_table => 'group_member', contribute => [ 'level', 'member_status' ] });
+  $self->add_has_many({ class => 'EnsEMBL::Web::Record::Account::Bookmark', owner => 'group'});
+  $self->add_has_many({ class => 'EnsEMBL::Web::Record::Account::Configuration', owner => 'group'});
+  $self->add_has_many({ class => 'EnsEMBL::Web::Record::Account::Annotation', owner => 'group'});
+  $self->add_has_many({ class => 'EnsEMBL::Web::Record::Account::DAS', owner => 'group'});
+  $self->add_has_many({ class => 'EnsEMBL::Web::Record::Account::Invite', owner => 'group'});
+  $self->add_has_many({ class => 'EnsEMBL::Web::Record::Account::User', table => 'user', link_table => 'group_member', contribute => [ 'level', 'member_status' ] });
   $self->populate_with_arguments($args);
 }
 

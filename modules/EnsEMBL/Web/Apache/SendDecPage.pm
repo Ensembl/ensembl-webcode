@@ -61,31 +61,6 @@ sub handler {
       last if @groups;
     }
   
-=pod
-    if (@groups) {
-      ## TODO: Not sure what this block does, as $user is not defined - mw4
-      ## Probably best to get the user from the registry.
-  
-      my $user;
-      my @user_groups = $user->groups;
-  
-      ## cross-reference user's groups against permitted groups
-      my $access = 0;
-      foreach my $g (@groups) {
-        foreach my $u (@user_groups) {
-          $access = 1 if $u == $g;
-        }
-        last if $access;
-      }
-      if (!$access) {
-        my $URL = '/common/access_denied';
-        $r->headers_out->add( "Location" => $URL );
-        $r->err_headers_out->add( "Location" => $URL );
-        $r->status( REDIRECT );
-      }
-    }
-  
-=cut
 ## Read html file into memory to parse out SSI directives.
     {
       local($/) = undef;

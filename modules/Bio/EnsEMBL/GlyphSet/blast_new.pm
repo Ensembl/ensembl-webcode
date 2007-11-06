@@ -50,8 +50,11 @@ sub zmenu {
   my $id = shift || 'UNKNOWN!';
 
   my $boxes     = shift || [];
-  my $first_box = $boxes->[0] || [];
-  my $feature   = $first_box->[2];
+warn ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
+use Data::Dumper;
+warn Data::Dumper::Dumper( $boxes );
+  #my $first_box = $boxes->[0] || [];
+  my $feature   = $boxes; #$first_box->[2];
 
   if( $feature ){
 

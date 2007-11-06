@@ -483,12 +483,12 @@ sub expanded_init {
     $y_pos = $row * int( - $h - 2 ) * $strand;
     $C1 += @{$id{$i}}; ## Diagnostic report....
     my $Composite = new Sanger::Graphics::Glyph::Composite({
-      'href'  => $self->href( $i, $id{$i} ),
+      'href'  => $self->href( $i, $F[0][2] ),
       'x'     => $F[0][0]> 1 ? $F[0][0]-1 : 0,
       'width' => 0,
       'y'     => 0,
       'title' => $i,
-      'zmenu'    => $self->zmenu( $i, $id{$i} ),
+      'zmenu'    => $self->zmenu( $i, $F[0][2] ),
     });
     my $X = -1000000;
     #my ($feature_colour, $label_colour, $part_to_colour) = $self->colour( $F[0][2]->display_id );

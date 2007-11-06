@@ -80,11 +80,11 @@ sub add_where {
 }
 
 sub add_order {
-  my ($self, $field, $order) = @_;
+  my ($self, $field, $direction) = @_;
   unless (defined $self->get_order_attributes) { 
     $self->set_order_attributes([]);
   }
-  push @{ $self->get_order_attributes }, { field => $field, order => $order };
+  push @{ $self->get_order_attributes }, { field => $field, direction => $direction };
 }
 
 sub add_select {
@@ -130,7 +130,7 @@ sub get_order {
   my $sql = '';
   if ($self->get_order_attributes) {
     foreach my $order (@{ $self->get_order_attributes }) {
-      my $direction = $where->{order} ? $where->{order} : 'ASC';
+      my $direction = $order->{direction} ? $order->{direction} : 'ASC';
       $sql .= $order->{field} . ' ', $direction . ',';
     }
   }

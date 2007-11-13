@@ -1362,7 +1362,10 @@ sub transcriptsnpview_menu    {
   else {
     $text = ". Please select a source from the yellow 'Source' dropdown menu" if scalar @populations;
   }
+
   $panel->print("<p>Where there is resequencing coverage, SNPs have been called using a computational method.  Here we display the SNP calls observed by transcript$text.  </p>");
+
+  $panel->print(qq(<div class="notice">Unfortunately there are problems with the Watson and Venter re-sequencing data in the variation database so we recommend you do not use this data. See the <a href="/Multi/newsview?rel=47">Release 47 news page</a> for more information.</div>));
 
   my $user_config = $object->user_config_hash( 'TSV_sampletranscript' );
   $user_config->{'Populations'}    = \@populations;

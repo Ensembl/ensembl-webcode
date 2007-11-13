@@ -1319,6 +1319,11 @@ sub individuals_options_form {
     }
   }
 
+  $form->add_element(
+	'type'	=> 'Information',
+	'value' => 'Unfortunately there are problems with the Watson and Venter re-sequencing data in the variation database so we recommend you do not use this data. See the <a href="/Multi/newsview?rel=47">Release 47 news page</a> for more information.',
+  );
+
   my $strains =  $object->species_defs->translate( 'strain' );
   $form->add_element(
 	'type'     => 'NoEdit',

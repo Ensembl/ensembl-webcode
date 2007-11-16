@@ -1,4 +1,4 @@
-uackage EnsEMBL::Web::Component::SNP;
+package EnsEMBL::Web::Component::SNP;
 
 =head1 LICENCE
 

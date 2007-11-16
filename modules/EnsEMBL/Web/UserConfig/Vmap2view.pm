@@ -24,6 +24,7 @@ sub init {
 			Vannot_TotPTrans
             Vannot_TotPseudo
 			Vannot_TotIgSeg
+			Vannot_TotTEC
             Vsnps
 	        Vpercents
     	    Videogram
@@ -41,10 +42,11 @@ sub init {
      			PTransDensity
                 PseudoGeneDensity
 			    IgSegDensity
+                TECGeneDensity
             )],
 	    'labels' => 1,
 	},
-
+       
 	'_colours' => {
 	    $self->{'_colourmap'}->colourSet( 'vega_gene_havana' ),
         },
@@ -94,6 +96,7 @@ sub init {
             'colour' => [qw(pseudogene)],
     	    'logicname' => 'PseudoGeneDensity',
     	},
+
 	    'Vannot_TotIgSeg' => {
 	        'on' => 'on',
 	        'pos' => '18',
@@ -102,6 +105,16 @@ sub init {
             'label' => ["Ig Seg."],
             'colour' => [qw(ig_segment)],
     	    'logicname' => 'IgSegDensity',
+    	},
+
+	    'Vannot_TotTEC' => {
+	        'on' => 'on',
+	        'pos' => '21',
+	        'width' => 40,
+            'glyphset' => 'Vgenedensity_vega',
+            'label' => ["TEC"],
+            'colour' => [qw(tec)],
+    	    'logicname' => 'TECGeneDensity',
     	},
 
 	    'Vpercents' => {

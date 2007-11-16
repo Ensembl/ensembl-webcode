@@ -1,4 +1,4 @@
-package EnsEMBL::Web::UserConfig::Vega::Vmapview;
+package EnsEMBL::Web::UserConfig::Vmapview;
 use strict;
 use EnsEMBL::Web::UserConfig;
 use vars qw(@ISA);
@@ -23,6 +23,7 @@ sub init {
 			Vannot_TotPTrans
             Vannot_TotPseudo
 			Vannot_TotIgSeg
+			Vannot_TotTEC
             Vsnps
 	        Vpercents
     	    Videogram
@@ -40,6 +41,7 @@ sub init {
      			PTransDensity
                 PseudoGeneDensity
 			    IgSegDensity
+				TECGeneDensity
             )],
 	},
        
@@ -92,14 +94,25 @@ sub init {
             'colour' => [qw(pseudogene)],
     	    'logicname' => 'PseudoGeneDensity',
     	},
+
 	    'Vannot_TotIgSeg' => {
 	        'on' => 'on',
-	        'pos' => '15',
+	        'pos' => '18',
 	        'width' => 40,
             'glyphset' => 'Vgenedensity_vega',
             'label' => ["Ig Seg."],
             'colour' => [qw(ig_segment)],
     	    'logicname' => 'IgSegDensity',
+    	},
+
+	    'Vannot_TotTEC' => {
+	        'on' => 'on',
+	        'pos' => '21',
+	        'width' => 40,
+            'glyphset' => 'Vgenedensity_vega',
+            'label' => ["TEC"],
+            'colour' => [qw(tec)],
+    	    'logicname' => 'TECGeneDensity',
     	},
 
 	    'Vpercents' => {

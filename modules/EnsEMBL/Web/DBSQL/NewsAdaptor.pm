@@ -7,11 +7,7 @@ use strict;
 use warnings;
 no warnings 'uninitialized';
 
-use Class::Std;
-
 use EnsEMBL::Web::SpeciesDefs;
-
-{                              
 
 sub new {
   my $caller = shift;
@@ -960,8 +956,6 @@ sub add_release_species {
   return $result;
 }
 
-
-}
 
 1;
 

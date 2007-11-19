@@ -26,7 +26,8 @@ use strict;
 use warnings;
 
 use DBI;
-use EnsEMBL::Web::Object::User;
+#use EnsEMBL::Web::Object::User;
+use EnsEMBL::Web::Record::Account::User;
 use EnsEMBL::Web::RegObj;
 
 sub new {
@@ -350,8 +351,7 @@ sub insert_record {
   my ($self, %params) = @_;
   my $type = $params{type};
   my $data = $params{data};
-  my ($table, $primary_key); 
-  my $primary_key = 'user_id';
+  my $table; 
   if ($params{table}) {
     $table = $params{table};
   }
@@ -613,15 +613,15 @@ sub last_inserted_id {
   return $result;
 }
 
+=pod
 sub get_user_from_cookie {
   my( $self, $arg_ref ) = @_;
   $arg_ref->{'cookie'}->retrieve($arg_ref->{'r'});
-  my $user = EnsEMBL::Web::Object::User->new({
-               adaptor => $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->userAdaptor,
+  my $user = EnsEMBL::Web::Record::Account::User->new({
                     id => $arg_ref->{'cookie'}->get_value,
-                 defer => 'yes'
-             });
+                    defer => 'yes',
+  });
   return $user;
 }
-
+=cut
 1;

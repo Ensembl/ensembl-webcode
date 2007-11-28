@@ -493,6 +493,9 @@ sub added_sources {
     my $add_link = sprintf("%sadd_das_source=(name=%s+url=%s+dsn=%s+type=%s",
       $url, $das_name, $das_adapt->domain, $das_adapt->dsn, $das_type
     );
+    (my $slabel  = $das_adapt->label) =~ s/ /\\\\ /g;
+    $add_link .= "+label=$slabel" if ($slabel ne $das_name);
+
     $add_link .= '+color='.     $das_adapt->color       if $das_adapt->color      ne 'blue';
     $add_link .= '+strand='.    $das_adapt->strand      if $das_adapt->strand     ne 'b';
     $add_link .= '+labelflag='. $das_adapt->labelflag   if $das_adapt->labelflag  ne 'u';

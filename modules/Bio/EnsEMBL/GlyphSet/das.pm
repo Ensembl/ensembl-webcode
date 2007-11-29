@@ -1518,7 +1518,7 @@ sub RENDER_histogram {
 
 }   # END RENDER_histogram
 
-sub RENDER_plot {
+sub RENDER_plot_TEMP {
   my( $self, $configuration ) = @_;
 
 # Display histogram only on a reverse strand if the track is configured to be shown on both strands

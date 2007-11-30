@@ -31,7 +31,7 @@ sub init {
   $self->add_track( 'scalebar', 'on'=>'on', 'pos' => $POS++, 'str' => 'f', 'abbrev' => 'on' );
   $self->add_track( 'marker',   'on'=>'on', 'pos' => $POS++,
                     'col' => 'magenta', 'colours' => {$self->{'_colourmap'}->colourSet( 'marker' )},
-                    'labels'    => 'off',
+                    'labels'    => 'on',
                     'available' => 'features markers'
                   ),
   $self->add_track( 'chr_band', 'on'=>'on', 'pos' => 999999 );

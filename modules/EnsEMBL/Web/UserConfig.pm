@@ -987,6 +987,7 @@ sub ADD_ALL_EST_FEATURES {
     [ 'chicken_ests',          'Chicken EST' ],
     [ 'est_embl',              "C.savigyi EST" ],  # subset of these in core but don't draw those
     [ 'chicken_est_exonerate', 'Chicken EST (ex.)' ],
+    [ 'human_est',             'Human EST' ],
     [ 'human_est_exonerate',   'Human EST (ex.)' ],
     [ 'est_exonerate',         'EST (ex.)' ],
     [ 'ciona_est',             'Ciona EST' ],

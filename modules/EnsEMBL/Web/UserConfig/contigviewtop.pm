@@ -9,7 +9,7 @@ sub init {
     $self->{'_userdatatype_ID'} = 2;
     $self->{'general'}->{'contigviewtop'} = {
         '_artefacts' => [qw(
-        annotation_status encode
+        annotation_status encode assemblyexception
 
 	) ],
 					    
@@ -50,7 +50,7 @@ sub init {
 						  'colour_set' => 'scaffolds', 'no_label' => 1);
 	$self->add_track( 'gene_legend', 'str' => 'r', 'on'=>'on', 'pos' => 100000 );
 	$self->add_track( 'redbox', 'on'=>'off', 'col' => 'red', 'pos' => 1000100 );
-
+	$self->add_track( 'assemblyexception', 'on' => 'on', 'pos' => 9996, 'str' => 'x', 'height' => 1, 'dep' => 6, 'lab' => 'black', 'navigation'  => 'on', );
 }
 
 1;

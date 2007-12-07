@@ -543,7 +543,7 @@ sub version_and_date {
                 my $mod_date = $obj->mod_date;
                 my $c_date = $obj->created_date;
                 if ($mod_date) {
-                        $text .= qq(</p><p>Gene last modified on $mod_date);
+                        $text .= qq(</p><p>Last modified on $mod_date);
                         if ($c_date) {
                                 $text .= qq( (<span class="small">Created on $c_date</span>)<small>);
                         }

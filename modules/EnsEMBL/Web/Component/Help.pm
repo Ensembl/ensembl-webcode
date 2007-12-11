@@ -26,6 +26,7 @@ sub helpview {
   my($panel,$object) = @_;
   my @articles = @{$object->views};
   my $article = $articles[0];
+  my $html;
 
   if ($article) {
     my $hilite = $object->param('hilite');

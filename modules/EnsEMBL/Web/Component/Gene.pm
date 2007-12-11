@@ -847,8 +847,8 @@ sub get_synonyms {
     my $dbname = $m->db_display_name;
     my $disp_id = $m->display_id();
     if ( $dbname =~/(HGNC|ZFIN)/ && $disp_id=~/$match_id/){
+      $ids = ""; 
       my $synonyms = $m->get_all_synonyms();
-warn "SS: ", $synonyms;
       foreach my $syn (@$synonyms){
       $ids = $ids .", " .( ref($syn) eq 'ARRAY' ? "@$syn" : $syn );
      }

@@ -26,7 +26,8 @@ sub render {
 ## News headlines
 
   my $species_defs = $ENSEMBL_WEB_REGISTRY->species_defs;
-  my $release_id = $species_defs->ENSEMBL_VERSION;
+  #my $release_id = $species_defs->ENSEMBL_VERSION;
+  my $release_id = 50;
 
   my $user_id = $ENV{'ENSEMBL_USER_ID'};
   my $user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;

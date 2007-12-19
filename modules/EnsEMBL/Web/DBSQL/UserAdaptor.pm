@@ -613,15 +613,14 @@ sub last_inserted_id {
   return $result;
 }
 
-=pod
 sub get_user_from_cookie {
   my( $self, $arg_ref ) = @_;
-  $arg_ref->{'cookie'}->retrieve($arg_ref->{'r'});
+  #$arg_ref->{'cookie'}->retrieve($arg_ref->{'r'});
   my $user = EnsEMBL::Web::Record::Account::User->new({
-                    id => $arg_ref->{'cookie'}->get_value,
+                    #id => $arg_ref->{'cookie'}->get_value,
+                    id => 0,
                     defer => 'yes',
   });
   return $user;
 }
-=cut
 1;

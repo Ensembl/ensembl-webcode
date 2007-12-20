@@ -156,13 +156,14 @@ sub configure {
       # the functions named in the script "configure" line
       # of the script.
       my $CONF = $config_module_name->new( $self->page, $object, $flag );
-      $CONF->{commander} = $self->{commander};
+      ## Attach any control modules to the configuration
+      $CONF->{wizard} = $self->{wizard};
       $CONF->{command} = $self->{command};
+      ## Loop through the functions to configure
       foreach my $FN ( @functions ) { 
         if( $CONF->can($FN) ) {
 	  # If this configuration module can perform this function do so...
           eval { $CONF->$FN(); };
-          $self->{wizard} = $CONF->{wizard};
           if( $@ ) { # Catch any errors and display as a "configuration runtime error"
             $self->page->content->add_panel( 
 					    new EnsEMBL::Web::Document::Panel(

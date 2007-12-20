@@ -7,7 +7,7 @@ package EnsEMBL::Web::Component::Feature;
 
 use EnsEMBL::Web::RegObj;
 use EnsEMBL::Web::Component;
-use EnsEMBL::Web::Component::Chromosome;
+use EnsEMBL::Web::Form;
 use Data::Dumper;
 use Bio::EnsEMBL::GlyphSet::Videogram;
 our @ISA = qw( EnsEMBL::Web::Component);
@@ -24,16 +24,79 @@ our %pointer_defaults = (
 
 #---------------------------------------------------------------------------
 
-sub fv_select      { _wrap_form($_[0], $_[1], 'fv_select'); }
-sub fv_layout      { _wrap_form($_[0], $_[1], 'fv_layout'); }
+sub select_feature {
+  my ( $panel, $object ) = @_;
+  my $html = qq(
+   <div class="formpanel" style="width:80%">
+     @{[ $panel->form( 'select_feature' )->render() ]}
+  </div>);
 
-sub _wrap_form {
-  my ( $panel, $object, $node ) = @_;
-  my $html = qq(<div class="formpanel" style="width:80%">);
-  $html .= $panel->form($node)->render();
-  $html .= '</div>';
   $panel->print($html);
   return 1;
+}
+
+sub select_feature_form {
+  my( $panel, $object ) = @_;
+  my $script = $object->script;
+
+  my $form = EnsEMBL::Web::Form->new( 'select_feature', "/@{[$object->species]}/$script", 'get' );
+
+  my $types = [];
+  ## look in species defs to find available features
+  foreach my $avail_feature (@{$object->find_available_features}) {
+    push @$types, { 'value'=>$avail_feature->{'value'},'name'=>$avail_feature->{'text'} },
+  }
+
+  ## By ID
+  $form->add_element(
+    'type'  => 'SubHeader',
+    'value' => 'Select features by ID',
+  );
+  $form->add_element(
+    'name'          => 'type',
+    'type'          => 'DropDownAndString',
+    'select'        => 'select',
+    'label'         => 'Feature type',
+    'values'        => $types,
+    'value'         => 'Gene',
+    'string_name'   => 'id',
+    'string_label'  => 'ID',
+  );
+  $form->add_element(
+    'type'  => 'Information',
+    'value' => 'Hint: to display multiple features, enter them as a space-delimited list',
+  );
+
+  ## Search (OMIM)
+  $form->add_element(
+    'type'  => 'SubHeader',
+    'value' => 'Search for features (OMIM only)',
+  );
+  $form->add_element(
+    'name'    => 'xref_db',
+    'type'    =>'MultiSelect',
+    'label'   =>'Feature type',
+    'values'  => [
+    {'name'=>'OMIM Disease', 'value'=>'MIM_MORBID'},
+    {'name'=>'OMIM Trait',   'value'=>'MIM_GENE'},
+  ],
+  );
+  $form->add_element(
+    'name'  => 'xref_term',
+    'type'  => 'String',
+    'label' => 'Search term',
+  );
+  $form->add_element(
+    'type' => 'Information',
+    'value' => 'N.B. If you enter more than one search term, the search will be done on the whole phrase (i.e. "prostate cancer"), NOT as an AND/OR search on each term.',
+  );
+ 
+  $form->add_element(
+    'name'  => 'submit',
+    'type'  => 'Submit',
+    'value' => 'Go',
+  );
+  return $form;
 }
 
 sub spreadsheet_featureTable {
@@ -426,105 +489,4 @@ sub regulatory_factor {
 
 1;
                                                  
-__END__
-
-=head1 Component::Feature
-
-=head2 SYNOPSIS
-
-This object is called from a Configuration object
-                                                                                
-    use EnsEMBL::Web::Component::Feature;
-
-For each component to be displayed, you need to create an appropriate panel object and then add the component. The description of each component indicates the usual Panel subtype, e.g. Panel::Image.
-
-    my $panel = new EnsEMBL::Web::Document::Panel::SpreadSheet(
-        'code'    => "info$self->{flag}",
-        'caption' => '',
-        'object'  => $self->{object},
-    );
-    $panel->add_components( qw(features
-      EnsEMBL::Web::Component::Feature::spreadsheet_featureTable));
-
-=head2 DESCRIPTION
-
-This class consists of methods for displaying miscellaneous feature data as XHTML. Current components include a karyotype with pointers indicating feature location, a spreadsheet with information about each feature, and a user input form to control the data being displayed.
-
-=head2 METHODS
-
-=head3 B<select_feature>
-
-Description:    Wraps the select_feature_form (see below) in a DIV and passes the HTML back to the Panel::Image object for rendering
-
-Arguments:      Document::Panel object, Proxy::Object (data)
-
-Returns:        true
-
-=head3 B<select_feature_form>
-
-Description:    Creates a Form object and populates it with widgets for selecting data and configuring the karyotype image
-
-Arguments:      Document::Panel object, Proxy::Object (data)
-
-Returns:        Form object
-
-=head3 B<spreadsheet_featureTable>
-
-Description:    Adds columns and rows of feature data to a Panel::Spreadsheet object
-
-Arguments:      Document::Panel object, Proxy::Object (data)
-
-Returns:        true
-
-=head3 B<key_to_pointers>
-
-Description:    Creates a simple table of pointers and the feature type each one refers to, then passes the XHTML back to the parent Panel::Image for rendering
-
-Arguments:      Document::Panel object, Proxy::Object (data)
-
-Returns:        true
-
-=head3 B<show_karyotype>
-
-Description:    Checks if the chosen species has chromosomes, and if so, calls the create_karyotype method and passes it back to the parent Panel::Image for rendering
-
-Arguments:      Document::Panel object, Proxy::Object (data)
-
-Returns:        true
-
-=head3 B<create_karyotype>
-
-Description:    Creates and renders a karyotype image with location pointers
-
-Arguments:      Document::Panel object, Proxy::Object (data)
-
-Returns:        Document::Image
-
-=head3 B<genes>
-
-Description:     Adds columns and rows of gene data to a Panel::Spreadsheet object (make sure your Configuration module checks for the existence of Gene objects before calling this method!)
-
-Arguments:      Document::Panel object, Proxy::Object (data)
-
-Returns:        true
-
-
-= head3 B<regulatory_factor>
-
-Description:    Adds text describing the information on the page.  Adds Panel::Information for the gene that encodes this regulatory factor
-
-=head2 BUGS AND LIMITATIONS
-
-None known at present.                                                                               
-
-=head2 AUTHOR
-
-Anne Parker, Ensembl Web Team
-Support enquiries: helpdesk\@ensembl.org
-                                                                                
-=head2 COPYRIGHT
-
-See http://www.ensembl.org/info/about/code_licence.html
-
-=cut
 

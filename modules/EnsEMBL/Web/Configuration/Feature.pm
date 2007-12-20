@@ -5,7 +5,6 @@ use EnsEMBL::Web::Document::Panel::SpreadSheet;
 use EnsEMBL::Web::Document::Panel::Information;
 use EnsEMBL::Web::Document::Panel::Image;
 use EnsEMBL::Web::Configuration;
-use EnsEMBL::Web::Wizard::Feature;
 
 our @ISA = qw( EnsEMBL::Web::Configuration );
 
@@ -19,32 +18,7 @@ sub featureview {
 
   $self->initialize_zmenu_javascript;
 
-  ## the "featureview" wizard uses 4 nodes: select feature, process selection, 
-  ## configure image (only shown if species has chromosomes), and display features
-  my $wizard = EnsEMBL::Web::Wizard::Feature->new($object);
-  $wizard->add_nodes([qw(fv_select fv_process fv_layout fv_display)]);
-  $wizard->default_node('fv_display');
-
-  ## chain the nodes together
-  $wizard->chain_nodes([
-          ['fv_select'=>'fv_process'],
-          ['fv_process'=>'fv_layout'],
-          ['fv_process'=>'fv_display'],
-          ['fv_layout'=>'fv_display'],
-  ]);
-
-  $self->add_wizard($wizard);
-
-  ## need custom panels for display page
-  my $here = $wizard->current_node($object);
-  if ($here eq 'fv_display') {
-    if (!$object->param('id')) { ## redirect to form
-      $wizard->current_node($object, 'fv_select');
-    }
-  }
-
-  $here = $wizard->current_node($object);
-  if ($here eq 'fv_display') {
+  if ($object->param('type')) {
     my $type = $object->param('type');
     my $id   = $object->param('id');
 
@@ -167,7 +141,17 @@ sub featureview {
     $self->{page}->content->add_panel($reg_panel)       if $reg_panel;
   }
   else {
-    $self->wizard_panel('Featureview');
+    ## Show input form
+    if( my $form_panel = $self->new_panel( 'Image',
+      'code'    => "info#",
+      'caption' => 'FeatureView',
+    )) {
+      $form_panel->add_components(qw(
+        select_feature          EnsEMBL::Web::Component::Feature::select_feature
+      ));
+      $self->add_form( $form_panel, qw(select_feature     EnsEMBL::Web::Component::Feature::select_feature_form) );
+      $self->add_panel( $form_panel );
+    }
   }
 }
 
@@ -202,7 +186,7 @@ sub context_menu {
   $self->add_entry( $flag, code=>'other_feat', 'text' => "Select another feature to display",
                                   'href' => "/@{[$obj->species]}/featureview?$config", 'options' => $features );
   $self->add_entry( $flag, 'text' => "Display your own features on a karyotype",
-                                  'href' => "/@{[$obj->species]}/karyoview" );
+                                  'href' => "" );
 }
 
 1;

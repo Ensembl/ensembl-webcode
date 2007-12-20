@@ -10,7 +10,7 @@ body { font-family: Luxi Sans, Geneva, Helvetica, Tahoma, Arial, sans-serif;
 pre, code, kbd {font-family:monospace; }
 div, p, span, li, dd, dt, th, td, pre, code, kbd { font-size:1em; }
 p  { margin-top:0.6em; margin-bottom:0.6em; }
-h1 { font-size:2em;   color:[[SPECIESNAME]]; margin:1.2em 0px 0px 0px; padding:0px; }
+h1 { font-size:2em;   color:[[HEADING]]; margin:1.2em 0px 0px 0px; padding:0px; }
 h2 { font-size:1.5em; color:[[TEXTCOLOR2]]; margin:0.5em 0px 0px 0px; padding:0px; }
 h3 { font-size:1.2em; color:[[HEADING]]; margin:1.5em 0px 0px 0px; padding:2px; }
 h4 { font-size:1.1em; color:#000; margin:1em 0px 0px 0px; padding:0px;}
@@ -61,13 +61,12 @@ kbd.line { display:block; margin-left:20px; }
 
 /************ Section-specific styles ************/
 
-#masthead    { position: absolute; height: 5.5em; margin: 0px; padding: 0px; width: 100%; z-index: 5;
-               border: 0px; top: 0px; left: 0px; background-color: #fff }
-#masthead h1 { margin:0px; padding:0.4em 0.5em 0.5em 0.2em; font-size: 2em; background-color: #fff }
+#masthead    { position: absolute; height: 4em; margin: 0.5em 0px 0px 0px; padding: 0px; width: 100%; z-index: 5;
+               border: 0px; top: 0px; left: 0px; background-color: [[PAGE]] }
 #masthead a  { text-decoration:none; }
-#masthead a.home    { font-size:0.9em; font-weight: bold; font-style: italic;
-                      color:#933; vertical-align:super; }
-#masthead a.section { font-size:1.5em; color:#36b; }
+#masthead a.home    { font-size:1.8em; font-weight: bold; font-style: italic;
+                      color:[[HEADING]]; vertical-align:super; }
+#masthead a.section { font-size:2.5em; font-weight:bold; color:[[SPECIESNAME]]; }
 
 #search, #closewindow { width:50%; position: absolute; right: 0.4em; top: 0.4em; z-index: 30; left:auto; margin:0px; padding:0px; text-align: right; border: 0px; font-size: 1em }
 #accountlinks a { font-weight:bold; text-decoration:none; }

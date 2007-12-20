@@ -10,12 +10,11 @@ body { font-family: Luxi Sans, Geneva, Helvetica, Tahoma, Arial, sans-serif;
 pre, code, kbd {font-family:monospace; }
 div, p, span, li, dd, dt, th, td, pre, code, kbd { font-size:1em; }
 p  { margin-top:0.6em; margin-bottom:0.6em; }
-h1 { font-size:2em;   color:[[HEADING]]; margin:1.2em 0px 0px 0px; padding:0px; }
-h2 { font-size:1.5em; color:[[TEXTCOLOR2]]; margin:0.5em 0px 0px 0px; padding:0px; }
-h3 { font-size:1.2em; color:[[HEADING]]; margin:1.5em 0px 0px 0px; padding:2px; }
-h4 { font-size:1.1em; color:#000; margin:1em 0px 0px 0px; padding:0px;}
-h5 { font-size:1em;   color:#000; margin:0px; padding:0px;}
-.viewname { font-size:1em; font-style:italic; color:[[HEADING]]; }
+h1 { font-size:1.5em; color:[[HEADING1]]; margin:0.5em 0px 0px 0px; padding:0px; }
+h2 { font-size:1.2em; color:[[HEADING2]]; margin:1.5em 0px 0px 0px; padding:2px; }
+h3 { font-size:1.1em; color:#000; margin:1em 0px 0px 0px; padding:0px;}
+h4 { font-size:1em;   color:#000; margin:0px; padding:0px;}
+.viewname { font-size:1em; font-style:italic; color:[[HEADING2]]; }
 img  { border: 0px }
 hr   { display: none; }
 hr.show { display: block; }
@@ -28,14 +27,15 @@ a:hover   { color:[[LINK_HOVER]]; text-decoration:underline; }
 a:active  { color:[[LINK_HOVER]]; text-decoration:underline; }
 
 form { border:none; margin-top: 0px; margin-bottom: 0px; padding:0px; }
-.form-button { color:[[HEADING]]; font-weight:bold;
+.form-button { color:[[HEADING2]]; font-weight:bold;
     font-style:italic; padding:2px;  }
-.red-button { background-color:[[HEADING]]; color:#fff; font-weight:bold;
-    font-style:italic; padding:2px; border:1px outset [[HEADING]]; }
+.red-button { background-color:[[HEADING2]]; color:#fff; font-weight:bold;
+    font-style:italic; padding:2px; border:1px outset [[HEADING2]]; }
 .blue-button { background-color:[[RELEASE_EDGE]]; color:#fff; font-weight:bold;
     font-style:italic; padding:2px; border:1px outset [[RELEASE_EDGE]]; }
 a.red-button, a.blue-button { padding:4px; color:#fff; text-decoration:none; } 
 a.red-button:visited, a.blue-button:visited { color:#fff; text-decoration:none; }
+.multi-button { margin:0px 10px; }
 
 /* Miscellaneous text styles */
 .bg1 { background:#fff; }
@@ -65,8 +65,8 @@ kbd.line { display:block; margin-left:20px; }
                border: 0px; top: 0px; left: 0px; background-color: [[PAGE]] }
 #masthead a  { text-decoration:none; }
 #masthead a.home    { font-size:1.8em; font-weight: bold; font-style: italic;
-                      color:[[HEADING]]; vertical-align:super; }
-#masthead a.section { font-size:2.5em; font-weight:bold; color:[[SPECIESNAME]]; }
+                      color:[[HEADING2]]; vertical-align:super; }
+#masthead a.section { font-size:2.5em; font-weight:bold; color:[[SECTION]]; }
 
 #search, #closewindow { width:50%; position: absolute; right: 0.4em; top: 0.4em; z-index: 30; left:auto; margin:0px; padding:0px; text-align: right; border: 0px; font-size: 1em }
 #accountlinks a { font-weight:bold; text-decoration:none; }

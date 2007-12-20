@@ -284,12 +284,12 @@ sub render_connection_form {
       $self->form->add_element(type => 'Submit', name => 'finish', value => 'Finish');
     } else {
       if ($backward_connection) {
-        $self->form->add_element(type => 'Button', name => 'go_previous', value => 'Previous', 
+        $self->form->add_element(type => 'Button', name => 'go_previous', value => '< Previous', 
                                 onclick => 'prev_node();', 'multibutton' => 'yes');
       }
       if ($forward_connection) {
         $self->form->add_element(type => 'Hidden', name => 'node_name', id => 'node_name', value => $forward_connection->to->name);
-        $self->form->add_element(type => 'Button', name => 'go_next', value => 'Next', 
+        $self->form->add_element(type => 'Button', name => 'go_next', value => 'Next >', 
                                 onclick => 'next_node();', 'multibutton' => 'yes' );
       }
     }

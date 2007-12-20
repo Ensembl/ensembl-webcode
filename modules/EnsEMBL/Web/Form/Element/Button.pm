@@ -12,10 +12,15 @@ sub new {
  }
 
 sub render { 
-    return sprintf( '<input type="button" name="%s" id="%s" value="%s" class="red-button" %s />', 
-		    CGI::escapeHTML($_[0]->name) || 'submit', 
-        CGI::escapeHTML($_[0]->id) || 'button_'.CGI::escapeHTML($_[0]->name),
-		    CGI::escapeHTML($_[0]->value), 
-		    $_[0]->onclick ? sprintf("onclick=\"%s\"", $_[0]->onclick) : '');
+  my $self = shift;
+  my $class = 'red-button';
+  if ($self->multibutton eq 'yes') {
+    $class .= ' multi-button';
+  }
+  return sprintf( '<input type="button" name="%s" id="%s" value="%s" class="%s" %s />', 
+		    CGI::escapeHTML($self->name) || 'submit', 
+        CGI::escapeHTML($self->id) || 'button_'.CGI::escapeHTML($self->name),
+		    CGI::escapeHTML($self->value), $class,
+		    $self->onclick ? sprintf("onclick=\"%s\"", $self->onclick) : '');
 }  
 1;

@@ -16,7 +16,7 @@ sub logo_src  :lvalue { $_[0]{'logo_src'}; }
 sub logo_w    :lvalue { $_[0]{'logo_w'};   }
 sub logo_h    :lvalue { $_[0]{'logo_h'};   }
 sub logo_href :lvalue { $_[0]{'logo_href'};   }
-sub logo_img  { return sprintf '<img src="%s" style="width: %dpx; height: %dpx; vertical-align:bottom; border:0px; padding-bottom:2px" alt="" title="Home" />',
+sub logo_img  { return sprintf '<img src="%s" style="width: %dpx; height: %dpx; vertical-align:top; padding:5px; border:0px;" alt="" title="Home" />',
                                $_[0]->logo_src, $_[0]->logo_w, $_[0]->logo_h ; }
 sub sub_title :lvalue { $_[0]{'sub_title'}; }
 
@@ -25,7 +25,7 @@ sub render {
   if ($sub_titles[0] eq 'HelpView') {
     $_[0]->printf( qq(
 <div id="masthead">
-  <h1><a href="%s">%s</a> <span class="viewname serif">%s</span></h1>
+  <a href="%s">%s</a>
 </div>), $_[0]->logo_href, $_[0]->logo_img, @{[$_[0]->sub_title]}
     );
   }
@@ -46,12 +46,11 @@ sub render {
           $species_name = $_[0]->sp_common;
         }
         $species_text = sprintf( '<a href="/%s/" class="section">%s</a>',  $_[0]->sp_bio, $species_name );
-        $species_text .= qq( <span class="viewname serif">@{[$_[0]->sub_title]}</span>) if $_[0]->sub_title;
       }
     }
     $_[0]->printf( qq(
 <div id="masthead">
-  <h1><a href="%s">%s</a><a href="/" class="home serif">%s</a> %s</h1>
+  <a href="%s">%s</a><a href="/" class="home serif">%s</a> %s
 </div>), $_[0]->logo_href, $_[0]->logo_img, $_[0]->site_name, $species_text );
   }
 }

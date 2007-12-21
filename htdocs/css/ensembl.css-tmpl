@@ -29,10 +29,14 @@ a:active  { color:[[LINK_HOVER]]; text-decoration:underline; }
 form { border:none; margin-top: 0px; margin-bottom: 0px; padding:0px; }
 .form-button { color:[[HEADING2]]; font-weight:bold;
     font-style:italic; padding:2px;  }
-.red-button { background-color:[[HEADING2]]; color:#fff; font-weight:bold;
+/*.red-button { background-color:[[HEADING2]]; color:#fff; font-weight:bold;
     font-style:italic; padding:2px; border:1px outset [[HEADING2]]; }
+.red-button { background-color:[[HEADING2]]; color:#fff; font-weight:bold;
+    font-style:italic; padding:2px; border:1px outset [[HEADING2]]; }*/
+.red-button { background-color:[[RELEASE_BG]]; color:#fff; font-weight:bold;
+    font-style:italic; padding:2px; border:3px double [[PAGE]]; }
 .blue-button { background-color:[[RELEASE_EDGE]]; color:#fff; font-weight:bold;
-    font-style:italic; padding:2px; border:1px outset [[RELEASE_EDGE]]; }
+    font-style:italic; padding:2px; border:3px double [[RELEASE_BG]]; }
 a.red-button, a.blue-button { padding:4px; color:#fff; text-decoration:none; } 
 a.red-button:visited, a.blue-button:visited { color:#fff; text-decoration:none; }
 .multi-button { margin:0px 10px; }
@@ -97,7 +101,7 @@ kbd.line { display:block; margin-left:20px; }
 #page div.sp { height: 1em; }
 
 #related { z-index: 15; position: absolute; left: 0px; top: 7em; padding: 10px; border: 0px; margin: 0px; width: 211px; }
-#related-box { margin:0px 20px 0px 0px; padding:10px 0px 10px 0px; border:1px solid [[RELEASE_EDGE]] }
+#related-box { margin:0px 20px 0px 0px; padding:10px 0px 10px 0px; border:1px solid [[RELEASE_BG]] }
 #related h2 { color:[[HEADING]]; font-size:1.2em; margin:0px; padding:2px 0px 2px 10px; }
 #related form { padding-left:10px; }
 #related ul { padding-left: 0px; margin-left: 30px; border: 0px }
@@ -118,15 +122,15 @@ p.affil-link { text-align:center; margin-top:4em; }
 .dropdown ul {position:absolute; top:1em; left:5px; width:200px; z-index:1;
                     display: none; }
 .dropdown:hover ul {display:block;}
-.dropdown ul li { border:1px solid [[BACKGROUND1]]; padding:2px; margin:0px;
-                    background-color:[[BACKGROUND3]]; list-style:none; }
+.dropdown ul li { border:1px solid [[RELEASE_BG]]; padding:2px; margin:0px;
+                    background-color:[[RELEASE_PALE]]; list-style:none; }
 /* end hack */
 
 * html .dropdown { position: relative; top: auto; left: auto; z-index: auto; display: block }
 * html .dropdown:hover  {z-index:1; }
 * html .dropdown ul { position: relative; top: auto; left: auto; width: auto; z-index: auto; display: block; list-style: none;}
 * html .dropdown:hover { display: block; }
-* html .dropdown ul li { border: 0px; padding: 2px; margin: 0em; margin-left: -25px; background-color: [[BACKGROUND2]]; list-style: none; }
+* html .dropdown ul li { border: 0px; padding: 2px; margin: 0em; margin-left: -25px; background-color: [[PAGE]]; list-style: none; }
 * html #related li.bullet ul li.m { list-style: none url(/img/blank.gif); }
 /* end funky menu styling */
 

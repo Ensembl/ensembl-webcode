@@ -120,14 +120,12 @@ sub store {
 ### Write session back to the database if required...
 ### Only work with storable configs and only if they or attached
 ### image configs have been altered!
-  my($self,$r) = @_;
+  my ($self, $r) = @_;
   my @storables = @{ $self->storable_data($r) };
-#warn "STORING CONFIGURATION.................. @storables";
   if ($#storables > -1) {
     foreach my $storable (@storables) {
       my $config_key = $storable->{config_key};
       my $d = $storable->{data};
-#warn "STORING $storable $config_key";
       $self->get_adaptor->setConfigByName( $self->create_session_id($r), 'script', $config_key, $d->Dump ) if $config_key;
     }
   }
@@ -140,20 +138,18 @@ sub storable_data {
   my $return_data = [];
   foreach my $config_key ( keys %{$Configs_of{ ident $self }||{}} ) {
     my $sc_hash_ref = $Configs_of{ ident $self }{$config_key}||{};
-#warn "STORABLE DATA $config_key ",$sc_hash_ref->{'config'}->storable," ",$sc_hash_ref->{'config'}->altered;
-## Cannot store unless told to do so by script config
+    ## Cannot store unless told to do so by script config
     next unless $sc_hash_ref->{'config'}->storable;
-## Start by setting the to store flag to 1 if the script config has been updated!
+    ## Start by setting the to store flag to 1 if the script config has been updated!
     my $to_store = $sc_hash_ref->{'config'}->altered;
     my $data = {
       'diffs'         => $sc_hash_ref->{'config'}->get_user_settings(),
       'image_configs' => {}
     };
-#warn "$config_key - $to_store";
-## get the script config diffs
+
+    ## get the script config diffs
     foreach my $image_config_key ( keys %{$Configs_of{ ident $self }{$config_key}{'image_configs'}||{} } ) {
       my $image_config = $ImageConfigs_of{ ident $self }{$image_config_key};
-#warn "      | `-- ImageConfig: $image_config_key", $image_config->altered;
       next          unless $image_config->storable; ## Cannot store unless told to do so by image config
       $to_store = 1 if     $image_config->altered;  ## Only store if image config has changed...
       $data->{'image_configs'}{$image_config_key}  = $image_config->get_user_settings();
@@ -201,21 +197,20 @@ sub get_das {
 ### An optional "true" value forces the re-retrival of das sources, otherwise
 ### retrieved from the session hash...
   my( $self, $force ) = @_; 
-## This is cached so return it unless "Force" is set to load in other stuff
+  ## This is cached so return it unless "Force" is set to load in other stuff
   return $Das_sources_of{ ident $self } if keys %{ $Das_sources_of{ ident $self } } && ! $force;
-## No session so cannot have anything configured!
+  ## No session so cannot have anything configured!
   return unless $self->get_session_id;
   my $data;
-## Get all DAS configurations from database!
+  ## Get all DAS configurations from database!
   my $hashref = $self->get_adaptor->getConfigsByType( $self->get_session_id, 'das' );
   my $TEMP;
   foreach my $key ( keys %$hashref ) {
-#warn "... $key ...";
     next if exists $Das_sources_of{ ident $self }{$key};
     $TEMP = $hashref->{$key};
     $TEMP = eval( $TEMP );
     next unless $TEMP;
-## Create new DAS source and load from value in database...
+    ## Create new DAS source and load from value in database...
     my $DAS = EnsEMBL::Web::DASConfig->new( $self->get_adaptor );
        $DAS->load( $TEMP );
     $Das_sources_of{ ident $self }{$key} = $DAS;
@@ -402,10 +397,9 @@ sub update_configs_for_das {
     }
     my @das_tracks = $sc->get('das_sources');
     my %das_tracks = map {$_=>1} @das_tracks;
-## NOW GENEVIEW / PROTVIEW saving
+    ## NOW GENEVIEW / PROTVIEW saving
     if( $scripts{$sc_name} && !$das_tracks{$N} ) {
       $sc->set('das_sources',[@das_tracks,$N],1);
-#warn "ADDING CONFIG..";
     } elsif( ! $scripts{$sc_name} && $das_tracks{$N} ) {
       delete $das_tracks{$N};
       $sc->set('das_sources',[keys %das_tracks],1);
@@ -455,12 +449,11 @@ sub getScriptConfig {
 ###
 ### Then loop through the {{EnsEMBL::Web::Input}} object and set anything in this
 ### Keep a record of what the user has changed!!
-
   my $self   = shift;
   my $script = shift;
   my $do_not_pop_from_params = shift;
 
-  unless( $Configs_of{ ident $self }{$script} ) {
+  unless ($Configs_of{ ident $self }{$script}) {
     my $script_config = EnsEMBL::Web::ScriptConfig->new( $script, $self );
 
     foreach my $root ( @{$self->get_path} ) {
@@ -493,21 +486,24 @@ sub getScriptConfig {
 ## and store any other data which comes back....
       $TEMP = $self->get_adaptor->getConfigByName( $self->get_session_id, 'script', $script );
       my $data;
+      $TEMP =~ s/\n|\r|\f|\\//g;
       $TEMP = eval($TEMP);
-      if( $TEMP ) {
+      if ($TEMP) {
         $script_config->set_user_settings( $TEMP->{'diffs'} );
         $image_config_data = $TEMP->{'image_configs'};
+      } else {
+        warn "ERROR: $@";
       }
     }
     unless( $do_not_pop_from_params ) {
       $script_config->update_from_input( $self->input ); ## Needs access to the CGI.pm object...
     }
+
     $Configs_of{ ident $self }{$script} = {
       'config'            => $script_config,       ## List of attached
       'image_configs'     => {},                   ## List of attached image configs
       'image_config_data' => $image_config_data    ## Data retrieved from database to define image config settings.
     };
-#warn "CONFIGURED $script -------- ", $Configs_of{ ident $self }{$script} ;
   }
   return $Configs_of{ ident  $self }{$script}{'config'};
 }

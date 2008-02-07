@@ -583,9 +583,9 @@ sub content {
   }
   foreach my $component ($self->components) {
 #warn "Starting component $component";
-    foreach my $function_name ( @{$self->{'components'}{$component}} ) { 
+    foreach my $function_name ( @{$self->{'components'}{$component}} ) {
       my $result;
-      (my $module_name = $function_name ) =~s/::\w+$//;
+      (my $module_name = $function_name ) =~ s/::\w+$//;
       if( $self->dynamic_use( $module_name ) ) {
         $self->{'object'} && $self->{'object'}->prefix($self->prefix);
         no strict 'refs';

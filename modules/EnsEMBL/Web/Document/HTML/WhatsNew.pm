@@ -28,7 +28,7 @@ sub render {
   my $species_defs = $ENSEMBL_WEB_REGISTRY->species_defs;
   my $release_id = $species_defs->ENSEMBL_VERSION;
 
-  my $user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;
+  my $user = $ENSEMBL_WEB_REGISTRY->get_user;
 
   my $adaptor = $ENSEMBL_WEB_REGISTRY->newsAdaptor;
 
@@ -37,10 +37,10 @@ sub render {
 
   ## get news headlines
   my $criteria = {'release'=>$release_id};
-  if ($user && $user->id) {
+  if ($user) {
     $criteria->{'species'} = [];
     ## check for user filters
-    my @filters = @{ $user->newsfilters };
+    my @filters = $user->newsfilters;
     ## Look up species names for use in query
     foreach my $f (@filters) {
       if ($f->species && $f->species ne 'none') {

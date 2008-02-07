@@ -9,7 +9,6 @@ no warnings 'uninitialized';
 use DBI;
 use Data::Dumper;
 use EnsEMBL::Web::SpeciesDefs;
-use EnsEMBL::Web::Data::User;
 use EnsEMBL::Web::DBSQL::SQL::Result;
 use EnsEMBL::Web::Tools::Encryption;
 

@@ -4,7 +4,6 @@ use strict;
 #use warnings;
 
 use EnsEMBL::Web::DBSQL::NewsAdaptor;
-use EnsEMBL::Web::Data::User;
 use EnsEMBL::Web::RegObj;
 
 {
@@ -19,7 +18,7 @@ sub render {
 
   my %species_description = setup_species_descriptions($species_defs);
 
-  my $user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;
+  my $user = $ENSEMBL_WEB_REGISTRY->get_user;
 
   my $html = "";
   #warn "RENDERING CUSTOM SPECIES LIST WITH USER: " . $reg_user->id;
@@ -92,8 +91,8 @@ sub render_species_list {
   my %id_to_species = %{ $id_to_species };
   my %species_id = reverse %id_to_species;
   my @specieslists = ();
-  if ($user && $user->id) {
-    @specieslists = @{ $user->specieslists };
+  if ($user) {
+    @specieslists = $user->specieslists;
   }
   my @favourites = ();
   my $html = "";
@@ -207,7 +206,7 @@ sub render_ajax_reorder_list {
   #warn "CHECKING FOR SPECIES IN AJAX LIST";
   my @specieslists;
   if ($user) {
-    @specieslists = @{ $user->specieslists };
+    @specieslists = $user->specieslists;
   }
   my @favourite_species = ();
   my %favourites = ();

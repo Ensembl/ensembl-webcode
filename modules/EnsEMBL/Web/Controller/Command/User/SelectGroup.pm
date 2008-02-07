@@ -7,7 +7,6 @@ use Class::Std;
 use CGI;
 
 use EnsEMBL::Web::RegObj;
-use EnsEMBL::Web::Data::Record;
 use Data::Dumper;
 
 use base 'EnsEMBL::Web::Controller::Command::User';
@@ -20,10 +19,9 @@ sub BUILD {
   my $cgi = new CGI;
   my $user = $ENSEMBL_WEB_REGISTRY->get_user;
 
-  my ($records_accessor) = grep { $_ eq $user->plural($cgi->param('type')) }
-                            keys %{ $user->get_has_many };
-                            
-  my ($user_record) = grep { $_->id == $cgi->param('id') } @{ $user->$records_accessor };
+  my ($records_accessor) = grep { $_ eq $cgi->param('type') } keys %{ $user->relations };
+  ## TODO: this should use abstraction limiting facility rather then grep
+  my ($user_record)      = grep { $_->id == $cgi->param('id') } $user->$records_accessor;
   $self->add_filter('EnsEMBL::Web::Controller::Command::Filter::Owner', {'user_id' => $user_record->user_id});
 }
 

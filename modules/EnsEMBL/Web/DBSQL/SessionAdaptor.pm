@@ -79,7 +79,6 @@ sub setConfigByName {
     $self->get_db_adaptor->do( "insert ignore into type set code = ?", {}, $type );
     ( $type_id ) = $self->get_db_adaptor->selectrow_array( "select type_id from type where code = ?", {}, $type );
   }
-  #warn "========> SETTING CONFIG";
   return $self->setConfig( $session_id, $type_id, $key, $value );
 }
 
@@ -112,20 +111,19 @@ sub getConfigByName {
 sub setConfig {
 ### Set the session configuration to the specified value with session_id and type_id as passed
   my( $self, $session_id, $type_id, $key , $value ) = @_;
-  #warn "=======> setConfig: SETTING CONFIG WITH: " . $value;
   return unless( $session_id && $type_id && $self->get_db_adaptor );
-  my($now) = $self->get_db_adaptor->selectrow_array( "select now()" );
   my $rows = $self->get_db_adaptor->do(
     "insert ignore into session_record
-        set created_at = ?, modified_at = ?, data = ?, session_id = ?, type_id = ?, code = ?",{},
-    $now, $now, $value, $session_id, $type_id, $key
+     set created_at = NOW(), modified_at = NOW(),
+     data = ?, session_id = ?, type_id = ?, code = ?", {}, 
+     $value, $session_id, $type_id, $key
   );
   if( $rows && $rows < 1 ) {
     #warn "=======> setConfig: UPDATING ID: " . $session_id;
     $self->get_db_adaptor->do(
-      "update session_record set data = ?, modified_at = ?
-        where session_id = ? and type_id = ? and code = ?", {}, 
-      $value, $now, $session_id, $type_id, $key 
+      "update session_record set data = ?, modified_at = NOW()
+       where session_id = ? and type_id = ? and code = ?", {}, 
+       $value, $session_id, $type_id, $key 
     );
   }
   return $session_id;

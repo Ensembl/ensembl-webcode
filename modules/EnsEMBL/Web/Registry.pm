@@ -23,13 +23,13 @@ my %DBAdaptor_of      :ATTR;
 my %WebAdaptor_of     :ATTR;
 my %SpeciesDefs_of    :ATTR;
 my %Das_sources_of    :ATTR;
-my %User_of      :ATTR( :set<user>     :get<user>     );
-my %Session_of   :ATTR( :set<session>  :get<session>  );
-my %Script_of    :ATTR( :set<script>   :get<script>   );
-my %Species_of   :ATTR( :set<species>  :get<species>  );
-my %SessionAdaptor_of :ATTR( :get<sessionadaptor> );                    # To allow it to be reset
-my %NewsAdaptor_of    :ATTR( :get<newsadaptor>    );                    # To allow it to be reset
-my %WebDB_of :ATTR( :get<webdb>    );                    # To allow it to be reset
+my %User_of           :ATTR( :set<user>     :get<user>     );
+my %Session_of        :ATTR( :set<session>  :get<session>  );
+my %Script_of         :ATTR( :set<script>   :get<script>   );
+my %Species_of        :ATTR( :set<species>  :get<species>  );
+my %SessionAdaptor_of :ATTR( :get<sessionadaptor> );          # To allow it to be reset
+my %NewsAdaptor_of    :ATTR( :get<newsadaptor>    );          # To allow it to be reset
+my %WebDB_of          :ATTR( :get<webdb>    );                # To allow it to be reset
 
 ## DAS functionality - most of this is moved from EnsEMBL::Web::ExternalDAS which
 ## will be deprecated - and now stores each source in the database separately
@@ -50,7 +50,7 @@ sub get_das {
   my $session_das = $self->get_session->get_das;
 
   if (my $user = $self->get_user) {
-    foreach my $das (@{ $user->dases }) {
+    foreach my $das ($user->dases) {
       $Das_sources_of{ ident $self }{$das->name} = $das->get_das_config;
       #warn $Das_sources_of{ ident $self }{$das->name};
     }
@@ -167,15 +167,18 @@ sub webDB {
 
 sub initialize_user {
 ###
-  my($self,$arg_ref)=@_;
+  my ($self, $arg_ref) = @_;
   $arg_ref->{'cookie'}->retrieve($arg_ref->{'r'});
   my $id = $arg_ref->{'cookie'}->get_value;
-  
-  $self->set_user( EnsEMBL::Web::Data::User->new({
-    id    => $id,
+
+  if ($id) {
+    $self->set_user(EnsEMBL::Web::Data::User->new($id));
+  } else {
+    $self->set_user(undef);
+  }
+
 ##  TODO: decide if we still need 'defer' here, and implement if yes
 ##  defer => 'yes',
-  }) ) if $id;
 }
 
 sub initialize_session {

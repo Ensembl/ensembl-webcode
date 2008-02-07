@@ -8,8 +8,9 @@ use warnings;
 no warnings 'uninitialized';
 
 use Class::Std;
-
+use EnsEMBL::Web::RegObj;
 use EnsEMBL::Web::SpeciesDefs;
+
 
 {                              
 
@@ -28,7 +29,7 @@ sub new {
        warn( "Unable to connect to authentication database: $DBI::errstr" );
        $self->{'_handle'} = undef;
     }
-    my $user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user();
+    my $user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;
     $self->{'_user'} = $user->id if $user;
   } else {
     if ($handle) {

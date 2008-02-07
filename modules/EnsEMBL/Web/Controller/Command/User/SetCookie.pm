@@ -5,7 +5,7 @@ use warnings;
 
 use Class::Std;
 use EnsEMBL::Web::Data::User;
-use EnsEMBL::Web::Data::Invite;
+use EnsEMBL::Web::Data::Record::Group::Invite;
 use EnsEMBL::Web::Tools::Encryption;
 use EnsEMBL::Web::RegObj;
 use Apache2::RequestUtil;
@@ -34,17 +34,15 @@ sub process {
   my $self = shift;
 
   my $cgi = new CGI;
-  my $user = EnsEMBL::Web::Data::User->new({
-    email    => $cgi->param('email'),
-  });
+  my $user = EnsEMBL::Web::Data::User->find(email => $cgi->param('email'));
   
-  warn 'USER email: '. $user->email;
-  warn 'USER id: '. $user->id;
-
   my $url = $cgi->param('url'); 
-  if (!$url || $url =~ m#common/user#) { ## Don't want to redirect user to e.g. register or login confirmation!
+
+  ## Don't want to redirect user to e.g. register or login confirmation!
+  if (!$url || $url =~ m#common/user#) {
     $url = '/index.html';
   }
+  
   if (!$ENV{'ENSEMBL_USER_ID'}) {
     if ($user && $user->id) {
       my $encrypted = EnsEMBL::Web::Tools::Encryption::encryptID($user->id);
@@ -70,17 +68,16 @@ sub process {
 
   ## Add membership if coming from invitation acceptance
   if ($cgi->param('record_id')) {
-    my $invitation = EnsEMBL::Web::Data::Invite->new({id => $cgi->param('record_id')});
+    my $invitation = EnsEMBL::Web::Data::Record::Group::Invite->new($cgi->param('record_id'));
     my $success = $self->add_member_from_invitation($user, $invitation);
-    if ($success) {
-      $invitation->destroy;
-    }
+    $invitation->destroy
+      if $self->add_member_from_invitation($user, $invitation);
   }
 
   my $redirect = "/common/user/logged_in?url=$url";
-  if ($cgi->param('updated')) {
-    $redirect .= ';updated='.$cgi->param('updated');
-  }
+  $redirect .= ';updated='.$cgi->param('updated')
+    if $cgi->param('updated');
+    
   $cgi->redirect($redirect);
 }
 

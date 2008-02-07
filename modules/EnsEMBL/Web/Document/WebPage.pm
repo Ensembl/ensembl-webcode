@@ -106,7 +106,7 @@ sub new {
   return $self if $self->factory->has_fatal_problem();
   eval {
     if( $parameters{'fast'} ) {
-warn "FAST CREATE OBJECTS...";
+      #warn "FAST CREATE OBJECTS...";
       $self->factory->fastCreateObjects();
     } else {
       $self->factory->createObjects();
@@ -240,9 +240,7 @@ sub groups  {
 sub get_user_id {
   my $self = shift;
   ## do we have one in the current session?
-  my $user_id = $ENV{'ENSEMBL_USER_ID'};
-
-  return $user_id;
+  return $ENV{'ENSEMBL_USER_ID'};
 }
 
 
@@ -418,7 +416,6 @@ sub simple_webpage {
     foreach my $object( @{$self->dataObjects} ) {
       $self->configure( $object, $object->script, 'context_menu', 'context_location' );
     }
-#warn "FIXING SESSION.............";
     $self->factory->fix_session;
     $self->action;
   }

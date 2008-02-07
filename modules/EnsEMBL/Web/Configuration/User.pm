@@ -234,8 +234,7 @@ sub context_menu {
                                     'href' => "/common/user/reset_password" );
     $self->add_entry( $flag, 'text' => "Log out",
                                     'href' => "javascript:logout_link()" );
-  }
-  else {
+  } else {
     my $flag = 'ac_full';
     $self->add_block( $flag, 'bulleted', "Your Ensembl" );
 
@@ -257,11 +256,9 @@ sub groupview {
   $self->_add_javascript_libraries;
 
   if ($user->param('id')) {
-    my $group = EnsEMBL::Web::Data::Group->new({ id => $user->param('id') });
+    my $group = EnsEMBL::Web::Data::Group->new($user->param('id'));
 
-    if( my $members_panel = $self->new_panel( 'Image',
-      'code'    => "group_details#",
-    )) {
+    if( my $members_panel = $self->new_panel('Image', 'code'    => "group_details#")) {
       $members_panel->add_components(qw(
         groupview EnsEMBL::Web::Component::User::groupview
       ));

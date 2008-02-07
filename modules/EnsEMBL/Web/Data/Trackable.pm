@@ -1,28 +1,50 @@
 package EnsEMBL::Web::Data::Trackable;
 
 ## Parent class for data objects that can be tracked by user and timestamp
-## Can be multiply-inherited with Object::Data::Owned
+## Can be multiply-inherited with Object::Data::Record
 
 use strict;
 use warnings;
+use HTTP::Date qw(str2time time2iso);
+use base qw(EnsEMBL::Web::Data);
 
-use Class::Std;
-use EnsEMBL::Web::Data;
+__PACKAGE__->add_queriable_fields(
+  created_at  => 'datetime',
+  created_by  => 'int',
+  modified_at => 'datetime',
+  modified_by => 'int',
+);
 
-our @ISA = qw(EnsEMBL::Web::Data);
+__PACKAGE__->add_trigger(
+  before_create => sub {
+                     $_[0]->created_at(time2iso());
+                     $_[0]->created_by($ENV{'ENSEMBL_USER_ID'});
+                   }
+);
 
-{
+__PACKAGE__->add_trigger(
+  before_update => sub {
+                     $_[0]->modified_at(time2iso());
+                     $_[0]->modified_by($ENV{'ENSEMBL_USER_ID'});
+                   }
+);
 
-sub BUILD {
-  my ($self, $ident, $args) = @_;
-  $self->set_trackable(1);
-  $self->add_queriable_field({ name => 'created_at', type => 'datetime' });
-  $self->add_queriable_field({ name => 'modified_at', type => 'datetime' });
-  $self->add_queriable_field({ name => 'modified_by', type => 'int' });
-  $self->add_queriable_field({ name => 'created_by', type => 'int' });
-
+sub created_at_pretty {
+  my $self = shift;
+  return pretty_date(str2time($self->created_at));
 }
 
+sub modified_at_pretty {
+  my $self = shift;
+  return pretty_date(str2time($self->modified_at));
+}
+
+sub pretty_date {
+  my $timestamp = shift;
+  my @date = localtime($timestamp);
+  my @days = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
+  my @months = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+  return $days[$date[6]].' '.$date[3].' '.$months[$date[4]].', '.($date[5] + 1900);
 }
 
 1;

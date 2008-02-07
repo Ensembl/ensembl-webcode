@@ -104,7 +104,7 @@ sub childInitHandler {
   my $r = shift;
   my $temp_hostname = hostname();
   my $temp_proc_id  = "".reverse $$;
-  my $temp_seed     = ( $temp_proc_id + $temp_proc_id<<15 ) & 0xffffffff;
+  my $temp_seed     = ( $temp_proc_id + $temp_proc_id << 15 ) & 0xffffffff;
   while( $temp_hostname=~s/(.{1,4})// ) {
     $temp_seed = $temp_seed ^ unpack( "%32L*", $1 );
   }

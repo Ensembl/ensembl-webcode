@@ -106,7 +106,7 @@ sub new {
   return $self if $self->factory->has_fatal_problem();
   eval {
     if( $parameters{'fast'} ) {
-      #warn "FAST CREATE OBJECTS...";
+warn "FAST CREATE OBJECTS...";
       $self->factory->fastCreateObjects();
     } else {
       $self->factory->createObjects();
@@ -156,13 +156,14 @@ sub configure {
       # the functions named in the script "configure" line
       # of the script.
       my $CONF = $config_module_name->new( $self->page, $object, $flag );
-      $CONF->{commander} = $self->{commander};
+      ## Attach any control modules to the configuration
+      $CONF->{wizard} = $self->{wizard};
       $CONF->{command} = $self->{command};
+      ## Loop through the functions to configure
       foreach my $FN ( @functions ) { 
         if( $CONF->can($FN) ) {
 	  # If this configuration module can perform this function do so...
           eval { $CONF->$FN(); };
-          $self->{wizard} = $CONF->{wizard};
           if( $@ ) { # Catch any errors and display as a "configuration runtime error"
             $self->page->content->add_panel( 
 					    new EnsEMBL::Web::Document::Panel(
@@ -240,80 +241,17 @@ sub groups  {
 sub get_user_id {
   my $self = shift;
   ## do we have one in the current session?
-  return $ENV{'ENSEMBL_USER_ID'};
+  my $user_id = $ENV{'ENSEMBL_USER_ID'};
+
+  return $user_id;
 }
 
 
 ## wrapper around redirect and render
 sub action {
+  warn 'DEPRECATED - use $self->render instead';
   my $self = shift;
-
-  if ($self->{wizard}) {
-    my $object = ${$self->dataObjects}[0];
-    my $node = $self->{wizard}->current_node($object);
-    $self->_node_hop($node);
-  }
-  else { ## not a wizard page after all!
-    $self->render;
-  }
-}
-
-sub _node_hop {
-  my ($self, $node, $loop) = @_;
-  $loop++;
-  if ($loop > 10 || !$self->{wizard}->isa_node($node) || $self->{wizard}->isa_page($node)) {
-    ## render page if not a processing node or doesn't exist
-    $self->render;
-  }
-  else {
-    ## do whatever processing is required by this node
-    my $object = ${$self->dataObjects}[0];
-    my $return_value = $self->{wizard}->$node($object);
-
-    my %parameter = %{$return_value} if (ref($return_value) =~ /HASH/);
-    if (my $next_node = $parameter{'hop'}) {
-      $self->_node_hop($next_node, $loop);
-    }
-    else {
-      my $URL;
-      if (my $exit = $parameter{'exit'}) {
-        $URL = CGI::unescape($exit);
-      }
-      else { 
-        $URL = '/'.$object->species.'/'.$object->script;
-      }
-
-      ## unpack returned parameters into a URL
-      my $tally = 0;
-      my $param_count = scalar(keys %parameter);
-      if ($param_count && !$parameter{'exit'}) {
-        $URL .= '?';
-      }
-      foreach my $param_name (keys %parameter) {
-
-        ## assemble rest of url for non-exit redirects
-        if (!$parameter{'exit'}) {
-          if (ref($parameter{$param_name}) eq 'ARRAY') {
-            foreach my $param_value (@{$parameter{$param_name}}) {
-              $URL .= ';' if $tally > 0;
-              $URL .= $param_name.'='.$param_value;    
-            }
-          }
-          else {
-            $URL .= ';' if $tally > 0;
-            $URL .= $param_name.'='.$parameter{$param_name};    
-          }
-          $tally++;
-        }
-      }
-      my $r = $self->page->renderer->{'r'};
-
-      ## do redirect
-      $r->headers_out->add( "Location" => $URL ); 
-      $r->err_headers_out->add( "Location" => $URL );
-      $r->status( REDIRECT );
-    }
-  }
+  $self->render;
 }
 
 sub redirect {
@@ -416,6 +354,7 @@ sub simple_webpage {
     foreach my $object( @{$self->dataObjects} ) {
       $self->configure( $object, $object->script, 'context_menu', 'context_location' );
     }
+#warn "FIXING SESSION.............";
     $self->factory->fix_session;
     $self->action;
   }

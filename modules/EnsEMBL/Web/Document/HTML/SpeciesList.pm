@@ -1,9 +1,9 @@
 package EnsEMBL::Web::Document::HTML::SpeciesList;
 
 use strict;
-#use warnings;
+use warnings;
+use Data::Dumper;
 
-use EnsEMBL::Web::DBSQL::NewsAdaptor;
 use EnsEMBL::Web::RegObj;
 
 {
@@ -13,25 +13,31 @@ sub render {
 
   my $species_defs = $ENSEMBL_WEB_REGISTRY->species_defs;
 
-  my $adaptor = $ENSEMBL_WEB_REGISTRY->newsAdaptor();
-  my %id_to_species = %{$adaptor->fetch_species($SiteDefs::ENSEMBL_VERSION)};
+  my @valid_species = $species_defs->valid_species;
+  my $species_check;
+  foreach my $sp (@valid_species) {
+    $species_check->{$sp}++;
+  }
 
-  my %species_description = setup_species_descriptions($species_defs);
+  my %species_info;
+  foreach my $species (@valid_species) {
+    my $info = $species_defs->get_config($species, "SPECIES_INFO");
+    $species_info{$species} = $species_defs->get_config($species, "SPECIES_INFO"); 
+  }
+
+  my %species_description = _setup_species_descriptions(\%species_info);
 
   my $user = $ENSEMBL_WEB_REGISTRY->get_user;
 
   my $html = "";
-  #warn "RENDERING CUSTOM SPECIES LIST WITH USER: " . $reg_user->id;
   if ($request && $request eq 'fragment') {
-    $html .= render_species_list($user, $species_defs, \%id_to_species, \%species_description); 
+    $html .= _render_species_list($user, $species_defs, \%species_info, \%species_description); 
   } else {
-    #warn "REORDER LIST"; 
     $html .= "<div id='reorder_species' style='display: none;'>\n";
-    $html .= render_ajax_reorder_list($user, $species_defs, \%id_to_species); 
+    $html .= _render_ajax_reorder_list($user, $species_defs, \%species_info); 
     $html .= "</div>\n";
-    #warn "FULL LIST";
     $html .= "<div id='full_species'>\n";
-    $html .= render_species_list($user, $species_defs, \%id_to_species, \%species_description); 
+    $html .= _render_species_list($user, $species_defs, \%species_info, \%species_description); 
     $html .= "</div>\n";
     $html .= qq(
 <p>Other pre-build species are available in <a href='#top' onclick='show_pre();'>Ensembl Pre! &rarr;</a></p>);
@@ -39,76 +45,14 @@ sub render {
   return $html;
 
 }
+sub _render_species_list {
+  my ($user, $species_defs, $species_info, $description) = @_;
+  my ($html, $species_name, $species_dir, $id, $group);
 
-sub setup_species_descriptions {
-  my $species_defs = shift;
-  my %description = ();
-
-  my $updated = '<strong class="alert">UPDATED!</strong>';
-  my $new     = '<strong class="alert">NEW!</strong>';
-
-  my $adaptor = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->newsAdaptor;
-
-  my @current_species = @{$adaptor->fetch_species_data($species_defs->ENSEMBL_VERSION)};
-
-  foreach my $species (@current_species) {
-    my ($html, $short);
-    my $sp = $species->{'name'};
-    $html = qq( <span class="small normal">);
-    $html .= $species->{'assembly'} if $species->{'assembly'};
-    $short = $html;
-    if (!$species->{'prev_assembly'}) {
-      $html .= ' '.$new;
-      $short = $html;
-    } elsif ($species->{'prev_assembly'} && $species->{'prev_assembly'} ne $species->{'assembly'}) {
-      $html .= ' '.$updated;
-      $short = $html;
-    }
-    if ($species->{'vega'} && $species->{'vega'} eq 'Y') {
-      $html .= qq( | <a href="http://vega.sanger.ac.uk/$sp/">Vega</a>);
-    }
-    if ($species->{'pre'}) {
-      $html .= ' | ';
-      if (!$species->{'prev_pre'} || ($species->{'prev_pre'} && $species->{'prev_pre'} ne $species->{'pre'})) {
-        $html .= $updated.' ';
-      }
-      $html .= qq(<a href="http://pre.ensembl.org/$sp/"><i><span class="red">pr<span class="blue">e</span>!</span></i></a>);
-    }
-    $short .= qq(</span>);
-    $html  .= qq(</span>);
-    if ($sp) {
-      (my $name = $sp) =~ s/_/ /;
-      $description{$name} = [$html, $short];
-    }
-  }
-
-  return %description;
-}
-
-sub render_species_list {
-  my ($user, $species_defs, $id_to_species, $species_description) = @_;
-  my %description = %{ $species_description };
-  my %id_to_species = %{ $id_to_species };
-  my %species_id = reverse %id_to_species;
-  my @specieslists = ();
-  if ($user) {
-    @specieslists = $user->specieslists;
-  }
-  my @favourites = ();
-  my $html = "";
-
-  if ($#specieslists < 0) {
-    my $defaults = $species_defs->DEFAULT_FAVOURITES;
-    if (!$defaults || ref($defaults) ne 'ARRAY' || scalar(@$defaults < 1)) {
-      $defaults = [$species_defs->ENSEMBL_PRIMARY_SPECIES, $species_defs->ENSEMBL_SECONDARY_SPECIES];
-    } 
-    foreach my $name (@$defaults) {
-      push @favourites, $species_id{$name};
-    }
-  }
-  else {
-    my $list = $specieslists[0];
-    @favourites = split(/,/, $list->favourites); 
+  my @favourites = @{_get_favourites($user, $species_defs, $species_info)};
+  my %check_faves;
+  foreach my $fave (@favourites) {
+    $check_faves{$fave}++;
   }
 
   ## output list
@@ -121,18 +65,19 @@ sub render_species_list {
   }
   $html .= "<div id='static_favourite_species'>\n";
   $html .= "<div class='favourites-species-list'>\n";
-  $html .= "<dl class='species-list'>\n";
+  $html .= _render_with_images(\@favourites, $species_defs, $description);
 
-  ## Render favourites with images
-  foreach my $id (@favourites) {
-    my $species_filename = $id_to_species{$id};
-    my $species_name = $species_filename;
-    my $common_name = $species_defs->other_species($species_filename, "SPECIES_COMMON_NAME");
-    $species_name =~ s/_/ /g;
-    $html .= "<dt class='species-list'><a href='/$species_filename/'><img src='/img/species/thumb_$species_filename.png' alt='$species_name' title='Browse $species_name' class='sp-thumb' height='40' width='40' /></a><a href='/$species_filename/' title='$species_name'>$common_name</a></dt>\n";
-    $html .= "<dd>" . $description{$species_name}[0] . "</dd>\n";
+  ## Show new species
+  my @new_species;
+  while (my ($species, $info) = each (%$species_info)) {
+    if (!$check_faves{$species} && !$info->{'prev_assembly'}) {
+      push @new_species, $species;
+    }
   }
-  $html .= "</dl>\n";
+
+  $html .= "<b>New genomes</b> \n";
+  $html .= _render_with_images(\@new_species, $species_defs, $description);
+
   $html .= "</div>\n";
   $html .= "</div>\n";
 
@@ -143,43 +88,49 @@ sub render_species_list {
   <option value="/">-- Select a species --</option>
 );
 
-  my @all_species = keys %species_id;
+  my @all_species = keys %$species_info;
 
   ## Sort species into phylogenetic groups
   my %phylo_tree;
-  foreach my $species (@all_species) {
-    my $group = $species_defs->other_species($species, "SPECIES_GROUP");
+  foreach $species_name (@all_species) {
+    $group = $species_defs->get_config($species_name, "SPECIES_GROUP");
     if (!$group) {
       ## Allow for non-grouped species lists
       $group = 'no_group';
     }
     if ($phylo_tree{$group}) {
-      push @{$phylo_tree{$group}}, $species;
+      push @{$phylo_tree{$group}}, $species_name;
     }
     else {
-      $phylo_tree{$group} = [$species];
+      $phylo_tree{$group} = [$species_name];
     }
   }  
 
-  #my @taxon_order = @{$species_defs->TAXON_ORDER};
-  my @taxon_order = ('Primates', 'Rodents etc.', 'Laurasiatheria', 'Afrotheria', 'Xenarthra',
-                      'Marsupials &amp; Monotremes', 'Birds', 'Reptiles &amp; Amphibians',
-                      'Fish', 'Other chordates', 'Other eukaryotes');
+  my @taxon_order = @{$species_defs->TAXON_ORDER};
 
   ## Output in taxonomic groups, ordered by common name
-  foreach my $group (@taxon_order) {
-    $html .= '<optgroup label="'.$group.'">'."\n" unless $group eq 'no_group';
-    my $species_group = $phylo_tree{$group};
+  foreach $group (@taxon_order) {
     my @sorted_by_common; 
-    if ($species_group && ref($species_group) eq 'ARRAY') {
+    my $species_group = $phylo_tree{$group};
+    if ($species_group && ref($species_group) eq 'ARRAY' && scalar(@$species_group) > 0) {
+      if ($group eq 'no_group') {
+        if (scalar(@taxon_order) > 1) {
+          $html .= '<optgroup label="Other species">'."\n";
+        }
+      }
+      else {
+        $html .= '<optgroup label="'.$group.'">'."\n";
+      }
       @sorted_by_common = sort {
-                          $species_defs->other_species($a, "SPECIES_COMMON_NAME")
+                          $species_defs->get_config($a, "SPECIES_COMMON_NAME")
                           cmp
-                          $species_defs->other_species($b, "SPECIES_COMMON_NAME")
+                          $species_defs->get_config($b, "SPECIES_COMMON_NAME")
                           } @$species_group;
     }
-    foreach my $species (@sorted_by_common) {
-      $html .= '<option value="/'.$species.'/">'.$species_defs->other_species($species, "SPECIES_COMMON_NAME").'</option>'."\n";
+    foreach $species_name (@sorted_by_common) {
+      $html .= '<option value="/'.$species_name.'/">'.$species_defs->get_config($species_name, "SPECIES_COMMON_NAME");
+      $html .= $description->{$species_name}[1] if $description->{$species_name}[1];
+      $html .= '</option>'."\n";
     }
 
     $html .= '</optgroup>'."\n" unless $group eq 'no_group';
@@ -194,42 +145,22 @@ sub render_species_list {
   return $html;
 }
 
-sub render_ajax_reorder_list {
-  my ($user, $species_defs, $id_to_species) = @_;
-  my %id_to_species = %{ $id_to_species };
-  my %species_id = reverse %id_to_species;
-  my $html = "";
+sub _render_ajax_reorder_list {
+  my ($user, $species_defs, $species_info) = @_;
+  my ($html, $species_name, $species_dir, $id);
 
   $html .= "For easy access to commonly used genomes, drag from the bottom list to the top one &middot; <a href='#' onClick='toggle_reorder();'>Done</a><br /><br />\n";
 
   $html .= "<div id='favourite_species'>\n<b>Favourites</b>";
-  #warn "CHECKING FOR SPECIES IN AJAX LIST";
-  my @specieslists;
-  if ($user) {
-    @specieslists = $user->specieslists;
-  }
-  my @favourite_species = ();
-  my %favourites = ();
-  #warn "FOUND SPECIES LISTS:" . $#specieslists;
-  if ($#specieslists < 0) {
-    foreach my $name (("Homo_sapiens", "Mus_musculus", "Danio_rerio")) {
-      push @favourite_species, $species_id{$name};
-    }
-  } else {
-    my $list = $specieslists[0];
-    @favourite_species = split(/,/, $list->favourites); 
-  }
-  foreach my $id (@favourite_species) {
-    $favourites{$id} = 1;
-  }
+  my @favourites = @{_get_favourites($user, $species_defs, $species_info)};
 
   $html .= "<ul id='favourites_list'>\n";
-  foreach my $id (@favourite_species) {
-    my $species_name = $id_to_species{$id};
-    my $sp_dir = $species_name;
+  foreach $species_name (@favourites) {
+    $species_dir = $species_name;
+    $id = $species_info->{$species_name}{'id'};
     $species_name =~ s/_/ /;
-    my $common = $species_defs->get_config($sp_dir, 'SPECIES_COMMON_NAME');
-    $html .= "<li id='favourite_$id'>$common (<em>" .$species_name."</em>)</li>\n";
+    my $common = $species_defs->get_config($species_dir, 'SPECIES_COMMON_NAME');
+    $html .= "<li id='favourite_$id'>$common (<em>" .$species_name."</em>)</li>\n" if $id;
   }
 
   $html .= "</ul></div>\n";
@@ -237,25 +168,116 @@ sub render_ajax_reorder_list {
   $html .= "<ul id='species_list'>\n";
 
 
+  my %sp_to_sort = %$species_info;
+  foreach my $fave (@favourites) {
+    delete $sp_to_sort{$fave};
+  }
   my @sorted_by_common = sort {
-                          $species_defs->other_species($id_to_species{$a}, "SPECIES_COMMON_NAME")
+                          $species_defs->get_config($a, "SPECIES_COMMON_NAME")
                           cmp
-                          $species_defs->other_species($id_to_species{$b}, "SPECIES_COMMON_NAME")
-                          } keys %id_to_species;
-
-  foreach my $id (@sorted_by_common) {
-    next if $favourites{$id};
-    my $species_name = $id_to_species{$id};
-    my $sp_dir = $species_name;
+                          $species_defs->get_config($b, "SPECIES_COMMON_NAME")
+                          } keys %sp_to_sort;
+  foreach $species_name (@sorted_by_common) {
+    $species_dir = $species_name;
     $species_name =~ s/_/ /;
-    my $common = $species_defs->get_config($sp_dir, 'SPECIES_COMMON_NAME');
-    $html .= "<li id='species_$id'>$common (<em>" . $species_name . "</em>)</li>\n";
+    $id = $sp_to_sort{$species_dir}->{'id'};
+    my $common = $species_defs->get_config($species_dir, 'SPECIES_COMMON_NAME');
+    $html .= "<li id='species_$id'>$common (<em>" . $species_name . "</em>)</li>\n" if $id;
   }
 
   $html .= "</ul></div>\n";
-  $html .= "<a href='#' onClick='toggle_reorder();'>Finished reordering</a> &middot; <a href='/common/user/reset_favourites'>Restore default list</a>";
-#warn "HTML: $html";
+  $html .= "<a href='javascript:void(0);' onclick='toggle_reorder();'>Finished reordering</a> &middot; <a href='/common/user/reset_favourites'>Restore default list</a>";
 
+  return $html;
+}
+
+sub _setup_species_descriptions {
+  my $species_info = shift;
+  my %description = ();
+
+  my $updated = '<strong class="alert">NEW ASSEMBLY</strong>';
+  my ($html, $dropdown);
+
+  while (my ($species, $info) = each (%$species_info)) {
+    $html = qq( <span class="small normal">);
+    $html .= $info->{'assembly'} if $info->{'assembly'};
+    if (!$info->{'prev_assembly'}) {
+      $dropdown = ' - NEW SPECIES';
+    } elsif ($info->{'prev_assembly'} && $info->{'prev_assembly'} ne $info->{'assembly'}) {
+      $html .= ' '.$updated;
+      $dropdown = ' - NEW ASSEMBLY';
+    }
+    else {
+      $dropdown = '';
+    }
+    if ($info->{'vega'} && $info->{'vega'} eq 'Y') {
+      $html .= qq( | <a href="http://vega.sanger.ac.uk/$species/">Vega</a>);
+    }
+    if ($info->{'pre'}) {
+      $html .= ' | ';
+      if (!$info->{'prev_pre'} || ($info->{'prev_pre'} && $info->{'prev_pre'} ne $info->{'pre'})) {
+        $html .= $updated.' ';
+      }
+      $html .= qq(<a href="http://pre.ensembl.org/$species/"><i><span class="red">pr<span class="blue">e</span>!</span></i></a>);
+    }
+    $html  .= qq(</span>);
+    if ($species) {
+      $description{$species} = [$html, $dropdown];
+    }
+  }
+
+  return %description;
+}
+
+
+sub _get_favourites {
+  ## Returns a list of species as Genus_species strings
+  my ($user, $species_defs, $species_info) = @_;
+
+  my %id_to_species;
+  while (my ($species, $info) = each (%$species_info)) {
+    next unless keys %$info;
+    $id_to_species{$info->{'id'}} = $species if $info->{'id'};
+  }
+
+  my @specieslists = ();
+  if ($user) {
+    @specieslists = $user->specieslists;
+  }
+  my @favourites = ();
+
+  if (scalar(@specieslists) > 0 && $specieslists[0]) {
+    my $list = $specieslists[0];
+    my @all_favourites = split(/,/, $list->favourites);
+    ## Omit any species not currently online
+    foreach my $fave (@all_favourites) {
+      push @favourites, $id_to_species{$fave} if $id_to_species{$fave};
+    }
+  }
+  else {
+    @favourites = @{$species_defs->DEFAULT_FAVOURITES};
+    if (scalar(@favourites) < 1) {
+      @favourites = ($species_defs->ENSEMBL_PRIMARY_SPECIES, $species_defs->ENSEMBL_SECONDARY_SPECIES);
+    }
+  }
+
+  return \@favourites;
+}
+
+sub _render_with_images {
+  my ($species_list, $species_defs, $description) = @_;
+
+  my $html .= "<dl class='species-list'>\n";
+
+  foreach my $species_name (@$species_list) {
+    my $species_dir = $species_name;
+    my $common_name = $species_defs->get_config($species_dir, "SPECIES_COMMON_NAME");
+    $species_name =~ s/_/ /g;
+    $html .= "<dt class='species-list'><a href='/$species_dir/'><img src='/img/species/thumb_$species_dir.png' alt='$species_name' title='Browse $species_name' class='sp-thumb' height='40' width='40' /></a><a href='/$species_dir/' title='$species_name'>$common_name</a></dt>\n";
+    $html .= "<dd>" . $description->{$species_dir}[0] . "</dd>\n" if $description->{$species_dir}[0];
+  }
+  $html .= "</dl>\n";
+  
   return $html;
 }
 

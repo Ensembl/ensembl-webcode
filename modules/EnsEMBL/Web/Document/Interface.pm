@@ -67,23 +67,24 @@ sub process {
             )
         );
         $self->render;
-      } else {
+      }
+      else {
         my $url;
         eval { $url = $CONF->$action($object, $interface) }; 
-        # Catch any errors and display as an "interface runtime error"
-        if ($@) {
+        if( $@ ) { # Catch any errors and display as an "interface runtime error"
           $self->page->content->add_panel(
             new EnsEMBL::Web::Document::Panel(
               'caption' => 'Interface runtime error',
               'content' => sprintf( qq(
-              <p>Unable to execute action $action owing to the following error:</p>
-              <pre>%s</pre>), $self->_format_error($@) )
+          <p>Unable to execute action $action owing to the following error:</p>
+          <pre>%s</pre>), $self->_format_error($@) )
             )
           );
         }
         if ($url) {
           $self->redirect($url);
-        } else {
+        }
+        else {
           $self->render;
         }
       }
@@ -101,7 +102,7 @@ sub process {
     } 
   }
   else {
-    warn "Can't use module $config_module_name!";
+warn "Can't use module $config_module_name!";
   } 
 }
 

@@ -11,6 +11,16 @@ sub site_name :lvalue { $_[0]{'site_name'}; }
 sub dbserver  :lvalue { $_[0]{'dbserver'}; }
 sub db        :lvalue { $_[0]{'db'}; }
 
+sub render {
+  $_[0]->printf( qq(
+<div id="release-t">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+<div id="release"><div>
+Ensembl release 50 - June 2008
+</div></div>
+  ));
+}
+
+=pod
 sub render { 
   $_[0]->printf( qq(
 <div id="release-t">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
@@ -19,6 +29,7 @@ sub render {
 </div></div>), CGI::escapeHTML($_[0]->site_name), CGI::escapeHTML($_[0]->version), CGI::escapeHTML($_[0]->version), CGI::escapeHTML($_[0]->date)
   );;
 }
+=cut
 
 1;
 

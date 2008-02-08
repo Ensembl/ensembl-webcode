@@ -34,7 +34,7 @@ sub render {
 
   $html .= qq(</select>
     for <input name="query" size="50" value="" />
-    <input type="submit" value="Go" class="red-button" /></div>
+    <input type="submit" value="Go" class="blue-button" /></div>
     <p>e.g. <strong>mouse chromosome 2</strong> or <strong>rat X:10000..20000</strong> or <strong>human gene BRCA2</strong></p>
     </form>
 

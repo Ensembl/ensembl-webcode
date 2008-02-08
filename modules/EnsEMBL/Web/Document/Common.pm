@@ -78,16 +78,12 @@ $self->_prof('B');
   $self->masthead->logo_src       = $style->{'SITE_LOGO'};
   $self->masthead->logo_w         = $style->{'SITE_LOGO_WIDTH'};
   $self->masthead->logo_h         = $style->{'SITE_LOGO_HEIGHT'};
+  $self->masthead->logo_href      = $style->{'SITE_LOGO_HREF'};
 
 $self->_prof('C');
 #  --- The sidebar
   $self->menu->site_name          = $self->species_defs->ENSEMBL_SITE_NAME;
-  $self->menu->archive            = $self->species_defs->ARCHIVE_VERSION;
-  foreach my $key ( @{$style->{'ADDITIONAL_LOGOS'}||[]} ) {
-    $self->menu->push_logo(
-      map { $_ => $style->{$key.uc("_$_")}||'' } qw(src href width height alt href)
-    );
-  }
+  #$self->menu->archive            = $self->species_defs->ARCHIVE_VERSION;
 }
 
 sub _script_HTML {

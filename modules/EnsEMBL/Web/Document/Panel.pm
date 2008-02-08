@@ -378,7 +378,7 @@ sub render {
     if( $status ne 'off' ) {
       if( $self->{'cacheable'} eq 'yes' ) { ### We can cache this panel - so switch the renderer!!!
         my $temp_renderer = $self->renderer;
-        $self->renderer = new EnsEMBL::Web::Document::Renderer::GzCacheFile( $self->{'cache_type'}, $self->{'cache_filename'} );
+        $self->renderer = new EnsEMBL::Web::Document::Renderer::GzCacheFile( $self->{'cache_filename'} );
         if( $self->{'_delayed_write_'} ) {
           $self->renderer->print($content)    unless( $self->renderer->{'exists'} eq 'yes' );
         } else {
@@ -583,9 +583,9 @@ sub content {
   }
   foreach my $component ($self->components) {
 #warn "Starting component $component";
-    foreach my $function_name ( @{$self->{'components'}{$component}} ) {
+    foreach my $function_name ( @{$self->{'components'}{$component}} ) { 
       my $result;
-      (my $module_name = $function_name ) =~ s/::\w+$//;
+      (my $module_name = $function_name ) =~s/::\w+$//;
       if( $self->dynamic_use( $module_name ) ) {
         $self->{'object'} && $self->{'object'}->prefix($self->prefix);
         no strict 'refs';

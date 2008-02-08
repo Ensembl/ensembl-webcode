@@ -11,18 +11,10 @@ sub new {
     'blocks'      => {},
     'block_order' => [],
     'site_name'   => '??????' ,
-    'logos'       => [],
-    'miniad'      => '',
   );
 }
 
 sub site_name          :lvalue { $_[0]{'site_name'}; }
-sub archive            :lvalue { $_[0]{'archive'}; }
-
-sub push_logo {
-  my( $self, %conf ) = @_;
-  push @{$self->{'logos'}}, \%conf;
-}
 
 ##############################################################################
 # Functions to manage menu blocks on the webpage on the LHS menu
@@ -140,17 +132,6 @@ sub entry {
   return undef;
 }
 
-sub add_miniad {
-  my ($self, $html) = @_;
-  return unless $html;
-  $self->{'miniad'} = $html;
-}
-
-sub delete_miniad {
-  my $self = shift;
-  $self->{'miniad'} = '';
-}
-
 sub render {
   my $self = shift;
   $self->print( qq(\n<div id="related"><div id="related-box">) );
@@ -168,21 +149,6 @@ sub render {
       $self->block_render_bulleted( $block->{'entries'} );
     }
   }
-
-  # get appropriate affiliation logos from ini
-  if( @{$self->{'logos'}} ) {
-    $self->print( qq(\n<h2 style="padding:4px; margin-top: 2em">\n));
-    foreach my $logo ( @{$self->{'logos'}}) {
-      $self->printf(
-        qq(<a href="%s"><img style="padding-left:5px" src="%s" width="%s" height="%s" alt="%s" title="%s" /></a>),
-        map { $logo->{$_}||'' } qw(href src width height alt alt)
-      );
-    }
-    $self->print('</h2>');
-  }
-
-  ## include a miniad
-  $self->print($self->{'miniad'}) if $self->{'miniad'};
 
   $self->print( qq(\n</div></div>) );
 }

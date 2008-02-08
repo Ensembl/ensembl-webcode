@@ -1214,8 +1214,9 @@ sub DESTROY { }
 
 sub timer{
 ### Provides easy-access to the ENSEMBL_WEB_REGISTRY's timer
-  use EnsEMBL::Web::RegObj qw($ENSEMBL_WEB_REGISTRY);
-  return $ENSEMBL_WEB_REGISTRY->timer;
+  my $self = shift;
+  $self->dynamic_use('EnsEMBL::Web::RegObj');
+  return $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->timer;
 }
 
 sub get_vega_regions {

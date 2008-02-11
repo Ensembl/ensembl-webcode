@@ -47,26 +47,26 @@ use Class::Std;
       $self->get_bold;
   }
 
-  sub set_align {
+  sub _set_align {
 ### Setter
 ### Sets horizontal alignment after checking value is valid
     my( $self, $val ) = @_; 
     $Align_of{ ident $self } = $alignments->{$val} if exists $alignments->{$val};
   }
 
-  sub set_valign {
+  sub _set_valign {
 ### Setter
 ### Sets vertical alignment after checking value is valid
     my( $self, $val ) = @_; 
     $Valign_of{ ident $self } = $valignments->{$val} if exists $valignments->{$val};
   }
 
-  sub set_bold {
+  sub _set_bold {
     my( $self, $val ) = @_; 
     $Bold_of{ ident $self } = $val if $val eq '0' or $val eq '1';
   }
 
-  sub set_italic {
+  sub _set_italic {
     my( $self, $val ) = @_; 
     $Italic_of{ ident $self } = $val if $val eq '0' or $val eq '1';
   }
@@ -84,10 +84,10 @@ use Class::Std;
     $self->set_bgcolor( 'ffffff' );
     $self->set_fgcolor( '000000' );
 ## Now set values set by code...
-    $self->set_align(   $arg_ref->{'align'}   ) if exists $arg_ref->{'align'  };
-    $self->set_valign(  $arg_ref->{'valign'}  ) if exists $arg_ref->{'valign' };
-    $self->set_bold(    $arg_ref->{'bold'}    ) if exists $arg_ref->{'bold'   };
-    $self->set_italic(  $arg_ref->{'italic'}  ) if exists $arg_ref->{'italic' };
+    $self->_set_align(   $arg_ref->{'align'}   ) if exists $arg_ref->{'align'  };
+    $self->_set_valign(  $arg_ref->{'valign'}  ) if exists $arg_ref->{'valign' };
+    $self->_set_bold(    $arg_ref->{'bold'}    ) if exists $arg_ref->{'bold'   };
+    $self->_set_italic(  $arg_ref->{'italic'}  ) if exists $arg_ref->{'italic' };
     $self->set_rowspan( $arg_ref->{'rowspan'} ) if exists $arg_ref->{'rowspan'};
     $self->set_colspan( $arg_ref->{'colspan'} ) if exists $arg_ref->{'colspan'};
     $self->set_bgcolor( $arg_ref->{'bgcolor'} ) if exists $arg_ref->{'bgcolor'};

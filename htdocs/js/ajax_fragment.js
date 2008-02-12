@@ -41,7 +41,7 @@ function info_fragment(caller) {
   }
   var url = "/" + json.fragment.species + "/populate_info_fragment";
   var ajax_panel = new Ajax.Request(url, {
-                           method: 'get',
+                           method: 'POST',
                            parameters: data,
                            onComplete: info_panel_loaded
                          });

@@ -230,6 +230,14 @@ sub incoming_parameters {
 sub add_incoming_parameters {
   my ($self) = @_;
   my %parameter = $self->incoming_parameters;
+
+  ## Make sure we don't duplicate fields already in this form (via 'Back' actions)
+  ## Mainly a fix for stupid HTML checkboxes
+  foreach my $element (@{ $self->current_node->get_elements }) {
+    delete($parameter{$element->{'name'}});
+  }
+
+  ## Add in valid CGI parameters as hidden fields
   foreach my $name (keys %parameter) {
     next if $name =~ /^wizard_/ && $name ne 'wizard_steps';
     my $value = $parameter{$name};

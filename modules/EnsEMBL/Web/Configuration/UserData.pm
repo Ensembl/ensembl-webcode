@@ -19,9 +19,7 @@ sub user_data {
   ## File upload/link section of wizard
   my $start_logic   = $wizard->create_node(( object => $object, module => $node, type => 'logic', name => 'start_logic'));
   my $distribution  = $wizard->create_node(( object => $object, module => $node, type => 'page', name => 'distribution'));
-  my $distro_logic  = $wizard->create_node(( object => $object, module => $node, type => 'logic', name => 'distro_logic'));
-  my $guide_global  = $wizard->create_node(( object => $object, module => $node, type => 'page', name => 'guide_global'));
-  my $guide_local   = $wizard->create_node(( object => $object, module => $node, type => 'page', name => 'guide_local'));
+  my $file_guide    = $wizard->create_node(( object => $object, module => $node, type => 'page', name => 'file_guide'));
   my $file_logic    = $wizard->create_node(( object => $object, module => $node, type => 'logic', name => 'file_logic'));
   my $file_upload   = $wizard->create_node(( object => $object, module => $node, type => 'page', name => 'file_upload'));
   my $url_data      = $wizard->create_node(( object => $object, module => $node, type => 'page', name => 'url_data'));
@@ -45,9 +43,8 @@ sub user_data {
   $wizard->add_connection(( from => $das_sources,    to => $finish));
 
   ## File upload
-  $wizard->add_connection(( from => $distribution,   to => $distro_logic));
-  $wizard->add_connection(( from => $guide_global,   to => $file_logic));
-  $wizard->add_connection(( from => $guide_local,    to => $file_logic));
+  $wizard->add_connection(( from => $distribution,   to => $file_guide));
+  $wizard->add_connection(( from => $file_guide,     to => $file_logic));
   $wizard->add_connection(( from => $file_upload,    to => $file_feedback));
   $wizard->add_connection(( from => $file_feedback,  to => $conf_tracks));
   $wizard->add_connection(( from => $file_feedback,  to => $finish));

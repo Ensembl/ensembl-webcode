@@ -85,6 +85,7 @@ sub stable_id         { my $self = shift; return $self->Obj->stable_id;  }
 sub feature_type      { my $self = shift; return $self->Obj->type;       }
 sub version           { my $self = shift; return $self->Obj->version;    }
 sub logic_name        { my $self = shift; return $self->gene ? $self->gene->analysis->logic_name : $self->Obj->analysis->logic_name; }
+sub status            { my $self = shift; return $self->Obj->status;  }
 sub display_label        {
   my $self = shift;
   return $self->Obj->analysis->display_label || $self->logic_name;
@@ -1258,6 +1259,29 @@ sub get_exon {
 	my $exon    = $exon_adaptor->fetch_by_stable_id($exon_id,1 );
 	return $exon;
 }
+
+sub mod_date {
+  my $self = shift;
+  my $time = $self->transcript()->modified_date;
+  return unless $time;
+  return $self->date_format( $time,'%d/%m/%y' ), $self->date_format( $time, '%y/%m/%d' );
+}
+
+sub created_date {
+  my $self = shift;
+  my $time = $self->transcript()->created_date;
+  return unless $time;
+  return $self->date_format( $time,'%d/%m/%y' ), $self->date_format( $time, '%y/%m/%d' );
+}
+
+sub date_format { 
+  my( $self, $time, $format ) = @_;
+  my( $d,$m,$y) = (localtime($time))[3,4,5];
+  my %S = ('d'=>sprintf('%02d',$d),'m'=>sprintf('%02d',$m+1),'y'=>$y+1900);
+  (my $res = $format ) =~s/%(\w)/$S{$1}/ge;
+  return $res;
+}
+
 
 1;
 

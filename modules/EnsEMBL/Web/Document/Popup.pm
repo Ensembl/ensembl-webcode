@@ -22,14 +22,12 @@ sub _initialize_HTML {
 
   $self->add_body_elements qw(
     javascript_div EnsEMBL::Web::Document::HTML::JavascriptDiv
-    masthead   EnsEMBL::Web::Document::HTML::MastHead
-    close      EnsEMBL::Web::Document::HTML::CloseWindow
-    release    EnsEMBL::Web::Document::HTML::Release
-    helplink   EnsEMBL::Web::Document::HTML::HelpLink
+    masthead   EnsEMBL::Web::Document::HTML::NoMastHead
+    release    EnsEMBL::Web::Document::HTML::NoRelease
+    helplink   EnsEMBL::Web::Document::HTML::NoHelpLink
     html_start EnsEMBL::Web::Document::HTML::HTML_Block
-    menu       EnsEMBL::Web::Document::HTML::Menu
-    content    EnsEMBL::Web::Document::HTML::Content
-    copyright  EnsEMBL::Web::Document::HTML::Copyright
+    menu       EnsEMBL::Web::Document::HTML::NoMenu
+    content    EnsEMBL::Web::Document::HTML::PopupContent
     html_end   EnsEMBL::Web::Document::HTML::HTML_Block
   );
   $self->call_child_functions( 'common_page_elements' );

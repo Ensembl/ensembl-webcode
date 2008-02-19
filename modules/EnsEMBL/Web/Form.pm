@@ -13,7 +13,7 @@ sub new {
         'method'   => lc($method) || 'get' ,  
         'name'     => $name,
         'id'       => $name,
-        'onSubmit' => sprintf( 'return( on_submit( %s_vars ))', $name )
+        'onsubmit' => sprintf( 'return( on_submit( %s_vars ))', $name )
     },
     '_buttons'     => {},
     '_button_order'=> [],

@@ -1,7 +1,7 @@
 package EnsEMBL::Web::DBSQL::MySQLAdaptorNEW;
 
 use strict;
-use warnings;
+#use warnings;
 
 use EnsEMBL::Web::SpeciesDefs;
 use base qw(Class::DBI);
@@ -40,7 +40,7 @@ sub accessor_name_for {
 sub mutator_name_for {
 	my ($class, $column) = @_;
   if ($class->can('mutator_name')) { 
-		warn "Use of 'mutator_name' is deprecated. Use 'mutator_name_for' instead\n";
+		#warn "Use of 'mutator_name' is deprecated. Use 'mutator_name_for' instead\n";
 		return $class->mutator_name($column) 
 	}
 

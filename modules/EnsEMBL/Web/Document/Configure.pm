@@ -90,6 +90,8 @@ sub common_menu_items {
                                   'href' => "/info/about/accounts.html",
                                   'icon' => '/img/infoicon.gif' );
     }
+    $doc->menu->add_entry( $flag, 'text' => "Display Your Data",
+                                    'href' => "javascript:void(window.open('/common/user_data','user_data','width=640,height=480,resizable,scrollbars,toolbar'))" );
   }
 }
 

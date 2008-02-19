@@ -222,8 +222,8 @@ sub context_menu {
   ## Is the user logged in?
   my $user_id = $ENV{'ENSEMBL_USER_ID'};
 
+  my $flag = 'user';
   if ($user_id) {
-    my $flag = 'user';
     $self->add_block( $flag, 'bulleted', "Your $SiteDefs::ENSEMBL_SITETYPE" );
 
     $self->add_entry( $flag, 'text' => "Account summary",
@@ -235,8 +235,7 @@ sub context_menu {
     $self->add_entry( $flag, 'text' => "Log out",
                                     'href' => "javascript:logout_link()" );
   } else {
-    my $flag = 'ac_full';
-    $self->add_block( $flag, 'bulleted', "Your Ensembl" );
+    $self->add_block( $flag, 'bulleted', "Your $SiteDefs::ENSEMBL_SITETYPE" );
 
     $self->add_entry( $flag, 'text' => "Login",
                                   'href' => "javascript:login_link();" );

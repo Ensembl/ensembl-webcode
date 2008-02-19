@@ -314,6 +314,7 @@ sub transHandler {
 #  warn "YARG $$ ....";
 #}
         $r->push_handlers( PerlCleanupHandler => \&Apache2::SizeLimit::handler );
+
         return OK;
       }
     } else {
@@ -490,7 +491,7 @@ sub cleanupHandler_blast {
   my $ticket;
   my $_process_blast_called_at = time();
 
-  #warn "Processing BLAST in Apache: $r";
+#  warn "Processing BLAST in Apache: $r";
 
   $ticket = $ENV{'ticket'};
   ## Lets work out when to run this!!
@@ -510,6 +511,7 @@ sub cleanupHandler_blast {
       $FLAG = 1;
     }
   }
+#  warn "$FLAG";
   while( $FLAG ) {
     $count++;
     $FLAG = 0;

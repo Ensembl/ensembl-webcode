@@ -16,16 +16,16 @@ sub start {
   $self->title('Where is the Data?');
   $self->add_element(( type => 'RadioButton', name => 'location', id => 'loc_1', value => 'local', 
                       label => 'Offline', notes => 'In a file on my local machine'));
-  $self->add_element(( type => 'RadioButton', name => 'location', id => 'loc_2', value => 'url', 
-                      label => 'On the Internet', notes => 'In a file on a webserver (i.e. URL-based data)'));
+  $self->add_element(( type => 'RadioButton', name => 'location', id => 'loc_4', value => 'das', 
+                      label => 'On the Internet', notes => 'On a DAS server'));
   if ($ENV{'ENSEMBL_USER_ID'}) {
     $self->add_element(( type => 'RadioButton', name => 'location', id => 'loc_3', value => 'account', 
                       label => ' ', notes => 'I have already uploaded the data to my Ensembl user account'));
   }
-  $self->add_element(( type => 'RadioButton', name => 'location', id => 'loc_4', value => 'das', 
-                      label => ' ', notes => 'On a DAS server'));
+  $self->add_element(( type => 'RadioButton', name => 'location', id => 'loc_2', value => 'url', 
+                      label => ' ', notes => 'In a file on a webserver (i.e. URL-based data)'));
   $self->add_element(( type => 'CheckBox', name => 'help', id => 'help_check', value => 'yes', 
-                      label => 'Help', notes => 'Suggest the best way to store my data', checked => 'checked'));
+                      label => ' ', notes => 'Suggest the best way to access my URL data', checked => 'checked'));
   $self->text_below(qq(If you would like help in setting up your own DAS server, please see our <a href="/info/using/external_data/das/das_server.html">DAS documentation</a></li>));
 }
 

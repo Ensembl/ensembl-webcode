@@ -14,7 +14,6 @@ use EnsEMBL::Web::Wizard::Node;
 {
 
 my %CGI :ATTR(:set<cgi> :get<cgi> :init_arg<cgi>);
-my %Data :ATTR(:set<data> :get<data>);
 my %Form :ATTR(:set<form> :get<form>);
 my %Nodes :ATTR(:set<nodes> :get<nodes> :init_arg<nodes>);
 my %Default_Node :ATTR(:set<default_node> :get<default_node>);

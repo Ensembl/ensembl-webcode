@@ -3,7 +3,7 @@ package EnsEMBL::Web::Configuration::Chromosome;
 use strict;
 use EnsEMBL::Web::Form;
 use EnsEMBL::Web::Configuration;
-use EnsEMBL::Web::Wizard::Chromosome;
+#use EnsEMBL::Web::Wizard::Chromosome;
 
 our @ISA = qw( EnsEMBL::Web::Configuration );
 
@@ -103,27 +103,27 @@ sub karyoview {
 }
 
 sub assemblyconverter {
-  my $self   = shift;
-  my $object = $self->{'object'};
-
-  $self->initialize_zmenu_javascript;
-                                                                                
-  ## the "assemblyconverter" wizard uses 4 nodes: add data, check data is present, convert features to new assembly
-  ## and display preview
-  my $wizard = EnsEMBL::Web::Wizard::Chromosome->new($object);
-  $wizard->add_nodes([qw(kv_add kv_datacheck ac_convert ac_preview)]);
-  $wizard->default_node('kv_add');
-                                                                                
-  ## chain the static nodes together
-  ## NB Unlike karyoview, it doesn't allow upload of multiple files
-  $wizard->chain_nodes([
-          ['kv_add'=>'kv_datacheck'],
-          ['kv_datacheck'=>'ac_convert'],
-          ['ac_convert'=>'ac_preview'],
-  ]);
-          
-  $self->add_wizard($wizard);
-  $self->wizard_panel('Assembly Converter');
+#  my $self   = shift;
+#  my $object = $self->{'object'};
+#
+#  $self->initialize_zmenu_javascript;
+#                                                                                
+#  ## the "assemblyconverter" wizard uses 4 nodes: add data, check data is present, convert features to new assembly
+#  ## and display preview
+#  my $wizard = EnsEMBL::Web::Wizard::Chromosome->new($object);
+#  $wizard->add_nodes([qw(kv_add kv_datacheck ac_convert ac_preview)]);
+#  $wizard->default_node('kv_add');
+#                                                                                
+#  ## chain the static nodes together
+#  ## NB Unlike karyoview, it doesn't allow upload of multiple files
+#  $wizard->chain_nodes([
+#          ['kv_add'=>'kv_datacheck'],
+#          ['kv_datacheck'=>'ac_convert'],
+#          ['ac_convert'=>'ac_preview'],
+#  ]);
+#          
+#  $self->add_wizard($wizard);
+#  $self->wizard_panel('Assembly Converter');
 }
 
 #---------------------------------------------------------------------------

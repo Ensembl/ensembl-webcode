@@ -6,7 +6,7 @@ use warnings;
 use Class::Std;
 use CGI;
 
-use EnsEMBL::Web::Data::Record::User::Annotation;
+use EnsEMBL::Web::Data::User;
 
 use base 'EnsEMBL::Web::Controller::Command::User';
 
@@ -45,7 +45,7 @@ sub render_page {
 
   ## Create interface object, which controls the forms
   my $interface = EnsEMBL::Web::Interface::InterfaceDef->new;
-  my $data = EnsEMBL::Web::Data::Record::User::Annotation->new($cgi->param('id'));
+  my $data = EnsEMBL::Web::Data::Record::Annotation::User->new($cgi->param('id'));
 
   $interface->data($data);
   $interface->discover;

@@ -95,7 +95,7 @@ sub render_page {
 sub send_invitation {
   my ($group_id, $email) = @_;
 
-  my $user   = $ENSEMBL_WEB_REGISTRY->get_user;
+  my $user   = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;
   my $group  = EnsEMBL::Web::Data::Group->new($group_id);
   my $invite = $group->add_to_invites({
     email  => $email,

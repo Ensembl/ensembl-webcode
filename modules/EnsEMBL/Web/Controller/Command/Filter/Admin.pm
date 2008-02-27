@@ -18,7 +18,7 @@ sub allow {
   my $self = shift;
   if ($self->get_group_id) {
     my $group = EnsEMBL::Web::Data::Group->new($self->get_group_id);
-    my $user  = $ENSEMBL_WEB_REGISTRY->get_user;
+    my $user  = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;
     if ($user->is_administrator_of($group)) {
       return 1;
     }

@@ -5,7 +5,7 @@ use warnings;
 
 use Class::Std;
 use EnsEMBL::Web::Data::User;
-use EnsEMBL::Web::Data::Record::Group::Invite;
+use EnsEMBL::Web::Data::Group;
 use EnsEMBL::Web::Tools::Encryption;
 use EnsEMBL::Web::RegObj;
 use Apache2::RequestUtil;
@@ -46,7 +46,7 @@ sub process {
   if (!$ENV{'ENSEMBL_USER_ID'}) {
     if ($user && $user->id) {
       my $encrypted = EnsEMBL::Web::Tools::Encryption::encryptID($user->id);
-      my $SD = $ENSEMBL_WEB_REGISTRY->species_defs;
+      my $SD = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->species_defs;
       my $user_cookie = EnsEMBL::Web::Cookie->new({
         'host'    => $SD->ENSEMBL_COOKIEHOST,
         'name'    => $SD->ENSEMBL_USER_COOKIE,
@@ -68,7 +68,7 @@ sub process {
 
   ## Add membership if coming from invitation acceptance
   if ($cgi->param('record_id')) {
-    my $invitation = EnsEMBL::Web::Data::Record::Group::Invite->new($cgi->param('record_id'));
+    my $invitation = EnsEMBL::Web::Data::Record::Invite::Group->new($cgi->param('record_id'));
     my $success = $self->add_member_from_invitation($user, $invitation);
     $invitation->destroy
       if $self->add_member_from_invitation($user, $invitation);

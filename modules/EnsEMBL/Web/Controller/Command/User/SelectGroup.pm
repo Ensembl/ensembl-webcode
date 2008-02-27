@@ -17,7 +17,7 @@ sub BUILD {
   my ($self, $ident, $args) = @_;
   $self->add_filter('EnsEMBL::Web::Controller::Command::Filter::LoggedIn');
   my $cgi = new CGI;
-  my $user = $ENSEMBL_WEB_REGISTRY->get_user;
+  my $user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;
 
   my ($records_accessor) = grep { $_ eq $cgi->param('type') } keys %{ $user->relations };
   ## TODO: this should use abstraction limiting facility rather then grep

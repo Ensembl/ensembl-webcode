@@ -11,7 +11,7 @@ use EnsEMBL::Web::RegObj;
 sub render {
   my ($class, $request) = @_;
 
-  my $species_defs = $ENSEMBL_WEB_REGISTRY->species_defs;
+  my $species_defs = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->species_defs;
 
   my @valid_species = $species_defs->valid_species;
   my $species_check;
@@ -27,7 +27,7 @@ sub render {
 
   my %species_description = _setup_species_descriptions(\%species_info);
 
-  my $user = $ENSEMBL_WEB_REGISTRY->get_user;
+  my $user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;
 
   my $html = "";
   if ($request && $request eq 'fragment') {

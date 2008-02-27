@@ -9,7 +9,6 @@ use CGI;
 use EnsEMBL::Web::RegObj;
 use EnsEMBL::Web::Data::User;
 use EnsEMBL::Web::Data::Group;
-use EnsEMBL::Web::Data::Record::Group::Invite;
 
 use base 'EnsEMBL::Web::Controller::Command::User';
 
@@ -50,7 +49,7 @@ sub process {
 
   ## Add membership if coming from invitation acceptance
   if ($cgi->param('record_id')) {
-    my $invitation = EnsEMBL::Web::Data::Record::Group::Invite->new($cgi->param('record_id'));
+    my $invitation = EnsEMBL::Web::Data::Record::Invite::Group->new($cgi->param('record_id'));
     my $group = EnsEMBL::Web::Data::Group->new($invitation->webgroup_id);
 
     $invitation->destroy

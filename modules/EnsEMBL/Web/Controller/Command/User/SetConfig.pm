@@ -10,8 +10,6 @@ use CGI;
 
 use EnsEMBL::Web::RegObj;
 use EnsEMBL::Web::Data::User;
-use EnsEMBL::Web::Data::Record::User::Configuration;
-use EnsEMBL::Web::Data::Record::User::CurrentConfig;
 
 use base 'EnsEMBL::Web::Controller::Command::User';
 
@@ -22,7 +20,7 @@ sub BUILD {
   my $cgi = new CGI;
 
   $self->add_filter('EnsEMBL::Web::Controller::Command::Filter::LoggedIn');
-  my $config = EnsEMBL::Web::Data::Record::User::Configuration->new($cgi->param('id'));
+  my $config = EnsEMBL::Web::Data::Record::Configuration::User->new($cgi->param('id'));
   $self->add_filter('EnsEMBL::Web::Controller::Command::Filter::Owner', {'user_id' => $config->user->id});
 
 }
@@ -42,7 +40,7 @@ sub process {
   my $cgi = new CGI;
 
   ## Set this config as the current one
-  my $user = $ENSEMBL_WEB_REGISTRY->get_user;
+  my $user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;
   my ($current) = $user->currentconfigs;
   $current ||= $user->add_to_currentconfigs({
     config => $cgi->param('id'),
@@ -66,7 +64,7 @@ sub process {
   } elsif ($url) {
     $new_url = $url;
   } else {
-    my $config = EnsEMBL::Web::Data::Record::User::Configuration->new($cgi->param('id'));
+    my $config = EnsEMBL::Web::Data::Record::Configuration::User->new($cgi->param('id'));
     if ($config && $config->url) {
       ## get saved URL
       $new_url = $config->url;

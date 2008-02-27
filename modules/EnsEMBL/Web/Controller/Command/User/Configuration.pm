@@ -6,8 +6,8 @@ use warnings;
 use Class::Std;
 use CGI;
 
-use EnsEMBL::Web::Data::Record::User::Configuration;
-use EnsEMBL::Web::Data::Record::Group::Configuration;
+use EnsEMBL::Web::Data::User;
+use EnsEMBL::Web::Data::Group;
 
 use base 'EnsEMBL::Web::Controller::Command::User';
 
@@ -48,9 +48,9 @@ sub render_page {
   my $interface = EnsEMBL::Web::Interface::InterfaceDef->new;
   my $data;
   if ($cgi->param('record_type') eq 'group') {
-    $data = EnsEMBL::Web::Data::Record::Group::Configuration->new($cgi->param('id'));
+    $data = EnsEMBL::Web::Data::Record::Configuration::Group->new($cgi->param('id'));
   } else {
-    $data = EnsEMBL::Web::Data::Record::User::Configuration->new($cgi->param('id'));
+    $data = EnsEMBL::Web::Data::Record::Configuration::User->new($cgi->param('id'));
   }
   
   $interface->data($data);

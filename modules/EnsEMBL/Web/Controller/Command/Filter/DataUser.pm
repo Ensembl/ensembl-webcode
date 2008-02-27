@@ -17,7 +17,7 @@ sub user {
     return EnsEMBL::Web::Data::User->new($id);
   }
 
-  return $ENSEMBL_WEB_REGISTRY->get_user;
+  return $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;
 }
 
 sub inherit {

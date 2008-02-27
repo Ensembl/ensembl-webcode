@@ -34,7 +34,7 @@ sub process {
              ? $cgi->param('type')
              : 'group';
   
-  if (my $user = $ENSEMBL_WEB_REGISTRY->get_user) {
+  if (my $user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user) {
     if (my ($record) = $user->sortables) {
       $record->kind($kind);
       $record->save;

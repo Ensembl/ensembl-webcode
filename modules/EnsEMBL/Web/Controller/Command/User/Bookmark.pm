@@ -6,8 +6,8 @@ use warnings;
 use Class::Std;
 use CGI;
 
-use EnsEMBL::Web::Data::Record::User::Bookmark;
-use EnsEMBL::Web::Data::Record::Group::Bookmark;
+use EnsEMBL::Web::Data::User;
+use EnsEMBL::Web::Data::Group;
 
 use base 'EnsEMBL::Web::Controller::Command::User';
 
@@ -50,9 +50,9 @@ sub render_page {
 
   ## TODO: make new constructor accept 'record_type' parameter 
   if ($cgi->param('record_type') eq 'group') {
-    $data = EnsEMBL::Web::Data::Record::Group::Bookmark->new($cgi->param('id'));
+    $data = EnsEMBL::Web::Data::Record::Bookmark::Group->new($cgi->param('id'));
   } else {
-    $data = EnsEMBL::Web::Data::Record::User::Bookmark->new($cgi->param('id'));
+    $data = EnsEMBL::Web::Data::Record::Bookmark::User->new($cgi->param('id'));
   }
   
   $interface->data($data);

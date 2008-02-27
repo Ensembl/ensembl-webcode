@@ -9,7 +9,7 @@ use CGI;
 use EnsEMBL::Web::Document::Interface;
 use EnsEMBL::Web::Interface::InterfaceDef;
 use EnsEMBL::Web::Data::User;
-use EnsEMBL::Web::Data::Record::Group::Invite;
+use EnsEMBL::Web::Data::Group;
 use EnsEMBL::Web::Data::Membership;
 use EnsEMBL::Web::RegObj;
 
@@ -37,7 +37,7 @@ sub process {
   my $self = shift;
   my $cgi = new CGI;
   
-  my $invitation = EnsEMBL::Web::Data::Record::Group::Invite->new($cgi->param('id'));
+  my $invitation = EnsEMBL::Web::Data::Record::Invite::Groups->new($cgi->param('id'));
   my $url; 
   if ($invitation->status eq 'pending') {
     ## Is this an existing user?

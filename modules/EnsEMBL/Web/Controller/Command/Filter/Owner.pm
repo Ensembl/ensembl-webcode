@@ -14,7 +14,7 @@ my %USER_ID :ATTR(:set<user_id> :get<user_id>);
 
 sub allow {
   my $self = shift;
-  my $user = $ENSEMBL_WEB_REGISTRY->get_user;
+  my $user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;
   if ($user == $self->get_user_id) {
     return 1;
   }

@@ -6,7 +6,7 @@ use warnings;
 use Class::Std;
 use CGI;
 
-use EnsEMBL::Web::Data::Record::User::SpeciesList;
+use EnsEMBL::Web::Data::User;
 use EnsEMBL::Web::Document::HTML::SpeciesList;
 use EnsEMBL::Web::RegObj;
 
@@ -34,10 +34,10 @@ sub render {
 sub render_page {
   my $self = shift;
   print "Content-type:text/html\n\n";
-  my $user = $self->filters->user($ENSEMBL_WEB_REGISTRY->get_user->id);
+  my $user = $self->filters->user($EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user->id);
 
   my ($species_list) = $user->specieslists;
-  $species_list = EnsEMBL::Web::Data::Record::User::SpeciesList->new
+  $species_list = EnsEMBL::Web::Data::Record::SpeciesList::User->new
     unless $species_list;
     
   $species_list->favourites($self->get_action->get_named_parameter('favourites'));

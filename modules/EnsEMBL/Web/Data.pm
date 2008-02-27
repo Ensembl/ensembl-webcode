@@ -216,9 +216,10 @@ sub has_many {
 
   my ($owner) = $class =~ /::(\w+)$/;
     
-  if (!ref($relation_class) && $relation_class =~ /^EnsEMBL::Web::Data::Record::(\w+)$/) {
+  if (!ref($relation_class) && $relation_class =~ /^EnsEMBL::Web::Data::Record/) {
 
-    $relation_class = 'EnsEMBL::Web::Data::Record::'.$owner.'::'.$1;
+    $class->_require_class($relation_class);
+    $relation_class = $relation_class->add_owner($owner);
     
     $class->relations({
       %{ $class->relations },
@@ -271,7 +272,6 @@ sub tie_a {
       unless $class->find_column($column);
   }
 }
-
 
 sub find_all { shift->retrieve_all(@_) }
 sub find     { shift->retrieve(@_) }

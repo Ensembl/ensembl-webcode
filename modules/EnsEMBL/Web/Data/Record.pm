@@ -30,4 +30,19 @@ sub clone {
   return \%hash;
 }
 
+sub add_owner {
+  my $class = shift;
+  my $owner = shift;
+  my $relation_class = $class .'::'. ucfirst($owner);
+  
+  my $package = "package $relation_class;
+                use base qw($class);
+                $relation_class->owner('$owner');
+                1;";
+  eval $package;
+  die "Compilation error: $@" if $@;
+  
+  return $relation_class;
+}
+
 1;

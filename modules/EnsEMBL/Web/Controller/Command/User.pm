@@ -9,7 +9,7 @@ sub user_or_admin {
   ### Chooses correct filter for shareable records, based on whether user or group record
   my ($self, $class, $id, $owner) = @_;
     if ($owner eq 'group') {
-      $class =~ s/^(.+)::(\w+)$/$1::Group::$2/;
+      $class = "${class}::Group";
       my $record = $class->new($id);
       $self->add_filter(
         'EnsEMBL::Web::Controller::Command::Filter::Admin',
@@ -17,8 +17,7 @@ sub user_or_admin {
       ) if $record;
 
     } else {
-
-      $class =~ s/^(.+)::(\w+)$/$1::User::$2/;
+      $class = "${class}::User";
       my $record = $class->new($id);
       $self->add_filter(
         'EnsEMBL::Web::Controller::Command::Filter::Owner',

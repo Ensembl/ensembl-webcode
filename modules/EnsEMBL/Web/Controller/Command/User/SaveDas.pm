@@ -6,7 +6,6 @@ use warnings;
 use Class::Std;
 use CGI;
 
-use EnsEMBL::Web::Data::Record::User::DAS;
 use EnsEMBL::Web::RegObj;
 
 use base 'EnsEMBL::Web::Controller::Command::User';
@@ -31,10 +30,10 @@ sub render {
 
 sub render_page {
   my $self = shift;
-  my $user = $ENSEMBL_WEB_REGISTRY->get_user;
+  my $user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;
   print "Content-type:text/html\n\n";
   print "Saving DAS for " . $user->id . "<br />"; 
-  my @sources = @{ $ENSEMBL_WEB_REGISTRY->get_das_filtered_and_sorted };
+  my @sources = @{ $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_das_filtered_and_sorted };
     
   foreach my $das (@sources) {
     $user->add_to_dases({

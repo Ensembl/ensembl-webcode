@@ -7,7 +7,7 @@ use Class::Std;
 use CGI;
 
 use EnsEMBL::Web::RegObj;
-use EnsEMBL::Web::Data::Record::User::Bookmark;
+use EnsEMBL::Web::Data::User;
 
 use base 'EnsEMBL::Web::Controller::Command::User';
 
@@ -37,7 +37,7 @@ sub process {
   my $self = shift;
   my $cgi = new CGI;
 
-  my $bookmark = EnsEMBL::Web::Data::Record::User::Bookmark->new($cgi->param('id'));
+  my $bookmark = EnsEMBL::Web::Data::Record::Bookmark::User->new($cgi->param('id'));
 
   my $click = $bookmark->click;
   if ($click) {

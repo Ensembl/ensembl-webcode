@@ -8,7 +8,7 @@ use CGI;
 
 use EnsEMBL::Web::Data;
 use EnsEMBL::Web::Data::Species;
-use EnsEMBL::Web::Data::Record::User::NewsFilter;
+use EnsEMBL::Web::Data::User;
 use base 'EnsEMBL::Web::Controller::Command::User';
 
 {
@@ -44,7 +44,7 @@ sub render_page {
 
   ## Create interface object, which controls the forms
   my $interface = EnsEMBL::Web::Interface::InterfaceDef->new;
-  my $data = EnsEMBL::Web::Data::Record::User::NewsFilter->new($cgi->param('id'));
+  my $data = EnsEMBL::Web::Data::Record::NewsFilter::User->new($cgi->param('id'));
   $interface->data($data);
   $interface->discover;
 

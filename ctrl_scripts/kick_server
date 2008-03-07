@@ -1,9 +1,0 @@
-#! /bin/sh
-
-./ctrl_scripts/stop_server
-
-sleep 2
-
-./ctrl_scripts/start_server
-
-./ctrl_scripts/taillog

@@ -1,4 +1,0 @@
-package das::entry_points;
-use EnsEMBL::Web::Document::WebPage;
-wrapper_webpage( "DAS", 'outputtype' => 'DAS', 'subtype' => 'dasep' );
-1;

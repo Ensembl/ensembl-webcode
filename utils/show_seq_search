@@ -1,0 +1,115 @@
+#!/usr/local/bin/perl
+
+use strict;
+use warnings;
+
+package show_ssaha;
+
+use FindBin qw($Bin);
+use File::Basename qw( dirname );
+use Data::Dumper;
+
+our $SERVERROOT;
+BEGIN{
+  $SERVERROOT = dirname( $Bin );
+  unshift @INC, "$SERVERROOT/conf";
+  unshift @INC, "$SERVERROOT";
+  eval{ require SiteDefs };
+  if ($@){ die "Can't use SiteDefs.pm - $@\n"; }
+  map{ unshift @INC, $_ } @SiteDefs::ENSEMBL_LIB_DIRS;
+}
+
+use EnsEMBL::Web::SpeciesDefs;
+
+my $SD = EnsEMBL::Web::SpeciesDefs->new();
+
+my @species = sort $SD->valid_species();
+print "@species";
+
+my %configured_servers_blat = map { $_->[1] ? ($_->[0],[split /:/, $_->[1]{'LATESTGP'}]):()} map { [$_,$SD->other_species($_,'BLAT_DATASOURCES')] } @species;
+
+my %configured_servers_dna  = map { $_->[1] ? ($_->[0],[split /:/, $_->[1]{'LATESTGP'}]):()} map { [$_,$SD->other_species($_,'SSAHA2_DATASOURCES')] } @species;
+
+my %configured_servers_cdna = map { $_->[1] ? ($_->[0],[split /:/, $_->[1]{'CDNA_ALL'}]):()} map { [$_,$SD->other_species($_,'SSAHA2_DATASOURCES')] } @species;
+
+my $live_sites = {};
+foreach my $species ( keys %configured_servers_blat ) {
+  my $T = $configured_servers_blat{$species};
+  $live_sites->{$T->[0]}{$T->[1]} = "B:$species";
+}
+
+foreach my $species ( keys %configured_servers_dna ) {
+  my $T = $configured_servers_dna{$species};
+  $live_sites->{$T->[0]}{$T->[1]} = "D:$species";
+}
+
+foreach my $species ( keys %configured_servers_cdna ) {
+  my $T = $configured_servers_cdna{$species};
+  $live_sites->{$T->[0]}{$T->[1]} = "C:$species";
+}
+
+my @servers = map { sprintf "ssaha%02d", $_ } (1..16);
+## push @servers, map { sprintf "ensarc-1-%02d", $_ } (10..13);
+
+
+my $ssaha = {};
+foreach my $server ( @servers ) {
+  my $ssh_command = $server =~ /ssaha/ 
+                  ? "ssh -i /nfs/WWW/.ssh/blastsrv "
+                  : "ssh -i /nfs/WWW/.ssh/blastsrv ";
+  my @lines = `$ssh_command$server 'ps --cols 200 -C ssaha2Server -o %a'`;
+  foreach(@lines) {
+    if(/ssaha2?Server\s*-port\s*(\d+)\s*.*?(.*)/) {
+      push @{$ssaha->{$server}{$2}{'ports'}}, $1;
+    } else {
+      warn $_;
+    }
+  }
+  @lines = `$ssh_command$server 'cd /data; find ssaha`;
+  foreach(@lines) {
+    chomp;
+    if(/ssaha\/(.*?)\..*\.(base|body|head|name|size)$/) {
+      push @{$ssaha->{$server}{$1}{'files'}}, $2;
+    } else {
+      warn $_;
+    }
+  }
+  @lines = `$ssh_command$server 'ps --cols 200 -C gfServer -o %a'`;
+  foreach(@lines) {
+    if(/gfServer\s*.*?s*(\d+)\s*\d+\.(\w+)/) {
+      push @{$ssaha->{$server}{$2}{'ports'}}, $1;
+    } else {
+      warn $_;
+    }
+  }
+  @lines = `$ssh_command$server 'cd /data; find blat`;
+  foreach(@lines) {
+    chomp;
+    if(/ssaha\/(\d+)\.(\w+).*\.(base|body|head|name|size)$/) {
+      push @{$ssaha->{$server}{$1}{'files'}}, $2;
+    } else {
+      warn $_;
+    }
+  }
+
+}
+
+my @RES = ();
+foreach my $machine ( sort keys %$ssaha ) {
+  my $K = 0;
+  foreach my $species ( sort keys %{$ssaha->{$machine}} ) {
+    my $d = $ssaha->{$machine}{$species};
+    my $ports = "@{$d->{'ports'}||[]}" || "not running";
+    my $files = join " ", sort @{$d->{'files'}||[]};
+    $files = $files eq '' ? '-----' : ($files eq "base body head name size" ? "#ALL#" : "some-");
+    my $live  = substr( $live_sites->{ $machine }{ $ports },0, 35);
+    delete( $live_sites->{ $machine }{$ports} );
+    push @RES, sprintf "%-7s %-11s %-5s %-35s %-50s \n", $machine, $ports, $files, $live, $species;
+    $K++;
+  }
+  push @RES, sprintf "%-7s             == %d servers running ==\n", $machine, $K;
+}
+warn Data::Dumper::Dumper( $live_sites );
+printf "%-7s %-11s %-5s %-35s %-50s\n", qw(Machine Ports(s) Files Live Species);
+print sort @RES;
+

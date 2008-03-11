@@ -969,7 +969,7 @@ sub get_markedup_trans_seq {
         }
         foreach my $r ($st..$en) {
           $bps[$r-1]{'alleles'}.= $snp->allele_string;
-          $bps[$r-1]{'url_params'}.= "source=".$snp->source.";snp=".$snp->variation_name;
+          $bps[$r-1]{'url_params'}.= "source=".$snp->source.";snp=".$snp->variation_name.';';
           my $snpclass = $snp->var_class;
           if($snpclass eq 'snp' || $snpclass eq 'SNP - substitution') {
             my $aa = int(($r-$cd_start+3)/3);

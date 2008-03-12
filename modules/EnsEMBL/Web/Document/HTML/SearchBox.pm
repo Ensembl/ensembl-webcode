@@ -19,7 +19,7 @@ sub sp_common  :lvalue { $_[0]{'sp_common'}=~s/_/ /g; $_[0]{'sp_common'}; }
 sub render {
   my $self   = shift;
   my $species = $ENV{'ENSEMBL_SPECIES'};
-  if( $species eq 'Multi' ) { $species = ''; }
+  if( $species !~ /_/ ) { $species = ''; }
   my $common = $species ? $self->sp_common : '';
   my $site_section;
   my $ebang = qq(<i><span style="color:#3366bb">e</span><span class="red">!</span></i>);
@@ -37,6 +37,7 @@ sub render {
 <div id="search">
 <form action="/@{[$species||'perl']}/psychic" method="get" id="seform">
   <input type="hidden" id="se_si" name="site" value="ensembl" />
+  <input type="hidden" id="se_species" name="species" value="$species" />
   <table id="se">
     <tr>
       <td id="se_but"><img title="Ensembl search" id="se_im" src="/img/small-ensembl.gif" alt="Ensembl search" /><img src="/img/small-down.gif" style="width:7px" alt=":" /></td>

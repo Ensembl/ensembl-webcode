@@ -667,6 +667,7 @@ sub fetch_assemblies {
         WHERE
                 s.species_id = rs.species_id 
                 and release_id = $release_num
+                and rs.assembly_name != ''
 
         ORDER BY s.name
     );

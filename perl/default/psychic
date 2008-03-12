@@ -17,8 +17,7 @@ my $webpage = new EnsEMBL::Web::Document::WebPage;
 my $q = $ENSEMBL_WEB_REGISTRY->get_session->get_input;
 my $species = $q->param('species') || undef;
 my $site = $q->param('site') || undef;
-my $index   = $q->param('idx')     || undef;
-warn "SPECIES: $species";
+my $index   = $q->param('idx')     || 'all';
 my $query   = $q->param('query');
 my $URL;
 
@@ -47,7 +46,6 @@ if ($site eq 'ebi') {
   }
   chop $query;
 # }
-warn "SPECIES: $species";
 
 my $feature_maps = {qw(
   gene       Gene

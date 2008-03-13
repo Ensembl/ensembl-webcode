@@ -76,7 +76,7 @@ sub search_ALL {
 
   ## Filter by configured indices
   my $SD = EnsEMBL::Web::SpeciesDefs->new();
-  my @idxs = @{$SD->EMSEMBL_SEARCH_IDXS};
+  my @idxs = @{$SD->ENSEMBL_SEARCH_IDXS};
   my @valid_methods;
 
   if (scalar(@idxs) > 0) {

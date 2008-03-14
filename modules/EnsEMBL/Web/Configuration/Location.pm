@@ -58,7 +58,7 @@ sub context_menu {
 
   if( $self->mapview_possible( $obj->seq_region_name ) ) {
     $menu->add_entry( $flag, 'code' => 'mv_link', 'text' => "View of @{[$obj->seq_region_type_and_name]}",
-       'title' => "MapView - Overview of @{[$obj->seq_region_type_and_name]} including feature sumarries",
+       'title' => "MapView - Overview of @{[$obj->seq_region_type_and_name]} including feature summaries",
        'href' => "/$species/mapview?chr=".$obj->seq_region_name );
   }
   $header =~s/<br \/>/ /;

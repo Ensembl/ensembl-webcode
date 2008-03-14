@@ -268,7 +268,7 @@ sub init {
       'on'  => "off",
       'pos' => '13',
       'str' => 'b',
-      'available'=> 'features "REGFEATURES_CISRED',
+      'available'=> 'features REGFEATURES_CISRED',
     },
 
     'first_ef'   => {

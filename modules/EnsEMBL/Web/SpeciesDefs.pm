@@ -1172,6 +1172,17 @@ sub _parse {
       }
     }
 ## VARIATION DATABASE 
+    if( $tree->{'databases'}->{'ENSEMBL_FUNCGEN'} ){ # 
+      my $sql = qq(select a.logic_name from analysis as a, feature_set as fs where fs.type ='external' and a.analysis_id=fs.analysis_id);
+      my $query = $dbh->prepare($sql);
+      eval {
+        $query->execute;
+        while( my $row = $query->fetchrow_arrayref) {
+          $row->[0] =~ s/ /_/g;
+          $tree->{'DB_FEATURES'}{uc("REGFEATURES_$row->[0]")} = 1;
+        }
+      };
+    }
     if( $tree->{'databases'}->{'ENSEMBL_VARIATION'} ){ # Then SNP is configured
       if( my $dbh = $self->db_connect( $tree, 'ENSEMBL_VARIATION' ) ){
 

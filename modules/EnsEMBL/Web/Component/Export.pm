@@ -47,7 +47,7 @@ sub stage1_form {
 
   $form->add_element('type' => 'SubHeader', 'value' => 'Region');
 
-  if( $object->param('l') =~ /(\w+):(-?[\.\w]+)-([\.\w]+)/ ) {
+  if( $object->param('l') =~ /([-\w\.]+):(-?[\.\w]+)-([\.\w]+)/ ) {
     my($sr,$s,$e) = ($1,$2,$3);
     $object->input_param( 'seq_region_name', $sr);
     $object->input_param( 'type1',           'bp');

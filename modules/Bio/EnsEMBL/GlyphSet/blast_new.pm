@@ -50,8 +50,8 @@ sub zmenu {
   my $id = shift || 'UNKNOWN!';
 
   my $boxes     = shift || [];
-  my $first_box = $boxes->[0] || [];
-  my $feature   = $first_box->[2];
+  #my $first_box = $boxes->[0] || [];
+  my $feature   = $boxes;
 
   if( $feature ){
 

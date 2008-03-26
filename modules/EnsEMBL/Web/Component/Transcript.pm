@@ -1033,7 +1033,9 @@ sub do_markedup_pep_seq {
 
 sub supporting_evidence_image {
   my( $panel, $object ) = @_;
-  if (! defined $object->get_supporting_evidence) {
+  my $evidence   = $object->get_supporting_evidence;
+
+  if (! defined $evidence ) {
     my $type = $object->logic_name; 
     if ($type eq "otter" ){ 
       $panel->print( '
@@ -1062,7 +1064,6 @@ sub supporting_evidence_image {
       The supporting evidence below consists of the sequence matches
       on which the exon predictions were based and are sorted by alignment score.
     </p>' );
-  my $evidence   = $object->get_supporting_evidence;
   my $show       = $object->param('showall');
   my $exon_count = $evidence->{ 'transcript' }{'exon_count'};
   my $hits       = scalar(keys %{$evidence->{ 'hits' }});

@@ -102,6 +102,7 @@ sub command{
 
   my( $host, $port, $nib_dir ) = $self->_get_server();
 
+  $self->adaptor->{'disconnect_flag'}=0;
   my $command = join( ' ',
 		      $exe,
 		      "-out=wublast",

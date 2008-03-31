@@ -106,7 +106,7 @@ sub _render_species_list {
     }
   }  
 
-  my @taxon_order = @{$species_defs->TAXON_ORDER};
+  my @taxon_order = @{$species_defs->TAXON_ORDER} if $species_defs->TAXON_ORDER;
 
   ## Output in taxonomic groups, ordered by common name
   foreach $group (@taxon_order) {

@@ -3,7 +3,7 @@ package EnsEMBL::Web::Data::Article;
 use strict;
 use warnings;
 use base qw(EnsEMBL::Web::Data);
-use EnsEMBL::Web::DBSQL::WebDBAdaptorNEW (__PACKAGE__->species_defs);
+use EnsEMBL::Web::DBSQL::WebDBConnection (__PACKAGE__->species_defs);
 
 __PACKAGE__->table('article');
 __PACKAGE__->set_primary_key('article_id');

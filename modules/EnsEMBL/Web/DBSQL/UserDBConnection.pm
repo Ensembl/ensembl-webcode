@@ -1,4 +1,4 @@
-package EnsEMBL::Web::DBSQL::WebDBAdaptorNEW;
+package EnsEMBL::Web::DBSQL::UserDBConnection;
 
 use strict;
 use warnings;
@@ -9,14 +9,14 @@ sub import {
   my $dsn = join(':',
     'dbi',
     'mysql',
-    $species_defs->multidb->{'ENSEMBL_WEBSITE'}{'NAME'},
-    $species_defs->multidb->{'ENSEMBL_WEBSITE'}{'HOST'},
-    $species_defs->multidb->{'ENSEMBL_WEBSITE'}{'PORT'},
+    $species_defs->ENSEMBL_USERDB_NAME,
+    $species_defs->ENSEMBL_USERDB_HOST,
+    $species_defs->ENSEMBL_USERDB_PORT,
   );
   $caller->connection(
     $dsn,
-    $species_defs->ENSEMBL_WRITE_USER,
-    $species_defs->ENSEMBL_WRITE_PASS,
+    $species_defs->ENSEMBL_USERDB_USER,
+    $species_defs->ENSEMBL_USERDB_PASS,
     {
       RaiseError => 1,
       PrintError => 1,

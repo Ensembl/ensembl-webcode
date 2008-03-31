@@ -6,7 +6,7 @@ package EnsEMBL::Web::Data::Component;
 use strict;
 use warnings;
 use base qw(EnsEMBL::Web::Data::Trackable);
-use EnsEMBL::Web::DBSQL::WebDBAdaptorNEW (__PACKAGE__->species_defs);
+use EnsEMBL::Web::DBSQL::WebDBConnection (__PACKAGE__->species_defs);
 
 __PACKAGE__->table('help_record');
 __PACKAGE__->set_primary_key('help_record_id');

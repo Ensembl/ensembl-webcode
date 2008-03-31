@@ -29,7 +29,10 @@ sub common_menu_items {
 
       ## Link to existing bookmarks
       my %included;
+
+      no warnings;
       my @records = reverse sort {$a->click <=> $b->click} $user->bookmarks;
+
       my $found = 0;
       if ($#records > -1) { 
         $found = 1;

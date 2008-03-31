@@ -3,7 +3,7 @@ package EnsEMBL::Web::Data::User;
 use strict;
 use warnings;
 use base qw(EnsEMBL::Web::Data::Trackable);
-use EnsEMBL::Web::DBSQL::UserDBAdaptorNEW (__PACKAGE__->species_defs);
+use EnsEMBL::Web::DBSQL::UserDBConnection (__PACKAGE__->species_defs);
 
 __PACKAGE__->table('user');
 __PACKAGE__->set_primary_key('user_id');

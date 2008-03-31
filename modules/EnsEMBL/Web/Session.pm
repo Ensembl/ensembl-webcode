@@ -80,6 +80,7 @@ sub exturl {
   my $self = shift;
   return $ExtURL_of{ident $self} ||= EnsEMBL::Web::ExtURL->new( $self->get_species, $self->get_species_defs );
 }
+
 sub colourmap {
 ### Gets the colour map
   my $self = shift;
@@ -89,11 +90,12 @@ sub colourmap {
 sub create_session_id {
 ### Gets session ID if the session ID doesn't exist
 ### a new one is grabbed and added to the users cookies
-  my( $self, $r ) =@_;
+  my( $self, $r ) = @_;
   my $session_id = $self->get_session_id;
   return $session_id if $session_id;
-  $session_id = $self->get_adaptor->create_session_id($r,$self->get_cookie);
+  $session_id = EnsEMBL::Web::Data::Session->create_session_id($r, $self->get_cookie);
   $self->set_session_id( $session_id );
+  $self->get_cookie->create( $r, $session_id );  
   return $session_id;
 }
 
@@ -122,12 +124,13 @@ sub store {
 ### image configs have been altered!
   my ($self, $r) = @_;
   my @storables = @{ $self->storable_data($r) };
-  if ($#storables > -1) {
-    foreach my $storable (@storables) {
-      my $config_key = $storable->{config_key};
-      my $d = $storable->{data};
-      $self->get_adaptor->setConfigByName( $self->create_session_id($r), 'script', $config_key, $d->Dump ) if $config_key;
-    }
+  foreach my $storable (@storables) {
+    EnsEMBL::Web::Data::Session->set_config(
+      session_id => $self->create_session_id($r),
+      type       => 'script',
+      code       => $storable->{config_key},
+      data       => $storable->{data}->Dump,
+    ) if $storable->{config_key};
   }
   $self->save_das;
 }
@@ -177,9 +180,9 @@ sub get_internal_das {
     }
     my $dsn = $source_confdata->{dsn};
     $source_confdata->{url} .= "/$dsn" if ($source_confdata->{url} !~ /$dsn$/);
-    my $DAS = EnsEMBL::Web::DASConfig->new( $self->get_adaptor );
-       $DAS->load( $source_confdata );
-       $DAS->set_internal();
+    my $DAS = EnsEMBL::Web::DASConfig->new;
+    $DAS->load( $source_confdata );
+    $DAS->set_internal();
     $Internal_das_of{ ident $self }{ $source } = $DAS;
   }
   return $Internal_das_of{ ident $self };
@@ -203,17 +206,20 @@ sub get_das {
   return unless $self->get_session_id;
   my $data;
   ## Get all DAS configurations from database!
-  my $hashref = $self->get_adaptor->getConfigsByType( $self->get_session_id, 'das' );
+  my @configs = EnsEMBL::Web::Data::Session->get_config(
+    session_id => $self->get_session_id,
+    type       => 'das'
+  );
   my $TEMP;
-  foreach my $key ( keys %$hashref ) {
-    next if exists $Das_sources_of{ ident $self }{$key};
-    $TEMP = $hashref->{$key};
+  foreach my $config (@configs) {
+    next if exists $Das_sources_of{ ident $self }{ $config->code };
+    $TEMP = $config->data;
     $TEMP = eval( $TEMP );
     next unless $TEMP;
     ## Create new DAS source and load from value in database...
-    my $DAS = EnsEMBL::Web::DASConfig->new( $self->get_adaptor );
-       $DAS->load( $TEMP );
-    $Das_sources_of{ ident $self }{$key} = $DAS;
+    my $DAS = EnsEMBL::Web::DASConfig->new;
+    $DAS->load( $TEMP );
+    $Das_sources_of{ ident $self }{$config->code} = $DAS;
   }
   return $Das_sources_of{ ident $self };
 }
@@ -235,12 +241,16 @@ sub get_das_config {
 ### Retrieve an individual externally configured DAS source
   my( $self, $key )  = @_;
   return $Das_sources_of{ ident $self }{$key} if exists $Das_sources_of{ ident $self }{$key};
-  my $TEMP = $self->get_adaptor->getConfigByName( $self->get_session_id, 'das', $key );
-  if( $TEMP ) {
-    $TEMP = eval( $TEMP );
+  my $config = EnsEMBL::Web::Data::Session->get_config(
+    session_id => $self->get_session_id,
+    type       => 'das',
+    code       => $key,
+  );
+  if ($config) {
+    my $TEMP = eval( $config->data );
     next unless $TEMP;
-    my $DAS = EnsEMBL::Web::DASConfig->new( $self->get_adaptor );
-       $DAS->load( $TEMP );
+    my $DAS = EnsEMBL::Web::DASConfig->new;
+    $DAS->load( $TEMP );
     $Das_sources_of{ ident $self }{$key} = $DAS;
   }
   return $Das_sources_of{ ident $self }{$key};
@@ -249,17 +259,27 @@ sub get_das_config {
 sub save_das {
 ### DAS
 ### Save all externally configured DAS sources back to the database
-  my( $self, $r ) = @_;
+  my ($self, $r) = @_;
   foreach my $source ( values %{$Das_sources_of{ ident $self }} ) {
     next unless $source->is_altered;
     if( $source->is_deleted ) {
-      $self->get_adaptor->resetConfigByName( $self->get_session_id, 'das', $source->get_name );
+      EnsEMBL::Web::Data::Session->reset_config(
+        session_id => $self->get_session_id,
+        type       => 'das',
+        code       => $source->get_name,
+      );
     } else {
       my $d =  Data::Dumper->new( [$source->get_data], [qw($data)] );
-         $d->Indent(1);
-      $self->get_adaptor->setConfigByName(   $self->create_session_id($r), 'das', $source->get_name, $d->Dump );
+      $d->Indent(1);
+      EnsEMBL::Web::Data::Session->reset_config(
+        session_id => $self->get_session_id,
+        type       => 'das',
+        code       => $source->get_name,
+        data       => $d->Dump,
+      );
     }
   }
+  
 }
 
 
@@ -330,7 +350,7 @@ sub add_das_source_from_URL {
   return unless $uname;
   $hash_ref =~ s/name=(\w)+ /name=$uname /;
 
-  my $DAS = EnsEMBL::Web::DASConfig->new( $self->get_adaptor );
+  my $DAS = EnsEMBL::Web::DASConfig->new;
   $DAS->create_from_URL( $hash_ref );
 ## We have a duplicate so need to do something clever!
   if( exists $Das_sources_of{ ident $self }{$DAS->get_key} ) {
@@ -350,7 +370,7 @@ sub add_das_source_from_hashref {
 ### DAS
 ### Create a new DAS source from a hash_ref
   my( $self, $hash_ref ) = @_;
-  my $DAS = EnsEMBL::Web::DASConfig->new( $self->get_adaptor );
+  my $DAS = EnsEMBL::Web::DASConfig->new;
   $DAS->create_from_hash_ref( $hash_ref );
 ## We have a duplicate so need to do something clever!
   if( exists $Das_sources_of{ ident $self }{$DAS->get_key} ) {
@@ -479,20 +499,27 @@ sub getScriptConfig {
         }
       }
     }
-    my $TEMP;
+
     my $image_config_data = {};
     if( $self->get_session_id && $script_config->storable ) {
-## Let us see if there is an entry in the database and load it into the script config!
-## and store any other data which comes back....
-      $TEMP = $self->get_adaptor->getConfigByName( $self->get_session_id, 'script', $script );
-      my $data;
-      $TEMP =~ s/\n|\r|\f|\\//g;
-      $TEMP = eval($TEMP);
-      if ($TEMP) {
-        $script_config->set_user_settings( $TEMP->{'diffs'} );
-        $image_config_data = $TEMP->{'image_configs'};
-      } else {
-        warn "ERROR: $@";
+      ## Let us see if there is an entry in the database and load it into the script config!
+      ## and store any other data which comes back....
+      my $config = EnsEMBL::Web::Data::Session->get_config(
+        session_id => $self->get_session_id,
+        type       => 'script',
+        code       => $script,
+      );
+
+      if ($config) {
+        my $TEMP = $config->data;
+        $TEMP =~ s/\n|\r|\f|\\//g;
+        $TEMP = eval($TEMP);
+        if ($TEMP) {
+          $script_config->set_user_settings( $TEMP->{'diffs'} );
+          $image_config_data = $TEMP->{'image_configs'};
+        } else {
+          warn "ERROR: $@" if $@;
+        }
       }
     }
     unless( $do_not_pop_from_params ) {
@@ -510,15 +537,27 @@ sub getScriptConfig {
 
 sub get_script_config_as_string {
   my ($self, $script) = @_;
+
   if( $self->get_session_id ) {
-    return $self->get_adaptor->getConfigByName( $self->get_session_id, 'script', $script );
+    my $config = EnsEMBL::Web::Data::Session->get_config(
+      session_id => $self->get_session_id,
+      type       => 'script',
+      code       => $script,
+    );
+    return $config->data if $config;
   }
+  
   return undef; 
 }
 
 sub set_script_config_from_string {
   my ($self, $script, $string) = @_;
-  $self->get_adaptor->setConfigByName( $self->get_session_id, 'script', $script, $string );
+  EnsEMBL::Web::Data::Session->set_config(
+    session_id => $self->get_session_id,
+    type       => 'script',
+    code       => $script,
+    data       => $string,
+  );
 }
 
 sub getImageConfig {

@@ -7,7 +7,7 @@ use EnsEMBL::Web::Form;
 
 use strict;
 use warnings;
-no warnings "uninitialized";
+no warnings 'uninitialized';
 
 @EnsEMBL::Web::Component::News::ISA = qw( EnsEMBL::Web::Component);
 
@@ -58,11 +58,11 @@ sub select_news_form {
   }
 
 ## do releases dropdown
-  my @releases = @{$object->valid_rels};
+  my @releases = $object->valid_rels;
   foreach my $rel (@releases) {
-    my $id = $$rel{'release_id'};
-    my $date = $$rel{'short_date'};
-    push (@rel_values, {'name'=>"Release $id ($date)",'value'=>$id});
+    my $id   = $rel->release_id;
+    my $date = $rel->short_date;
+    push (@rel_values, { 'name'=>"Release $id ($date)",'value'=>$id });
   }
 
   my $required = $species eq 'Multi' ? 'no' : 'yes';
@@ -133,25 +133,13 @@ sub show_news {
   (my $sp_title = $sp_dir) =~ s/_/ /;
 
   my $html;
-  my $prev_cat = 0;
-  my $prev_rel = 0;
   my $rel_selected = $object->param('release_id') || $object->param('rel');
 
-## Get lookup hashes
+  ## Get lookup hashes
   my $releases = $object->releases;
   my %rel_lookup;
   foreach my $rel_array (@$releases) {
     $rel_lookup{$$rel_array{'release_id'}} = $rel_array->{'full_date'};
-  }
-  my $cats = $object->all_cats;
-  my %cat_lookup;
-  foreach my $cat_array (@$cats) {
-    $cat_lookup{$$cat_array{'news_category_id'}} = $cat_array->{'news_category_name'};
-  }
-  my $spp = $object->all_spp;
-  my %sp_lookup = %$spp;
-  if ($sp_dir eq 'Multi' && $object->param('species')) {
-    $sp_dir = $sp_lookup{$object->param('species')};
   }
 
   ## Do title
@@ -164,90 +152,64 @@ sub show_news {
     $html .= "<h2>Release $rel_selected News $rel_date</h2>";
   }
 
-  my @generic_items = @{$object->generic_items};
-  my @species_items = @{$object->species_items};
-
-## sort the news items
-  my ($all_sorted, $gen_sorted, $sp_sorted);
-  if ($sp_dir eq 'Multi' || $rel_selected eq 'all') {
-    my @all_items = (@generic_items, @species_items);
-    $all_sorted = $object->sort_items(\@all_items);
-  }
-  else {
-    $gen_sorted = $object->sort_items(\@generic_items);
-    $sp_sorted  = $object->sort_items(\@species_items);
-  }
-## output sorted news
+  ## output sorted news
   my @sections;
   if ($sp_dir eq 'Multi') {
-    @sections = ("Ensembl News");
+    @sections = (
+      { 'Ensembl News'   => $object->all_items },
+    );
+  } elsif ($rel_selected eq 'all') {
+    @sections = (
+      { "$sp_title News" => $object->all_items },
+    );
+  } else {
+    @sections = (
+      { "$sp_title News" => $object->species_items},
+      { 'Other News'     => $object->generic_items},
+    );
   }
-  elsif ($rel_selected eq 'all') {
-    @sections = ("$sp_title News");
-  }
-  else {
-    @sections = ("$sp_title News", "Other News");
-  }
-  for (my $i=0; $i<scalar(@sections); $i++) {
-    my ($header, $current_items);
-    if ($sp_dir eq 'Multi' || $rel_selected eq 'all') {
-      $current_items = $all_sorted;
-    }
-    else {
-      $header = $sections[$i];
-      $current_items = $i == 0 ? $sp_sorted : $gen_sorted;
-    }
-    my $prev_sp = 0;
-    my $prev_count = 0;
-    my $ul_open = 0;
-    for (my $i=0; $i<scalar(@$current_items); $i++) {
-      my %item = %{$$current_items[$i]};
-      next if $item{'status'} ne 'news_ok';
-      my $item_id = $item{'news_item_id'};
-      my $title = $item{'title'};
-      my $content = $item{'content'};
-      my $release_id = $item{'release_id'};
-      my $rel_date = $rel_lookup{$release_id};
-      $rel_date =~ s/.*\(//g;
-      $rel_date =~ s/\)//g;
-      my $news_cat_id = $item{'news_category_id'};
-      my $cat_name = $cat_lookup{$news_cat_id};
-      my $species = $item{'species'};
-      my $sp_count = $item{'sp_count'};
-
+  
+  my $prev_rel;
+  my $prev_cat;
+  
+  for my $section (@sections) {
+    my ($caption, $items) = each %$section;
+    warn $caption;
+    for my $item (@$items) {
       ## Release number (only needed for big multi-release pages)
-      if (!$object->param('rel') && $prev_rel != $release_id) {
-        $html .= qq(<h2>Release $release_id News ($rel_date)</h2>\n);
+      if (!$object->param('rel') && $prev_rel != $item->release_id) {
+        $html .= "<h2>Release ". $item->release_id ." News (". $item->release->full_date .")</h2>\n";
         $prev_cat = 0;
       }
 
       ## is it a new category?
-      if ($prev_cat != $news_cat_id) {
-        $html .= _output_cat_heading($news_cat_id, $cat_name, $rel_selected);
+      if ($prev_cat != $item->news_category_id) {
+        my ($cat_id, $cat_name, $release) = @_;
+        my $anchor = $rel_selected eq 'all' ? '' : ' id="cat'. $item->news_category_id .'"' ;
+        $html  .= qq(<h3 class="boxed"$anchor>). $item->news_category->name .qq(</h3>\n);
       }
 
+      my $title = $item->title;
       ## show list of affected species on main news page 
       if ($sp_dir eq 'Multi') {
-        my $sp_str = '';
-        if (ref($species) eq 'ARRAY' && scalar(@$species)) {
-          for (my $j=0; $j<scalar(@$species); $j++) {
-            $sp_str .= ', ' unless $j == 0;
-            (my $sp_name = $sp_lookup{$$species[$j]}) =~ s/_/ /g;
-            $sp_str .= "<i>$sp_name</i>";
-          }
-        }
-        else {
-          $sp_str = 'all species';
-        }
-        $title .= qq# <span style="font-weight:normal">($sp_str)</span>#;
+        my $sp_str = $item->species
+                       ? join ', ', map { '<i>'. $_->common_name .'</i>' } $item->species
+                       : 'all species';
+        $title .= qq{ <span style="font-weight:normal">($sp_str)</span>};
       }
     
       ## wrap each record in nice XHTML
-      $html .= _output_story($title, $content);
+      $html .= "<h4>$title</h4>\n";
+      my $content = $item->content;
+      if ($content !~ /^</) { ## wrap bare content in a <p> tag
+          $content = "<p>$content</p>";
+      }
+      $html .= $content."\n\n";
+      
 
       ## keep track of where we are!
-      $prev_rel = $release_id;
-      $prev_cat = $news_cat_id;
+      $prev_rel = $item->release_id;
+      $prev_cat = $item->news_category_id;
     }
   }
 
@@ -255,27 +217,4 @@ sub show_news {
   return 1;
 }
 
-sub _output_cat_heading {
-### "Private" method used by show_news (above) to format headers
-    my ($cat_id, $cat_name, $release) = @_;
-    my $anchor = $release eq 'all' ? '' : qq( id="cat$cat_id") ;
-    my $html = qq(<h3 class="boxed"$anchor>$cat_name</h3>\n);
-    return $html;
-}
-
-sub _output_story {
-### "Private" method used by show_news (above) to format stories
-    my ($title, $content) = @_;
-    
-    my $html = "<h4>$title</h4>\n";
-    if ($content !~ /^</) { ## wrap bare content in a <p> tag
-        $content = "<p>$content</p>";
-    }
-    $html .= $content."\n\n";
-    
-    return $html;
-}
-
 1;
-
-

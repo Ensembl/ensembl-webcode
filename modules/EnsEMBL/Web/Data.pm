@@ -2,8 +2,9 @@ package EnsEMBL::Web::Data;
 
 use strict;
 use warnings;
-use base qw(EnsEMBL::Web::DBSQL::MySQLAdaptorNEW);
-use Data::Dumper;
+use EnsEMBL::Web::Cache;
+use base qw/EnsEMBL::Web::DBSQL::MySQLAdaptor/;
+use Data::Dumper qw//;
 
 
 #----------------------------------------------------------------------
@@ -52,20 +53,15 @@ sub save {
   }
 }
 
-## TODO: for now we disable object memory cache,
-## but once we have memcached implemented, we will need to use that here
-sub _init {
-	my $class = shift;
-	my $data  = shift || {};
-	my $key   = $class->_live_object_key($data);
-	return $class->_fresh_init($key => $data);
-}
-
 ##
 ## Fix for insert, to work with new() and save()
 ##
 sub insert_blessed {
 	my $self = shift;
+
+  if ( $self->cache ) {
+      $self->cache->set( $self->_staleness_cache_key, time() );
+  }
 
 	$self->call_trigger('before_create');
 	$self->call_trigger('deflate_for_create');
@@ -276,5 +272,17 @@ sub tie_a {
 sub find_all { shift->retrieve_all(@_) }
 sub find     { shift->retrieve(@_) }
 sub destroy  { shift->delete(@_) }
+
+## Set caching object
+## Any cache object that has a get, set, and remove method is supported
+__PACKAGE__->cache(
+  new EnsEMBL::Web::Cache {
+    servers => [ '127.0.0.1:11211' ],
+    #debug   => 1,
+    #default_exptime => 60*60*24*29,
+  }
+);
+
+#__PACKAGE__->default_search_attributes( { use_resultset_cache => 1 } );
 
 1;

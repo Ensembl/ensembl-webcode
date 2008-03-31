@@ -6,7 +6,9 @@ package EnsEMBL::Web::Data::Trackable;
 use strict;
 use warnings;
 use HTTP::Date qw(str2time time2iso);
+use EnsEMBL::Web::Tools::Misc;
 use base qw(EnsEMBL::Web::Data);
+
 
 __PACKAGE__->add_queriable_fields(
   created_at  => 'datetime',
@@ -37,14 +39,6 @@ sub created_at_pretty {
 sub modified_at_pretty {
   my $self = shift;
   return pretty_date(str2time($self->modified_at));
-}
-
-sub pretty_date {
-  my $timestamp = shift;
-  my @date = localtime($timestamp);
-  my @days = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
-  my @months = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
-  return $days[$date[6]].' '.$date[3].' '.$months[$date[4]].', '.($date[5] + 1900);
 }
 
 1;

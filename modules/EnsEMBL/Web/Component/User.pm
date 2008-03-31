@@ -1,10 +1,7 @@
 package EnsEMBL::Web::Component::User;
 
-use Data::Dumper;
-
 use EnsEMBL::Web::Component;
 use EnsEMBL::Web::Proxy::Object;
-use EnsEMBL::Web::DBSQL::NewsAdaptor;
 use EnsEMBL::Web::Interface::TabView;
 use EnsEMBL::Web::Interface::Tab;
 use EnsEMBL::Web::Interface::Table;
@@ -13,6 +10,7 @@ use EnsEMBL::Web::Data::User;
 use EnsEMBL::Web::Data::Group;
 use EnsEMBL::Web::RegObj;
 use EnsEMBL::Web::Form;
+use EnsEMBL::Web::Tools::Misc;
 
 use CGI;
 
@@ -920,7 +918,7 @@ sub group_details {
   my $modifier      = $group->find_user_by_user_id($group->modified_by);
   my $creator_name  = $creator->name; 
   my $creator_org   = $creator->organisation; 
-  my $created_at    = $group->created_at_pretty;
+  my $created_at    = pretty_date($group->created_at);
 
   my $html = qq(<h3 class="plain">$group_name</h3>\n<p>$group_blurb</p>\n);
   if ($level eq 'Administrator') {

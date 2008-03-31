@@ -328,8 +328,6 @@ sub extra_data {
 sub discover {
   ### Autogenerate elements based on data structure
   my $self = shift;
-    use Carp qw(cluck);
-    cluck "This is how we got here!";
   my %fields = %{ $self->data->get_all_fields };
 
   my (%elements, @element_order);

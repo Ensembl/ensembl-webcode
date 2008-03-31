@@ -5,7 +5,6 @@ use warnings;
 no warnings "uninitialized";
 
 use EnsEMBL::Web::SpeciesDefs;
-use EnsEMBL::Web::User::Record;
 use EnsEMBL::Web::RegObj;
 
 warn("AJAX: Updating bookmark"); 
@@ -28,7 +27,7 @@ if ($user eq $user_id) {
     $record->save;
     print $name;
   } elsif ($action eq 'delete') {
-    my @records = EnsEMBL::Web::User::Record->find_bookmark_by_id($bookmark, { adaptor => $ENSEMBL_WEB_REGISTRY>userAdaptor});
+    my @records = EnsEMBL::Web::User::Record->find_bookmark_by_id($bookmark, { adaptor => $ENSEMBL_WEB_REGISTRY->userAdaptor});
     my $record = $records[0];
     $record->adaptor($ENSEMBL_WEB_REGISTRY->userAdaptor);
     $record->delete;

@@ -5,7 +5,6 @@ package user_tabs;
 use strict;
 use warnings;
 
-use EnsEMBL::Web::Data::Record::User::Opentab;
 use EnsEMBL::Web::Data::User;
 use EnsEMBL::Web::RegObj;
 use CGI;
@@ -22,7 +21,7 @@ if ($user) {
                 $user->opentabs
                   if $cgi->param('name');
   
-  $tab ||= EnsEMBL::Web::Data::Record::User::Opentab->new();
+  $tab ||= EnsEMBL::Web::Data::Record::Opentab::User->new();
 
   $tab->user_id($user->id);
   $tab->tab($cgi->param('tab'));

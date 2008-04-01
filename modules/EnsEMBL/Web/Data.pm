@@ -276,11 +276,7 @@ sub destroy  { shift->delete(@_) }
 ## Set caching object
 ## Any cache object that has a get, set, and remove method is supported
 __PACKAGE__->cache(
-  new EnsEMBL::Web::Cache {
-    servers => [ '127.0.0.1:11211' ],
-    #debug   => 1,
-    #default_exptime => 60*60*24*29,
-  }
+  new EnsEMBL::Web::Cache
 );
 
 #__PACKAGE__->default_search_attributes( { use_resultset_cache => 1 } );

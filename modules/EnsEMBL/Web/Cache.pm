@@ -6,22 +6,31 @@ package EnsEMBL::Web::Cache;
 
 use strict;
 use warnings;
+use Data::Dumper;
+use EnsEMBL::Web::SpeciesDefs;
 use base 'Cache::Memcached';
 use fields 'default_exptime';
 
 sub new {
   my $class = shift;
-  my $args = (@_ == 1) ? shift : { @_ };  # hashref-ify args
+  my $species_defs = new EnsEMBL::Web::SpeciesDefs;
+  my %memcached    = $species_defs->multiX('ENSEMBL_MEMCACHED');
 
-  my $self = $class->SUPER::new($args);
+  return undef
+    unless %memcached;
 
-  $self->{default_exptime} = $args->{default_exptime}
-    if defined $args->{default_exptime};
+  my %args = (
+    servers         => $memcached{servers},
+    debug           => $memcached{debug},
+    default_exptime => $memcached{default_exptime},
+    @,
+  );
 
-  if ($self->{debug} && !$class->SUPER::get('debug_key_list')) {
-    $class->SUPER::set('debug_key_list', {});
-  }
+  my $default_exptime = delete $args{default_exptime};
+    
+  my $self = $class->SUPER::new(\%args);
 
+  $self->{default_exptime} = $default_exptime;
   return $self;
 }
 

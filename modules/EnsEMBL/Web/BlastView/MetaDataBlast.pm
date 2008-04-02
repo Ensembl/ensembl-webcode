@@ -56,7 +56,7 @@ STAGE_SETUP:{
      $form->set_type( 'LABEL' );
      $form->set_name( 'alert' );
   my $entry = $form->addobj_form_entry();
-     $entry->set_label( qq(We now used Blat as our default DNA search.  This will make your query faster.) );
+     $entry->set_label( qq(We now used <a href="http://www.genome.org/cgi/content/abstract/12/4/656">BLAT</a> as our default DNA search.  This will make your query faster.) );
  BLOCK_SEQUENCE:{
     my $block = $stage->addobj_block();
     $block->set_name('query');

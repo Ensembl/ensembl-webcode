@@ -56,15 +56,20 @@ sub add_panel { $_[0]{page}->content->add_panel( $_[1] ); }
 sub set_title { $_[0]{page}->set_title( $_[1] ); }
 sub add_form  { my($self,$panel,@T)=@_; $panel->add_form( $self->{page}, @T ); }
 
-sub wizard {
-### a
+sub add_wizard {
   my ($self, $wizard) = @_;
-  if ($wizard) {
-    $self->{'wizard'} = $wizard;
-  }
-warn "CONF WIZ ", return $self->{'wizard'};
-  return $self->{'wizard'};
+  $self->{wizard} = $wizard;
 }
+
+sub commander {
+### a
+  my ($self, $commander) = @_;
+  if ($commander) {
+    $self->{'commander'} = $commander;
+  }
+  return $self->{'commander'};
+}
+
 
 sub add_block {
   my $self = shift;

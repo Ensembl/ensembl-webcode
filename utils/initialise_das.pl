@@ -251,12 +251,9 @@ sub sources {
     (my $vsp = $species) =~ s/\_/ /g;
     my $source = pop @n;
     my $assembly = join('.', @n);
-    my $authority = $assembly;
-    my $version = '';
-    if (scalar(@n) > 1) {
-	$authority = $n[0];
-	$version = $n[-1];
-    }
+    # Assume the version starts with a number (if it exists)
+    # e.g. NCBI36 -> NCBI + 36, Btau_3.1 -> Btau_ + 3.1, GUINEAPIG -> GUINEAPIG + undef
+    my ($authority, $version) = $assembly =~ m/(\D+)(i.*)/;
 	my $seq_type = $assembly =~ /-clone/ ? 'Clone' : 'Chromosome';
 	my $id;
 	if ($sitetype eq 'Vega') {

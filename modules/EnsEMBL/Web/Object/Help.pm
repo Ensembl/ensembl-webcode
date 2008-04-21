@@ -141,20 +141,14 @@ sub index {
 
 sub glossary {
   my $self = shift;
-  if ($self->modular) {
-    return $self->records([['type','glossary'],['status','live']]);
-  } else {
-    ## Fake records!
-
-    my $glossary = EnsEMBL::Web::Data::Glossary->find_all(
-      [['status', 'live']],
+  my $glossary = EnsEMBL::Web::Data::Glossary->find_all(
+      [['type', 'glossary'],['status', 'live']],
       {
         order_by => ['word', 'ASC'],
       }
-    );
+  );
 
-    return $glossary;
-  }
+  return $glossary;
 }
 
 sub movie_list {

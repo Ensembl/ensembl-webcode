@@ -141,11 +141,12 @@ sub markup_and_render {
       $slices = [$slice_name];
     }
 
-   foreach my $loc (@$slices) {
+    $Chrs .= '<td>';
+    foreach my $loc (@$slices) {
       my ($stype, $assembly, $region, $start, $end, $strand) = split (/:/ , $loc);
-      $Chrs .= qq{<td><a href="/$display_name/contigview?l=$region:$start-$end">$loc</a></td>};
+      $Chrs .= qq{<a href="/$display_name/contigview?l=$region:$start-$end">$loc</a><br />};
     }
-    $Chrs .= "</tr>";
+    $Chrs .= "</td></tr>";
   }
   $Chrs .= "</table>";
 

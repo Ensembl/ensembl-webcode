@@ -426,13 +426,14 @@ sub contigviewtop {
 
 sub cytoview_config {
   my ($panel, $object) = @_;
+  my $html = "";
+
   if (my $user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user) {
     my @current_configs = @{ $user->currentconfigs };
     my $current_config = $current_configs[0];
     my $script_name = "cytoview";
     my $session = $ENSEMBL_WEB_REGISTRY->get_session;
     my $string = $session->get_script_config_as_string($script_name);
-    my $html = "";
   
     if ($current_config) {
   #  warn "CHECKING FOR CURRENT CONFIG: " . $current_config->config;

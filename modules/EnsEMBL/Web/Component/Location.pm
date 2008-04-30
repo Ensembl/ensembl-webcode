@@ -455,7 +455,7 @@ sub cytoview_config {
       }
     }
     $panel->print($html);
-  } 
+  }
 }
 
 sub cytoview {

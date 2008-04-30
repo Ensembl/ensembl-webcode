@@ -49,14 +49,15 @@ STAGE_SETUP:{
   $GLOBAL->set_default_stage($stage);
   $stage->set_name( 'setup' );
   $stage->add_javascript_files( '/js/ensFormElementControl.js' );
-  
-  my $block = $stage->addobj_block();
-     $block->set_label( qq( Important Notice ) );
-  my $form = $block->addobj_form();
-     $form->set_type( 'LABEL' );
-     $form->set_name( 'alert' );
-  my $entry = $form->addobj_form_entry();
-     $entry->set_label( qq(We now used Blat as our default DNA search.  This will make your query faster.) );
+
+##Vega doesn't have BLAT yet 
+#  my $block = $stage->addobj_block();
+#     $block->set_label( qq( Important Notice ) );
+#  my $form = $block->addobj_form();
+#     $form->set_type( 'LABEL' );
+#     $form->set_name( 'alert' );
+#  my $entry = $form->addobj_form_entry();
+#     $entry->set_label( qq(We now used Blat as our default DNA search.  This will make your query faster.) );
  BLOCK_SEQUENCE:{
     my $block = $stage->addobj_block();
     $block->set_name('query');

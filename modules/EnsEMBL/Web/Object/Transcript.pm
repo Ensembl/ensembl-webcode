@@ -68,10 +68,10 @@ sub default_track_by_gene {
         medaka_transcriptcoalescer medaka_genome_project
       ) )
     },
-	'vega' => {
-			   otter          => 'evega_transcript',
-			   otter_external => 'evega_external_transcript',
-			  }
+  'vega' => {
+         otter          => 'evega_transcript',
+         otter_external => 'evega_external_transcript',
+        }
   );
 
   return lc($logic).'_transcript' if $db eq 'otherfeatures' && lc($logic) =~ /^singapore_(est|protein)$/;
@@ -325,7 +325,7 @@ sub getAllelesConsequencesOnSlice {
      map  { $_->[1]?[$_->[0]->start+$_->[1],$_->[0]->end+$_->[1],$_->[0]]:() } 
        # [ AF, offset ]   Map to fake coords.   Create a munged version AF
        map  { [$_, $self->munge_gaps( $key, $_->start, $_->end)] }
-	 @$allele_features;
+   @$allele_features;
 
   return ([], []) unless @filtered_af;
 
@@ -462,7 +462,7 @@ sub get_source {
   if ($default) {
     $return = $vari_adaptor->get_VariationAdaptor->get_default_source();
   }
-  return $return if $return;	
+  return $return if $return;  
   return $vari_adaptor->get_VariationAdaptor->get_all_sources();
 
 }
@@ -552,9 +552,9 @@ sub generate_query_hash {
 
    my $self = shift;
   return {
-	  'transcript' => $self->stable_id,
-	  'db'         => $self->get_db,
-	 };
+    'transcript' => $self->stable_id,
+    'db'         => $self->get_db,
+   };
 }
 
 
@@ -1039,30 +1039,14 @@ sub get_go_list {
   my %hash;
   foreach my $goxref ( sort{ $a->display_id cmp $b->display_id } @goxrefs ){
     my $go = $goxref->display_id;
-
-		my $info_text;
-
-		if($goxref->info_type eq 'PROJECTION'){
-			$info_text= $goxref->info_text; 
-		}
-
-    my $evidence = '';
-    if( $goxref->isa('Bio::EnsEMBL::GoXref') ){
-      $evidence = join( ", ", @{$goxref->get_all_linkage_types } ); 
-    }
-    my ($go2) = $go=~/GO:0*(\d+)/;
-    my $term;
-    next if exists $hash{$go2};
-    $hash{$go2}=1;
-
-    my $term_name;
-    if( $goadaptor ){
-      my $term;
-      eval{ $term = $goadaptor->get_term({acc=>$go2}) };
-      if($@){ warn( $@ ) }
-      $term_name = $term ? $term->name : '';
-    }
-    $term_name ||= $goxref->description || '';
+    next if exists $go_hash{$go};
+    my $info_text = $goxref->info_type eq 'PROJECTION'   ? $goxref->info_text
+                                                         : '';
+    my $evidence  = $goxref->isa('Bio::EnsEMBL::GoXref') ? join( ", ", @{$goxref->get_all_linkage_types } )
+                                                         : ''; 
+    my $term_name = $goadaptor                           ? $goadaptor->name_from_acc($go) 
+                                                         : '';
+       $term_name ||= $goxref->description || '';
     $go_hash{$go} = [$evidence, $term_name, $info_text];
   }
   return \%go_hash;
@@ -1119,9 +1103,9 @@ sub get_supporting_evidence { ## USED!
         # skip evidence for this exon if it doesn't support this particular
         # transcript (vega only)
 
-		if ($self->species_defs->ENSEMBL_SITE_NAME eq 'Vega') {
-		  next unless ($trans_evidence{$this_feature->dbID});
-		}
+    if ($self->species_defs->ENSEMBL_SITE_NAME eq 'Vega') {
+      next unless ($trans_evidence{$this_feature->dbID});
+    }
         
         my $no_version_no;
         if($dl_seq_name =~ /^[A-Z]{2}\.\d+/i) {
@@ -1219,8 +1203,8 @@ sub location_string {
 
 =head2 vega_projection
 
- Arg[1]	     : EnsEMBL::Web::Proxy::Object
- Arg[2]	     : Alternative assembly name
+ Arg[1]       : EnsEMBL::Web::Proxy::Object
+ Arg[2]       : Alternative assembly name
  Example     : my $v_slices = $object->ensembl_projection($alt_assembly)
  Description : map an object to an alternative (vega) assembly
  Return type : arrayref
@@ -1228,22 +1212,22 @@ sub location_string {
 =cut
 
 sub vega_projection {
-	my $self = shift;
-	my $alt_assembly = shift;
-	my $alt_projection = $self->Obj->feature_Slice->project('chromosome', $alt_assembly);
-	my @alt_slices = ();
-	foreach my $seg (@{ $alt_projection }) {
-		my $alt_slice = $seg->to_Slice;
-		push @alt_slices, $alt_slice;
-	}
-	return \@alt_slices;
+  my $self = shift;
+  my $alt_assembly = shift;
+  my $alt_projection = $self->Obj->feature_Slice->project('chromosome', $alt_assembly);
+  my @alt_slices = ();
+  foreach my $seg (@{ $alt_projection }) {
+    my $alt_slice = $seg->to_Slice;
+    push @alt_slices, $alt_slice;
+  }
+  return \@alt_slices;
 }
 
 
 =head2 get_exon
 
- Arg[1]	     : EnsEMBL::Web::Proxy::Object
- Arg[2]	     : exon stable id
+ Arg[1]       : EnsEMBL::Web::Proxy::Object
+ Arg[2]       : exon stable id
  Example     : my $exon = $object->get_exon($id);
  Description : get an exon from the stable_id
  Return type : B::E::Exon
@@ -1251,13 +1235,13 @@ sub vega_projection {
 =cut
 
 sub get_exon {
-	my $self    = shift;
-	my $exon_id = shift;
-	my $db      = shift;
-	my $dbs     = $self->DBConnection->get_DBAdaptor($db);
-	my $exon_adaptor = $dbs->get_ExonAdaptor;
-	my $exon    = $exon_adaptor->fetch_by_stable_id($exon_id,1 );
-	return $exon;
+  my $self    = shift;
+  my $exon_id = shift;
+  my $db      = shift;
+  my $dbs     = $self->DBConnection->get_DBAdaptor($db);
+  my $exon_adaptor = $dbs->get_ExonAdaptor;
+  my $exon    = $exon_adaptor->fetch_by_stable_id($exon_id,1 );
+  return $exon;
 }
 
 sub mod_date {

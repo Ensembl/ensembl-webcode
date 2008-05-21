@@ -45,14 +45,18 @@ sub get_das {
 ### retrieved from the session hash...
   my( $self, $force ) = @_;
 ## This is cached so return it unless "Force" is set to load in other stuff
+
   return $Das_sources_of{ ident $self } if keys %{ $Das_sources_of{ ident $self } } && ! $force;
+  $Das_sources_of{  ident $self } = {}; # Initialize emtpy hash!
+
 ## No session so cannot have anything configured!
   my $session_das = $self->get_session->get_das;
+  $Das_sources_of{  ident $self } = {}; # Initialize emtpy hash! EK !!
 
   if (my $user = $self->get_user) {
     foreach my $das (@{ $user->dases }) {
       $Das_sources_of{ ident $self }{$das->name} = $das->get_das_config;
-      #warn $Das_sources_of{ ident $self }{$das->name};
+      warn $das->name, " !!! ", $Das_sources_of{ ident $self }{$das->name};
     }
   }
 
@@ -65,7 +69,8 @@ sub get_das {
 
 sub get_das_filtered_and_sorted {
   my( $self, $species ) = @_;
-  my $T = $self->get_das;# "GET DAS...", warn $T;
+  my $T = $self->get_das(1);#  Force the das config to be read from scratch EK !!
+
 #  warn join "\n","KEYS", keys %{$T||{}},"VALUES",map { join '; ',keys %{$_->get_data||{}} } values %{$T||{}};
   my @T =
     map  { $_->[1] }

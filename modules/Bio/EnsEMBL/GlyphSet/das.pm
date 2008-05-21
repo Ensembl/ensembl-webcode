@@ -106,6 +106,11 @@ $Data::Dumper::Indent = 1;
   } else {
     (my $name = $self->{'extras'}{'name'}) =~ s/^managed(_das)?_//;
     my ($fref, $cssref, $segref) = $self->{'container'}->get_all_DAS_Features;
+### Temp GR code - to be removed for the next release
+    if ($name eq 'das_Batman') {
+	$name = $self->{'extras'}{'dsn'};
+    }
+### End of GR code
     push @segments, @{$segref->{$name} || []};
   }
 
@@ -796,6 +801,8 @@ sub _init {
   my ($self) = @_;
   ( my $das_name        = (my $das_config_key = $self->das_name() ) ) =~ s/managed_(extdas_)?//g;
 
+  warn "Display features $das_name";
+
   $das_config_key =~ s/^managed_das/das/;
   my $Config = $self->{'config'};
   my $Extra  = $self->{'extras'};
@@ -827,7 +834,8 @@ sub _init {
   }
     # Handle DAS errors first
   if($das_features[0]->das_type_id() eq '__ERROR__') {
-      $self->errorTrack( 'Error retrieving '.$self->{'extras'}->{'caption'}.' features ('.$das_features[0]->das_id.')' );
+      my $error = $das_features[0]->das_feature_label || $das_features[0]->das_id;
+      $self->errorTrack( 'Error retrieving '.$self->{'extras'}->{'caption'}." features ($error)" );
       return -1 ;   # indicates no features drawn because of DAS error
   }
 
@@ -1660,6 +1668,7 @@ sub features {
 
   return $self->{'_features'} if ($self->{'_features'});
 
+
 #  my $dastype = $Extra->{'type'} || 'ensembl_location_chromosome';
   my $dsn = $Extra->{'dsn'};
   my $url = defined($Extra->{'extra_url'}) ? $Extra->{'extra_url'}."/$dsn" :  $Extra->{'protocol'}.'://'. $Extra->{'domain'} ."/$dsn";
@@ -1668,8 +1677,14 @@ sub features {
   my $srcname = $Extra->{'label'} || $das_name;
   $srcname =~ s/^(managed_|mananged_extdas)//;
    
+
+
   my @das_features = ();
    my ($dastype) = $Extra->{'type'} || @{$Extra->{'mapping'}||[]};
+
+#  warn "GET features $srcname ($dastype) .. ";
+#  warn Dumper $Extra;
+
   if ($dastype !~ /^ensembl_location/) {
     my $ga =  $self->{'container'}->adaptor->db->get_GeneAdaptor();
     my $genes = $ga->fetch_all_by_Slice( $self->{'container'});
@@ -1732,8 +1747,16 @@ sub features {
     }
   } else {
     my( $f, $css, $s) = $self->{'container'}->get_all_DAS_Features;
-    my( $features, $das_styles, $das_segments ) = ($f->{$das_name}, $css->{$das_name}, $s->{$das_name});
+#    warn join ' *** ', sort keys %$f;
 
+### Temp GR code - to be removed
+    if ($das_name eq 'das_Batman') {
+	$das_name = $dsn;
+    }
+### End of GR code
+
+    my( $features, $das_styles, $das_segments ) = ($f->{$das_name}, $css->{$das_name}, $s->{$das_name});
+#    warn "$das_name : ", scalar(@{$features ||[]});
     $self->{_styles} = $das_styles;
     @das_features = grep {
       $_->das_type_id() !~ /^(contig|component|karyotype)$/i && 

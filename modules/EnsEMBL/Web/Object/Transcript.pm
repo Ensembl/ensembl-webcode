@@ -1103,7 +1103,7 @@ sub get_supporting_evidence { ## USED!
         # skip evidence for this exon if it doesn't support this particular
         # transcript (vega only)
 
-    if ($self->species_defs->ENSEMBL_SITE_NAME eq 'Vega') {
+    if ( ($self->species_defs->ENSEMBL_SITE_NAME eq 'Vega') || ($self->logic_name =~ /otter/) ) {
       next unless ($trans_evidence{$this_feature->dbID});
     }
         

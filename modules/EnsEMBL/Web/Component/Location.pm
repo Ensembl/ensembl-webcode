@@ -426,34 +426,36 @@ sub contigviewtop {
 
 sub cytoview_config {
   my ($panel, $object) = @_;
-  my $user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user;
-  my @current_configs = @{ $user->currentconfigs };
-  my $current_config = $current_configs[0];
-  my $script_name = "cytoview";
-  my $session = $ENSEMBL_WEB_REGISTRY->get_session;
-  my $string = $session->get_script_config_as_string($script_name);
-  my $html = "";
+  if (my $user = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_user) {
+	my @current_configs = @{ $user->currentconfigs };
+    my $current_config = $current_configs[0];
+    my $script_name = "cytoview";
+    my $session = $ENSEMBL_WEB_REGISTRY->get_session;
+    my $string = $session->get_script_config_as_string($script_name);
+    my $html = "";
 
-  if ($current_config) {
+    if ($current_config) {
 #  warn "CHECKING FOR CURRENT CONFIG: " . $current_config->config;
-    foreach my $configuration (@{ $user->configurations }) {
-      if ($configuration->id eq $current_config->config) {
-        warn "LOADED CONFIG " . $configuration->id;
-	my $saved_string = $configuration->scriptconfig . "\n";
-	$string =~ s/\n|\r|\f//g;
-	$saved_string =~ s/\n|\r|\f//g;
+      foreach my $configuration (@{ $user->configurations }) {
+        if ($configuration->id eq $current_config->config) {
+          warn "LOADED CONFIG " . $configuration->id;
+	  my $saved_string = $configuration->scriptconfig . "\n";
+	  $string =~ s/\n|\r|\f//g;
+	  $saved_string =~ s/\n|\r|\f//g;
 
-        $html = "<div style='text-align: center; padding-bottom: 4px;'>";
-        if (length($saved_string) != length($string)) {
-	  $html .= "You have changed the '" . $configuration->name . "' view configuration &middot; <a href='#' onclick='config_link(" . $configuration->id . ");'><b>Save changes</b></a>";
-        } else {
-          $html .= "You are using the " . $configuration->name . " configuration";
-	}
-        $html .= "</div>";
+          $html = "<div style='text-align: center; padding-bottom: 4px;'>";
+          if (length($saved_string) != length($string)) {
+	         $html .= "You have changed the '" . $configuration->name . "' view configuration &middot; <a href='#' onclick='config_link(" . $configuration->id . ");'><b>Save changes</b></a>";
+          }
+		  else {
+            $html .= "You are using the " . $configuration->name . " configuration";
+	      } 
+          $html .= "</div>";
+        }
       }
     }
+    $panel->print($html);
   }
-  $panel->print($html); 
 }
 
 sub cytoview {

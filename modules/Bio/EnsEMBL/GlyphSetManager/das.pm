@@ -30,7 +30,7 @@ sub init {
 			    batman_BC => 'B-cells',
 			    batman_CD4 => 'CD4 T-cells',
 			    batman_CD8 => 'CD8 T-cells',
-			    batman_CX => ' Cervix',
+			    batman_CX => 'Cervix',
 			    batman_CN => 'Colon',
 			    batman_GM => 'GM06990',
 			    batman_LR => 'Liver',
@@ -46,15 +46,15 @@ sub init {
 			    );
 
 	  foreach my $btsrc (sort keys %batmanHash) {
-	      my $extra_config2 = $extra_config;
-	      $extra_config2->{'alt_assembly'} = $extra_config->{'assembly'} if $extra_config->{'assembly'} ne $species_defs->ENSEMBL_GOLDEN_PATH;
-	      $extra_config2->{dsn} = $btsrc;
+	      my %extra_config2 = %{ $extra_config };
+	      $extra_config2{'alt_assembly'} = $extra_config->{'assembly'} if $extra_config->{'assembly'} ne $species_defs->ENSEMBL_GOLDEN_PATH;
+	      $extra_config2{dsn} = $btsrc;
 	      (my $label = $btsrc) =~ s/batman_//;
 	      
-	      $extra_config2->{label} = $batmanHash{$btsrc};
-	      $extra_config2->{caption} = $batmanHash{$btsrc};
-	      $extra_config2->{url} =~ s/Batman_\%/$btsrc/;
-	      $self->add_glyphset( $extra_config2 );
+	      $extra_config2{label} = $batmanHash{$btsrc};
+	      $extra_config2{caption} = $batmanHash{$btsrc};
+	      $extra_config2{url} =~ s/Batman_\%/$btsrc/;
+	      $self->add_glyphset( \%extra_config2 );
 	  }
       } else {
 ### ENd of temp GR code

@@ -73,13 +73,13 @@ sub parse {
     $join = '&';
   }
 
-  $self->parse_exalead($q);
+  $self->parse_ebeye($q);
 
 
 }
 
 
-sub parse_exalead {
+sub parse_ebeye {
     my($self, $q) = @_;
     my $wrapper = EBeyeWSWrapper->new();
 

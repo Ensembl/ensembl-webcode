@@ -6,7 +6,7 @@ use Data::Dumper;
 $Data::Dumper::Indent  = 1;
 
 use CGI;
-use EBeyeWSWrapper;
+use EBeyeSearch::EBeyeWSWrapper;
 use Data::Page;
 
 sub new {

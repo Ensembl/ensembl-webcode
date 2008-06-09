@@ -77,7 +77,6 @@ sub getNumberOfResults{
 	my $result = $self->{proxy}->getNumberOfResults($domain, $query);
 	return $result->valueof('//getNumberOfResultsResponse/numberOfResults');
 }
-		
 
 =head2 getResultsIds
 	Executes a query and returns the list of identifiers for the entries found.
@@ -175,6 +174,7 @@ return $ref;
 	Return:
 		list of the fields' values (strings).
 =cut
+
 sub getEntry{
 	my ($self, $domain, $entry, $refFields) = @_;
 	
@@ -203,12 +203,11 @@ sub getEntries {
 	my $wsResult = $self->{proxy}->getEntries($domain, $refEntries, $refFields);
 	
 	my @wsValue = $wsResult->valueof('//getEntriesResponse/arrayOfEntryValues/ArrayOfString/string');
-	return _getRefToArrayOfStringArray(\@wsValue, $nbFields);
+	return $self->_getRefToArrayOfStringArray(\@wsValue, $nbFields);
 
 
 }
-	
-	
+
 =head2 getEntryFieldUrls
 	Search for a particular entry in a domain and returns the urls configured 
 	for some of the fields of this entry. The result contains the urls for each 
@@ -250,9 +249,8 @@ sub getEntriesFieldUrls {
 	my $wsResult = $self->{proxy}->getEntriesFieldUrls($domain, $refEntries, $refFields);
 	
 	my @wsValue = $wsResult->valueof('//getEntriesFieldUrlsResponse/arrayOfEntryUrlsValues/ArrayOfString/string');
-	return _getRefToArrayOfStringArray(\@wsValue, $nbFields);
+	return $self->_getRefToArrayOfStringArray(\@wsValue, $nbFields);
 }
-
 
 =head2
 	Returns the list of domains with entries referenced in a particular domain.
@@ -345,20 +343,18 @@ sub getReferencedEntries {
 sub getReferencedEntriesSet {
 	my ($self, $domain, $entries, $referencedDomain, $refFields) = @_;
 	my @fieldValues = ();
-	my %dict     = ();
+	my $dict;
 	my $nbFields = @$refFields;
 	my $wsResult = $self->{proxy}->getReferencedEntriesSet($domain, $entries, $referencedDomain, $refFields);
 	my @entries  = $wsResult->valueof('//getReferencedEntriesSetResponse/arrayOfEntryValues/EntryReferences/entry');
-	
 	my $i = 1;
 	foreach my $entry (@entries) {
 		my @fieldValues = $wsResult->valueof("//getReferencedEntriesSetResponse/arrayOfEntryValues/[$i]/references/ArrayOfString/string");
-		$dict{$entry} = _getRefToArrayOfStringArray(\@fieldValues, $nbFields);
+		$dict->{$entry} = $self->_getRefToArrayOfStringArray(\@fieldValues, $nbFields);
 		$i++;
 	}
-		return \%dict;	 
+		return $dict;	 
 }
-
 
 =head2
 	Returns the list of referenced entries from a domain referenced in a set 
@@ -381,5 +377,5 @@ sub getReferencedEntriesFlatSet {
 	my $nbFields = @$refFields;
 	my $result   = $self->{proxy}->getReferencedEntriesFlatSet($domain, $refEntries, $referencedDomain, $refFields);
 	my @wsValue  = $result->valueof('//getReferencedEntriesFlatSetResponse/arrayOfEntryValues/ArrayOfString/string');
-	return _getRefToArrayOfStringArray(\@wsValue, $nbFields + 1);
+	return $self->_getRefToArrayOfStringArray(\@wsValue, $nbFields + 1);
 }

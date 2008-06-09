@@ -1,5 +1,5 @@
 
-package EBeyeWSWrapper;
+package EBeyeSearch::EBeyeWSWrapper;
 
 use strict;
 use Data::Dumper;

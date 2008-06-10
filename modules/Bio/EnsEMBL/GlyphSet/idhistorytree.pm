@@ -360,7 +360,18 @@ sub _init {
 
   $self->push($asmbl_label);
 
-  my %archive_info = %{$Config->species_defs->get_config($species, 'archive')};
+  my %archive_info_test = %{$Config->species_defs->get_config($species, 'archive')};
+  my %archive_info;
+  foreach my $k (keys %archive_info_test) {
+    if ($k eq "assemblies"){
+      my %temp = %{$archive_info_test{$k}};
+      foreach my $key (keys %temp){
+       $archive_info{$key} = $temp{$key};
+     }
+    }
+  }
+
+
   my @a_colours = ('contigblue1', 'contigblue2');
   my $i =0;
   my $pix_per_bp = $self->{'config'}->transform()->{'scalex'};

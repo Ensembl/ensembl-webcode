@@ -46,7 +46,11 @@ if( $ebi_search->__status eq 'failure') {
 
     my $panel = new EnsEMBL::Web::Document::Panel(
 						  'caption' => "$sitetype text search - Debug",
-						  'content' => $renderer->render_summary . $renderer->render_pagination . '<p>' . '<pre>' .  $q->escapeHTML( qq/$hits/) . '</pre>'. '</p>' 
+						  'content' => 
+						  $renderer->render_form . 
+						  $renderer->render_summary . 
+						  $renderer->render_pagination . 
+						  '<p>' . '<pre>' .  $q->escapeHTML( qq/$hits/) . '</pre>'. '</p>' 
 						 );
     $page->page->content->add_panel($panel);
 }

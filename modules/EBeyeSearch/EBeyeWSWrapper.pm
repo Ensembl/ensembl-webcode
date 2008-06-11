@@ -1,4 +1,3 @@
-
 package EBeyeSearch::EBeyeWSWrapper;
 
 use strict;
@@ -42,7 +41,7 @@ sub new() {
 	my $self  = {};
 	$self->{proxy} = SOAP::Lite
 	                 -> uri($NAMESPACE)
-	                 -> proxy($ENDPOINT);
+	                 -> proxy($ENDPOINT, timeout => 30);
 	bless($self);
 	return $self;
 }
@@ -53,6 +52,7 @@ sub new() {
 	Parameters: /	
 	Return:     List of domain identifiers (strings).
 =cut
+
 sub listDomains() {
 	my ($self) = @_;
 	
@@ -372,6 +372,7 @@ sub getReferencedEntriesSet {
 	Return:
 		The ref. to the list of referenced entries : [ [entryId1, field1, field2, ...], [entryId2, field1, field2, ...]
 =cut
+
 sub getReferencedEntriesFlatSet {
 	my ($self, $domain, $refEntries, $referencedDomain, $refFields) = @_;
 	my $nbFields = @$refFields;

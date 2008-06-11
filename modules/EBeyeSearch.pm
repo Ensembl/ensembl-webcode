@@ -20,16 +20,12 @@ sub new {
     'hidden_fields' => [],
     '__status'      => 'no_search',
     '__error'       => undef,
-    '__timeout'     => 30
   };
   bless $self, $class;
   return $self;
 }
 
 
-sub __timeout :lvalue {
-  $_[0]->{'__timeout'};
-}
 
 sub __status :lvalue {
   $_[0]->{'__status'};
@@ -73,7 +69,12 @@ sub parse {
     $join = '&';
   }
 
-  $self->parse_ebeye($q);
+  eval {  
+      $self->parse_ebeye($q);
+  } ;if ($@){
+      $self->__status = 'failure';
+      $self->__error  = $@ eq '500 read timeout' ? 'Search engine timed out' : $@;
+  }
 
 
 }
@@ -81,7 +82,7 @@ sub parse {
 
 sub parse_ebeye {
     my($self, $q) = @_;
-    my $wrapper = EBeyeWSWrapper->new();
+    my $wrapper = EBeyeSearch::EBeyeWSWrapper->new();
 
     my $domain  = 'ensembl';
     my $query = $q->param('q');
@@ -100,6 +101,9 @@ sub parse_ebeye {
     $pager->current_page($current_page);
     $self->pager = $pager;
     my $results = $wrapper->getResults($domain, $query, $fields, $pager->first, 10);
+
+
+
     $self->results = $results;
 
 

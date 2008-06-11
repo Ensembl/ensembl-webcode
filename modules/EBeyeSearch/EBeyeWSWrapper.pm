@@ -37,7 +37,7 @@ sub _getRefToArrayOfStringArray {
 # }
 
 
-sub new() {
+sub new {
 	my $self  = {};
 	$self->{proxy} = SOAP::Lite
 	                 -> uri($NAMESPACE)

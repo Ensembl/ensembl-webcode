@@ -3,31 +3,38 @@ package EBeyeSearch::EBeyeWSWrapper;
 use strict;
 use Data::Dumper;
 use SOAP::Lite;
-
+use Scalar::Util qw(reftype);
+use Carp;
 
 
 # Check the SOAP::Lite version
 
-my $NAMESPACE = 'http://webservice.ebinocle.ebi.ac.uk';
-my $ENDPOINT  = 'http://www.ebi.ac.uk/ebisearch/service.ebi';
+sub new {
+    my ($class, $args) = @_;
+    my  $self  = {'WSproxy' => ''};
 
+    bless $self, $class;
 
-sub _newArray() {
-	my @self = ();
-	return \@self; 
+    $args->{namespace} ||= 'http://webservice.ebinocle.ebi.ac.uk';
+    $args->{endpoint} ||=  'http://www.ebi.ac.uk/ebisearch/service.ebi';
+
+    $self->WSproxy = SOAP::Lite
+      -> uri($args->{namespace})
+	-> proxy($args->{endpoint}, timeout => 30);
+    bless($self);
+    return $self;
 }
+
+
+
 
 sub _getRefToArrayOfStringArray {
     my ($self,$refWsValue, $sizeChunk) = @_;
     my @arrayOfArrays;
-
-     while (my @chunk = splice (@$refWsValue, 0, $sizeChunk)  ) {
+    while (my @chunk = splice (@$refWsValue, 0, $sizeChunk)  ) {
  	push @arrayOfArrays, \@chunk;
-     }
-
+    }
     return \@arrayOfArrays;
-
-
 }
 
 # sub _getRefToHashOfString {
@@ -36,15 +43,18 @@ sub _getRefToArrayOfStringArray {
 
 # }
 
-
-sub new {
-	my $self  = {};
-	$self->{proxy} = SOAP::Lite
-	                 -> uri($NAMESPACE)
-	                 -> proxy($ENDPOINT, timeout => 30);
-	bless($self);
-	return $self;
+sub WSproxy :lvalue {
+  $_[0]->{'WSproxy'};
 }
+
+
+sub proxy {
+    my ($self, $arg) = @_;
+    (defined $arg) && 
+      ($self->{_proxy} = $arg);
+    return $self->{_proxy};
+}
+
 
 
 =head2 listDomains
@@ -56,7 +66,7 @@ sub new {
 sub listDomains() {
 	my ($self) = @_;
 	
-	my $result = $self->{proxy}->listDomains();
+	my $result = $self->WSproxy->listDomains();
 	return $result->valueof('//listDomainsResponse/arrayOfDomainNames/string');
 }
 
@@ -71,10 +81,11 @@ sub listDomains() {
 		Number of results (int).
 
 =cut
+
 sub getNumberOfResults{ 
 	my ($self, $domain, $query) = @_;
 	
-	my $result = $self->{proxy}->getNumberOfResults($domain, $query);
+	my $result = $self->WSproxy->getNumberOfResults($domain, $query);
 	return $result->valueof('//getNumberOfResultsResponse/numberOfResults');
 }
 
@@ -92,7 +103,7 @@ sub getNumberOfResults{
 sub getResultsIds {
 	my ($self, $domain, $query, $start, $size) = @_;
 	
-	my $result = $self->{proxy}->getResultsIds($domain, $query, $start, $size);
+	my $result = $self->WSproxy->getResultsIds($domain, $query, $start, $size);
 	return $result->valueof('//getResultsIdsResponse/arrayOfIds/string');
 }
 	
@@ -109,7 +120,7 @@ sub getResultsIds {
 sub getAllResultsIds {
 	my ($self, $domain, $query) = @_;
 
-	my $result = $self->{proxy}->getAllResultsIds($domain, $query);
+	my $result = $self->WSproxy->getAllResultsIds($domain, $query);
 	return $result->valueof('//getAllResultsIdsResponse/arrayOfIds/string');
 }
 		
@@ -126,7 +137,7 @@ sub getAllResultsIds {
 sub listFields {
 	my ($self, $domain) = @_;
 	
-	my $result = $self->{proxy}->listFields($domain);
+	my $result = $self->WSproxy->listFields($domain);
 	return $result->valueof('//listFieldsResponse/arrayOfFieldNames/string');
 }
 
@@ -147,16 +158,37 @@ sub listFields {
 		A ref. to an array of arrays of strings (['field1', 'field2', ...], ['field1', 'field2', ...], ...) 
 =cut
 sub getResults {
-	my ($self, $domain, $query, $refFields, $start, $size) = @_;
-	my $nbFields = @$refFields;
-	my $wsResult = $self->{proxy}->getResults($domain, $query, $refFields, $start, $size);
+	my ($self, $domain, $query, $fields, $start, $size) = @_;
+
+	my $wsResult = $self->WSproxy->getResults($domain, $query, $fields, $start, $size);
 
 	my @wsValue = $wsResult->valueof('//getResultsResponse/arrayOfEntryValues/ArrayOfString/string');
 
 
-	my $ref = $self->_getRefToArrayOfStringArray(\@wsValue, $nbFields);
+        return $self->_getRefToArrayOfStringArray(\@wsValue, scalar(@$fields));
 
-return $ref;
+}
+
+
+sub getResultsAsHash {
+	my ($self, $domain, $query, $fields, $start, $size) = @_;
+
+	my $wsResult = $self->WSproxy->getResults($domain, $query, $fields, $start, $size);
+
+	my @wsValue = $wsResult->valueof('//getResultsResponse/arrayOfEntryValues/ArrayOfString');
+	my $all_hits;
+
+	foreach my $hit (@wsValue) {
+	    my ($values) = values %{$hit};
+	    my $hit_hash;
+	    for (my $i = 0; $i< @$fields; $i++) {
+		$hit_hash->{@$fields[$i]} = $values->[$i];
+
+	    }
+	    push @$all_hits, $hit_hash;
+
+	}
+	return $all_hits;
 }
 
 
@@ -165,7 +197,7 @@ return $ref;
 	of the fields of this entry. 
 	The result contains the values for each field specified in the 'fields' 
 	argument in the same order as they appear in the 'fields' list.
-		    
+
 	Parameters:
 		domain (string)  The id of the domain to search into (must be one of the domains 
 		                 returned by the listDomains() method).
@@ -176,9 +208,12 @@ return $ref;
 =cut
 
 sub getEntry{
+
 	my ($self, $domain, $entry, $refFields) = @_;
 	
-	my $result = $self->{proxy}->getEntry($domain, $entry, $refFields);
+	my $result = $self->WSproxy->getEntry($domain, $entry, $refFields);
+
+
 	return $result->valueof('//getEntryResponse/entryValues/string');
 }
 
@@ -197,13 +232,16 @@ sub getEntry{
 	Return:
 		A reference to an array of arrays of strings.
 =cut
+
+
 sub getEntries {
-	my ($self, $domain, $refEntries, $refFields) = @_;
-	my $nbFields = @$refFields;
-	my $wsResult = $self->{proxy}->getEntries($domain, $refEntries, $refFields);
+	my ($self, $domain, $entries, $fields) = @_;
+	die "getEntries expects array ref of entries got: [$entries]" unless ref $entries eq 'ARRAY';
+	die "getEntries expects array ref of fields got: [$fields]" unless ref $fields eq 'ARRAY';
+	my $wsResult = $self->WSproxy->getEntries($domain, $entries, $fields);
 	
 	my @wsValue = $wsResult->valueof('//getEntriesResponse/arrayOfEntryValues/ArrayOfString/string');
-	return $self->_getRefToArrayOfStringArray(\@wsValue, $nbFields);
+	return $self->_getRefToArrayOfStringArray(\@wsValue, scalar @$fields);
 
 
 }
@@ -225,7 +263,7 @@ sub getEntries {
 sub getEntryFieldUrls {
 	my ($self, $domain, $entry, $refFields) = @_;
 	
-	my $result = $self->{proxy}->getEntryFieldUrls($domain, $entry, $refFields);
+	my $result = $self->WSproxy->getEntryFieldUrls($domain, $entry, $refFields);
 	return $result->valueof('//getEntryFieldUrlsResponse/entryUrlsValues/string');
 }
 
@@ -246,7 +284,7 @@ sub getEntryFieldUrls {
 sub getEntriesFieldUrls {
 	my ($self, $domain, $refEntries, $refFields) = @_;
 	my $nbFields = @$refFields;
-	my $wsResult = $self->{proxy}->getEntriesFieldUrls($domain, $refEntries, $refFields);
+	my $wsResult = $self->WSproxy->getEntriesFieldUrls($domain, $refEntries, $refFields);
 	
 	my @wsValue = $wsResult->valueof('//getEntriesFieldUrlsResponse/arrayOfEntryUrlsValues/ArrayOfString/string');
 	return $self->_getRefToArrayOfStringArray(\@wsValue, $nbFields);
@@ -264,7 +302,7 @@ sub getEntriesFieldUrls {
 sub getDomainsReferencedInDomain{
 	my($self, $domain) =@_;
 	
-	my $result = $self->{proxy}->getDomainsReferencedInDomain($domain);
+	my $result = $self->WSproxy->getDomainsReferencedInDomain($domain);
 	return $result->valueof('//getDomainsReferencedInDomainResponse/arrayOfDomainNames/string');
 }
 
@@ -282,7 +320,7 @@ sub getDomainsReferencedInDomain{
 sub getDomainsReferencedInEntry {
 	my ($self, $domain, $entry) = @_;
 	
-	my $result = $self->{proxy}->getDomainsReferencedInEntry($domain, $entry);
+	my $result = $self->WSproxy->getDomainsReferencedInEntry($domain, $entry);
 	return $result->valueof('//getDomainsReferencedInEntryResponse/arrayOfDomainNames/string');
 }
 
@@ -299,7 +337,7 @@ sub getDomainsReferencedInEntry {
 sub listAdditionalReferenceFields {
 	my ($self, $domain) = @_;
 	
-	my $result = $self->{proxy}->listAdditionalReferenceFields($domain);
+	my $result = $self->WSproxy->listAdditionalReferenceFields($domain);
 	return $result->valueof('//listAdditionalReferenceFieldsResponse/arrayOfFieldNames/string');
 }
 
@@ -320,7 +358,7 @@ sub listAdditionalReferenceFields {
 sub getReferencedEntries {
 	my ($self, $domain, $entry, $referencedDomain) = @_;
 		
-	my $result = $self->{proxy}->getReferencedEntries($domain, $entry, $referencedDomain);
+	my $result = $self->WSproxy->getReferencedEntries($domain, $entry, $referencedDomain);
 	return $result->valueof('//getReferencedEntriesResponse/arrayOfEntryIds/string');
 }
 
@@ -345,7 +383,7 @@ sub getReferencedEntriesSet {
 	my @fieldValues = ();
 	my $dict;
 	my $nbFields = @$refFields;
-	my $wsResult = $self->{proxy}->getReferencedEntriesSet($domain, $entries, $referencedDomain, $refFields);
+	my $wsResult = $self->WSproxy->getReferencedEntriesSet($domain, $entries, $referencedDomain, $refFields);
 	my @entries  = $wsResult->valueof('//getReferencedEntriesSetResponse/arrayOfEntryValues/EntryReferences/entry');
 	my $i = 1;
 	foreach my $entry (@entries) {
@@ -376,7 +414,10 @@ sub getReferencedEntriesSet {
 sub getReferencedEntriesFlatSet {
 	my ($self, $domain, $refEntries, $referencedDomain, $refFields) = @_;
 	my $nbFields = @$refFields;
-	my $result   = $self->{proxy}->getReferencedEntriesFlatSet($domain, $refEntries, $referencedDomain, $refFields);
+	my $result   = $self->WSproxy->getReferencedEntriesFlatSet($domain, $refEntries, $referencedDomain, $refFields);
 	my @wsValue  = $result->valueof('//getReferencedEntriesFlatSetResponse/arrayOfEntryValues/ArrayOfString/string');
 	return $self->_getRefToArrayOfStringArray(\@wsValue, $nbFields + 1);
 }
+
+
+1;

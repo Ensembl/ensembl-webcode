@@ -1,0 +1,67 @@
+#!/usr/local/bin/perl -w
+
+use EnsEMBL::Web::Document::WebPage;
+use EBeyeSearch;
+use EBeyeSearch::Renderer;
+
+use CGI;
+use CGI::Carp;
+use strict;
+use Time::HiRes qw(time);
+use Data::Dump qw(dump);
+
+my $page = new EnsEMBL::Web::Document::WebPage;
+
+
+my $ebi_search = EBeyeSearch->new();
+# $ebi_search->engineURL = $page->{'species_defs'}->ENSEMBL_SEARCH_URL; 
+
+$ebi_search->rootURL   = "/$ENV{'ENSEMBL_SPECIES'}/ebi_search";
+my $q = CGI->new();
+( my $SPECIES   = $ENV{'ENSEMBL_SPECIES'} ) =~ s/_/ /g;
+
+
+
+$ebi_search->parse( $q );
+
+my $sitetype = $page->{'species_defs'}->ENSEMBL_SITE_NAME;
+
+my $renderer = EBeyeSearch::Renderer->new(ebeye => $ebi_search);
+
+if( $ebi_search->__status eq 'failure') {
+
+
+
+  my $panel = new EnsEMBL::Web::Document::Panel(
+    'caption' => "$sitetype text search - error",
+    'content' => '<p>There was an error whilst trying to search Ensembl:</p>'.
+                 '<p>Your search did not complete in time. Please try again.</p>'.
+		 $renderer->render_form 
+  );
+  $page->page->content->add_panel($panel);
+
+}else { 
+
+#        map {  warn join "\n", @$_ } @{$ebi_search->results};
+
+    my $hits;
+    map { $hits .= "\n\n" .  (join "\n", @$_) } @{$ebi_search->results};
+    
+    
+    my $panel = new EnsEMBL::Web::Document::Panel(
+						  'caption' => "$sitetype text search - Debug",
+						  'content' => 
+						  $renderer->render_form . 
+						  $renderer->render_summary . 
+						  $renderer->render_pagination . 
+						  '<p>' . '<pre>' .  $q->escapeHTML( qq/$hits/) . '</pre>'. '</p>' 
+						 );
+    $page->page->content->add_panel($panel);
+}
+
+$q->header;
+$page->page->render();
+
+
+
+1;

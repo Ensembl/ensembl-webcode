@@ -100,9 +100,9 @@ use Sys::Hostname;
 use Exporter();
 @ISA=qw(Exporter);
 
-$VERSION                   = 49;
-$ARCHIVE_VERSION           = "Mar2008";    # Change this to the archive site for this version
-$ENSEMBL_RELEASE_DATE      = 'Mar 2008';
+$VERSION                   = 50;
+$ARCHIVE_VERSION           = "Jul2008";    # Change this to the archive site for this version
+$ENSEMBL_RELEASE_DATE      = 'Jul 2008';
 
 $ENSEMBL_MIN_SPARE_SERVERS =  5;
 $ENSEMBL_MAX_SPARE_SERVERS = 20;

@@ -53,7 +53,7 @@ my $wa = $ENSEMBL_WEB_REGISTRY->newsAdaptor;
 #---------------- DO APPROPRIATE QUERIES AND OUTPUT NEWS FILE ----------------#
 
 # general query - will probably need it at least once
-my $stories = $wa->fetch_news_items({'release'=>$release_id, 'status'=>'news_ok'}, 1);
+my $stories = $wa->fetch_news_items({'release'=>$release_id, 'news_done'=>'Y'}, 1);
 
 # get a list of valid species for this release
 our $rel_spp = $wa->fetch_species($release_id);
@@ -91,7 +91,7 @@ if (@valid_spp) {
         
         # get stories for this species
         my $species_id = $rev_hash{$sp};
-        my $sp_items = $wa->fetch_news_items({'release'=>$release_id, 'species'=>$species_id, 'status'=>'news_ok'}, '', '5',);
+        my $sp_items = $wa->fetch_news_items({'release'=>$release_id, 'species'=>$species_id, 'news_done'=>'Y'}, '', '5',);
 
         $html .= qq(<h4><i>$pretty_sp</i> News</h4>);
         my $done = [];

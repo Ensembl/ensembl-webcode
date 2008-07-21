@@ -177,6 +177,7 @@ sub show_news {
     $gen_sorted = $object->sort_items(\@generic_items);
     $sp_sorted  = $object->sort_items(\@species_items);
   }
+
 ## output sorted news
   my @sections;
   if ($sp_dir eq 'Multi') {
@@ -188,6 +189,9 @@ sub show_news {
   else {
     @sections = ("$sp_title News", "Other News");
   }
+  my $total_species = $object->species_defs->valid_species;
+  warn "TOTAL $total_species";
+
   for (my $i=0; $i<scalar(@sections); $i++) {
     my ($header, $current_items);
     if ($sp_dir eq 'Multi' || $rel_selected eq 'all') {
@@ -201,8 +205,8 @@ sub show_news {
     my $prev_count = 0;
     my $ul_open = 0;
     for (my $i=0; $i<scalar(@$current_items); $i++) {
-      my %item = %{$$current_items[$i]};
-      next if $item{'status'} ne 'news_ok';
+      my %item = %{$current_items->[$i]};
+      next if $item{'news_done'} ne 'Y';
       my $item_id = $item{'news_item_id'};
       my $title = $item{'title'};
       my $content = $item{'content'};
@@ -230,10 +234,18 @@ sub show_news {
       if ($sp_dir eq 'Multi') {
         my $sp_str = '';
         if (ref($species) eq 'ARRAY' && scalar(@$species)) {
-          for (my $j=0; $j<scalar(@$species); $j++) {
-            $sp_str .= ', ' unless $j == 0;
-            (my $sp_name = $sp_lookup{$$species[$j]}) =~ s/_/ /g;
-            $sp_str .= "<i>$sp_name</i>";
+	  if (scalar(@$species) > $total_species / 2) {
+           $sp_str = 'most species';
+	  }
+	  elsif (scalar(@$species) > 5) {
+           $sp_str = 'multiple species';
+	  }
+          else {
+            for (my $j=0; $j<scalar(@$species); $j++) {
+              $sp_str .= ', ' unless $j == 0;
+              (my $sp_name = $sp_lookup{$$species[$j]}) =~ s/_/ /g;
+              $sp_str .= "<i>$sp_name</i>";
+            }
           }
         }
         else {

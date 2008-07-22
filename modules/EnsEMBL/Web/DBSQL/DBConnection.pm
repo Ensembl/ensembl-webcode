@@ -293,6 +293,7 @@ sub _get_databases_common {
                $self->{'species_defs'}->multi('PHUSION_BLASTN'),
                $self->{'species_defs'}->multi('BLASTZ_RECIP_NET'),
                $self->{'species_defs'}->multi('TRANSLATED_BLAT'),
+               $self->{'species_defs'}->multi('TRANSLATED_BLAT_NET'),
                $self->{'species_defs'}->multi('GENE')
             );
             foreach my $sp ( keys %multi ) {

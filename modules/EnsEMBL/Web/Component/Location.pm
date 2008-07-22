@@ -207,6 +207,15 @@ sub multi_bottom {
           $config->set( $K, "compact", $flags{ 'group_tblat' } ? 0 : 1 );
         }
       }
+      if( $flags{'tblat_net'} ) {
+        foreach( 'TRANSLATED_BLAT_NET' ) {
+          my $K = lc($previous_species)."_".lc($_)."_match";
+          $config->set( $K, "on", "on" );
+          $config->set( $K, "str", "x" );
+          $config->set( $K, "join", 1 ) if $flags{ 'join_tblat_net' };
+          $config->set( $K, "compact", $flags{ 'group_tblat_net' } ? 0 : 1 );
+        }
+      }
     } else {
       if( $previous_species ) {
         if( $flags{'match'} ) {
@@ -234,6 +243,15 @@ sub multi_bottom {
             $config->set( $K, "str", "f" );
             $config->set( $K, "join", 1 ) if $flags{ 'join_tblat' };
             $config->set( $K, "compact", $flags{ 'group_tblat' } ? 0 : 1 );
+          }
+        }
+        if( $flags{'tblat_net'} ) {
+          foreach( 'TRANSLATED_BLAT_NET' ) {
+            my $K = lc($previous_species)."_".lc($_)."_match";
+            $config->set( $K, "on", "on" );
+            $config->set( $K, "str", "f" );
+            $config->set( $K, "join", 1 ) if $flags{ 'join_tblat_net' };
+            $config->set( $K, "compact", $flags{ 'group_tblat_net' } ? 0 : 1 );
           }
         }
       }
@@ -265,6 +283,16 @@ sub multi_bottom {
             $config->set( $K, "compact", $flags{ 'group_tblat' } ? 0 : 1 );
           }
         }
+        if( $flags{'tblat_net'} ) {
+          foreach( 'TRANSLATED_BLAT_NET' ) {
+            my $K = lc($next_species)."_".lc($_)."_match";
+            $config->set( $K, "on", "on" );
+            $config->set( $K, "str", "r" );
+            $config->set( $K, "join", 1 ) if $flags{ 'join_tblat_net' };
+            $config->set( $K, "compact", $flags{ 'group_tblat_net' } ? 0 : 1 );
+          }
+        }
+
       }
     }
   }

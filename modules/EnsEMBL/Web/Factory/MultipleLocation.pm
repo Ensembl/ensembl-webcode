@@ -264,7 +264,7 @@ sub _best_guess {
   my( $self, $slice, $species, $width, $chrom ) = @_;
   ( my $S2 = $species ) =~ s/_/ /g;
   ## foreach my $method ( @{$self->species_defs->COMPARATIVE_METHODS} ) {
-  foreach my $method ( qw(BLASTZ_NET TRANSLATED_BLAT BLASTZ_RAW BLASTZ_CHAIN) ) {
+  foreach my $method ( qw(BLASTZ_NET TRANSLATED_BLAT TRANSLATED_BLAT_NET BLASTZ_RAW BLASTZ_CHAIN) ) {
     my( $seq_region, $cp, $strand );
     eval {
       ( $seq_region, $cp, $strand ) = $self->_dna_align_feature_adaptor->interpolate_best_location( $slice, $S2, $method, $chrom );

@@ -18,6 +18,8 @@ sub init {
     opt_join_match   on
     opt_tblat       off
     opt_join_tblat   on
+    opt_tblat_net       off
+    opt_join_tblat_net   on
     opt_group_hcr    on
     opt_group_match  on
     opt_group_tblat off

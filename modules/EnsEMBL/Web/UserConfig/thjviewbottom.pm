@@ -70,13 +70,16 @@ sub init {
       'opt_match'       => 1,
       'opt_hcr'         => 1,
       'opt_tblat'       => 1,
+      'opt_tblat_net'       => 1,
       'opt_join_transcript'  => 1,
       'opt_join_match'  => 1,
       'opt_join_hcr'    => 1,
       'opt_join_tblat'  => 1,
+      'opt_join_tblat_net'  => 1,
       'opt_group_match'  => 0,
       'opt_group_hcr'    => 0,
       'opt_group_tblat'  => 0,
+      'opt_group_tblat_net'  => 0,
       'opt_join_lines'      => 1,
       'opt_lines'      => 1,
       'opt_empty_tracks' => 0,
@@ -111,8 +114,10 @@ sub init {
       'compara' => [ 
         ['opt_match'            => 'Blastz net'],
         ['opt_tblat'            => 'Translated BLAT'],
+        ['opt_tblat_net'        => 'Translated BLAT net'],
         ['opt_join_match'       => 'Join Blastz net'],
         ['opt_join_tblat'       => 'Join tr. BLAT'],
+        ['opt_join_tblat_net'   => 'Join tr. BLAT net'],
         ['opt_join_transcript'  => 'Join transcripts'],
         ['opt_group_match'      => 'Group Blastz net'],
       ],
@@ -653,6 +658,7 @@ sub mult {
     [ 'PHUSION_BLASTN_TIGHT' ,'pink3', 'high cons','darkolivegreen2', -19   ],
     [ 'BLASTZ_RECIP_NET'     ,'pink',  'cons', 'darkseagreen1', -20  ],
     [ 'TRANSLATED_BLAT'      ,'orchid1', 'trans BLAT','chartreuse', -18 ],
+    [ 'TRANSLATED_BLAT_NET'  ,'orchid2', 'trans BLAT NET', 'green', -17 ]
   );
 
   foreach my $METHOD (@methods) {

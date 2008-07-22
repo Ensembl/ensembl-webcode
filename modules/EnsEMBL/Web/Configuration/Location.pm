@@ -153,7 +153,7 @@ unless( $obj->species_defs->NO_SEQUENCE ) {
     );
   }
 
-  my %species = ( map { $obj->species_defs->multi($_,$species) } qw(BLASTZ_RAW BLASTZ_NET BLASTZ_RECIP_NET PHUSION_BLASTN TRANSLATED_BLAT BLASTZ_GROUP) );
+  my %species = ( map { $obj->species_defs->multi($_,$species) } qw(BLASTZ_RAW BLASTZ_NET BLASTZ_RECIP_NET PHUSION_BLASTN TRANSLATED_BLAT BLASTZ_GROUP TRANSLATED_BLAT_NET) );
   my @options = ();
   foreach( sort keys %species ) {
     (my $HR = $_ ) =~s/_/ /;

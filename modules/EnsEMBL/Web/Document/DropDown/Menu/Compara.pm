@@ -30,6 +30,7 @@ sub new {
            $self->{'config'}->{'species_defs'}->multi( 'PHUSION_BLASTN',   $self->{'species'} ),
            $self->{'config'}->{'species_defs'}->multi( 'BLASTZ_RECIP_NET', $self->{'species'} ),
            $self->{'config'}->{'species_defs'}->multi( 'TRANSLATED_BLAT',  $self->{'species'} ),
+           $self->{'config'}->{'species_defs'}->multi( 'TRANSLATED_BLAT_NET',  $self->{'species'} ),
            $self->{'config'}->{'species_defs'}->multi( 'BLASTZ_RAW',       $self->{'species'} ),
            );
 		my %vega_config = $self->{'config'}->{'species_defs'}->multiX('VEGA_COMPARA_CONF');

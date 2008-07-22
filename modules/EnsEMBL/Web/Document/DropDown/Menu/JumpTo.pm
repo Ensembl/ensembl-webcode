@@ -15,7 +15,7 @@ sub new {
   ); 
   my $location = $self->{'location'};
   my $FLAG = 0;
-  my %species = ( map {  $self->{'config'}->{'species_defs'}->multi($_) } qw(BLASTZ_RAW BLASTZ_NET BLASTZ_RECIP_NET PHUSION_BLASTN TRANSLATED_BLAT BLASTZ_GROUP) );
+  my %species = ( map {  $self->{'config'}->{'species_defs'}->multi($_) } qw(BLASTZ_RAW BLASTZ_NET BLASTZ_RECIP_NET PHUSION_BLASTN TRANSLATED_BLAT TRANSLATED_BLAT_NET BLASTZ_GROUP) );
   
   foreach( keys %species ) {
     next if $_ eq 'Apis_mellifera';

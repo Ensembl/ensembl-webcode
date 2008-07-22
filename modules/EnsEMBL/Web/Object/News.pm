@@ -136,7 +136,7 @@ sub sort_items {
               return
               $b->{"release_id"} <=> $a->{"release_id"}
                 ||
-              $b->{"cat_order"} <=> $a->{"cat_order"}
+              $a->{"cat_order"} <=> $b->{"cat_order"}
                 ||
               $b->{"priority"} <=> $a->{"priority"}
                 ||

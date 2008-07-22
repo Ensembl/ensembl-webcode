@@ -22,7 +22,8 @@ sub BUILD {
   $self->add_queriable_field({ name => 'notes', type => 'text' });
   $self->add_queriable_field({ name => 'priority', type => 'int' });
   $self->add_queriable_field({ name => 'species_id', type => 'int' }); ## Replacement for has_many
-  $self->add_queriable_field({ name => 'status', type => "enum('declared','done','news_ok','news_not_ok')" });
+  $self->add_queriable_field({ name => 'status', type => "enum('declared','handed_over','postponed')" });
+  $self->add_queriable_field({ name => 'news_done', type => "enum('Y','N')" });
   $self->add_belongs_to("EnsEMBL::Web::Data::Release");
   $self->add_belongs_to("EnsEMBL::Web::Data::NewsCategory");
   #$self->add_has_many({ class => 'EnsEMBL::Web::Data::Species'});

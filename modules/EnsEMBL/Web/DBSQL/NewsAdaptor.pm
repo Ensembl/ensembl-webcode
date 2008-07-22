@@ -77,6 +77,7 @@ sub fetch_news_items {
     'category'=>'n.news_category_id = '.$where->{'category'},
     'priority'=>'n.priority = '.$where->{'priority'},
     'status'=>'n.status = "'.$where->{'status'}.'"',
+    'news_done'=>'n.news_done = "'.$where->{'news_done'}.'"',
   );
   if (my $cat = $where->{'category'}) {
     my $string;
@@ -142,7 +143,8 @@ sub fetch_news_items {
             n.content           as content,
             n.priority          as priority,
             c.priority          as cat_order,
-            n.status            as status
+            n.status            as status,
+            n.news_done         as news_done
         FROM
             ( news_item n,
             news_category c )
@@ -210,6 +212,7 @@ sub fetch_news_items {
        'priority'         => $A[5],
        'cat_order'        => $A[6],
        'status'           => $A[7],
+       'news_done'        => $A[8],
        'species'          => $species,
        'sp_count'         => $sp_count
        }
@@ -258,7 +261,8 @@ sub fetch_headlines {
             n.content           as content,
             n.priority          as priority,
             c.priority          as cat_order,
-            n.status            as status
+            n.status            as status,
+            n.news_done         as news_done
         FROM
             news_item n,
             news_category c
@@ -281,7 +285,7 @@ sub fetch_headlines {
   else {
     $sql .= ' WHERE n.news_category_id = c.news_category_id';
   }
-  $sql .= " $where_str AND n.status = 'news_ok' GROUP BY n.news_item_id ORDER BY n.priority DESC $limit_str";
+  $sql .= " $where_str AND n.news_done = 'Y' GROUP BY n.news_item_id ORDER BY n.priority DESC $limit_str";
 
   my $T = $self->handle->selectall_arrayref($sql, {});
   return [] unless $T;
@@ -325,6 +329,7 @@ sub fetch_headlines {
        'priority'         => $A[5],
        'cat_order'        => $A[6],
        'status'           => $A[7],
+       'news_done'        => $A[8],
        'species'          => $species,
        'sp_count'         => $sp_count
        }
@@ -432,6 +437,23 @@ sub fetch_species {
     for (my $i=0; $i<scalar(@$T);$i++) {
         my @array = @{$T->[$i]};
         $$results{$array[0]} = $array[1];
+    }
+    return $results;
+}
+
+sub fetch_species_for_item {
+    my ($self, $news_item_id) = @_;
+    my $results = [];
+
+    return {} unless $self->{'_handle'};
+
+    my $sql = qq(
+    	SELECT species_id FROM item_species WHERE news_item_id = $news_item_id
+    );
+    my $T = $self->{'_handle'}->selectall_arrayref($sql);
+    return [] unless $T;
+    for (my $i=0; $i<scalar(@$T);$i++) {
+        push @$results, $T->[$i][0];
     }
     return $results;
 }
@@ -667,7 +689,6 @@ sub fetch_assemblies {
         WHERE
                 s.species_id = rs.species_id 
                 and release_id = $release_num
-                and rs.assembly_name != ''
 
         ORDER BY s.name
     );
@@ -716,6 +737,7 @@ sub add_news_item {
     my $species           = $item{'species_id'};
     my $priority          = $item{'priority'};
     my $status            = $item{'status'};
+    my $news_done         = $item{'news_done'};
     my $user_id           = $self->editor;
 
     # escape double quotes in text items
@@ -732,6 +754,7 @@ sub add_news_item {
             news_category_id  = "$news_category_id",
             priority          = "$priority",
             status            = "$status",
+            news_done         = "$news_done",
             created_by        = $user_id,
             created_at        = NOW()
         );

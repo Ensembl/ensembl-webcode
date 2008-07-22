@@ -256,7 +256,7 @@ sub wiggle_plot {
     warn ("Cannot get get adaptors: $wiggle_adaptor");
     return 0;
   }
-  my $method_link_species_set = $db->get_MethodLinkSpeciesSetAdaptor->fetch_by_dbID(50005);
+  my $method_link_species_set = $db->get_MethodLinkSpeciesSetAdaptor->fetch_by_dbID(50007);
 
 # warn "WIGGLE $method_link_species_set , $slice, $display_size";
   my $features = $wiggle_adaptor->fetch_all_by_MethodLinkSpeciesSet_Slice($method_link_species_set, $slice, $display_size) || [];

@@ -38,12 +38,7 @@ sub colour {
   my $translation = $transcript->translation;
   my $translation_id = $translation ? $translation->stable_id : '';
 
-  my $genecol;
-  if( $gene->type eq 'Genoscope_predicted' ) {
-    $genecol = '_GSTEN';
-  } else {
-    $genecol = '_HOX' ;
-  }
+  my $genecol = 'genoscope_'.$transcript->status;
 
   my $highlight = undef;
   if(exists $highlights{lc($transcript->stable_id)}) {
@@ -54,25 +49,21 @@ sub colour {
     $highlight = $colours->{'hi'};
   }
     
-  return (@{$colours->{$genecol}}, $highlight);
+  return (@{$colours->{$genecol}||['orange','Genoscope']}, $highlight);
 }
 
 sub gene_colour {
   my ($self, $gene, $colours, %highlights) = @_;
   my $genecol;  $colours->{ "_".$gene->external_status }[0];
 
-  if( $gene->type eq 'Genoscope_predicted' ) {
-    $genecol = '_GSTEN';
-  } else {
-    $genecol = '_HOX' ;
-  }
+  my $genecol = 'genoscope_'.$gene->status;
 
   my $highlight = undef;
   if(exists $highlights{lc($gene->stable_id)}) {
     $highlight = $colours->{'hi'};
   }
 
-  return (@{$colours->{$genecol}}, $highlight);
+  return (@{$colours->{$genecol}||['orange','Genoscope']}, $highlight);
 }
 
 sub href {

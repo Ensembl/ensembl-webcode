@@ -52,6 +52,7 @@ sub _init {
   my $bitmap_length  = int( $vc_length * $pix_per_bp );
 
   my $colours        = $Config->get($type,'colour_set' ) ? {$Config->{'_colourmap'}->colourSet( $Config->get($type,'colour_set' ) )} : $Config->get($type,'colours');
+  $colours->{'Other'} = [ 'orange', 'Other' ];
 
   my $max_length     = $Config->get($type,'threshold') || 1e6;
   my $max_length_nav = $Config->get($type,'navigation_threshold') || 50e3;
@@ -84,6 +85,7 @@ sub _init {
     my $gene_label = $self->gene_label( $g );
     my $GT         = $self->gene_col( $g );
        $GT =~ s/XREF//g;
+       $GT = 'Other' unless $colours->{$GT};
     my $gene_col   = ($used_colours->{ $GT } = $colours->{ $GT });
     my $ens_ID     = $self->ens_ID( $g );
     my $high = exists $highlights{ lc($gene_label) } || exists $highlights{ lc($g->stable_id) };

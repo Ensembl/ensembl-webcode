@@ -36,12 +36,12 @@ sub new {
     'ensembl_projection_protein_coding_NOVEL',    => [ 'olivedrab4', 'Novel projection' ],
     'ensembl_projection_pseudogene_NOVEL',        => [ 'darkolivegreen3', 'Pseudogene projection' ],
   );
-  $self->colourSet( 'ensembl_segment',
-    'ensembl_segment_C_segment_KNOWN',         => [ 'darkorange3', 'Known C segment' ], #Translate
-    'ensembl_segment_V_segment_KNOWN',         => [ 'darkorange4', 'Known V segment' ], #Translate
-    'ensembl_segment_V_segment_NOVEL',         => [ 'chocolate4',  'Novel V segment' ], #Translate
-    'ensembl_segment_D_segment_KNOWN',         => [ 'peru',        'Known D segment' ],
-    'ensembl_segment_J_segment_KNOWN',         => [ 'tan2',        'Known J segment' ],
+  $self->colourSet( 'ensembl_ig_gene',
+    'ensembl_IG_gene_IG_C_gene_KNOWN',         => [ 'darkorange3', 'Known C gene' ], #Translate
+    'ensembl_IG_gene_IG_V_gene_KNOWN',         => [ 'darkorange4', 'Known V gene' ], #Translate
+    'ensembl_IG_gene_IG_V_gene_NOVEL',         => [ 'chocolate4',  'Novel V gene' ], #Translate
+    'ensembl_IG_gene_IG_D_gene_KNOWN',         => [ 'peru',        'Known D gene' ],
+    'ensembl_IG_gene_IG_J_gene_KNOWN',         => [ 'tan2',        'Known J gene' ],
   );
 
   my %core = (
@@ -174,7 +174,15 @@ sub new {
     'ncRNA_protein_coding_KNOWN' => [ 'rust' , 'Known protein coding' ],
     'havana_protein_coding_KNOWN'  => [ 'dodgerblue4', 'Havana Known Protein coding'],
     'havana_protein_coding_NOVEL'  => [ 'blue',        'Havana Novel Protein coding' ],
+    'havana_havana_pseudogene_KNOWN' => [ 'grey50', 'Havana Known Pseudogene' ],
+    'havana_IG_pseudogene_KNOWN' => [ 'grey50', 'Havana Known Pseudogene' ],
+    'havana_processed_pseudogene_KNOWN' => [ 'grey50', 'Havana Known Pseudogene' ],
+    'havana_unprocessed_pseudogene_KNOWN' => [ 'grey50', 'Havana Known Pseudogene' ],
+    'havana_processed_pseudogene_NOVEL' => [ 'grey80', 'Havana kovel Pseudogene' ],
+    'havana_unprocessed_pseudogene_NOVEL' => [ 'grey80', 'Havana Novel Pseudogene' ],
     'ensembl_havana_gene_protein_coding_KNOWN'  => [ 'goldenrod3', 'Merged Known Protein coding'],
+    'ensembl_havana_gene_retrotransposed_KNOWN'  => [ 'darkseagreen2', 'Merged Known retrotransposed' ],
+    'ensembl_havana_transcript_retrotransposed_KNOWN'  => [ 'darkseagreen2', 'Merged Known retrotransposed' ],
     'ensembl_havana_gene_protein_coding_NOVEL'  => [ 'goldenrod4', 'Merged Novel Protein coding'],
     'ensembl_havana_transcript_protein_coding_KNOWN'  => [ 'goldenrod3', 'Common Known Protein coding'],
     'ensembl_havana_transcript_protein_coding_NOVEL'  => [ 'goldenrod4', 'Common Novel Protein coding'],
@@ -199,9 +207,8 @@ sub new {
   $self->colourSet( 'genoscope_gene',
     'hi'         => 'highlight1',
     'superhi'    => 'highlight2',
-    '_GSTEN' => [ 'black', 'Genoscope predicted genes' ],
-    '_HOX' => [ 'rust', 'Genoscope annotated genes' ],
-    '_CYT' => [ 'rust', 'Genoscope annoateed genes' ],
+    'genoscope_KNOWN_BY_PROTECTION' => [ 'red', 'Genoscope projected genes' ],
+    'genoscope_NOVEL'               => [ 'orange', 'Genoscope novel genes' ]
   );
   $self->colourSet( 'wormbase_gene',
     'hi'         => 'highlight1',

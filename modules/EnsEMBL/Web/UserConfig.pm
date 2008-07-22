@@ -1209,7 +1209,7 @@ sub ADD_ALL_TRANSCRIPTS {
   my $POS  = shift || 2000;
   $self->add_new_track_transcript( 'ensembl',   'Ensembl genes',   'ensembl_gene',   $POS++, 'logic_name' => 'havana ensembl_havana_gene ensembl' );
   $self->add_new_track_transcript( 'ensembl_projection',   'Ensembl proj. genes',   'ensembl_projection',   $POS++, @_ );
-  $self->add_new_track_transcript( 'ensembl_segment',      'Ig segments',           'ensembl_segment',   $POS++, @_ );
+  $self->add_new_track_transcript( 'ensembl_ig_gene',      'Ig genes',           'ensembl_ig_gene',   $POS++, @_ );
   $self->add_new_track_transcript( 'evega',         'Vega Havana gene',      'vega_gene_havana',    $POS++, 'glyph' => 'evega_transcript', 'db' => 'vega', 'logic_name' => 'otter', 'available' => 'database_features ENSEMBL_VEGA.OTTER',  'on' => 'off',   @_ );
   $self->add_new_track_transcript( 'evega_external','Vega External gene',    'vega_gene_external',  $POS++, 'glyph' => 'evega_transcript', 'db' => 'vega', 'logic_name' => 'otter_external', 'available' => 'database_features ENSEMBL_VEGA.OTTER_EXTERNAL', 'on' => 'off',    @_ );
   $self->add_new_track_transcript( 'flybase',   'Flybase genes',   'flybase_gene',   $POS++, @_ );
@@ -1218,7 +1218,7 @@ sub ADD_ALL_TRANSCRIPTS {
   $self->add_new_track_transcript( 'sgd',       'SGD genes',  'sgd_gene',  $POS++, @_ );
   $self->add_new_track_transcript( 'genebuilderbeeflymosandswall',
                                                 'Bee genes',       'bee_gene',       $POS++, @_ );
-  $self->add_new_track_transcript( 'gsten',     'Genoscope genes', 'genoscope_gene', $POS++, 'logic_name' => 'gsten hox ctt', @_ );
+  $self->add_new_track_transcript( 'gsten',     'Genoscope genes', 'genoscope_gene', $POS++, @_ );
   $self->add_new_track_transcript( 'rna',       'ncRNA genes',     'rna_gene',       $POS++, 'available' => 'features NCRNA|MIRNA|TRNA|SNLRNA|SNORNA|SNRNA|RRNA','logic_name' => 'ncrna mirna trna snlrna snorna snrna rrna' ,  'compact' => 1,   @_ );
   $self->add_new_track_transcript( 'erna',       'e! ncRNA genes', 'rna_gene',   $POS++, 'available' => 'features ensembl_ncRNA', 'logic_name' => 'ensembl_ncrna',  'legend_type' => 'rna',  'compact' => 1,      @_ );
 
@@ -1422,9 +1422,10 @@ sub ADD_GENE_TRACKS {
 
   $self->add_new_track_gene( 'gsten', 'Genoscope Genes', 'genoscope_gene', $POS++,
     'gene_label'           => sub { return $_[0]->stable_id },
-    'gene_col'             => sub { return $_[0]->biotype eq 'Genoscope_predicted' ? '_GSTEN'    : '_HOX' },
-    'logic_name'           => 'gsten hox cyt', @_
+    'gene_col'             => sub { return 'genoscope_'.$_[0]->status; },
+    'logic_name'           => 'gsten', @_
   );
+
   $self->add_new_track_gene( 'dog_protein', 'Dog proteins', 'dog_protein', $POS++,
     'gene_label'           => sub { return $_[0]->stable_id },
     'gene_col'             => 'dog_protein' , @_
@@ -1436,9 +1437,9 @@ sub ADD_GENE_TRACKS {
     @_
   );
 
-  $self->add_new_track_gene( 'ensembl_segment', 'Ensembl segment', 'ensembl_segment', $POS++,
+  $self->add_new_track_gene( 'ensembl_ig_gene', 'Ensembl segment', 'ensembl_ig_gene', $POS++,
     'gene_label'           => sub { return $_[0]->external_name || $_[0]->stable_id },
-    'gene_col'             => sub { return 'ensembl_segment_'.$_[0]->biotype.'_'.$_[0]->status; },
+    'gene_col'             => sub { return 'ensembl_IG_gene_'.$_[0]->biotype.'_'.$_[0]->status; },
     @_
   );
 

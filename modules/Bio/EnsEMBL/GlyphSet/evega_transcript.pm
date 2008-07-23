@@ -95,9 +95,11 @@ sub zmenu {
   my $gtype = ucfirst(lc($gene->status)).' '.ucfirst(lc($gene->biotype));
   $gtype =~ s/_/ /g;
   $gtype =~ s/unknown //i;
+  $gtype =~ s/Ig/IG/i;
   my $ttype = ucfirst(lc($transcript->status)).' '.ucfirst(lc($transcript->biotype));
   $ttype =~ s/_/ /g;
   $ttype =~ s/unknown //i;
+  $ttype =~ s/Ig/IG/i;
   my $ExtUrl = EnsEMBL::Web::ExtURL->new($self->{'config'}->{'species'}, $self->species_defs);
   my $caption = $self->my_config('caption'); 
   my $zmenu = {

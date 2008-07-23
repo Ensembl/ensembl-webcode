@@ -415,6 +415,10 @@ sub discover {
 
 sub _create_relational_element {
   my ($self, $type, $class) = @_;
+
+  ## Quick patch for 49 and 50 to work faster
+  return undef;
+
   if (EnsEMBL::Web::Root::dynamic_use(undef, $class)) {
     my $object = $class->new();
     my $name = $object->get_primary_key;

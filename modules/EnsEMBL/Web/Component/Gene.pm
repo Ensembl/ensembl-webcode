@@ -1282,7 +1282,14 @@ sub regulation_factors {
       my @temp = split (/\:/, $factor_name);
       $factor_name = $temp[1];
     }  
-    my $factor_link = $factor_name? qq(<a href="/@{[$object->species]}/featureview?id=$factor_name;type=RegulatoryFactor;id=$factor_name;name=$type">$factor_name</a>) : "unknown";
+
+     my $factor_link; warn $type;
+     if ($type =~/^cisRED/){
+           $factor_link = $factor_name;
+     } else {
+        $factor_link = $factor_name? qq(<a href="/@{[$object->species]}/featureview?id=$factor_name;type=RegulatoryFactor;name=$type">$factor_name</a>) : "unknown";
+     } 
+  
     my $feature_name = $feature_obj->display_label;
     my $db_ent = $feature_obj->get_all_DBEntries;
     my $seq_name = $feature_obj->slice->seq_region_name;     

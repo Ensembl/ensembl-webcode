@@ -602,12 +602,13 @@ sub version_and_date {
 sub type {
     my ($panel, $gene) = @_; 
     my $label = 'Gene Type';
-	#return if this is a Eucomm gene
-	return if ($gene->Obj->analysis->logic_name eq 'otter_eucomm');
-	my $biotype = ($gene->Obj->biotype eq 'tec') ? uc($gene->Obj->biotype) : ucfirst(lc($gene->Obj->biotype));
+    #return if this is a Eucomm gene
+    return if ($gene->Obj->analysis->logic_name eq 'otter_eucomm');
+    my $biotype = ($gene->Obj->biotype eq 'tec') ? uc($gene->Obj->biotype) : ucfirst(lc($gene->Obj->biotype));
     my $type = ucfirst(lc($gene->Obj->status))." $biotype";
-	$type =~ s/_/ /g;
-	$type =~ s/unknown //i;
+    $type =~ s/_/ /g;
+    $type =~ s/unknown //i;
+    $type =~ s/ig/IG/i;
     # create a colourmap and use it to get label for gene type
     $panel->add_row($label, qq(<p>$type [<a href="http://vega.sanger.ac.uk/info/about/gene_and_transcript_types.html" target="external">Definition</a>]</p>));
     return 1;

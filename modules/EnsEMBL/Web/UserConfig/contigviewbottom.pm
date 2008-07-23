@@ -804,7 +804,7 @@ sub init {
   my $compara = 3000;
   my @methods = (
     [ 'TRANSLATED_BLAT'      ,'orchid1', 'trans BLAT',   'translated BLAT' ],
-    [ 'TRANSLATED_BLAT_NET'  ,'orchid2', 'trans BLAT NET',   'translated BLAT NET' ],
+    [ 'TRANSLATED_BLAT_NET'  ,'orchid2', 'trans BLAT NET',   'translated BLAT (net)' ],
     [ 'PHUSION_BLASTN_TIGHT' ,'pink3',   'high cons bp', 'highly conserved PHUSION BLAST' ],
     [ 'BLASTZ_GROUP_TIGHT'   ,'pink3',   'high cons bz', 'highly conserved BLASTz (group)' ],
     [ 'BLASTZ_NET_TIGHT'     ,'pink3',   'high cons bz', 'highly conserved BLASTz (net)' ],

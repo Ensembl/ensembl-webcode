@@ -224,7 +224,7 @@ sub glossary {
 
   my $html = "<dl>";
   my @sorted = sort { lc($a->word) cmp lc($b->word) } @$glossary;
-  foreach my $entry (@$glossary) {
+  foreach my $entry (@sorted) {
     my $word    = $entry->word;
     my $acronym = $entry->expanded;
     my $meaning = $entry->meaning;
@@ -479,5 +479,18 @@ sub static {
   $panel->print($html);
   return 1;
 }
+
+sub ebi_link {
+  my($panel,$object) = @_;
+
+  my $html = qq(
+<p>Additional <a href="http://www.ebi.ac.uk/2can/evideos/index.html">Flash tutorials with audio</a> can be found on the EBI 2Can e
+-learning portal.</p>
+  );
+
+  $panel->print($html);
+  return 1;
+}
+
 
 1;

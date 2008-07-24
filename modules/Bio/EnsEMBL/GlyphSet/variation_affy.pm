@@ -19,7 +19,7 @@ sub features {
   my ($self) = @_;
   my $snps = $self->fetch_features;
   my $key = $self->_key();
-  my $source_name = "Affy GeneChip $key Mapping Array";
+  my $source_name = "Affy GeneChip $key Array";
 
   my @affy_snps;
   foreach my $vf (@$snps) {

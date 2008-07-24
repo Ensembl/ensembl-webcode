@@ -21,17 +21,17 @@ sub features {
 }
 
 sub href {
-    my ( $self, $id, $type ) = @_;
-    my @bits = split( ':', $id );
-    my $meta = pop @bits;
-    my( $ticket,$hsp_id,$use_date ) = split( '!!', $meta );
-    $use_date || return $id;
-    if (!$type || (ref($type) eq 'ARRAY')){
-        $type = 'ALIGN';
-    };
-    my $htmpl = '/Multi/blastview?ticket=%s;hsp_id=%s!!%s;_display=%s';
-    return sprintf($htmpl, $ticket, $hsp_id, $use_date, $type);
-    #   return $self->ID_URL( 'SRS_PROTEIN', $id );
+  my ( $self, $id, $type ) = @_;
+  my @bits = split( ':', $id );
+  my $meta = pop @bits;
+  my( $ticket,$hsp_id,$use_date ) = split( '!!', $meta );
+  $use_date || return $id;
+  if (!$type || (ref($type) eq 'ARRAY')){
+    $type = 'ALIGN';
+  }
+  my $htmpl = '/Multi/blastview?ticket=%s;hsp_id=%s!!%s;_display=%s';
+  return sprintf($htmpl, $ticket, $hsp_id, $use_date, $type);
+  #   return $self->ID_URL( 'SRS_PROTEIN', $id );
 }
 
 # Overload SUPER::_init to suppress track if BLAST_NEW not in highlights param

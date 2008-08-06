@@ -21,12 +21,9 @@ sub new {
     $self->WSproxy = SOAP::Lite
       -> uri($args->{namespace})
 	-> proxy($args->{endpoint}, timeout => 30);
-    bless($self);
+
     return $self;
 }
-
-
-
 
 sub _getRefToArrayOfStringArray {
     my ($self,$refWsValue, $sizeChunk) = @_;
@@ -106,8 +103,7 @@ sub getResultsIds {
 	my $result = $self->WSproxy->getResultsIds($domain, $query, $start, $size);
 	return $result->valueof('//getResultsIdsResponse/arrayOfIds/string');
 }
-	
-	
+
 =head2 getAllResultsIds
 	Executes a query and returns the list of all the identifiers for the entries found.
 	Parameters:
@@ -123,8 +119,7 @@ sub getAllResultsIds {
 	my $result = $self->WSproxy->getAllResultsIds($domain, $query);
 	return $result->valueof('//getAllResultsIdsResponse/arrayOfIds/string');
 }
-		
-		
+
 =head2 listFields
 	Returns the list of fields that can be retrieved for a particular domain.
 	Parameters:
@@ -136,12 +131,11 @@ sub getAllResultsIds {
 
 sub listFields {
 	my ($self, $domain) = @_;
-	
 	my $result = $self->WSproxy->listFields($domain);
 	return $result->valueof('//listFieldsResponse/arrayOfFieldNames/string');
 }
 
-		
+
 =head2 getResults
 	Executes a query and returns a list of results. Each result contains the
 	values for each field specified in the 'fields' argument in the same order
@@ -163,14 +157,12 @@ sub getResults {
 	my $wsResult = $self->WSproxy->getResults($domain, $query, $fields, $start, $size);
 
 	my @wsValue = $wsResult->valueof('//getResultsResponse/arrayOfEntryValues/ArrayOfString/string');
-
-
         return $self->_getRefToArrayOfStringArray(\@wsValue, scalar(@$fields));
 
 }
 
 
-sub getResultsAsHash {
+sub getResultsAsHashArray {
 	my ($self, $domain, $query, $fields, $start, $size) = @_;
 
 	my $wsResult = $self->WSproxy->getResults($domain, $query, $fields, $start, $size);

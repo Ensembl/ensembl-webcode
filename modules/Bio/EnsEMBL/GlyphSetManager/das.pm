@@ -53,7 +53,7 @@ sub init {
 	      
 	      $extra_config2{label} = $batmanHash{$btsrc};
 	      $extra_config2{caption} = $batmanHash{$btsrc};
-	      $extra_config2{url} =~ s/Batman_\%/$btsrc/;
+	      $extra_config2{url} =~ s/batman_.+/$btsrc/i;
 	      $self->add_glyphset( \%extra_config2 );
 	  }
       } else {

@@ -666,7 +666,7 @@ sub add_das_tracks {
 	  foreach my $btsrc (qw(batman_BC batman_CD4 batman_CD8 batman_CX batman_CN batman_GM batman_LR batman_LG batman_PS batman_PL batman_PR batman_RM batman_SM batman_SP batman_US batman_WB)) {
 #	  foreach my $btsrc (qw(batman_BC batman_CD4 batman_CD8 )) {
 	      eval {
-		  (my $URL = $dbname->{'url'}) =~ s/Batman_\%/$btsrc/;
+		  (my $URL = $dbname->{'url'}) =~ s/batman_\w+/$btsrc/;
 		  
 		  $adaptor = Bio::EnsEMBL::ExternalData::DAS::DASAdaptor->new(
 									      -url   => $URL,

@@ -37,7 +37,8 @@ sub content {
     $dir = '' if $dir !~ /_/;
     my $referer = ';_referer='.$self->object->param('_referer').';x_requested_with='.$self->object->param('x_requested_with');
 
-    $html .= qq(<h3>Your news filters</h3>);
+    $html .= qq(<h3>Your news filters</h3>
+    <p>N.B. Currently we only offer the option to filter news by species.</p>);
     ## Sort user filters by name if required
 
     ## Display user filters

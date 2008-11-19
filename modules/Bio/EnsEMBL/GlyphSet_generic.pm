@@ -419,13 +419,11 @@ sub composite_histogram {
     'dotted' => 1,
     'y'      => $y
   }));
-  $self->unshift($self->Rect({
+  $self->unshift($self->Space({
     'x'      => $g->{extent_start}-1,
     'width'  => $g->{extent_end}-$g->{extent_start}+1,
     'height' => $st->{'height'},
-    'colour'  => '#f8f8f8',
     'absolutey' => 1,
-    'dotted' => 1,
     'y'      => $y
   }));
 
@@ -908,8 +906,7 @@ sub glyph_arrow {
         'bordercolour' => $st->{fgcolor}
       }));
       $top -= $ah;
-    }
-    unless( $st->{southwest} eq 'no' ) {
+    } unless( $st->{southwest} eq 'no' ) {
       $self->push($self->Poly({
         'points'       => [ $mp-$w/2, $bottom+$ah, $mp, $bottom, $mp+$w/2, $bottom+$ah ],
         'absolutey'    => 1,
@@ -942,7 +939,7 @@ sub glyph_arrow {
         'colour'       => $st->{fgcolor},
         'bordercolour' => $st->{fgcolor},
         'absolutey'    => 1,
-        'points'       => [ $box_s, $y+$h/2, $box_s + $aw, $y, $box_s + $aw, $y+$h ]
+        'points'       => [ $box_s-1, $y+$h/2, $box_s-1 + $aw, $y, $box_s-1 + $aw, $y+$h ]
       }));
       $box_s += $aw;
     }

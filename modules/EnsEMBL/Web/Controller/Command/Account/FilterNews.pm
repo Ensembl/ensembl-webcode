@@ -39,6 +39,7 @@ sub process {
   ## Set values for checkboxes
   my $release = EnsEMBL::Web::Data::Release->new($sd->ENSEMBL_VERSION);
   my @all_species = $release->species('assembly_code'=>{'!='=>''});
+warn ">>> SPP @all_species";
   my @species_list;
   my @sorted = sort {$a->common_name cmp $b->common_name} @all_species;
   foreach my $species (@sorted) {
@@ -55,7 +56,7 @@ sub process {
   ## Page components
   $interface->default_view('add');
   $interface->panel_footer({'add'=>qq(<p>Need help? <a href="mailto:$help_email">Contact the helpdesk</a> &middot; <a href="/info/about/privacy.html">Privacy policy</a><p>)});
-  $interface->on_success($self->url('/Account/Details'));
+  $interface->on_success($self->url('/Account/NewsFilters'));
   $interface->on_failure($self->url('/Account/UpdateFailed'));
   $interface->script_name($self->get_action->script_name);
 

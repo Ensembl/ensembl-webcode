@@ -251,7 +251,7 @@ sub parse {
   $self->_parse();
   $self->store();
   $reg_conf->configure();
-  EnsEMBL::Web::Tools::RobotsTxt::create();
+  EnsEMBL::Web::Tools::RobotsTxt::create($self->ENSEMBL_SPECIES);
   $self->{'_parse_caller_array'} = [];
   my $C = 0;
   while(my @T = caller($C) ) { $self->{'_parse_caller_array'}[$C] = \@T; $C++; }

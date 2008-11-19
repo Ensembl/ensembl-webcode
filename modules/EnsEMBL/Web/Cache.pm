@@ -130,7 +130,7 @@ sub set {
   
   my $result = $self->SUPER::set($key, $value, $exptime || $self->{default_exptime});
   $self->add_tags($key, $self->{namespace}, @tags);
-
+  
   return $result;
 }
 

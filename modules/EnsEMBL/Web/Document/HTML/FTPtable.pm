@@ -74,6 +74,7 @@ sub render {
 <td><a rel="external" href="ftp://ftp.ensembl.org/pub/).$rel.qq(_mysql/">mySQL</a></td>
 <td>-</td>
 <td><a rel="external" href="ftp://ftp.ensembl.org/pub/).$rel.qq(_emf/">EMF</a></td>
+<td>-</td>
 </tr>
 <tr class="$rev">
 <td><strong>Ensembl Mart</strong></td>
@@ -83,6 +84,7 @@ sub render {
 <td>-</td>
 <td>-</td>
 <td><a rel="external" href="ftp://ftp.ensembl.org/pub/).$rel.qq(_mysql/">mySQL</a></td>
+<td>-</td>
 <td>-</td>
 <td>-</td>
 </tr>

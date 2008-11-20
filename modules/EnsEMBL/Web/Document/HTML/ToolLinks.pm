@@ -35,12 +35,8 @@ sub render   {
       );
     }
   }
-  if( $self->blast ) {
-    $html .= qq(<a href="/Multi/blastview">BLAST/BLAT</a> &nbsp;|&nbsp); 
-  }
-  if( $self->biomart ) {
-    $html .= qq(<a href="/biomart/martview">BioMart</a> &nbsp;|&nbsp;);
-  }
+  $html .= qq(<a href="/Multi/blastview">BLAST/BLAT</a> &nbsp;|&nbsp;) if $self->blast;
+  $html .= qq(<a href="/biomart/martview">BioMart</a> &nbsp;|&nbsp;)   if $self->biomart;
   $html .= qq(<a href="/info/website/help/" id="help">Docs &amp; FAQs</a>);
 
   $self->print($html);

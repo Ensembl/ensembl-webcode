@@ -39,6 +39,10 @@ sub render {
     if ($sp_dir =~ /homo_sapiens|mus_musculus|rattus_norvegicus/) {
       $emf = qq(<a rel="external" title="Variation and comparative data" href="ftp://ftp.ensembl.org/pub/).$rel.qq(_emf/$sp_var/">EMF</a>);
     }
+    my $funcgen = '-';
+    if ($sp_dir =~ /homo_sapiens/) {
+      $funcgen = qq(<a rel="external" title="Functional genomics data in GFF format" href="ftp://ftp.ensembl.org/pub/).$rel.qq(_functional_genomics/$sp_dir/">FUNCGEN</a>);
+    }
     $class = $row % 2 == 0 ? 'bg1' : 'bg2';
 
     $html .= qq(
@@ -52,6 +56,7 @@ sub render {
 <td><a rel="external" href="ftp://ftp.ensembl.org/pub/).$rel.qq(_mysql/">MySQL</a></td>
 <td><a rel="external" href="ftp://ftp.ensembl.org/pub/).$rel.qq(_gtf/">GTF</a></td>
 <td>$emf</td>
+<td>$funcgen</td>
 </tr>
       );
     $row++;

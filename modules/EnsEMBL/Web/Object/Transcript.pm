@@ -1739,13 +1739,13 @@ sub get_int_seq {
 }
 
 sub save_seq {
-    my $self = shift;
-    my $content = shift ;
-    my $seq_file = $self->species_defs->ENSEMBL_TMP_DIR.'/'."SEQ_".time().int(rand()*100000000).$$;
-    open (TMP,">$seq_file") or die("Cannot create working file.$!");
-    print TMP $content;
-    close TMP;
-    return ($seq_file)
+  my $self = shift;
+  my $content = shift ;
+  my $seq_file = $self->species_defs->ENSEMBL_TMP_TMP.'/'."SEQ_".time().int(rand()*100000000).$$;
+  open (TMP,">$seq_file") or die("Cannot create working file.$!");
+  print TMP $content;
+  close TMP;
+  return ($seq_file)
 }
 
 

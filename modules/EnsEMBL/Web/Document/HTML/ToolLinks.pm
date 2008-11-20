@@ -23,23 +23,22 @@ sub render   {
   my $html;
   
   if( $self->logins ) {
-    if ($ENV{'ENSEMBL_USER_ID'}) {
+    if( $ENV{'ENSEMBL_USER_ID'} ) {
       $html .= qq(
       <a style="display:none" href="$dir/Account/Links?_referer=$url" class="modal_link">Account</a> &nbsp;|&nbsp;
       <a href="$dir/Account/Logout?_referer=$url">Logout</a> &nbsp;|&nbsp;
       );
-    }
-    else {
+    } else {
       $html .= qq(
       <a style="display:none" href="$dir/Account/Login?_referer=$url" class="modal_link">Login</a> / 
       <a style="display:none" href="$dir/Account/Register?_referer=$url" class="modal_link">Register</a> &nbsp;|&nbsp;
       );
     }
   }
-  if ($self->blast) {
+  if( $self->blast ) {
     $html .= qq(<a href="/Multi/blastview">BLAST/BLAT</a> &nbsp;|&nbsp); 
   }
-  if ($self->biomart) {
+  if( $self->biomart ) {
     $html .= qq(<a href="/biomart/martview">BioMart</a> &nbsp;|&nbsp;);
   }
   $html .= qq(<a href="/info/website/help/" id="help">Docs &amp; FAQs</a>);

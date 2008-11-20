@@ -51,7 +51,7 @@ sub render {
       $self->checked ? ' checked="checked" ' : '',
       $self->disabled ? ' disabled="disabled" ' : '',
   );
-  return {'label' => $label, 'widget' => $widget};
+  return {'widget' => $widget, 'label' => $label};
 }
 
 

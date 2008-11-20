@@ -50,6 +50,7 @@ sub select_das {
   my $self = shift;
 
   $self->title('Select a DAS source');
+  $self->set_extra_buttons('top'); ## Repeat buttons at top, as this is often a long form
   my $fieldset = {};
   my $elements = [];
   

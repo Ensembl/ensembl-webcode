@@ -15,9 +15,10 @@ sub new {
         'id'       => $name,
         'class'    => $style || 'std check',
     },
-    '_buttons'     => [],
-    '_fieldsets'   => [],
-    '_form_id'     => 1
+    '_buttons'        => [],
+    '_extra_buttons'  => '',
+    '_fieldsets'      => [],
+    '_form_id'        => 1
   };
   bless $self, $class;
   return $self;
@@ -41,6 +42,14 @@ sub add_button {
     warn "Not a button module!";
   }
 } 
+
+sub extra_buttons {
+  my ($self, $buttons) = @_;
+  if ($buttons) {
+    $self->{'_extra_buttons'} = $buttons;
+  }
+  return $self->{'_extra_buttons'};
+}
 
 sub add_attribute {
 ### Add an attribute to the FORM tag
@@ -91,6 +100,7 @@ sub add_hidden {
     $self->add_element('type'=>'Hidden','name'=>$_,'value'=>$hash_ref->{$_});
   }
 }
+
 sub render {
 ### Render the FORM tag and its contents
   my $self = shift;
@@ -119,6 +129,10 @@ sub render {
     $output .= sprintf ' %s="%s"', CGI::escapeHTML($k), CGI::escapeHTML($v);
   }
   $output .= '>';
+
+  if ($self->{'_extra_buttons'} eq 'top') {
+    $output .= $self->_render_buttons;
+  }
 
   $output .= $widgets;
   

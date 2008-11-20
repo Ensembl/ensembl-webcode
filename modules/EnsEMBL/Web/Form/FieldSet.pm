@@ -114,8 +114,8 @@ sub render {
     ## Used for complex forms like DAS and healthchecks
     my $table = EnsEMBL::Web::Document::SpreadSheet->new();
     $table->add_columns(
-      {'key' => 'label', 'title' => '', 'width' => '90%', 'align' => 'left' },
       {'key' => 'widget', 'title' => '', 'width' => '5%', 'align' => 'left' },
+      {'key' => 'label', 'title' => '', 'width' => '90%', 'align' => 'left' },
     );
     my $hidden_output;
     foreach my $element ( @{$self->{'_elements'}} ) {

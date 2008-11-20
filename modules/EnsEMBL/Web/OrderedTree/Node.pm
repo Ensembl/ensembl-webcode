@@ -167,7 +167,7 @@ sub is_child_of {
 sub remove_node {
 ### Remove a node - only if is a leaf node!!
   my( $self ) = @_;
-  return $self->remove_subtree if $self->right = $self->left+1;
+  return $self->remove_subtree if $self->right == $self->left+1;
 }
 
 sub remove_subtree {

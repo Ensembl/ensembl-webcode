@@ -23,7 +23,7 @@ sub render {
 
 <tr>
 <th>Species</th>
-<th colspan="8" style="text-align:center">Files</th>
+<th colspan="9" style="text-align:center">Files</th>
 </tr>
 
 );

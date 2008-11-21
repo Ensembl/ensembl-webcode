@@ -100,11 +100,14 @@ sub Features {
 sub Stylesheet {
   my $self = shift;
 
-  my %COL = $self->session->colourmap->colourSet( 'ideogram' );
+  my $COL = $self->species_defs->colour('ideogram');
   my @default = ( 'FGCOLOR'=>'grey50','HEIGHT'=> 10, 'LABEL' => 'yes', 'BUMP' => 'no' );
   my $stylesheet_structure = {'structural' => {}};
-  foreach ( keys %COL ) {
-    $stylesheet_structure->{'structural'}{'band:'.$_} = [{'type'=>'box','attrs' => {@default,'BGCOLOR'=>$COL{$_}}}];
+  foreach ( keys %$COL ) {
+    $stylesheet_structure->{'structural'}{'band:'.$_} = [{
+      'type'=>'box',
+      'attrs' => { @default,'BGCOLOR'=>$self->species_defs->colour(lc($_)) }
+    }];
   }
   $stylesheet_structure->{'structural'}{'default'} = [{'type'=>'box','attrs' => {@default, 'BGCOLOR'=>'red'}}];
   $stylesheet_structure->{'default'}{'default'} = [{'type'=>'box','attrs' => { @default,'BGCOLOR'=>'red'}}];

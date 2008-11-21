@@ -232,6 +232,7 @@ function modal_success( transport ) {
   var b = M.join('</div>');
 //  $('modal_close').innerHTML = 
 //	  configuration_updated ? 'SAVE and close' : 'Close';
+  $('modal_close').innerHTML = 'Close';
   $('modal_content').update( b );
   if( $('modal_reload') ) {
     page_needs_to_be_reloaded = true;

@@ -43,7 +43,7 @@ sub counts {
   my $key = '::COUNTS::TRANSCRIPT::'.
             $ENV{ENSEMBL_SPECIES}                 .'::'.
             $self->core_objects->{parameters}{db} .'::'.
-            $self->core_objects->{parameters}{g}  .'::';
+            $self->core_objects->{parameters}{t}  .'::';
 
   my $counts;
 

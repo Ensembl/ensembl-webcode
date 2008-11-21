@@ -159,7 +159,7 @@ sub configurator {
     } else { ### We are updating a view config!
       $vc->update_from_input( $input );
       if( $ENV{'ENSEMBL_ACTION'} ne 'ExternalData' ) {
-        my $vc_2 = $session->getViewConfig( undef, 'ExternalData' );
+        my $vc_2 = $session->getViewConfig( $ENV{'ENSEMBL_TYPE'}, 'ExternalData' );
         $vc_2->update_from_input( $input ) if $vc_2;
       }
       $session->store;

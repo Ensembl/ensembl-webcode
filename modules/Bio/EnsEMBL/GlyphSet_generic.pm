@@ -134,7 +134,7 @@ my $offset = $self->{'container'}->start - 1;
           $group->{'label'}||$group->{'id'},
           $group->{'start'} + $offset,
           $group->{'end'}   + $offset,
-          $ori > 0 ? 'Forward' : $ori < 0 ? 'Reverse' : '-';
+          $group->{'strand'} > 0 ? 'Forward' : $group->{'strand'} < 0 ? 'Reverse' : '-';
         $title .= '; Features: '.$group->{'count'} if $group->{'count'} > 1;
 #        $title .= $group->{'notes'};
         if( @{$group->{'links'}||[]} ) {
@@ -228,7 +228,7 @@ my $offset = $self->{'container'}->start - 1;
           $f->display_label||$f->display_id,
           $f->seq_region_start,
           $f->seq_region_end,
-          $ori > 0 ? 'Forward' : $ori < 0 ? 'Reverse' : '-';
+          $ori > $f->seq_region_strand ? 'Forward' : $f->seq_region_strand < 0 ? 'Reverse' : '-';
 #        $title .= $f->{'notes'};
         $href = $f->{'link'}->[0]{'href'} if @{$f->{'link'}||[]};
         $title .= "; Type: ".$f->type_id if $f->type_id;
@@ -322,7 +322,7 @@ my $offset = $self->{'container'}->start - 1;
           my $f = $self->gen_feature({
             'start'  => $t->[1]+1,
             'end'    => $_->[0]-1,
-            'strand' => $ori 
+            'strand' => $group->{'strand'} 
           });
           $f->{'y'}            = $group->{'y'};
           $f->{'extent_start'} = $t->[1]+1;

@@ -155,7 +155,8 @@ sub load_user_tracks {
       $menu->append( $self->create_track( 'tmp_'.$entry->{'code'}, $entry->{'name'}, {
         '_class'      => 'tmp',
         'glyphset'    => '_flat_file',
-        'subtype'     => 'tmp_file',
+        'colourset'   => 'classes',
+        'sub_type'     => 'tmp',
         'file'        => $entry->{'filename'},
         'format'      => $entry->{'format'},
         'caption'     => $entry->{'name'},
@@ -194,8 +195,9 @@ sub load_user_tracks {
     $menu->append($self->create_track( 'url_'.md5_hex( $_ ), $url_sources{$_}{'source_name'}, {
       '_class'      => 'url',
       'glyphset'    => '_flat_file',
+      'colourset'   => 'classes',
       'caption'     => $url_sources{$_}{'source_name'},
-      'subtype'     => 'url',
+      'sub_type'     => 'url',
       'url'         => $_,
       'renderers'   => $renderers,
       'description' => sprintf ( '
@@ -473,16 +475,17 @@ sub load_tracks {
  
 sub load_configured_das {
   my $self=shift;
+  my @extra = @_;
   ## Now we do the das stuff - to append to menus (if the menu exists!!)
   my $internal_das_sources = $self->species_defs->get_all_das;
   foreach my $source ( sort { $a->caption cmp $b->caption } values %$internal_das_sources ) {
     $source->is_on($self->{'type'}) || next;
-    $self->add_das_track( $source->category,  $source );
+    $self->add_das_track( $source->category,  $source, @extra );
   }
 }
 
 sub add_das_track {
-  my( $self, $menu, $source ) = @_;
+  my( $self, $menu, $source, @extra ) = @_;
   my $node = $self->get_node($menu);
   if( !$node && grep { $menu eq $_ } @TRANSCRIPT_TYPES) {
     for (@TRANSCRIPT_TYPES) {
@@ -501,6 +504,7 @@ sub add_das_track {
     $desc .= sprintf ' [<a href="%s">Homepage</a>]', $homepage;
   }
   my $t = $self->create_track( "das_".$source->logic_name,$source->label, {
+    @extra,
     '_class'      => 'DAS',
     'glyphset'    => '_das',
     'display'     => 'off',
@@ -1324,6 +1328,17 @@ sub add_decorations {
       'description'   => 'Haplotype (HAPs) and Pseudo autosomal regions (PARs)',
       'colourset'     => 'assembly_exception'
     }));
+  }
+  if( $key eq 'core' && $hashref->{'karyotype'}{'rows'}>0 && ! $self->get_node('ideogram') ) {
+    $menu->append( $self->create_track( 'chr_band_'.$key, 'Chromosome bands',{
+      'db'            => $key,
+      'glyphset'      => 'chr_band',
+      'display'       => 'normal',
+      'strand'        => 'f',
+      'description'   => 'Cytogenetic bands',
+      'colourset'     => 'ideogram'
+    }));
+
   }
 }
 #----------------------------------------------------------------------#

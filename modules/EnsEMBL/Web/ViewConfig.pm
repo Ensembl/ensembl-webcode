@@ -190,6 +190,62 @@ sub update_from_input {
   return;
 }
 
+sub update_from_config_strings {
+### Loop through the parameters and update the config based on the parameters passed!
+  my( $self, $session, $r ) = @_;
+  my $input = $session->input;
+  my $flag = 0;
+  if( $input->param('config') ) {
+    foreach my $v ( split /,/, $input->param('config') ) {
+      my( $k,$t ) = split /=/, $v,2;
+      $self->set($k,$t);
+    }
+  }
+  my $flag = 0;
+  foreach my $name ( $self->image_configs ) {
+    if( $input->param($name) ) {
+      my $ic = $session->getImageConfig($name,$name);
+      next unless $ic;
+      foreach my $v ( split /,/, $input->param($name) ) {
+        my( $key,$render ) = split /=/,$v,2;
+## Now we have to get the image_config... and modify it...
+        if( $key =~ /^(\w+)\.(.*)$/ ) {
+          my( $type, $p ) = ($1,$2);
+          if( $type eq 'url' ) {
+## We have to create a URL upload entry in the session...
+            use Digest::MD5 qw(md5_hex);
+            my $code = md5_hex($p);
+            my $n    =  $p =~ /\/([^\/]+)\/*$/ ? $1 : 'un-named';
+            $session->set_data(
+              'type'    => 'url',
+              'url'     => $p,
+              'species' => $ENV{'ENSEMBL_SPECIES'},
+              'code'    => $code, 
+              'name'    => $n
+            );
+## We then have to create a node in the user_config...
+            $ic->_add_flat_file_track( undef, 'url', "url_$code", $n, 
+              sprintf ( '
+  Data retrieved from an external webserver.
+  This data is attached to the %s, and comes from URL: %s', CGI::escapeHTML( $n ), CGI::escapeHTML( $p ) ),
+              'url' => $p
+            );
+            my $nd = $ic->get_node( "url_$code" );
+## Then we have to set the renderer...
+            $flag += $nd->set_user( 'display', $render ) if $nd;
+          }
+        } else {
+          my $nd = $ic->get_node($key);
+          $flag += $nd->set_user( 'display', $render ) if $nd;
+        }
+      }
+    }
+  }
+  $self->altered = 1 if $flag;
+  $session->store;
+  return;
+}
+
 sub delete {
 ### Delete a key from the user settings
   my($self, $key ) = @_;

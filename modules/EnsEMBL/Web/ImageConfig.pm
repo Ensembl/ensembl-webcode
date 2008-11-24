@@ -13,6 +13,14 @@ my $reg = "Bio::EnsEMBL::Registry";
 
 our @TRANSCRIPT_TYPES = qw(transcript alignslice_transcript tsv_transcript gsv_transcript TSE_transcript gene);
 
+our $alignment_renderers = [
+  'off'         => 'Off',
+  'normal'      => 'Normal',
+  'half_height' => 'Half height',
+  'stack'       => 'Stacked',
+  'unlimited'   => 'Stacked unlimited',
+  'ungrouped'   => 'Ungrouped'
+];
 our $MEMD = EnsEMBL::Web::Cache->new;
 
 #########
@@ -120,14 +128,6 @@ sub load_user_tracks {
 ## Then those attached as URLs to either the session or the User
 
 ## Now we deal with the url sources... again flat file!
-  my $renderers = [
-    'off'         => 'Off',
-    'normal'      => 'Normal',
-    'half_height' => 'Half height',
-    'stack'       => 'Stacked',
-    'unlimited'   => 'Stacked unlimited',
-    'ungrouped'   => 'Ungrouped'
-  ];
 
   my %url_sources = ();
   my %user_sources = ();
@@ -160,7 +160,7 @@ sub load_user_tracks {
         'file'        => $entry->{'filename'},
         'format'      => $entry->{'format'},
         'caption'     => $entry->{'name'},
-        'renderers'   => $renderers,
+        'renderers'   => $alignment_renderers,
         'description' => '
   Data that has been temporarily uploaded to the web server.',
         'display'     => 'normal',
@@ -192,20 +192,12 @@ sub load_user_tracks {
   }
 
   foreach (sort { $url_sources{$a}{'source_name'} cmp $url_sources{$b}{'source_name'} } keys %url_sources  ) {
-    $menu->append($self->create_track( 'url_'.md5_hex( $_ ), $url_sources{$_}{'source_name'}, {
-      '_class'      => 'url',
-      'glyphset'    => '_flat_file',
-      'colourset'   => 'classes',
-      'caption'     => $url_sources{$_}{'source_name'},
-      'sub_type'     => 'url',
-      'url'         => $_,
-      'renderers'   => $renderers,
-      'description' => sprintf ( '
+    $self->_add_flat_file_track( $menu, 'url', 'url_'.md5_hex( $_ ), $url_sources{$_}{'source_name'},
+      sprintf ( '
   Data retrieved from an external webserver.
   This data is attached to the %s, and comes from URL: %s', CGI::escapeHTML( $url_sources{$_}{'source_type'}), CGI::escapeHTML( $_ ) ),
-      'display'     => 'normal',
-      'strand'      => 'b'
-    }));
+      'url' => $_
+    );
   }
   if( keys %user_sources ) { ## We now need to get a userdata adaptor to get the analysis info!
     my $dbs         = EnsEMBL::Web::DBSQL::DBConnection->new( $self->{'species'} );
@@ -219,7 +211,7 @@ sub load_user_tracks {
       push @tracks, ['user_'.$logic_name, $analysis->display_label, {
         '_class'      => 'user',
         'glyphset'    => '_user_data',
-        'renderers'   => $renderers,
+        'renderers'   => $alignment_renderers,
         'source_name' => $user_sources{$logic_name}{'source_name'},
         'logic_name'  => $logic_name,
         'caption'     => $analysis->display_label,
@@ -240,39 +232,28 @@ sub load_user_tracks {
     }
   }
   
-## Do we have a user?!
-
-### Now get the tracks that have been stored in the database...
-## Firstly those shared (and attached to the session)
-
-## Then those attached to the user account
-=pod  
-    foreach my $u ( 
-  
-  warn "USER: ",Dumper( $t );
-    foreach my $upload ($user->uploads) {
-      if ($upload->species eq $self->{'species'}) {
-        foreach my $logic_name( split ', ', $upload->analyses ) {
-          $menu->append($self->create_track( "user_$logic_name", $logic_name, {
-            '_class'      => 'user',
-            'glyphset'    => '_tmp_user_data',
-            'url'         => 'tmp',
-            'caption'     => $logic_name,
-            'logic_names' => [$logic_name],
-            'description' => $upload->format.' file saved in your user account',
-            'display'     => 'normal',
-            'renderers'   => [qw(off Off normal Normal)],
-            'strand'      => 'b',
-          }));
-          $i++;
-        }
-      }
-    }
-  }
-=cut
-
-## 
   return;
+}
+
+sub _add_flat_file_track {
+  my( $self, $menu, $sub_type, $key, $name, $description, %X ) = @_;
+  $menu ||= $self->get_node('user_data');
+  return unless $menu;
+  my $X = $self->create_track( $key, $name, {
+    'display'     => 'normal',
+    'strand'      => 'b',
+    '_class'      => 'url',
+    'glyphset'    => '_flat_file',
+    'colourset'   => 'classes',
+    'caption'     => $name,
+    'sub_type'    => $sub_type,
+    'renderers'   => $alignment_renderers,
+    'description' => $description,
+    %X
+  });
+  if( $X ) {
+    $menu->append($X);
+  };
 }
 
 sub update_from_input {

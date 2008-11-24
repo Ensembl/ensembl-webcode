@@ -311,15 +311,19 @@ sub attach_das {
         $source->coord_systems(\@expand_coords);
       }
       
-      if( $self->object->get_session->add_das(
-        $source,
-        $self->object->_parse_referer( $self->object->param('_referer') )
-      )) {
+      # NOTE: at present the interface only allows adding a source that has not
+      # already been added (by disabling their checkboxes). Thus this call
+      # should always evaluate true at present.
+      if( $self->object->get_session->add_das( $source ) ) {
         push @success, $source->logic_name;
       } else {
         push @skipped, $source->locic_name;
       }
-
+      #  Either way, turn the source on...
+      $self->object->get_session->configure_das_views(
+        $source,
+        $self->object->_parse_referer( $self->object->param('_referer') )
+      );
     }
     $self->object->get_session->save_das;
     $self->parameter('added', \@success);

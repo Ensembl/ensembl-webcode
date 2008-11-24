@@ -211,6 +211,8 @@ sub load_user_tracks {
       push @tracks, ['user_'.$logic_name, $analysis->display_label, {
         '_class'      => 'user',
         'glyphset'    => '_user_data',
+        'colourset'   => 'classes',
+        'sub_type'    => 'user',
         'renderers'   => $alignment_renderers,
         'source_name' => $user_sources{$logic_name}{'source_name'},
         'logic_name'  => $logic_name,

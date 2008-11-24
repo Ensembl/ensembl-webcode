@@ -551,13 +551,13 @@ sub get_das_servers {
 sub get_das_server_dsns {
   my ($self, @logic) = @_;
   
-  my $server  = $self->_das_server_param();
+  my ($server, $dsn) = $self->_das_server_param();
   my $species = $ENV{ENSEMBL_SPECIES};
   if ($species eq 'common') {
     $species = $self->species_defs->ENSEMBL_PRIMARY_SPECIES;
   }
 
-  my $name    = $self->param('das_name_filter');
+  my @name    = grep { $_ } $dsn, $self->param('das_name_filter');
   @logic      = grep { $_ } @logic;
   my $sources;
   
@@ -571,12 +571,13 @@ sub get_das_server_dsns {
     
     $sources = $parser->fetch_Sources(
       -species    => $species || undef,
-      -name       => $name    || undef,
-      -logic_name => scalar @logic ? \@logic : undef,
+      -name       => scalar @name  ? \@name  : undef, # label or DSN
+      -logic_name => scalar @logic ? \@logic : undef, # the URI
     );
     
     if (!$sources || !scalar @{ $sources }) {
-      $sources = "No DAS sources found for $server";
+      my $filters = @name ? ' named ' . join ' or ', @name : '';
+      $sources = "No $species DAS sources$filters found for $server";
     }
     
   } catch {
@@ -597,19 +598,20 @@ sub _das_server_param {
   for my $key ( 'other_das', 'preconf_das' ) {
     
     # Get and "fix" the server URL
-    my $server = $self->param( $key ) || next;
+    my $raw = $self->param( $key ) || next;
     
-    if ($server !~ /^\w+\:/) {
-      $server = "http://$server";
+    if ($raw !~ /^\w+\:/) {
+      $raw = "http://$raw";
     }
-    if ($server =~ /^http/) {
-      $server =~ s|/*$||;
-      if ($server !~ m{/das1?$}) {
-        $server = "$server/das";
-      }
+    $raw =~ s|/+$||;
+    my ($server, $dsn) = $raw =~ m{(.+/das)1?(?:/(.+))?};
+    # If this regex doesn't match, there is no /das in the string
+    if (!$server) {
+      $server = "$raw/das";
     }
-    $self->param( $key, $server );
-    return $server;
+
+    $self->param( $key, $dsn ? "$server/$dsn" : $server );
+    return ($server, $dsn);
     
   }
   

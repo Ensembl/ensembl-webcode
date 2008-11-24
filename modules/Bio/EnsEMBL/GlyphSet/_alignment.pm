@@ -246,7 +246,8 @@ sub render_ungrouped {
   my $regexp = $pix_per_bp > 0.1 ? '\dI' : ( $pix_per_bp > 0.01 ? '\d\dI' : '\d\d\dI' );
   my $features_drawn = 0;
   my $X             = -1e8; ## used to optimize drawing!
-  my $feature_colour = $self->my_colour( $self->my_config( 'sub_type') );
+  my %features = $self->features;
+  my $feature_colour = $self->my_colour( $self->my_config( 'sub_type' ), undef  );
 
 ## Grab all the features;
 ## Remove those not on this display strand
@@ -255,7 +256,6 @@ sub render_ungrouped {
 
   my $y_offset = 0;
 
-  my %features  = $self->features;
   foreach my $feature_key ( $strand < 0 ? sort keys %features : reverse sort keys %features ) {
     $self->{'track_key'} = $feature_key;
     foreach my $f (

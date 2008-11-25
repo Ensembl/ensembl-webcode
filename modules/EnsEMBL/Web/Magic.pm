@@ -236,7 +236,9 @@ sub ingredient {
 
   my $session_id   = $ENSEMBL_WEB_REGISTRY->get_session->get_session_id;
   $ENV{CACHE_KEY}  = $ENV{REQUEST_URI};
-  $ENV{CACHE_TAGS} = {$ENV{'HTTP_REFERER'} => 1};
+  $ENV{CACHE_TAGS} ||= {};
+  $ENV{CACHE_TAGS}->{$ENV{'HTTP_REFERER'}} = 1;
+
   ## Ajax request
   $ENV{CACHE_KEY} .= "::SESSION[$session_id]" if $session_id;
   $ENV{CACHE_KEY} .= "::WIDTH[$ENV{ENSEMBL_IMAGE_WIDTH}]" if $ENV{'ENSEMBL_IMAGE_WIDTH'};
@@ -328,6 +330,16 @@ sub stuff {
   my $input = new CGI;
   if (my @share_ref = $input->param('share_ref')) {
     $session->receive_shared_data(@share_ref);
+  }
+
+  if (
+      $MEMD && 
+      ($r->headers_in->{'Cache-Control'} eq 'max-age=0' || $r->headers_in->{'Pragma'} eq 'no-cache')
+     ) {
+      $MEMD->delete_by_tags(
+        $ENSEMBL_WEB_REGISTRY->species_defs->ENSEMBL_BASE_URL.$ENV{'REQUEST_URI'},
+        $session_id ? "session_id[$session_id]" : (),
+      );
   }
 
   my $content = ($MEMD && $ENSEMBL_WEB_REGISTRY->check_ajax) ? $MEMD->get($ENV{CACHE_KEY}) : undef;
@@ -432,7 +444,11 @@ sub stuff {
     }
 
     $content = $webpage->page->renderer->content;
-    my @tags = qw(DYNAMIC);
+
+    my @tags = (
+      $ENSEMBL_WEB_REGISTRY->species_defs->ENSEMBL_BASE_URL . $ENV{'REQUEST_URI'},
+      'DYNAMIC'
+    );
     push @tags, keys %{ $ENV{CACHE_TAGS} } if $ENV{CACHE_TAGS};
     $MEMD->set($ENV{CACHE_KEY}, $content, 60*60*24*7, @tags)
       if $MEMD &&

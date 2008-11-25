@@ -146,7 +146,6 @@ sub validate_das {
            : $no_coords  ? 'select_das_coords'
            : 'attach_das';
   $self->parameter('wizard_next', $next);
-  warn ">>> NEXT $next";
   return;
 }
 

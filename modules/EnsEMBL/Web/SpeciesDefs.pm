@@ -110,13 +110,16 @@ sub get_all_das {
     $species = '';
   }
   
-  return { 
-    map {
-      my $t = EnsEMBL::Web::DASConfig->new_from_hashref( $sources_hash->{$_} );
-      $t->matches_species( $species ) ? ($t->logic_name => $t) : ()
-    }
-    keys %$sources_hash
-  };
+  my %by_name = ();
+  my %by_url  = ();
+  for ( values %$sources_hash ) {
+    my $das = EnsEMBL::Web::DASConfig->new_from_hashref( $_ );
+    $das->matches_species( $species ) || next;
+    $by_name{$das->logic_name} = $das;
+    $by_url {$das->full_url  } = $das;
+  }
+  
+  return wantarray ? ( \%by_name, \%by_url ) : \%by_name;
 }
 
 sub name {

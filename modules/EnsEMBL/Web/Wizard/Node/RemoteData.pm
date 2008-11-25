@@ -73,12 +73,12 @@ sub select_das {
     $self->set_extra_buttons('top'); ## Repeat buttons at top, as this is often a long form
     $fieldset->{'layout'} = 'table';
     my @already_added = ();
-    my $all_das = $ENSEMBL_WEB_REGISTRY->get_all_das(  );
+    my @all_das = $ENSEMBL_WEB_REGISTRY->get_all_das();
     for my $source (@{ $sources }) {
       
       # If the source is already in the speciesdefs/session/user, skip it
       my $already_added = 0;
-      if ( $all_das->{$source->logic_name} ) {
+      if ( $all_das[1]->{ $source->full_url } ) {
         push @already_added, $source;
         $already_added = 1;
       }
@@ -420,7 +420,6 @@ sub show_tempdas {
 sub save_tempdas {
   my $self = shift;
 
-  warn ">>> Saving remote data";
   my $user = $ENSEMBL_WEB_REGISTRY->get_user;
   my @sources = grep {$_} $self->object->param('dsn');
   

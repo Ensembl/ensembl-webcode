@@ -562,13 +562,7 @@ sub get_das_server_dsns {
   my $sources;
   
   try {
-    my $parser = Bio::EnsEMBL::ExternalData::DAS::SourceParser->new(
-      -location => $server,
-      -timeout  => $self->species_defs->ENSEMBL_DAS_TIMEOUT,
-      -proxy    => $self->species_defs->ENSEMBL_WWW_PROXY,
-      -noproxy  => $self->species_defs->ENSEMBL_NO_PROXY,
-    );
-    
+    my $parser = $self->get_session->get_das_parser( $server );
     $sources = $parser->fetch_Sources(
       -species    => $species || undef,
       -name       => scalar @name  ? \@name  : undef, # label or DSN
@@ -599,20 +593,7 @@ sub _das_server_param {
     
     # Get and "fix" the server URL
     my $raw = $self->param( $key ) || next;
-    
-    if ($raw !~ /^\w+\:/) {
-      $raw = "http://$raw";
-    }
-    $raw =~ s|/+$||;
-    my ($server, $dsn) = $raw =~ m{(.+/das)1?(?:/(.+))?};
-    # If this regex doesn't match, there is no /das in the string
-    if (!$server) {
-      $server = "$raw/das";
-    }
-    # Could have entered http://foo.com/das/dsn
-    if ($dsn && $dsn =~ m/^(sources|dsn)$/) {
-      $dsn = undef;
-    }
+    my ($server, $dsn) = $self->get_session->parse_das_string( $raw );
 
     $self->param( $key, $dsn ? "$server/$dsn" : $server );
     return ($server, $dsn);

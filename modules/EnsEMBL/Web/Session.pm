@@ -32,6 +32,7 @@ our %DAS_IMAGE_DEFAULTS = ( 'display' => 'off' );
 ## Modified parameters built in BUILD fnuction...
   my %Configs_of       :ATTR;
   my %Das_sources_of   :ATTR( :get<das_sources>  );
+  my %Das_parsers_of   :ATTR( :get<das_parsers>  );
   my %ImageConfigs_of  :ATTR;
   my %Path_of          :ATTR( :get<path> );
 ## Lazy loaded objects....
@@ -74,10 +75,11 @@ sub BUILD {
   my( $class, $ident,  $arg_ref ) = @_;
 ### Most of the build functions is done automagically by Class::Std, two unusual ones
 ### are the path and Cookie object..
-  $Configs_of{      $ident } = {}; # Initialize empty hash!
-  $ImageConfigs_of{ $ident } = {}; # Initialize emtpy hash!
-  $Data_of{         $ident } = {}; # Initialize empty hash!
-  $Path_of{         $ident } = ['EnsEMBL::Web', reverse @{$arg_ref->{'path'}||[]}];
+  $Configs_of      { $ident } = {}; # Initialize empty hash!
+  $ImageConfigs_of { $ident } = {}; # Initialize emtpy hash!
+  $Data_of         { $ident } = {}; # Initialize empty hash!
+  $Das_parsers_of  { $ident } = {}; # Initialize empty hash!
+  $Path_of         { $ident } = ['EnsEMBL::Web', reverse @{$arg_ref->{'path'}||[]}];
 }
 
 sub input {
@@ -360,6 +362,23 @@ sub receive_shared_data {
 ###################################################################################################
 
 
+sub get_das_parser {
+  my ( $self, $location ) = @_;
+  
+  # Location is server (though in theory it doesn't have to be HTTP)
+  my $parser = $self->get_das_parsers()->{$location};
+  if (! $parser ) {
+    $parser = Bio::EnsEMBL::ExternalData::DAS::SourceParser->new(
+        -location => $location,
+        -timeout  => $self->get_species_defs->ENSEMBL_DAS_TIMEOUT,
+        -proxy    => $self->get_species_defs->ENSEMBL_WWW_PROXY,
+        -noproxy  => $self->get_species_defs->ENSEMBL_NO_PROXY,
+      );
+    $self->get_das_parsers()->{$location} = $parser;
+  }
+  return $parser;
+}
+
 # This method gets all configured DAS sources for the current session, i.e. all
 # those either added or modified externally.
 # Returns a hashref, indexed by logic_name.
@@ -378,7 +397,7 @@ sub get_all_das {
   );  
 
   # If there is no session, there are no configs
-  return {} unless $self->get_session_id;
+  return ({},{}) unless $self->get_session_id;
   
   # If the cache hasn't been initialised, do it
   if ( ! $Das_sources_of{ ident $self } ) {
@@ -395,18 +414,20 @@ sub get_all_das {
       $config->data || next;
       # Create new DAS source from value in database...
       my $das = EnsEMBL::Web::DASConfig->new_from_hashref( $config->data );
-      $das->category( 'session' );
+      $das->category( 'session' ); # paranoia...
       $Das_sources_of{ ident $self }{ $das->logic_name } = $das;
     }
   }
   
-  return { map {
-    $_->logic_name => $_
-  } grep {
-    $_->matches_species( $species )
-  } values %{ $Das_sources_of{ ident $self } }};
+  my %by_name = ();
+  my %by_url  = ();
+  for my $das ( values %{ $Das_sources_of{ ident $self } } ) {
+    $das->matches_species( $species ) || next;
+    $by_name{$das->logic_name} = $das;
+    $by_url {$das->full_url  } = $das;
+  }
   
-  return $Das_sources_of{ ident $self };
+  return wantarray ? ( \%by_name, \%by_url ) : \%by_name;
 }
 
 # Save all session-specific DAS sources back to the database
@@ -451,15 +472,19 @@ sub save_das {
 sub _get_unique_source_name {
   my( $self, $source ) = @_;
   
-  my $sources = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_all_das;
+  my @sources = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_all_das;
   for ( my $i = 0; 1; $i++ ) {
     my $test_name = $i ? $source->logic_name . "_$i" : $source->logic_name;
-    if ( my $test_source = $sources->{$test_name} ) {
+    my $test_url  = $i ? $source->full_url   . "_$i" : $source->full_url;
+    
+    my $test_source = $sources[0]->{$test_name} || $sources[1]->{$test_url};
+    if ( $test_source ) {
       if ( $source->equals( $test_source ) ) {
         return;
       }
       next;
     }
+    
     return $test_name;
   }
   
@@ -482,8 +507,7 @@ sub add_das {
   return 0;
 }
 
-# Make sure a DAS source is available on all the views it is suitable for,
-# and switched on for the 'current view' (if it is suitable)
+# Switch on a DAS source for the current view/image (if it is suitable)
 sub configure_das_views {
   my ($self, $das, $referer_hash, $track_options) = @_;
   my $this_type   = $referer_hash->{'ENSEMBL_TYPE'  } || $ENV{'ENSEMBL_TYPE'};
@@ -533,6 +557,74 @@ sub configure_das_views {
   }
   
   return;
+}
+
+
+sub add_das_from_string {
+  my ( $self, $string, $view_details, $track_options ) = @_;
+
+  my @existing = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->get_all_das();
+  my ($server, $identifier) = $self->parse_das_string( $string );
+  # If we couldn't reliably parse an identifier (i.e. string is not a URL),
+  # assume it is a registry ID
+  if ( !$identifier ) {
+    $identifier = $string;
+    $server     = $self->get_species_defs->DAS_REGISTRY_URL;
+  }
+
+  # Check if the source has already been added, otherwise add it
+  my $source = $existing[0]->{$identifier} || $existing[1]->{"$server/$identifier"};
+  unless ($source) {
+    # If not, parse the DAS server to get a list of sources...
+    for ( @{ $self->get_das_parser($server)->fetch_Sources() } ) {
+      # ... and look for one with a matcing URI or DSN
+      if ( $_->logic_name eq $identifier || $_->dsn eq $identifier ) {
+        $source = EnsEMBL::Web::DASConfig->new_from_hashref( $_ );
+        $self->add_das( $source );
+        $self->save_das();
+        last;
+      }
+    }
+  }
+
+  if ( $source ) {
+    # so long as the source is 'suitable' for this view, turn it on
+    $self->configure_das_views( $source, $view_details, $track_options );
+  } else {
+    return "Unable to find a source named $identifier on $server";
+  }
+
+  return;
+}
+
+# Convert some form of DAS source identifier into a server URI and relative
+# source URI. Where no reliable inference can be made, a server URI is returned
+# but no DSN (rather than the other way around).
+# e.g. http://server/das             -> http://server/das              + undef
+#      http://server/das/            -> http://server/das              + undef
+#      http://server/das/foo         -> http://server/das              + foo
+#      file://server/das/foo         -> file://server/das              + foo
+#      http://server/das/sources/foo -> http://server/das              + foo
+#      server/das/foo                -> http://server/das              + foo
+#      server/das/sources/foo        -> http://server/das              + foo
+#      foo                           -> http://foo/das                 + undef
+sub parse_das_string {
+  my ( $self, $in ) = @_;
+  # OK... start the analysis...
+  if ($in !~ m{^\w+:}) {
+    $in = "http://$in"; # if no scheme, assume http
+  }
+  if ( $in !~ m{/das1?/|/das1?$} ) {
+    $in = "$in/das";
+  }
+  # separate server from identifier
+  my ($server, $dsn) = $in =~ m{^(.+/das)1?(?:/+(.+))?};
+  if ( $dsn ) {
+    $dsn =~ s!(sources|dsn)(/|$)!!; # Check for http://foo.com/das/dsn
+    $dsn =~ s!/+$!!; # Make sure doesn't end in a slash
+  }
+  
+  return ($server, $dsn);
 }
 
 sub deepcopy {

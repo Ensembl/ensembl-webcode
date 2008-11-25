@@ -609,6 +609,10 @@ sub _das_server_param {
     if (!$server) {
       $server = "$raw/das";
     }
+    # Could have entered http://foo.com/das/dsn
+    if ($dsn && $dsn =~ m/^(sources|dsn)$/) {
+      $dsn = undef;
+    }
 
     $self->param( $key, $dsn ? "$server/$dsn" : $server );
     return ($server, $dsn);

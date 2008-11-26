@@ -110,7 +110,6 @@ sub Stylesheet {
       <GLYPH>
          <ANCHORED_ARROW>
 	   <HEIGHT>10</HEIGHT>
-           <BGCOLOR>lightblue3</BGCOLOR>
            <FGCOLOR>lightblue3</FGCOLOR>
 	   <BAR_STYLE>line</BAR_STYLE>
 	   <NO_ANCHOR>1</NO_ANCHOR>
@@ -126,7 +125,6 @@ sub Stylesheet {
       <GLYPH>
          <ANCHORED_ARROW>
 	   <HEIGHT>10</HEIGHT>
-           <BGCOLOR>lightblue3</BGCOLOR>
            <FGCOLOR>lightblue3</FGCOLOR>
 	   <BAR_STYLE>line</BAR_STYLE>
 	   <NO_ANCHOR>1</NO_ANCHOR>

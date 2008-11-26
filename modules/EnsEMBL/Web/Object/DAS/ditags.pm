@@ -131,7 +131,6 @@ sub Stylesheet {
       <GLYPH>
          <ANCHORED_ARROW>
            <HEIGHT>10</HEIGHT>
-           <BGCOLOR>darkolivegreen1</BGCOLOR>
            <FGCOLOR>darkolivegreen1</FGCOLOR>
            <BAR_STYLE>line</BAR_STYLE>
            <NO_ANCHOR>1</NO_ANCHOR>
@@ -144,7 +143,6 @@ sub Stylesheet {
       <GLYPH>
          <ANCHORED_ARROW>
            <HEIGHT>10</HEIGHT>
-           <BGCOLOR>darkolivegreen1</BGCOLOR>
            <FGCOLOR>darkolivegreen1</FGCOLOR>
            <BAR_STYLE>line</BAR_STYLE>
            <NO_ANCHOR>1</NO_ANCHOR>
@@ -157,7 +155,6 @@ sub Stylesheet {
       <GLYPH>
          <ANCHORED_ARROW>
            <HEIGHT>10</HEIGHT>
-           <BGCOLOR>lightblue1</BGCOLOR>
            <FGCOLOR>lightblue1</FGCOLOR>
            <BAR_STYLE>line</BAR_STYLE>
            <NO_ANCHOR>1</NO_ANCHOR>
@@ -170,7 +167,6 @@ sub Stylesheet {
       <GLYPH>
          <ANCHORED_ARROW>
            <HEIGHT>10</HEIGHT>
-           <BGCOLOR>lightblue1</BGCOLOR>
            <FGCOLOR>lightblue1</FGCOLOR>
            <BAR_STYLE>line</BAR_STYLE>
            <NO_ANCHOR>1</NO_ANCHOR>
@@ -183,7 +179,6 @@ sub Stylesheet {
       <GLYPH>
          <ANCHORED_ARROW>
            <HEIGHT>10</HEIGHT>
-           <BGCOLOR>lightblue1</BGCOLOR>
            <FGCOLOR>lightblue1</FGCOLOR>
            <BAR_STYLE>line</BAR_STYLE>
            <NO_ANCHOR>1</NO_ANCHOR>
@@ -196,7 +191,6 @@ sub Stylesheet {
       <GLYPH>
          <ANCHORED_ARROW>
            <HEIGHT>10</HEIGHT>
-           <BGCOLOR>lightblue1</BGCOLOR>
            <FGCOLOR>lightblue1</FGCOLOR>
            <BAR_STYLE>line</BAR_STYLE>
            <NO_ANCHOR>1</NO_ANCHOR>
@@ -209,7 +203,6 @@ sub Stylesheet {
       <GLYPH>
          <ANCHORED_ARROW>
            <HEIGHT>10</HEIGHT>
-           <BGCOLOR>darkolivegreen1</BGCOLOR>
            <FGCOLOR>darkolivegreen1</FGCOLOR>
            <BAR_STYLE>line</BAR_STYLE>
            <NO_ANCHOR>1</NO_ANCHOR>
@@ -222,7 +215,6 @@ sub Stylesheet {
       <GLYPH>
          <ANCHORED_ARROW>
            <HEIGHT>10</HEIGHT>
-           <BGCOLOR>darkolivegreen1</BGCOLOR>
            <FGCOLOR>darkolivegreen1</FGCOLOR>
            <BAR_STYLE>line</BAR_STYLE>
            <NO_ANCHOR>1</NO_ANCHOR>
@@ -235,7 +227,6 @@ sub Stylesheet {
       <GLYPH>
          <ANCHORED_ARROW>
            <HEIGHT>10</HEIGHT>
-           <BGCOLOR>royalblue1</BGCOLOR>
            <FGCOLOR>royalblue1</FGCOLOR>
            <BAR_STYLE>line</BAR_STYLE>
            <NO_ANCHOR>1</NO_ANCHOR>
@@ -253,7 +244,6 @@ sub Stylesheet {
       <GLYPH>
          <ANCHORED_ARROW>
            <HEIGHT>10</HEIGHT>
-           <BGCOLOR>darkolivegreen1</BGCOLOR>
            <FGCOLOR>darkolivegreen1</FGCOLOR>
            <BAR_STYLE>line</BAR_STYLE>
            <NO_ANCHOR>1</NO_ANCHOR>
@@ -266,7 +256,6 @@ sub Stylesheet {
       <GLYPH>
          <ANCHORED_ARROW>
            <HEIGHT>10</HEIGHT>
-           <BGCOLOR>darkolivegreen1</BGCOLOR>
            <FGCOLOR>darkolivegreen1</FGCOLOR>
            <BAR_STYLE>line</BAR_STYLE>
            <NO_ANCHOR>1</NO_ANCHOR>
@@ -279,7 +268,6 @@ sub Stylesheet {
       <GLYPH>
          <ANCHORED_ARROW>
            <HEIGHT>10</HEIGHT>
-           <BGCOLOR>lightblue1</BGCOLOR>
            <FGCOLOR>lightblue1</FGCOLOR>
            <BAR_STYLE>line</BAR_STYLE>
            <NO_ANCHOR>1</NO_ANCHOR>
@@ -292,7 +280,6 @@ sub Stylesheet {
       <GLYPH>
          <ANCHORED_ARROW>
            <HEIGHT>10</HEIGHT>
-           <BGCOLOR>lightblue1</BGCOLOR>
            <FGCOLOR>lightblue1</FGCOLOR>
            <BAR_STYLE>line</BAR_STYLE>
            <NO_ANCHOR>1</NO_ANCHOR>
@@ -305,7 +292,6 @@ sub Stylesheet {
       <GLYPH>
          <ANCHORED_ARROW>
            <HEIGHT>10</HEIGHT>
-           <BGCOLOR>lightblue1</BGCOLOR>
            <FGCOLOR>lightblue1</FGCOLOR>
            <BAR_STYLE>line</BAR_STYLE>
            <NO_ANCHOR>1</NO_ANCHOR>
@@ -318,7 +304,6 @@ sub Stylesheet {
       <GLYPH>
          <ANCHORED_ARROW>
            <HEIGHT>10</HEIGHT>
-           <BGCOLOR>lightblue1</BGCOLOR>
            <FGCOLOR>lightblue1</FGCOLOR>
            <BAR_STYLE>line</BAR_STYLE>
            <NO_ANCHOR>1</NO_ANCHOR>
@@ -331,7 +316,6 @@ sub Stylesheet {
       <GLYPH>
          <ANCHORED_ARROW>
            <HEIGHT>10</HEIGHT>
-           <BGCOLOR>darkolivegreen1</BGCOLOR>
            <FGCOLOR>darkolivegreen1</FGCOLOR>
            <BAR_STYLE>line</BAR_STYLE>
            <NO_ANCHOR>1</NO_ANCHOR>
@@ -344,7 +328,6 @@ sub Stylesheet {
       <GLYPH>
          <ANCHORED_ARROW>
            <HEIGHT>10</HEIGHT>
-           <BGCOLOR>darkolivegreen1</BGCOLOR>
            <FGCOLOR>darkolivegreen1</FGCOLOR>
            <BAR_STYLE>line</BAR_STYLE>
            <NO_ANCHOR>1</NO_ANCHOR>
@@ -357,7 +340,6 @@ sub Stylesheet {
       <GLYPH>
          <ANCHORED_ARROW>
            <HEIGHT>10</HEIGHT>
-           <BGCOLOR>royalblue1</BGCOLOR>
            <FGCOLOR>royalblue1</FGCOLOR>
            <BAR_STYLE>line</BAR_STYLE>
            <NO_ANCHOR>1</NO_ANCHOR>

@@ -44,7 +44,6 @@ sub colour {
   #warn "GENECOL $KEY";
   my $genecol = $colours->{ $KEY } || [ 'orange', 'Other' ];
   
-  warn @$genecol;
   if(exists $highlights{lc($transcript->stable_id)}) {
     return (@$genecol, $colours->{'superhi'});
   } elsif(exists $highlights{lc($transcript->external_name)}) {
@@ -62,7 +61,6 @@ sub gene_colour {
   if( $gene->biotype eq 'bacterial_contaminant' ) {
     $genecol = $colours->{'_BACCOM'};
   }
-  warn @$genecol;
   if(exists $highlights{lc($gene->stable_id)}) {
     return (@$genecol, $colours->{'hi'});
   }

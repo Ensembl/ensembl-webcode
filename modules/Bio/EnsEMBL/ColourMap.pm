@@ -44,6 +44,16 @@ sub new {
     'ensembl_IG_gene_IG_J_gene_KNOWN',         => [ 'tan2',        'Known J gene' ],
   );
 
+  ## Mouse currently using old IG names
+  $self->colourSet( 'ensembl_segment',
+    'ensembl_segment_C_segment_KNOWN',         => [ 'darkorange3', 'Known C segment' ], #Translate
+    'ensembl_segment_V_segment_KNOWN',         => [ 'darkorange4', 'Known V segment' ], #Translate
+    'ensembl_segment_V_segment_NOVEL',         => [ 'chocolate4',  'Novel V segment' ], #Translate
+    'ensembl_segment_D_segment_KNOWN',         => [ 'peru',        'Known D segment' ],
+    'ensembl_segment_J_segment_KNOWN',         => [ 'tan2',        'Known J segment' ],
+  );
+
+
   my %core = (
     '_protein_coding'           => [ 'rust', 'Known Protein Coding' ],
     '_protein_coding_KNOWN'     => [ 'rust', 'Known Protein Coding' ],

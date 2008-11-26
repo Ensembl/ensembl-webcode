@@ -43,3 +43,5 @@ div#mart_bottom_bar { border: 0px; border-top: 1px solid black }
 .mart_btnhov_go:hover, .mart_btnhov:hover { background-color: #933 }
 
 .mart_summarypanel_listheader_highlighted, .mart_summarypanel_AttFiltHeader_highlighted { background-color: #fc9 }
+.mart_btn_new, .mart_btn_count, .mart_btn_url, .mart_btn_results, .mart_btn_help, .mart_btn_xml, .mart_btn_perl { background-color: #993333 }
+

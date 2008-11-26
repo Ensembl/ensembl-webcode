@@ -59,7 +59,6 @@ my $webpage= new EnsEMBL::Web::Document::WebPage(
 #  'fast'       => 1
 );
 
-warn ".... ", values %components, ' ... ', $webpage->factory->param('l');
 my $object = $webpage->dataObjects->[0];
 $object->param('image_width', $params{'image_width'});
 #warn "INCOMING WIDTH: " . $params{'image_width'};

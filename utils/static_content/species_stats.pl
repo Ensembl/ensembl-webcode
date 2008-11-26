@@ -145,8 +145,8 @@ foreach my $spp (@valid_spp) {
 
     ## logicnames for valid genes
     my $genetypes = "'ensembl', 'ensembl_havana_gene', 'havana', 'ensembl_projection',
-      'ensembl_ncRNA', 'tRNA', 'pseudogene', 'retrotransposed', 'human_ensembl_proteins',
-      'flybase', 'wormbase', 'vectorbase', 'sgd', 'HOX', 'CYT', 'GSTEN'";
+      'ensembl_ncRNA', 'tRNA', 'ncRNA', 'pseudogene', 'retrotransposed', 'human_ensembl_proteins',
+      'ensembl_IG_gene', 'flybase', 'wormbase', 'vectorbase', 'sgd', 'HOX', 'CYT', 'GSTEN'";
 
 
     my ($known, $novel, $proj, $pseudo, $rna);  
@@ -288,7 +288,7 @@ foreach my $spp (@valid_spp) {
 
     my $snps = 0;
     if ($var_db) {
-      ($snps) = &query ( $db,
+      ($snps) = &query ( $var_db,
         "SELECT COUNT(DISTINCT variation_id) FROM variation_feature",
         );
       print "SNPs:$snps\n" if $DEBUG;

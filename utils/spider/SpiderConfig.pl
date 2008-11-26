@@ -20,8 +20,8 @@ Usage:
 Note:
 
   spider.pl was slightly modified to use SpiderConfig.pl by default
-  instead of SwishSpiderConfig.pl, just because I like the name of it :)
-  It also was modified to accept URL(s) straight from command line, without specifying 
+  instead of SwishSpiderConfig.pl, just because I didn't like the name :)
+  It also was modified to accept URL(s) straight from command line
 
 Futher information:
 
@@ -87,7 +87,7 @@ sub test_url {
 sub test_response {
   ($uri, $server, $response, $parent) = @_;
   print $response->code.' ('.$response->message.') '.$uri."\n";
-  if ($response->code >= 400) {
+  if (($response->code >= 400) or ($uri =~ /stats/)) {
     print ERROR_PAGES "                $parent : \n";
     print ERROR_PAGES $response->code.' ('.$response->message.') '.$uri."\n";
   }

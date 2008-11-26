@@ -913,7 +913,7 @@ sub ADD_ALL_DNA_FEATURES {
     [ 'human_cdna',            'Human cDNAs' ],
     [ 'macaque_cdna',          'Macaque cDNAs' ],
     [ 'mouse_cdna',            'Mouse cDNAs' ],
-    [ 'rat_cdna',              'Rat cDNAs' ],
+    [ 'rat_cdna',              'Rat cDNAs [of]' ],
   );
 
   foreach ( @EST_DB_CDNA ) {
@@ -1209,6 +1209,7 @@ sub ADD_ALL_TRANSCRIPTS {
   my $POS  = shift || 2000;
   $self->add_new_track_transcript( 'ensembl',   'Ensembl genes',   'ensembl_gene',   $POS++, 'logic_name' => 'havana ensembl_havana_gene ensembl' );
   $self->add_new_track_transcript( 'ensembl_projection',   'Ensembl proj. genes',   'ensembl_projection',   $POS++, @_ );
+  $self->add_new_track_transcript( 'ensembl_segment',      'Ig segments',           'ensembl_segment',   $POS++, @_ );
   $self->add_new_track_transcript( 'ensembl_ig_gene',      'Ig genes',           'ensembl_ig_gene',   $POS++, @_ );
   $self->add_new_track_transcript( 'evega',         'Vega Havana gene',      'vega_gene_havana',    $POS++, 'glyph' => 'evega_transcript', 'db' => 'vega', 'logic_name' => 'otter', 'available' => 'database_features ENSEMBL_VEGA.OTTER',  'on' => 'off',   @_ );
   $self->add_new_track_transcript( 'evega_external','Vega External gene',    'vega_gene_external',  $POS++, 'glyph' => 'evega_transcript', 'db' => 'vega', 'logic_name' => 'otter_external', 'available' => 'database_features ENSEMBL_VEGA.OTTER_EXTERNAL', 'on' => 'off',    @_ );
@@ -1434,6 +1435,12 @@ sub ADD_GENE_TRACKS {
   $self->add_new_track_gene( 'ensembl_projection', 'Ensmebl projection', 'ensembl_projection', $POS++,
     'gene_label'           => sub { return $_[0]->external_name || $_[0]->stable_id },
     'gene_col'             => sub { return 'ensembl_projection_'.$_[0]->biotype.'_'.$_[0]->status; },
+    @_
+  );
+
+  $self->add_new_track_gene( 'ensembl_segment', 'Ensembl segment', 'ensembl_segment', $POS++,
+    'gene_label'           => sub { return $_[0]->external_name || $_[0]->stable_id },
+    'gene_col'             => sub { return 'ensembl_segment_'.$_[0]->biotype.'_'.$_[0]->status; },
     @_
   );
 

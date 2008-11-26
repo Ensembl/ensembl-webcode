@@ -910,7 +910,6 @@ sub init {
       push @{ $self->{'general'}->{'contigviewbottom'}{ '_artefacts'} }, $KEY;
       push @{ $self->{'general'}->{'contigviewbottom'}{'_settings'}{'compara'} },  [ $KEY , $METHOD->[3] ];
   }
-
-
 }
+
 1;

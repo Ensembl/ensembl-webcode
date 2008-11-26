@@ -127,7 +127,7 @@ sub create_RegulatoryFactor {
   my %fset_types = (
    "cisRED group motif" => "cisRED group motifs",
    "miRanda miRNA_target" => "miRanda miRNA",
-   "BioTIFFIN motif" => "BioTIFFIN motifs"
+   "BioTIFFIN motif" => "BioTIFFIN motifs",
   );
 
   my $feature_set_adaptor = $efg_db->get_FeatureSetAdaptor; 

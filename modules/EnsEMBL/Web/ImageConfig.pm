@@ -192,7 +192,8 @@ sub load_user_tracks {
   }
 
   foreach (sort { $url_sources{$a}{'source_name'} cmp $url_sources{$b}{'source_name'} } keys %url_sources  ) {
-    $self->_add_flat_file_track( $menu, 'url', 'url_'.md5_hex( $_ ), $url_sources{$_}{'source_name'},
+    my $k = 'url_'.md5_hex( $self->{'species'}.':'.$_ );
+    $self->_add_flat_file_track( $menu, 'url', $k, $url_sources{$_}{'source_name'},
       sprintf ( '
   Data retrieved from an external webserver.
   This data is attached to the %s, and comes from URL: %s', CGI::escapeHTML( $url_sources{$_}{'source_type'}), CGI::escapeHTML( $_ ) ),

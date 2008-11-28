@@ -324,13 +324,25 @@ sub stuff {
   ## If user logged in, some content depends on user
   $ENV{CACHE_KEY} .= "::USER[$ENV{ENSEMBL_USER_ID}]" if $ENV{ENSEMBL_USER_ID};
 
-  my $session_id  = $session->get_session_id;
-  $ENV{CACHE_KEY} .= "::SESSION[$session_id]" if $session_id;
 
   my $input = new CGI;
+  my $url = undef;
+  $session->set_input( $input );
   if (my @share_ref = $input->param('share_ref')) {
     $session->receive_shared_data(@share_ref);
+    $input->delete('share_ref');
+    $url = $input->self_url;
   }
+  my $vc = $session->getViewConfig( $ENV{'ENSEMBL_TYPE'}, $ENV{'ENSEMBL_ACTION'} );
+  my $url2 = $vc->update_from_config_strings( $session, $r );
+  $url = $url2 if $url2;
+  if( $url ) {
+    CGI::redirect( $url );
+    return 'Jumping back in without parameter!';
+  }
+
+  my $session_id  = $session->get_session_id;
+  $ENV{CACHE_KEY} .= "::SESSION[$session_id]" if $session_id;
 
   if (
       $MEMD && 

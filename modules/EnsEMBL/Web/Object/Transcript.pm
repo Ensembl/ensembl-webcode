@@ -31,6 +31,7 @@ sub availability {
     $hash->{'core'}       = $self->get_db eq 'core' ? 1 : 0;
     $hash->{'either'}     = 1;
     $hash->{'transcript'} = 1;
+    $hash->{'domain'}     = 1;
     $hash->{'translation'}= $self->Obj->translation ? 1 : 0;
   }
   return $hash;

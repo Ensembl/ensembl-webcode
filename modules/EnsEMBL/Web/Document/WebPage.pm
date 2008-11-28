@@ -158,8 +158,6 @@ sub new {
     $self->timer_push("Object creation failed");
   } else {
     $self->timer_push("Objects created");
-    my $vc = $self->factory->get_viewconfig( );
-    $vc->update_from_config_strings( $ENSEMBL_WEB_REGISTRY->get_session, $rend->{'r'} ) if $vc;
     $self->timer_push("Script config updated from input");
   }
   return $self;

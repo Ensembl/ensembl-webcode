@@ -459,12 +459,16 @@ sub composite_extent_gradient {
   my($self,$g,$st) = @_;
   return if $g->{'start'} > $self->{'seq_len'} || $g->{'end'} < 1;
 
-  my $gs = $g->{'start'} < 1 ? 1 : $g->{'start'};
-  my $ge = $g->{'end'}   < $self->{'seq_len'} ? $g->{'end'} : $self->{'seq_len'};
-
-  my $p  = 2 * $self->{bppp};
-  $g->{'extent_start'} = $gs - $p      if !defined($g->{extent_start}) || $g->{'start'} < $g->{'extent_start'};
-  $g->{'extent_end'}   = $ge + $p      if !defined($g->{extent_end}  ) || $g->{'end'}   > $g->{'extent_start'};
+  if( $g->{'fake'} ) {
+    $g->{'extent_start'} = 1;
+    $g->{'extent_end'}   = $self->{'seq_len'};
+  } else {
+    my $gs = $g->{'start'} < 1 ? 1 : $g->{'start'};
+    my $ge = $g->{'end'}   < $self->{'seq_len'} ? $g->{'end'} : $self->{'seq_len'};
+    my $p  = 2 * $self->{bppp};
+    $g->{'extent_start'} = $gs - $p      if !defined($g->{extent_start}) || $g->{'start'} < $g->{'extent_start'};
+    $g->{'extent_end'}   = $ge + $p      if !defined($g->{extent_end}  ) || $g->{'end'}   > $g->{'extent_start'};
+  }
   $g->{'height'}       = $st->{height} if !defined($g->{height}      ) || $st->{height} > $g->{height};
   $self->{h}           = $st->{height} if !defined($self->{h}        ) || $st->{height} > $self->{h};
 }

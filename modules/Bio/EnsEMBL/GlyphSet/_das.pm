@@ -122,6 +122,7 @@ sub features       {
           } else {
             $c_g++;
             $groups{$logic_name}{$g}{$st_x} = {
+              'fake'    => 1,
               'strand'  => $st,
               'count'   => 1,
               'type'    => $ty,

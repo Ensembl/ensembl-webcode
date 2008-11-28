@@ -78,6 +78,7 @@ sub colour_key {
 
 sub my_colour {
   my( $self, $k, $v ) = @_;
+
   my $c = $self->my_config('style')->{'color'} || $self->{_default_colour};
   return $v eq 'join' ?  $self->{'config'}->colourmap->mix( $c, 'white', 0 ) : $c;
 }

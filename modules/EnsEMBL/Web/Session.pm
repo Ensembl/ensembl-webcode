@@ -442,6 +442,7 @@ sub save_das {
   
   foreach my $source ( values %{ $self->get_all_das } ) {
     # If the source hasn't changed in some way, skip it
+#warn "$source -> $source->is_altered";
     next unless $source->is_altered;
     # Delete moved or deleted records
     if( $source->is_deleted || !$source->is_session ) {
@@ -495,7 +496,9 @@ sub add_das {
   my ( $self, $das ) = @_;
   
   # If source is different to any thing added so far, add it
-  if ( my $new_name = $self->_get_unique_source_name($das) ) {
+#warn "ADD $das...";
+  if( my $new_name = $self->_get_unique_source_name($das) ) {
+#warn ">> $new_name <<";
     $das->logic_name( $new_name );
     $das->category  ( 'session' );
     $das->mark_altered;
@@ -567,6 +570,7 @@ sub add_das_from_string {
   my ($server, $identifier) = $self->parse_das_string( $string );
   # If we couldn't reliably parse an identifier (i.e. string is not a URL),
   # assume it is a registry ID
+#warn "... $string - $server - $identifier";
   if ( !$identifier ) {
     $identifier = $string;
     $server     = $self->get_species_defs->DAS_REGISTRY_URL;
@@ -574,12 +578,15 @@ sub add_das_from_string {
 
   # Check if the source has already been added, otherwise add it
   my $source = $existing[0]->{$identifier} || $existing[1]->{"$server/$identifier"};
+
   unless ($source) {
     # If not, parse the DAS server to get a list of sources...
     for ( @{ $self->get_das_parser($server)->fetch_Sources() } ) {
+#warn "<< ",$_->logic_name," >> ",$_->dsn;
       # ... and look for one with a matcing URI or DSN
       if ( $_->logic_name eq $identifier || $_->dsn eq $identifier ) {
         $source = EnsEMBL::Web::DASConfig->new_from_hashref( $_ );
+#warn "... $source ...";
         $self->add_das( $source );
         $self->save_das();
         last;
@@ -587,7 +594,8 @@ sub add_das_from_string {
     }
   }
 
-  if ( $source ) {
+  if( $source ) {
+#warn "CONFIGURING...";
     # so long as the source is 'suitable' for this view, turn it on
     $self->configure_das_views( $source, $view_details, $track_options );
   } else {

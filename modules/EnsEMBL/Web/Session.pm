@@ -581,6 +581,7 @@ sub add_das_from_string {
 
   unless ($source) {
     # If not, parse the DAS server to get a list of sources...
+eval {
     for ( @{ $self->get_das_parser($server)->fetch_Sources() } ) {
 #warn "<< ",$_->logic_name," >> ",$_->dsn;
       # ... and look for one with a matcing URI or DSN
@@ -592,6 +593,7 @@ sub add_das_from_string {
         last;
       }
     }
+};
   }
 
   if( $source ) {

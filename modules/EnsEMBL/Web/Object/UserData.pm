@@ -549,21 +549,22 @@ sub get_das_servers {
 
 # Returns an arrayref of DAS sources for the selected server and species
 sub get_das_server_dsns {
-  my ($self, @logic) = @_;
+  my $self = shift;
   
-  my ($server, $dsn) = $self->_das_server_param();
+  my $server = $self->_das_server_param();
   my $species = $ENV{ENSEMBL_SPECIES};
   if ($species eq 'common') {
     $species = $self->species_defs->ENSEMBL_PRIMARY_SPECIES;
   }
 
-  my @name    = grep { $_ } $dsn, $self->param('das_name_filter');
-  @logic      = grep { $_ } @logic;
+  my @name  = grep { $_ } $self->param('das_name_filter');
+  my @logic = grep { $_ } @_;
   my $sources;
   
   try {
-    my $parser = $self->get_session->get_das_parser( $server );
+    my $parser = $self->get_session->get_das_parser();
     $sources = $parser->fetch_Sources(
+      -location   => $server,
       -species    => $species || undef,
       -name       => scalar @name  ? \@name  : undef, # label or DSN
       -logic_name => scalar @logic ? \@logic : undef, # the URI
@@ -593,10 +594,7 @@ sub _das_server_param {
     
     # Get and "fix" the server URL
     my $raw = $self->param( $key ) || next;
-    my ($server, $dsn) = $self->get_session->parse_das_string( $raw );
-
-    $self->param( $key, $dsn ? "$server/$dsn" : $server );
-    return ($server, $dsn);
+    return $raw;
     
   }
   

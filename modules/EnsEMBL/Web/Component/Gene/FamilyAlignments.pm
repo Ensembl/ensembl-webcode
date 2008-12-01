@@ -41,9 +41,9 @@ sub _embed_jalview {
   return unless $count;
   my $BASE      = $object->species_defs->ENSEMBL_BASE_URL;
   my $FN        = $object->temp_file_name( undef, 'XXX/X/X/XXXXXXXXXXXXXXX' );
-  my $file      = $object->species_defs->ENSEMBL_TMP_DIR_IMG."/$FN";
+  my $file      = $object->species_defs->ENSEMBL_TMP_DIR_IMG."/$FN.fa.png";
   $object->make_directory( $file );
-  my $URL       = $object->species_defs->ENSEMBL_TMP_URL_IMG."/$FN";
+  my $URL       = $object->species_defs->ENSEMBL_TMP_URL_IMG."/$FN.fa.png";
   if( open FASTA,   ">$file" ) {;
     foreach my $member_attribute (@$refs){
       my ($member, $attribute) = @$member_attribute;

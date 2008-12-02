@@ -370,10 +370,12 @@ sub _ajax_zmenu_compara_tree_node{
   my $tree = $obj->get_ProteinTree || die( "No protein tree for gene" );
   my $node = $tree->find_node_by_node_id($node_id) 
       || die( "No node_id $node_id in ProteinTree" );
-  
-  my $tagvalues = $node->get_tagvalue_hash; 
+
+  # my $tagvalues = $node->get_tagvalue_hash; # Speed up below
+  my $tagvalues = $node->{_tags};
   my $is_leaf = $node->is_leaf;
-  my $leaf_count = scalar @{$node->get_all_leaves};
+  # my $leaf_count = scalar @{$node->get_all_leaves}; # Speed up below
+  my $leaf_count  = $node->num_leaves;
   my $parent_distance = $node->distance_to_parent || 0;
 
   # Caption

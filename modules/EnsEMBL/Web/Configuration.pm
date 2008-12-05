@@ -532,23 +532,6 @@ sub _local_tools {
 
   my $referer = $ENV{'REQUEST_URI'};
 
-  if( $ENV{'ENSEMBL_USER_ID'} ) {
-    $self->{'page'}->local_tools->add_entry(
-      'caption' => 'Bookmark this page',
-      'class'   => 'modal_link',
-      'url'     => $obj->_url({ 'type'     => 'Account', 'action'   => 'Bookmark',
-                                '_referer' => $ENV{'REQUEST_URI'}, '__clear'  =>1,
-                                'name'     => $self->{'page'}->title->get,
-                                'url'      => $obj->species_defs->ENSEMBL_BASE_URL.$ENV{'REQUEST_URI'} })
-    );
-  } else {
-    $self->{'page'}->local_tools->add_entry(
-      'caption' => 'Bookmark this page',
-      'class'   => 'disabled',
-      'url'     => undef,
-      'title'   => 'You must be logged in to bookmark pages'
-    );
-  }
   my $vc = $obj->get_viewconfig;
   my $config = $vc->default_config;
 
@@ -598,6 +581,24 @@ sub _local_tools {
       'class'   => 'disabled',
       'url'     => undef,
       'title'   => 'You cannot add custom data to this page'
+    );
+  }
+
+  if( $ENV{'ENSEMBL_USER_ID'} ) {
+    $self->{'page'}->local_tools->add_entry(
+      'caption' => 'Bookmark this page',
+      'class'   => 'modal_link',
+      'url'     => $obj->_url({ 'type'     => 'Account', 'action'   => 'Bookmark',
+                                '_referer' => $ENV{'REQUEST_URI'}, '__clear'  =>1,
+                                'name'     => $self->{'page'}->title->get,
+                                'url'      => $obj->species_defs->ENSEMBL_BASE_URL.$ENV{'REQUEST_URI'} })
+    );
+  } else {
+    $self->{'page'}->local_tools->add_entry(
+      'caption' => 'Bookmark this page',
+      'class'   => 'disabled',
+      'url'     => undef,
+      'title'   => 'You must be logged in to bookmark pages'
     );
   }
 

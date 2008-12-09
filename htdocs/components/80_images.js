@@ -27,6 +27,7 @@
 
   function __init_image_export() {
     $$('.iexport a').each(function(n){
+			if( !n.hasClassName('munged') ) {
       var url = n.href;
       n.innerHTML = 'Export image';
       var mn = Builder.node( 'dl', {className:'iexport_mn', id: 'menu_'+n.identify(), style: 'display:none' } );
@@ -46,6 +47,8 @@
       add_image_format( mn, url, 'png-2',    'PNG (x2)' );
       add_image_format( mn, url, 'png',      'PNG' );
       add_image_format( mn, url, 'png-0.5',  'PNG (/2)' );
+			  n.addClassName('munged');
+			}
     });
 // Create the search list!
   }

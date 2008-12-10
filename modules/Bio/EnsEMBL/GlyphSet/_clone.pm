@@ -30,8 +30,10 @@ sub features {
 sub get_colours {
   my( $self, $f ) = @_;
   my $T = $self->SUPER::get_colours( $f );
-  $T->{'part'} = 'border' if $f->get_scalar_attribute('inner_start');
-  $T->{'part'} = 'border' if ($self->my_config('outline_threshold') && ($f->length > $self->my_config('outline_threshold')) );
+	if( ! $self->my_colour( $T->{'key'}, 'solid' ) ) {
+    $T->{'part'} = 'border' if $f->get_scalar_attribute('inner_start');
+    $T->{'part'} = 'border' if ($self->my_config('outline_threshold') && ($f->length > $self->my_config('outline_threshold')) );
+  }
   return $T;
 }
 
@@ -41,8 +43,9 @@ sub colour_key {
 	return lc( $state ) if $state;
 	my $flag = 'default';
 	if( $self->my_config('set','alt') ) {
-    $flag = $self->{'flags'}{$f->dbID} ||= ( $self->{'flag'} eq 'default' ? 'alt' : 'default' );
+    $flag = $self->{'flags'}{$f->dbID} ||= $self->{'flag'} = ($self->{'flag'} eq 'default' ? 'alt' : 'default');
 	}
+	warn ">> ",$self->my_config('set'), $flag;
   return ( $self->my_config('set'), $flag );
 }
 

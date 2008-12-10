@@ -38,7 +38,12 @@ sub get_colours {
 sub colour_key {
   my ($self, $f) = @_;
   (my $state = $f->get_scalar_attribute('state')) =~ s/^\d\d://;
-  return lc( $state || $self->my_config('set') );
+	return lc( $state ) if $state;
+	my $flag = 'default';
+	if( $self->my_config('set','alt') ) {
+    $flag = $self->{'flags'}{$f->dbID} ||= ( $self->{'flag'} eq 'default' ? 'alt' : 'default' );
+	}
+  return ( $self->my_config('set'), $flag );
 }
 
 ## Return the image label and the position of the label

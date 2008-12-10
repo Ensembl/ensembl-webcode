@@ -957,7 +957,15 @@ sub delete_node {
   my ($self, $code) = @_;
   if ($code && $self->tree) {
     my $node = $self->tree->get_node($code);
-    $node->remove_node;
+    $node->remove_node if $node;
+  }
+}
+
+sub delete_submenu {
+  my ($self, $code) = @_;
+  if ($code && $self->tree) {
+    my $node = $self->tree->get_node($code);
+    $node->remove_subtree if $node;
   }
 }
 

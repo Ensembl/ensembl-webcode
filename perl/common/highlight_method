@@ -70,7 +70,6 @@ while(<I>) {
     $out .= $formatter->format_string($_) unless /^\s*###/ && $method;
   }
 }
-
 $out =~ s/\n\s+\n/\n/g;
 unless( $out ) {
   printf "<p>Unable to find method %s in module %s</p>", escapeHTML( $method ), escapeHTML( $module );

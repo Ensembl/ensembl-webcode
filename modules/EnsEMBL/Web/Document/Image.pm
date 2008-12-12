@@ -5,12 +5,6 @@ use POSIX qw(floor ceil);
 use Bio::EnsEMBL::DrawableContainer;
 use Bio::EnsEMBL::VDrawableContainer;
 
-our %formats = (qw(
-  svg        SVG
-  postscript PostScript
-  pdf        PDF
-));
-
 sub new {
   my( $class, $species_defs, $panel_name ) = @_;
   my $self = {
@@ -32,7 +26,6 @@ sub new {
     'format'             => 'png',
     'prefix'             => 'p',
 
-    'image_formats'      => []
   };
   bless $self, $class;
   return $self;
@@ -48,9 +41,6 @@ sub prefix {
 }
 sub set_extra {
   my( $self, $object ) = @_;
-  foreach( keys %formats ) {
-    $self->add_image_format( $_ ) if $object->param( "format_$_" ) eq 'on';
-  }
 }
 
 #----------------------------------------------------------------------------
@@ -487,8 +477,6 @@ sub caption            : lvalue { $_[0]->{'caption'}; }
 sub format             : lvalue { $_[0]->{'format'}; }
 sub panel              : lvalue { $_[0]->{'panel'}; }
 
-sub add_image_format  { push @{$_[0]->{'image_formats'}}, $_[1]; }
-
 sub exists { 
   my $self = shift;
   return 0 unless $self->cacheable eq 'yes';
@@ -580,18 +568,6 @@ sub render {
                $self->imagemap eq 'yes' ? $image->render_image_map : '',
 				 $self->{'export'} ? '<div style="text-align:right; background-color; red;">EXPORT</div>' : '',
 	       $self->caption ? sprintf( '<div style="text-align: center; font-weight: bold">%s</div>', $self->caption ) : '',
-  }
-  if( @{$self->{'image_formats'}} ) {
-    my %URLS;
-    foreach( sort @{$self->{'image_formats'}} ) {
-      my $T = $image->render($_);
-      $URLS{$_} = $T->{'URL'};
-      $URLS{$_}.='.eps' if lc($_) eq 'postscript';
-    }
-    ## Add links for other image formats (right aligned in div)
-     $HTML .= '<div style="text-align:right">'.join( '; ', map {
-       qq(<a href="$URLS{$_}">View as $formats{$_}</a>)
-     } @{$self->{'image_formats'}}).'.</div>';
   }
   $HTML .= $self->tailnote;
     

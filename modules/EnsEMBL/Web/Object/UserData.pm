@@ -480,7 +480,7 @@ sub _save_genomic_features {
                   -start        => $s,
                   -end          => $e,
                   -strand       => $f->strand,
-              -hseqname   => ($f->id."" eq "") ? '-' : $f->id,
+                  -hseqname   => ($f->id."" eq "") ? '-' : $f->id,
                   -hstart       => $f->hstart,
                   -hend         => $f->hend,
                   -hstrand      => $f->hstrand,

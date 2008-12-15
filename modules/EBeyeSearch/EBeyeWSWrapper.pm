@@ -412,4 +412,12 @@ sub getReferencedEntriesFlatSet {
 }
 
 
+
+sub getDetailedNumberOfResults {
+        my ($self, $domain, $query) = @_;
+        my $result = $self->WSproxy->getDetailledNumberOfResults($domain,$query,'true');
+        return $result->valueof('//getDetailledNumberOfResultsResponse/detailledNumberOfResults/subDomainsResults/DomainResult');
+}
+
+
 1;

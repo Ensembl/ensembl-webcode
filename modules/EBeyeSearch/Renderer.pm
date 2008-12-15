@@ -3,7 +3,7 @@ use strict;
 use Data::Dumper;
 use Data::Page;
 use Template;
-
+use Carp qw(cluck);
 
 sub  new {
     my ($class, %args ) = @_;
@@ -33,19 +33,22 @@ sub ebeye {
 
 
 
-sub render_summary() {
+sub render_summary {
   my $self = shift;
 
-  return $self->_render_text( "Enter the string you wish to search for in the box above." ) unless $self->ebeye->query;
+  return $self->_render_text( "Enter the string you wish to search for in the box above." ) unless $self->ebeye->cgi_obj->param('q');
 
   my $pager = $self->ebeye->pager;
   my $total_entries = $pager->total_entries;
   my $page_first_hit = $pager->first;
   my $page_last_hit = $pager->last;
-  my $query = $self->ebeye->query;
-
+    my $cgi = $self->ebeye->cgi_obj;
+  my $query =  $cgi->param('q') .  ( $cgi->param('species') && $cgi->param('species') ne 'all' ? ' species:' . $cgi->param('species') : '');
   if( $total_entries > 0 ) {
-      return $self->_render_text( qq{Results <strong>$page_first_hit-$page_last_hit</strong> of <strong>$total_entries</strong> for <strong>$query.</strong>});
+      my $domain = $self->ebeye->cgi_obj->param('domain');
+      $domain =~ s/ensembl_//;
+      ucfirst $domain;
+      return $self->_render_text( qq{<h2>$total_entries hits in $domain</h2><h3>Showing Results <strong>$page_first_hit-$page_last_hit</strong> for <strong>$query.</strong></h3>});
   } else {
     return $self->_render_text( qq{Your query <strong>- $query -</strong> did not match any records in the database. Please make sure all terms are spelled correctly}  );
   }
@@ -54,35 +57,38 @@ sub render_summary() {
 
 
 sub render_pagination {
-  my $self = shift;
-  return unless my $query = $self->ebeye->query;
+  my ($self,$domain) = @_;
+  return unless my $query = $self->ebeye->cgi_obj->param('q');
   return if $self->ebeye->nhits < 11;
   my $pager = $self->ebeye->pager;
   my $current_page = $pager->current_page;
   my $last_page = $pager->last_page;
   my $previous_page = $pager->previous_page;
   my $next_page = $pager->next_page;
-
-  my $out = '<div class="paginate">';
+  
+  my $cgi = $self->ebeye->cgi_obj;
+#  my $query =  $cgi->param('q') .  ( $cgi->param('species') && $cgi->param('species') ne 'all' ? ' species:' . $cgi->param('species') : '');
+  
+  my $out = '<h4><div class="paginate">';
 
   if ( $pager->previous_page) {
-      $out .= sprintf( '<a href="?ebi_search;q=%s;page=%s">prev</a> ', $query ,$pager->previous_page );
+      $out .= sprintf( '<a href="?q=%s;page=%s;domain=%s;species=%s">prev</a> ', $cgi->param('q') ,$pager->previous_page, $domain, $cgi->param('species') );
   }
   foreach my $i (1..$last_page) {
       if( $i == $current_page ) {
 	  $out .= sprintf( '<strong>%s</strong> ', $i );
       } elsif( $i < 5 || ($last_page-$i)<4 || abs($i-$current_page+1)<4 ) {
 	  #       my $T = new ExaLead::Link( "_s=".(($i-1)*10), $self->ebeye );
-	  $out .= sprintf( '<a href="?ebi_search;q=%s;page=%s">%s</a> ', $query ,$i, $i );
+	  $out .= sprintf( '<a href="?q=%s;page=%s;domain=%s;species=%s">%s</a> ', $cgi->param('q') ,$i, $domain, $cgi->param('species'),$i );
       } else {
 	  $out .= '..';
       }
   }
   $out =~ s/\.\.+/ ... /g;
   if ($pager->next_page) {
-      $out .= sprintf( '<a href="?ebi_search;q=%s;page=%s">next</a> ', $query ,$pager->next_page );
+      $out .= sprintf( '<a href="?q=%s;page=%s;domain=%s;species=%s">next</a> ', $cgi->param('q') ,$pager->next_page,$domain,$cgi->param('species') );
   }  
-  return "$out</div>";
+  return "$out</div></h4>";
 }
 
 
@@ -105,78 +111,7 @@ sub render_form {
 }
 
 
-sub Xrender_results {
-    my $self = shift;
-    my $results = $self->ebeye->results;
-    my $html = q#<script>
-  function tabselect(tab, pane) {
-    var tablist = tab.parentNode.getElementsByTagName('li');
 
-    //  var lClassType = tab.className.substring(0, tab.className.indexOf('-') );
-    var current_selected = tab.parentNode.getElementsByClassName('tab-selected');
-    current_selected[0].removeClassName('tab-selected').addClassName('tab-unselected');
-    tab.removeClassName('tab-unselected').addClassName('tab-selected');
-
-    var panelist = pane.parentNode.getElementsByTagName('li');
-    $A(panelist).each( function(node) {
-      if (node.id === pane.id) {
-        pane.className='pane-selected';
-        //       loadPane(pane, '/Homo_sapiens/EnsemblGenomesSearch?q=FBgn0016059&coredomain=ensembl&refdomain=uniprot&partial=true');
-        var coredomain = 'ensembl';
-        var refdomain =  $w(tab.className)[0];
-        var query = tab.parentNode.id;
-        pars = 'q=' + query + '&refdomain=' + refdomain + '&coredomain=' + coredomain + '&partial=true';
-        loadPane(pane, '/Homo_sapiens/EnsemblGenomesSearch', pars);
-      } else {
-        node.className='pane-unselected';
-      }
-    });
-}
-
-
-function loadPane(pane, src , pars) {
-  if (pane.innerHTML =='' || pane.innerHTML=='<img alt="Wait" src="/img/ajax-loader.gif" style="vertical-align:-3px" /> Loading...') {
-    reloadPane(pane, src, pars);
-  }
-}
-
-function reloadPane(pane, src, pars) {
-
-
-  new Ajax.Updater(pane, 
-  src, 
-  {
-    method: 'post',
-    parameters: pars,
-    asynchronous:1, 
-    evalScripts:true, 
-    onLoading:function(request){pane.innerHTML='<img alt="Wait" src="/images/spinner.gif" style="vertical-align:-3px" /> Loading...'}
-})
-
-}
-</script>#;
-
-    foreach my $entry_id (keys %$results ) {
-	my $tab_control_html .=  qq{<ul class="tabselector"  id="$entry_id">};
-	my $tab_id  = 'tab_default' . '_' . $entry_id;
-	my $pane_id = 'pane_default' . '_' . $entry_id;
-	$tab_control_html .=  qq{<li class="tab-selected" id="$tab_id" ><a href="#" onclick="tabselect( \$('$tab_id') , \$('$pane_id') ); return false>;">results</a></li>};	
-	my $pane_content_html .= qq{<ul class="panes"  id="$pane_id">};
-	my $r = $results->{$entry_id}->{results};
-	warn Dumper($r);
-	$pane_content_html .=  qq{<li class="pane-selected" id="$entry_id">$r</li>};
-	foreach my $key (keys %{$results->{$entry_id}} ) {
-	    $tab_id = 'tab_' . $key . '_' . $entry_id;
-	    $pane_id = 'pane_' . $key . '_' . $entry_id;
-	    $tab_control_html .=  qq{<li class="$key tab-unselected" id="$tab_id"> <a href="#" onclick="tabselect(\$('$tab_id') , \$('$pane_id')); return false;">$key</li>};
-	    $pane_content_html .=  qq{<li class="$key pane-unselected" id="$pane_id"></li>};
-	}
-	$tab_control_html  .=  qq{</ul>};
-	$pane_content_html .=  qq{</ul>};
-	$html .= ($tab_control_html . $pane_content_html);
-    }
-    return $html;
-}
 
 sub render_partial {
     my ($self) = shift;
@@ -188,8 +123,8 @@ sub render_partial {
 
 			    INTERPOLATE  => 1,
 			    ABSOLUTE => 1,
-			    INCLUDE_PATH => ["/homes/keenan/work/eg_web_root/templates/src", 
-					     "/homes/keenan/work/eg_web_root/templates/lib" ],
+			    INCLUDE_PATH => ["/opt/ensembl/templates/src", 
+					     "/opt/ensembl/templates/lib" ],
 			   }) || die "$Template::ERROR\n";
 
     my $html;
@@ -199,50 +134,52 @@ sub render_partial {
     return $html;
 }
 
+sub render_results_summary {
+    my $self = shift;
+    my $template_vars;
+#    $template_vars->{results} =  $self->ebeye->results;
+    $template_vars->{results_summary} =  $self->ebeye->results_summary;
+    my $cgi = $self->ebeye->cgi_obj;
 
-sub Firstrender_results {
+    $template_vars->{species} = $cgi->param('species');
+    $template_vars->{query_string} = sprintf ("q=%s;species=%s" , $cgi->param('q') , $cgi->param('species') );
+
+    my $tt = Template->new({
+                            INTERPOLATE  => 1,
+                            ABSOLUTE => 1,
+                            INCLUDE_PATH => ["/opt/ensembl/templates/src",
+                                             "/opt/ensembl/templates/lib" ],
+                           }) || die "$Template::ERROR\n";
+    my $html;
+     $tt->process('EBeyeSearch/ResultsSummary.tt2', $template_vars, \$html)
+      || die $tt->error(), "\n";
+
+
+    return $html;
+
+
+
+}
+
+sub render_domain_hits {
     my $self = shift;
 
     my $template_vars;
-    $template_vars->{results} =  $self->ebeye->results;
+    $template_vars->{results} =  $self->ebeye->domainhits;
     my $tt = Template->new({
-
 			    INTERPOLATE  => 1,
 			    ABSOLUTE => 1,
-			    INCLUDE_PATH => ["/homes/keenan/work/eg_web_root/templates/src", 
-					     "/homes/keenan/work/eg_web_root/templates/lib" ],
+			    INCLUDE_PATH => ["/opt/ensembl/templates/src", 
+					     "/opt/ensembl/templates/lib" ],
 			   }) || die "$Template::ERROR\n";
 
     my $html;
-     $tt->process('EBeyeSearch/Results2.tt2', $template_vars, \$html)
+     $tt->process('EBeyeSearch/DomainResults.tt2', $template_vars, \$html)
       || die $tt->error(), "\n";
 
     return $html;
 
 }
-
-
-sub render_results {
-    my $self = shift;
-
-    my $template_vars;
-    $template_vars->{results} =  $self->ebeye->results;
-    my $tt = Template->new({
-
-			    INTERPOLATE  => 1,
-			    ABSOLUTE => 1,
-			    INCLUDE_PATH => ["/homes/keenan/work/eg_web_root/templates/src", 
-					     "/homes/keenan/work/eg_web_root/templates/lib" ],
-			   }) || die "$Template::ERROR\n";
-
-    my $html;
-     $tt->process('EBeyeSearch/Results2.tt2', $template_vars, \$html)
-      || die $tt->error(), "\n";
-
-    return $html;
-
-}
-
 
 
 
@@ -250,6 +187,7 @@ sub render_results {
 
 
 1;
+
 
 # <ul class="panes" id="panecontrol1">
 #   <li id="vendor_pane" class="pane-selected">

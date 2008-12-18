@@ -113,7 +113,6 @@ sub render_form {
 
 
 
-<<<<<<< Renderer.pm
 sub render_partial {
     my ($self) = shift;
 
@@ -189,80 +188,6 @@ sub render_domain_hits {
 
 
 
-=======
-sub render_partial {
-    my ($self) = shift;
-
-    my $template_vars;
-    $template_vars->{results} =  $self->ebeye->results;
-
-    my $tt = Template->new({
-
-			    INTERPOLATE  => 1,
-			    ABSOLUTE => 1,
-			    INCLUDE_PATH => ["/opt/ensembl/templates/src", 
-					     "/opt/ensembl/templates/lib" ],
-			   }) || die "$Template::ERROR\n";
-
-    my $html;
-     $tt->process('EBeyeSearch/HitsByDomain.tt2', $template_vars, \$html)
-      || die $tt->error(), "\n";
-
-    return $html;
-}
-
-sub render_results_summary {
-    my $self = shift;
-    my $template_vars;
-#    $template_vars->{results} =  $self->ebeye->results;
-    $template_vars->{results_summary} =  $self->ebeye->results_summary;
-    my $cgi = $self->ebeye->cgi_obj;
-
-    $template_vars->{species} = $cgi->param('species');
-    $template_vars->{query_string} = sprintf ("q=%s;species=%s" , $cgi->param('q') , $cgi->param('species') );
-
-    my $tt = Template->new({
-                            INTERPOLATE  => 1,
-                            ABSOLUTE => 1,
-                            INCLUDE_PATH => ["/opt/ensembl/templates/src",
-                                             "/opt/ensembl/templates/lib" ],
-                           }) || die "$Template::ERROR\n";
-    my $html;
-     $tt->process('EBeyeSearch/ResultsSummary.tt2', $template_vars, \$html)
-      || die $tt->error(), "\n";
-
-
-    return $html;
-
-
-
-}
-
-sub render_domain_hits {
-    my $self = shift;
-
-    my $template_vars;
-    $template_vars->{results} =  $self->ebeye->domainhits;
-    my $tt = Template->new({
-			    INTERPOLATE  => 1,
-			    ABSOLUTE => 1,
-			    INCLUDE_PATH => ["/opt/ensembl/templates/src", 
-					     "/opt/ensembl/templates/lib" ],
-			   }) || die "$Template::ERROR\n";
-
-    my $html;
-     $tt->process('EBeyeSearch/DomainResults.tt2', $template_vars, \$html)
-      || die $tt->error(), "\n";
-
-    return $html;
-
-}
-
-
-
-
-
->>>>>>> 1.1.2.4
 
 1;
 

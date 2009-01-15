@@ -35,10 +35,9 @@ sub content {
   my $referer = '_referer='.$self->object->param('_referer').';x_requested_with='.$self->object->param('x_requested_with');
 
   return '' unless $object->param('id') && int($object->param('id'));
-  my $ok_id = $user->is_administrator_of($object->param('id'));
- 
-  if ($ok_id) {
-    my $group = EnsEMBL::Web::Data::Group->new($ok_id);
+
+  if ($user->is_administrator_of($object->param('id'))) {
+    my $group = EnsEMBL::Web::Data::Group->new($object->param('id'));
 
     ## Error messages from invitation module
     if ($object->param('active') || $object->param('pending')) {

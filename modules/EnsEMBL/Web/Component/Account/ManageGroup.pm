@@ -36,8 +36,9 @@ sub content {
 
   return '' unless $object->param('id') && int($object->param('id'));
 
-  if ($user->is_administrator_of($object->param('id'))) {
-    my $group = EnsEMBL::Web::Data::Group->new($object->param('id'));
+  my $ok_id = $user->is_administrator_of($object->param('id')) ? $object->param('id') : undef;
+  if ($ok_id) {
+    my $group = EnsEMBL::Web::Data::Group->new($ok_id);
 
     ## Error messages from invitation module
     if ($object->param('active') || $object->param('pending')) {

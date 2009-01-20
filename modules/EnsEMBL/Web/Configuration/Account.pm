@@ -77,7 +77,6 @@ sub user_populate_tree {
         { 'availability' => 1, 'concise' => 'News Filters' },
       )
     );
-
     my $groups_menu = $self->create_submenu( 'Groups', 'Groups' );
     
     $groups_menu->append(

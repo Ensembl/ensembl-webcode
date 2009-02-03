@@ -897,7 +897,7 @@ sub add_protein_feature {
     my $renderer =  $menus{$menu_code}[2];
     foreach my $key_2 ( @$keys ) {
       next if $self->tree->get_node( $type.'_'.$key_2 );
-      next if $type ne $data->{$key_2}{'type'}; ## Don't separate by db in this case!
+      next if $type ne ($data->{$key_2}{'type'}||'feature'); ## Don't separate by db in this case!
       $menu->append( $self->create_track( $type.'_'.$key_2, $data->{$key_2}{'name'}, {
         'strand'      => $gset =~ /P_/ ? 'f' : 'b',
         'depth'       => 1e6,

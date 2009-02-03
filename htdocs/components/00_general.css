@@ -136,3 +136,5 @@ dd { margin-bottom:1em; }
   .print_hide, .error, .warning, .info { display: none }
 }
 
+a._external_link_ { border-bottom: 1px dotted [[PAGE_LINK]] }
+

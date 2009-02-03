@@ -35,6 +35,7 @@ addLoadEvent(__init_ensembl_web_hide_form );
 function __init_ensembl_rel_external() {
   $$('a[rel="external"]').each(function(n){
     n.target = '__blank'
+    n.addClassName( '_external_link_' );
   });
 }
 addLoadEvent( __init_ensembl_rel_external );

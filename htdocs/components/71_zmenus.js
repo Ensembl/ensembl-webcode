@@ -63,6 +63,7 @@ __info(x.key);
   }
   __zmenu_show( Q, x.x, x.y );
   __init_ensembl_rel_external();
+  __modal_onload();
 // If AJAX isn't enabled return....
   if(!x.h) return;
   if( ENSEMBL_AJAX != 'enabled' ) return;
@@ -85,6 +86,7 @@ __info(x.key);
       if( t && t.match( /<tbody class="real">/ ) ) {
         Q.getElementsBySelector('tbody.real')[0].replace( t );
         __init_ensembl_rel_external();
+        __modal_onload();
         __zmenu_close_button(Q);
       }
     }

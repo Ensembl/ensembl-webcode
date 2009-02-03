@@ -471,8 +471,7 @@ sub save_tempdas {
     if ($error) {
         $self->parameter('wizard_next', 'show_tempdas');
         $self->parameter('error_message', 'Unable to save URL to user account');
-    }
-    else {
+    } else {
       $self->parameter('wizard_next', 'ok_tempdas');
       $self->parameter('url', 'ok');
     }

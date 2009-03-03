@@ -265,6 +265,7 @@ sub features_form {
   push @options, [ 'variation'  => 'Variation features' ]     if $object->species_defs->databases->{'ENSEMBL_VARIATION'};
   push @options, [ 'gene'       => 'Gene Information' ];
   my %checked = map { $_ => 'yes' } $object->param('options');
+  $checked{ 'gene' } = 'yes' if ($object->param('format') =~ /gff|csv|tab/);
   $form->add_element( 'type' => 'MultiSelect',
     'class'  => 'radiocheck1col',
     'name'   => 'options',
@@ -563,6 +564,7 @@ sub _feature {
   my( $type, $options, $feature, $extra, $def_source ) = @_;
   my $score  = $feature->can('score') ? $feature->score : undef;
      $score  ||= '.';
+
   my $frame  = $feature->can('frame') ? $feature->frame : undef;
      $frame  ||= '.';
   my($name,$strand,$start,$end);
@@ -580,9 +582,21 @@ sub _feature {
   }
   $name   ||= 'SEQ';
   $name   =~ s/\s/_/g;
+
+#better code for getting phase info
+  my $phase;
+  if ($strand == 1) {
+    $phase = $feature->can('phase') ? $feature->phase : '.';
+  } elsif ($strand == -1) {
+    $phase = $feature->can('end_phase') ? $feature->end_phase : '.';
+  }
+  $phase = '.' if $phase == -1 || !defined $phase;
+#
+
   $strand ||= '.';
   $strand = '+' if $strand eq 1;
   $strand = '-' if $strand eq -1;
+
   my $source = $feature->can('source_tag') ? $feature->source_tag : undef;
      $source ||= $def_source || 'Ensembl';
      $source =~ s/\s/_/g;
@@ -590,7 +604,7 @@ sub _feature {
      $tag    ||= ucfirst(lc($type)) || '.';
      $tag    =~ s/\s/_/g;
 
-  my @results = ( $name, $source, $tag, $start, $end, $score, $strand, $frame );
+  my @results = ( $name, $source, $tag, $start, $end, $score, $strand, $phase );
 
   if( $options->{'format'} eq 'gff' ) {
     push @results, join "; ", map { defined $extra->{$_} ? "$_=$extra->{$_}" : () } @{$options->{'other'}};

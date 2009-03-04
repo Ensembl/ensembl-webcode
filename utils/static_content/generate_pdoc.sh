@@ -33,7 +33,7 @@
 
 #. /etc/profile
 
-PERLMOD_LOC="/ensemblweb/www/www_52"   # current server root
+PERLMOD_LOC="/ensemblweb/www/www_53"   # current server root
 #PERLMOD_LOC="/ensemblweb/www/server"   # current server root
 
 PDOC_LOC="$PERLMOD_LOC/public-plugins/ensembl/htdocs/info/docs/api/Pdoc"    # where you want Pdocs created

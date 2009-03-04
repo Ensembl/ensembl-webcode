@@ -524,10 +524,11 @@ sub get_sequence_data {
         @exons = map { @{$_->get_all_Exons } } @{$slice->get_all_Genes};
       }
       
+      # Values of parameter should not be fwd and rev - this is confusing.
       if ($config->{'exon_ori'} eq 'fwd') {
-        @exons = grep { $_->seq_region_strand > 0 } @exons; # Only fwd exons
+        @exons = grep { $_->strand > 0 } @exons; # Only exons in same orientation 
       } elsif ($config->{'exon_ori'} eq 'rev') {
-        @exons = grep { $_->seq_region_strand < 0 } @exons; # Only rev exons
+        @exons = grep { $_->strand < 0 } @exons; # Only exons in opposite orientation
       }
       
       my @all_exons = map {[ $config->{'comparison'} ? 'compara' : 'other', $_ ]} @exons;
@@ -546,13 +547,15 @@ sub get_sequence_data {
         my $start = $exon->start - ($type eq 'gene' ? $slice_start : 1);
         my $end = $exon->end - ($type eq 'gene' ? $slice_start : 1);
         my $id = $exon->can('stable_id') ? $exon->stable_id : '';
-
+        
+        ($start, $end) = ($slice_length - $end - 1, $slice_length - $start - 1) if $slice_strand < 0 && $exon->strand < 0;
+        
         $start = 0 if $start < 0;
         $end = $config->{'length'} - 1 if $end >= $config->{'length'};
         
         for ($start..$end) {          
           push (@{$mk->{'exons'}->{$_}->{'type'}}, $type);          
-          $mk->{'exons'}->{$_}->{'id'} .= ($mk->{'exons'}->{$_}->{'id'} ? '; ' : '') . $id;
+          $mk->{'exons'}->{$_}->{'id'} .= ($mk->{'exons'}->{$_}->{'id'} ? '; ' : '') . $id unless $mk->{'exons'}->{$_}->{'id'} =~ /$id/;
         }
       }
     }

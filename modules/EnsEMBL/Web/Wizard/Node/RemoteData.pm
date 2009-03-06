@@ -336,7 +336,7 @@ sub attach_das {
       if( $self->object->get_session->add_das( $source ) ) {
         push @success, $source->logic_name;
       } else {
-        push @skipped, $source->locic_name;
+        push @skipped, $source->logic_name;
       }
       #  Either way, turn the source on...
       $self->object->get_session->configure_das_views(

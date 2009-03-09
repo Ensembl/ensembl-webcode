@@ -515,11 +515,11 @@ sub get_sequence_data {
       if ($exontype eq 'Ab-initio') {      
         @exons = ( 
           grep { $_->seq_region_start <= $slice_end && $_->seq_region_end >= $slice_start }
-          map { @{$_->get_all_Exons } }
+          map { @{$_->get_all_Exons} }
           @{$slice->get_all_PredictionTranscripts} 
         );
-      } elsif ($exontype eq 'vega' || $exontype eq 'est') {      
-        @exons = map { @{$_->get_all_Exons } } @{$slice->get_all_Genes('', $exontype)};
+      } elsif ($exontype eq 'vega' || $exontype eq 'est') {
+        @exons = map { @{$_->get_all_Exons} } @{$slice->get_all_Genes('', $exontype)};
       } else {
         @exons = map { @{$_->get_all_Exons } } @{$slice->get_all_Genes};
       }
@@ -550,8 +550,10 @@ sub get_sequence_data {
         
         ($start, $end) = ($slice_length - $end - 1, $slice_length - $start - 1) if $slice_strand < 0 && $exon->strand < 0;
         
+        next if $end < 0 || $start >= $slice_length;
+        
         $start = 0 if $start < 0;
-        $end = $config->{'length'} - 1 if $end >= $config->{'length'};
+        $end = $slice_length - 1 if $end >= $slice_length;
         
         for ($start..$end) {          
           push (@{$mk->{'exons'}->{$_}->{'type'}}, $type);          
@@ -958,7 +960,7 @@ sub markup_line_numbers {
         $end = $e < $config->{'length'} ? $row_start + ($data->{'dir'} * $config->{'display_width'}) - $data->{'dir'} : $data->{'end'};
         
         $start = $row_start;
-
+                
         # Next line starts at current end + 1 for forward strand, or - 1 for reverse strand
         $row_start = $end + $data->{'dir'} if $end;
       }
@@ -994,6 +996,31 @@ sub build_sequence {
   my @output;
   my $s = 0;
   
+  # Temporary patch because Firefox doesn't copy/paste anything but inline styles
+  my $styles = $self->object->species_defs->ENSEMBL_STYLE;
+  my %class_to_style = (
+    con => [ 1,  { 'background-color' => "#$styles->{'SEQ_CONSERVATION'}" } ],
+    res => [ 2,  { 'color' => "#$styles->{'SEQ_RESEQEUNCING'}" } ],
+    e0  => [ 3,  { 'color' => "#$styles->{'SEQ_EXON0'}" } ],
+    e1  => [ 4,  { 'color' => "#$styles->{'SEQ_EXON1'}" } ],
+    e2  => [ 5,  { 'color' => "#$styles->{'SEQ_EXON2'}" } ],
+    eo  => [ 6,  { 'background-color' => "#$styles->{'SEQ_EXONOTHER'}" } ],
+    eg  => [ 7,  { 'color' => "#$styles->{'SEQ_EXONGENE'}", 'font-weight' => "bold" } ],
+    c0  => [ 8,  { 'background-color' => "#$styles->{'SEQ_CODONC0'}" } ],
+    c1  => [ 9,  { 'background-color' => "#$styles->{'SEQ_CODONC1'}" } ],
+    cu  => [ 10, { 'background-color' => "#$styles->{'SEQ_CODONUTR'}" } ],
+    sn  => [ 11, { 'background-color' => "#$styles->{'SEQ_SNP'}" } ],      
+    si  => [ 12, { 'background-color' => "#$styles->{'SEQ_SNPINSERT'}" } ],
+    sd  => [ 13, { 'background-color' => "#$styles->{'SEQ_SNPDELETE'}" } ],   
+    snt => [ 14, { 'background-color' => "#$styles->{'SEQ_SNP_TR'}" } ],
+    syn => [ 15, { 'background-color' => "#$styles->{'SEQ_SYN'}" } ],
+    snu => [ 16, { 'background-color' => "#$styles->{'SEQ_SNP_TR_UTR'}" } ],
+    siu => [ 17, { 'background-color' => "#$styles->{'SEQ_SNPINSERT_TR_UTR'}" } ],
+    sdu => [ 18, { 'background-color' => "#$styles->{'SEQ_SNPDELETE_TR_UTR'}" } ],
+    sf  => [ 19, { 'background-color' => "#$styles->{'SEQ_FRAMESHIFT'}" } ],
+    aa  => [ 20, { 'color' => "#$styles->{'SEQ_AMINOACID'}" } ]
+  );
+  
   foreach my $lines (@$sequence) {
     my ($row, $title, $previous_title, $new_line_title, $class, $previous_class, $new_line_class, $pre, $post);
     my ($count, $i);
@@ -1012,20 +1039,41 @@ sub build_sequence {
           $class .= " $1";
         }
         
-        $class = qq{class="$class"};
+        # Taken out for temporary patch
+        #$class = qq{class="$class"};
       } elsif ($config->{'maintain_colour'} && $previous_class =~ /[" ](e\w)[" ]/) {
-          $class = qq{class="$1"};
+          # Taken out for temporary patch
+          #$class = qq{class="$1"};
+          $class = $1;
       } else {
         $class = '';
       }
 
       $post .= $seq->{'post'};
-  
-      if ($i == 0) {
-        $row .= "<span $class $title>";
-      } elsif ($class ne $previous_class || $title ne $previous_title) {
-        $row .= "</span><span $class $title>";
+       
+      # Temporary patch because Firefox doesn't copy/paste anything but inline styles
+      my $style;
+      
+      if ($class) {
+        my %style_hash;
+        
+        foreach (sort { $class_to_style{$a}->[0] <=> $class_to_style{$b}->[0] } split / /, $class) {
+          my $st = $class_to_style{$_}->[1];
+          
+          map $style_hash{$_} = $st->{$_}, keys %$st;
+        }
+        
+        $style = sprintf 'style="%s"', join ';', map "$_:$style_hash{$_}", keys %style_hash;
       }
+
+      if ($i == 0) {
+        #$row .= "<span $class $title>";
+        $row .= "<span $style $title>";
+      } elsif ($class ne $previous_class || $title ne $previous_title) {
+        #$row .= "</span><span $class $title>";
+        $row .= "</span><span $style $title>";
+      }
+      # End patch
   
       $row .= $seq->{'letter'};
   
@@ -1036,7 +1084,26 @@ sub build_sequence {
         if ($i == $config->{'display_width'}) {
           $row = "$row</span>";
         } else {
-          $row = "<span $new_line_class $new_line_title>$row</span>";
+          # Temporary patch because Firefox doesn't copy/paste anything but inline styles
+          my $new_line_style;
+          
+          if ($new_line_class eq $class) {
+            $new_line_style = $style;
+          } elsif ($new_line_class) {
+            my %style_hash;
+            
+            foreach (sort { $class_to_style{$a}->[0] <=> $class_to_style{$b}->[0] } split / /, $new_line_class) {
+              my $st = $class_to_style{$_}->[1];
+              
+              map $style_hash{$_} = $st->{$_}, keys %$st;
+            }
+            
+            $new_line_style = sprintf 'style="%s"', join ';', map "$_:$style_hash{$_}", keys %style_hash;
+          }
+          
+          $row = "<span $new_line_style $new_line_title>$row</span>";
+          # End patch
+          #$row = "<span $new_line_class $new_line_title>$row</span>";
         }
         
         if ($config->{'comparison'}) {

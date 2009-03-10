@@ -3,7 +3,8 @@ package EnsEMBL::Web::Controller::Command::Account::ResetFavourites;
 use strict;
 use warnings;
 use Class::Std;
-
+use EnsEMBL::Web::RegObj;
+use EnsEMBL::Web::Document::Interface;
 use base 'EnsEMBL::Web::Controller::Command::Account';
 
 {
@@ -20,10 +21,15 @@ sub BUILD {
 
 sub process {
   my $self = shift;
-  my $user = $self->filters->user;
+  my $user = $ENSEMBL_WEB_REGISTRY->get_user;
   $user->specieslists->delete_all;
 
-  $self->filters->redirect($self->url('/index.html'));
+#  $self->redirect($self->url('/index.html'));
+
+  my $webpage = EnsEMBL::Web::Document::Interface->new();
+  $webpage->page->ajax_redirect('/index.html');
+
+
 }
 
 }

@@ -1035,13 +1035,13 @@ sub build_sequence {
         $class = $seq->{'class'};
         chomp $class;
         
-        if ($config->{'maintain_colour'} && $previous_class =~ /[" ](e\w)[" ]/ && $class !~ /\s*(e\w)\s*/) {
+        if ($config->{'maintain_colour'} && $previous_class =~ /\s*(e\w)\s*/ && $class !~ /\s*(e\w)\s*/) { # Temporary patch: changed $previous_class regex from [" ](e\w)[" ] to \s*(e\w)\s*
           $class .= " $1";
         }
         
         # Taken out for temporary patch
         #$class = qq{class="$class"};
-      } elsif ($config->{'maintain_colour'} && $previous_class =~ /[" ](e\w)[" ]/) {
+      } elsif ($config->{'maintain_colour'} && $previous_class =~ /\s*(e\w)\s*/) { # Temporary patch: changed regex from [" ](e\w)[" ] to \s*(e\w)\s*
           # Taken out for temporary patch
           #$class = qq{class="$1"};
           $class = $1;

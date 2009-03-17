@@ -349,10 +349,17 @@ sub _reset_config_panel {
     currently turned on from that menu are shown by the two numbers in parentheses <span style="white-space:nowrap">(tracks on/total tracks)</span>.
   </li>
   <li>
+    <p>
     Certain tracks displayed come from user-supplied or external data sources, these are clearly
-    marked as <strong>DAS</strong> (Distributed Annotation Sources), 
-    <strong>URL</strong> (UCSC style web resources) or <strong>User</strong> data uploaded by
+    marked as <strong><img src="/i/track-das.gif" alt="DAS" style="vertical-align:top; width:40px;height:16px" title="DAS" /></strong> (Distributed Annotation Sources), 
+    <strong><img src="/i/track-url.gif" alt="URL" style="vertical-align:top; width:40px;height:16px" title="URL" /></strong> (UCSC style web resources) or <strong><img src="/i/track-user.gif" alt="User" style="vertical-align:top; width:40px;height:16px" title="User" /></strong> data uploaded by
     yourself or another user.
+    </p>
+    <p>
+    Please note that the content of these tracks is not the responsibility of the Ensembl project.
+    </p>
+    <p>In the case of URL based or DAS tracks may either slow down your ensembl browsing experience OR may be unavailable as these are served and stored from other servers elsewhere on the Internet.
+    </p>
   </li>
 </ul>';
   }

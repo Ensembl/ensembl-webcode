@@ -104,7 +104,9 @@ sub _summarise_core_tables {
   );
   my $analysis = {};
   foreach my $a_aref (@$t_aref) {
-    my $T = eval($a_aref->[6]);
+    ( my $A = $a_aref->[6] ) =~ s/^[^{]+//;
+       $A =~ s/[^}]+$//;
+    my $T = eval($A);
        $T = {} unless ref($T) eq 'HASH';
     $analysis->{ $a_aref->[0] } = {
       'logic_name'  => $a_aref->[1],
@@ -602,7 +604,10 @@ sub _munge_meta {
   $self->tree->{'ASSEMBLY_DATE'} = $months[$A[1]].' '.$A[0];
 
   ## Do species name and group
-  my @taxonomy = @{$self->_meta_info('DATABASE_CORE','species.classification')};
+#  my @taxonomy = @{$self->_meta_info('DATABASE_CORE','species.classification')};
+## Small hack to get rid of drosophila group etc that is causing us problems in getting the genus out...
+
+  my @taxonomy = grep { $_!~/ / } @{$self->_meta_info('DATABASE_CORE','species.classification')}; 
   my $order = $self->tree->{'TAXON_ORDER'};
 
   $self->tree->{'SPECIES_BIO_NAME'} = $taxonomy[1].' '.$taxonomy[0];

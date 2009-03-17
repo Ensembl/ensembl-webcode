@@ -15,26 +15,26 @@ use base qw(EnsEMBL::Web::Root Exporter);
 our @EXPORT_OK = qw(cache cache_print);
 our @EXPORT    = @EXPORT_OK;
 
-sub _error {
-  my($self,$caption,$desc,$width) = @_;
-  return sprintf '<div style="width:%s" class="error"><h3>%s</h3><div class="error-pad">%s</div></div>', 
-    $width || $self->image_width.'px', $caption, $desc;
-}
-sub _warning {
-  my($self,$caption,$desc,$width) = @_;
-  return sprintf '<div style="width:%s" class="warning"><h3>%s</h3><div class="error-pad">%s</div></div>', 
-    $width || $self->image_width.'px', $caption, $desc;
-}
-sub _info {
-  my($self,$caption,$desc,$width) = @_;
-  return sprintf '<div style="width:%s" class="info"><h3>%s</h3><div class="error-pad">%s</div></div>', 
-    $width || $self->image_width.'px', $caption, $desc;
+sub _info_panel {
+  my($self,$class,$caption,$desc,$width) = @_;
+  return sprintf '<div style="width:%s" class="%s"><h3>%s</h3><div class="error-pad">%s</div></div>',
+    $width || $self->image_width.'px', $class, $caption, $desc;
 }
 
-sub _hint {
-  my($self,$caption,$desc,$width) = @_;
-  return sprintf '<div style="width:%s" class="info"><h3>%s</h3><div class="error-pad">%s</div></div>', 
-    $width || $self->image_width.'px', $caption, $desc;
+## Fatal error message... couldn't perform action
+sub _error   { my $self = shift; return $self->_info_panel( 'error',   @_ ); }
+
+## Error message... but not fatal!
+sub _warning { my $self = shift; return $self->_info_panel( 'warning', @_ ); }
+
+## Extra information 
+sub _info    { my $self = shift; return $self->_info_panel( 'info',    @_ ); }
+
+## Extra information - panel will eventually be removable - when extra session stuff is added
+sub _hint    {
+  my($self,$ID,$caption,$desc,$width) = @_;
+  return sprintf '<div id="%s" style="width:%s" class="hint hint_flag"><h3>%s</h3><div class="error-pad">%s</div></div>',
+    $ID, $width || $self->image_width.'px', $caption, $desc;
 }
 
 sub _export_image {

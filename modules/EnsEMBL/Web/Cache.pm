@@ -125,11 +125,7 @@ sub set {
   return unless $value;
   
   _warn("MEMCACHED->set($self->{namespace}$key)");
-  
-  ## TMP workaround: add extra tag for everything except user upload data
-  push @tags, 'no_user_upload'
-    unless 'EnsEMBL::Web::File::Driver::Memcached' eq caller;
-  
+
   my $result = $self->SUPER::set($key, $value, $exptime || $self->{default_exptime});
 
   $self->add_tags($key, $self->{namespace}, @tags)

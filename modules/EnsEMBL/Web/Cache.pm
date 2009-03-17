@@ -150,7 +150,7 @@ sub get {
   ## Hits & Misses statistics
   if ($self->{hm_stats} && @tags) {
     my $suffix = $result ? '::HITS' : '::MISSES';
-    $self->incr("$_$suffix") for ($self->{namespace}, @tags);
+    $self->incr("$_$suffix") for ('', @tags);
   }
 
   return $result;
@@ -162,8 +162,14 @@ sub incr {
 
   _warn("MEMCACHED->incr($key)");
 
-  $self->set($key, 1, undef, 'STATS')
-    unless $self->SUPER::incr($key);
+  my $result = $self->SUPER::incr($key);
+  if ($result) {
+    ##warn "incr [$key] = $result";
+  } else {
+    $self->set($key, 1000000001, undef, 'STATS');
+    my $result = $self->decr($key, 1000000000);
+    ##warn "incr [$key] = $result (set)";
+  }
 }
 
 sub delete {

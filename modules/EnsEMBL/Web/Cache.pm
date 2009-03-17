@@ -162,9 +162,11 @@ sub incr {
   if ($result) {
     ##warn "incr [$key] = $result";
   } else {
-    $self->set($key, 1000000001, undef, 'STATS');
-    my $result = $self->decr($key, 1000000000);
-    ##warn "incr [$key] = $result (set)";
+    if ($self->add($key, '0000000001')) {
+      $self->add_tags($key, $self->{namespace}, 'STATS');
+      #my $result = $self->decr($key, 1000000000);
+      ##warn "incr [$key] = $result (set)";
+    }
   }
 }
 

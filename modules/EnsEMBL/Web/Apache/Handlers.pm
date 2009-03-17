@@ -164,7 +164,7 @@ sub postReadRequestHandler {
   $ENV{CACHE_TAGS} = {};
 
 ## Manipulate the Registry...
-  $ENSEMBL_WEB_REGISTRY->timer->set_script_start_time( time  ); ## This is the page rendering start time!
+  $ENSEMBL_WEB_REGISTRY->timer->new_child();
   $ENSEMBL_WEB_REGISTRY->timer->clear_times();
   $ENSEMBL_WEB_REGISTRY->timer_push( 'Handling script', undef, 'Apache' );
 #  $r->push_handlers( PerlTransHandler =>   \&transHandler );
@@ -579,7 +579,11 @@ sub transHandler {
 
 sub logHandler {
   my $r = shift;
-  $r->subprocess_env->{'ENSEMBL_SCRIPT_TIME'} = sprintf( "%0.6f", time() - $ENSEMBL_WEB_REGISTRY->timer->get_script_start_time );
+  my $T = time;
+  $r->subprocess_env->{'ENSEMBL_CHILD_COUNT'}  = $ENSEMBL_WEB_REGISTRY->timer->get_process_child_count;
+  $r->subprocess_env->{'ENSEMBL_SCRIPT_START'} = sprintf( "%0.6f", $T );
+  $r->subprocess_env->{'ENSEMBL_SCRIPT_END'}   = sprintf( "%0.6f", $ENSEMBL_WEB_REGISTRY->timer->get_script_start_time );
+  $r->subprocess_env->{'ENSEMBL_SCRIPT_TIME'}  = sprintf( "%0.6f", $T - $ENSEMBL_WEB_REGISTRY->timer->get_script_start_time );
   return DECLINED;
 }
 sub cleanupHandler {

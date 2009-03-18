@@ -1116,7 +1116,7 @@ sub new_panel {
   if( $panel_type && !$self->dynamic_use( $module_name ) ) {
     my $error = $self->dynamic_use_failure( $module_name );
     my $message = "^Can't locate EnsEMBL/Web/Document/Panel/$panel_type\.pm in";
-    if( $error =~ m:$message: ) {
+    if( $error =~ /$message/ ) {
       $error = qq(<p>Unrecognised panel type "<b>$panel_type</b>");
     } else {
       $error = sprintf( "<p>Unable to compile <strong>$module_name</strong></p><pre>%s</pre>",

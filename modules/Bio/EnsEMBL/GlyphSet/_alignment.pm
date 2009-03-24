@@ -24,6 +24,11 @@ sub feature_group {
   return $f->hseqname;    ## For core features this is what the sequence name is...
 }
 
+sub feature_label {
+  my( $self, $f, $db_name ) = @_;
+  return $f->hseqname;
+}
+
 sub feature_title {
   my( $self, $f,$db_name ) = @_;
   $db_name ||= 'External Feature';
@@ -79,6 +84,13 @@ sub colour_key {
   my( $self, $feature_key ) = @_;
   return $self->my_config( 'sub_type' );
 }
+
+sub render_labels {
+  my $self = shift;
+  $self->{'show_labels'} = 1;
+  $self->render_normal();
+}
+
 sub render_normal {
   my $self = shift;
   my $tfh    = $self->{'config'}->texthelper()->height($self->{'config'}->species_defs->ENSEMBL_STYLE->{'GRAPHIC_FONT'});
@@ -113,6 +125,14 @@ sub render_normal {
 
   my $features_drawn = 0;
   my $features_bumped = 0;
+    my $label_h = 0;
+  my( $fontname, $fontsize ) ;
+  if( $self->{'show_labels'} ) {
+    ( $fontname, $fontsize ) = $self->get_font_details( 'outertext' );
+    my( $txt, $bit, $w,$th ) = $self->get_text_width( 0, 'X', '', 'ptsize' => $fontsize, 'font' => $fontname );
+    $label_h = $th;
+  }
+  warn "LABEL HEIGHT.... $label_h";
   foreach my $feature_key ( $strand < 0 ? sort keys %features : reverse sort keys %features ) {
     $self->_init_bump( undef, $dep );
     my %id             = ();
@@ -141,6 +161,7 @@ sub render_normal {
 
     my $regexp = $pix_per_bp > 0.1 ? '\dI' : ( $pix_per_bp > 0.01 ? '\d\dI' : '\d\d\dI' );
 
+
     foreach my $i ( sort {
       $id{$a}[0][3] <=> $id{$b}[0][3]  ||
       $id{$b}[-1][4] <=> $id{$a}[-1][4]
@@ -149,14 +170,22 @@ sub render_normal {
       my $START      = $F[0][0] < 1 ? 1 : $F[0][0];
       my $END        = $F[-1][1] > $length ? $length : $F[-1][1];
       my $db_name    = $F[0][5];
+      my( $txt, $bit, $w, $th );
       my $bump_start = int($START * $pix_per_bp) - 1;
       my $bump_end   = int($END * $pix_per_bp);
+
+      if( $self->{'show_labels'} ) {
+        my $title = $self->feature_label( $F[0][2],$db_name );
+        my( $txt, $bit, $tw,$th ) = $self->get_text_width( 0, $title, '', 'ptsize' => $fontsize, 'font' => $fontname );
+        my $text_end = $bump_start + $tw + 1;
+        $bump_end = $text_end if $text_end > $bump_end;
+      }
       my $row        = $self->bump_row( $bump_start, $bump_end );
       if( $row > $dep ) {
         $features_bumped++;
         next;
       }
-      $y_pos = $y_offset - $row * int( $h + $gap ) * $strand;
+      $y_pos = $y_offset - $row * int( $h + $gap * $label_h ) * $strand;
 
       my $Composite = $self->Composite({
         'href'  => $self->href( $F[0][2] ),
@@ -212,6 +241,23 @@ sub render_normal {
       }
       $Composite->y( $Composite->y + $y_pos );
       $self->push( $Composite );
+      if( $self->{'show_labels'} ) {
+        $self->push( $self->Text({
+          'font'      => $fontname,
+          'colour'    => $feature_colour,
+          'height'    => $fontsize,
+          'ptsize'    => $fontsize,
+          'text'      => $self->feature_label($F[0][2],$db_name),
+          'title'     => $self->feature_title($F[0][2],$db_name),
+          'halign'    => 'left',
+          'valign'    => 'center',
+          'x'         => $Composite->{'x'},
+          'y'         => $Composite->{'y'} + $h + 2,
+          'width'     => $Composite->{'x'} + ($bump_end-$bump_start) / $pix_per_bp,
+          'height'    => $label_h,
+          'absolutey' => 1
+        }));
+      }
       if(exists $highlights{$i}) {
         $self->unshift( $self->Rect({
           'x'         => $Composite->{'x'} - 1/$pix_per_bp,
@@ -223,7 +269,7 @@ sub render_normal {
         }));
       }
     }
-    $y_offset -= $strand * ( ($self->_max_bump_row + 1) * ( $h + $gap ) + 6 );
+    $y_offset -= $strand * ( ($self->_max_bump_row + 1) * ( $h + $gap + $label_h ) + 6 );
   }
   $self->errorTrack( "No features from '".$self->my_config('name')."' in this region" )
     unless( $features_drawn || $self->get_parameter( 'opt_empty_tracks')==0 );

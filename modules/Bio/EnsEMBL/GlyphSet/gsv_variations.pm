@@ -46,7 +46,7 @@ sub _init {
     next if $snp->start > $transcript->end + $EXTENT - $offset;
     my $snp_type = lc($cod_snp->display_consequence); 
     my $colour = $colour_map->{$snp_type}->{'default'};
-    my $aa_change = $cod_snp->pep_allele_string;
+    my $aa_change = $cod_snp->pep_allele_string || '-';
     
 
     my $S =  ( $snpref->[0]+$snpref->[1] )/2;
@@ -72,7 +72,7 @@ sub _init {
     ({'action'  => 'Variation',
       'v'     => $variation_id,
       'vf'    => $dbid,
-      'var_box' => 1,
+      'var_box' => $aa_change,
     });
 
     my $type      = join ", ", @{$cod_snp->consequence_type || [] }; 

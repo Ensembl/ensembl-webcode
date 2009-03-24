@@ -16,6 +16,7 @@ our @TRANSCRIPT_TYPES = qw(transcript alignslice_transcript tsv_transcript gsv_t
 our $alignment_renderers = [
   'off'         => 'Off',
   'normal'      => 'Normal',
+  'labels'      => 'Labels',
   'half_height' => 'Half height',
   'stack'       => 'Stacked',
   'unlimited'   => 'Stacked unlimited',
@@ -598,14 +599,7 @@ sub add_dna_align_feature {
         'caption'     => $data->{$key_2}{'caption'},
         'description' => $data->{$key_2}{'description'},
         'display'     => $data->{$key_2}{'display'}||'off', ## Default to on at the moment - change to off by default!
-        'renderers'   => [
-          'off'         => 'Off',
-          'normal'      => 'Normal',
-          'half_height' => 'Half height',
-          'stack'       => 'Stacked',
-          'unlimited'   => 'Stacked unlimited',
-          'ungrouped'   => 'Ungrouped'
-        ],
+        'renderers'   => $alignment_renderers,
         'strand'      => 'b'
       }));
     }
@@ -633,14 +627,7 @@ sub add_protein_align_feature {
       'caption'     => $data->{$key_2}{'caption'},
       'description' => $data->{$key_2}{'description'},
       'display'     => $data->{$key_2}{'display'}||'off', ## Default to on at the moment - change to off by default!
-      'renderers'   => [
-        'off'         => 'Off',
-        'normal'      => 'Normal',
-        'half_height' => 'Half height',
-        'stack'       => 'Stacked',
-        'unlimited'   => 'Stacked unlimited',
-        'ungrouped'   => 'Ungrouped'
-      ],
+      'renderers'   => $alignment_renderers,
       'strand'      => 'b'
     }));
   }

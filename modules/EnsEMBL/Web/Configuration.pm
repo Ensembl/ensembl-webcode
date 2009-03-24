@@ -1198,8 +1198,8 @@ sub ajax_zmenu_variation {
   my $type;
   if ($obj->param('snp_fake') && $feature) { $type = $feature->display_consequence; }
   elsif ($trans_variation){ $type =  join ", ", @{$trans_variation->consequence_type || [] };}
-  else {$type = $obj->param('consequence') || '';}
-
+  elsif ($obj->param('consequence')){$type = $obj->param('consequence') || '';}
+  else  { $type = $feature->display_consequence; }
 
   my $var_link = $obj->_url({'type' => 'Variation', 'action' => 'Summary', 'v' => $feature->variation_name, 'vf' => $feature->dbID, 'source' => $feature->source }); 
 
@@ -1264,12 +1264,14 @@ sub ajax_zmenu_variation {
       'label'       =>  $feature->map_weight,
       'priority'    =>  8,
     });
-  } elsif ($obj->param('var_box') && $trans_variation->pep_allele_string){
-    $panel->add_entry({
-      'type'        =>  'amino acid:',
-      'label'       =>  $trans_variation->pep_allele_string,
-      'priority'    =>  8,
-    });
+  } elsif ($obj->param('var_box')){
+    unless (  $obj->param('var_box') eq  '-' ){
+      $panel->add_entry({
+        'type'        =>  'amino acid:',
+        'label'       =>  $obj->param('var_box'),
+        'priority'    =>  8,
+      });
+    }
   }elsif ($obj->type eq 'Variation'){
     my $status = join(', ', @{$feature->get_all_validation_states||[]} );
     $panel->add_entry({

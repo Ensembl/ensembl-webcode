@@ -6,7 +6,7 @@ use strict;
 use warnings;
 no warnings "uninitialized";
 
-use EnsEMBL::Web::Tools::Misc;
+use EnsEMBL::Web::Tools::Misc qw(get_url_content);
 use EnsEMBL::Web::Tools::Encryption qw(checksum);
 use EnsEMBL::Web::TmpFile::Text;
 use EnsEMBL::Web::RegObj;
@@ -85,11 +85,17 @@ sub upload {
       $name = $orig_path[-1];
     }
 
+    my $content = get_url_content($self->object->param('url'), $self->object->species_defs->ENSEMBL_WWW_PROXY);
+    unless ($content) {
+        $self->parameter('wizard_next', 'select_file');
+        $self->parameter('error_message', 'We cannot retrieve the contents of the URL you have specified, please check the URL and try again.');
+    }
+
     ## Cache data (TmpFile::Text knows whether to use memcached or temp file)
     my $file = new EnsEMBL::Web::TmpFile::Text(
       prefix => 'user_upload',
       ($method eq 'url') ?
-      (content      => EnsEMBL::Web::Tools::Misc::get_url_content($self->object->param('url'))) :
+      (content      => $content) :
       (tmp_filename => $self->object->[1]->{'_input'}->tmpFileName($self->object->param('file'))),
     );
 
@@ -127,8 +133,7 @@ sub upload {
           $self->parameter(code        => $file->md5);
           $self->parameter(wizard_next => 'upload_feedback');
         }
-      }
-      else {
+      } else {
         $self->parameter('wizard_next', 'select_file');
         $self->parameter('error_message', 'Your file appears to be empty. Please check that it contains correctly-formatted data.');
       }

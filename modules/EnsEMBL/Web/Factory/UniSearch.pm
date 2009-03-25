@@ -347,16 +347,19 @@ sub search_MARKER {
   my $self = shift;
   $self->_fetch_results( 
     [ 'core', 'Marker',
-      "select count(distinct name) from marker_synonym where name [[COMP]] '[[KEY]]'",
-      "select distinct name from marker_synonym where name [[COMP]] '[[KEY]]'" ]
+      "select count(distinct m.name) from marker_synonym m left join (marker_feature f) on m.marker_id=f.marker_id
+       where f.seq_region_id is not null and m.name [[COMP]] '[[KEY]]'",
+      "select distinct m.name, s.name, f.seq_region_start, f.seq_region_end from marker_synonym m 
+       left join (marker_feature f, seq_region s ) on f.marker_id=m.marker_id and s.seq_region_id=f.seq_region_id
+       where f.seq_region_start is not null and m.name [[COMP]] '[[KEY]]'" ]
   );
 
   foreach ( @{$self->{_results}} ) {
-    my $KEY =  $_->[2] < 1e6 ? 'contigview' : 'cytoview';
+    my $KEY =  'Location/View';
     $KEY = 'cytoview' if $self->species_defs->NO_SEQUENCE;
     $_ = {
-      'URL'       => "/@{[$self->species]}/markerview?marker=$_->[0]",
-      'URL_extra' => [ 'C', 'View marker in ContigView', "/@{[$self->species]}/$KEY?marker=$_->[0]" ],
+      'URL'       => "/@{[$self->species]}/Location/Marker?m=$_->[0];r=$_->[1]:$_->[2]-$_->[3]",
+      'URL_extra' => [ 'Region overview', 'View marker in Region Overview', "/@{[$self->species]}/$KEY?m=$_->[0];r=$_->[1]:$_->[2]-$_->[3]" ],
       'idx'       => 'Marker',
       'subtype'   => 'Marker',
       'ID'        => $_->[0],

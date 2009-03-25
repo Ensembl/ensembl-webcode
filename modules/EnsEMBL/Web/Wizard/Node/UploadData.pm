@@ -85,10 +85,15 @@ sub upload {
       $name = $orig_path[-1];
     }
 
-    my $content = get_url_content($self->object->param('url'), $self->object->species_defs->ENSEMBL_WWW_PROXY);
-    unless ($content) {
+
+    my $content;
+    if ($method eq 'url') {
+      $content = get_url_content($self->object->param('url'), $self->object->species_defs->ENSEMBL_WWW_PROXY);
+      unless ($content) {
         $self->parameter('wizard_next', 'select_file');
         $self->parameter('error_message', 'We cannot retrieve the contents of the URL you have specified, please check the URL and try again.');
+        return;
+      }
     }
 
     ## Cache data (TmpFile::Text knows whether to use memcached or temp file)

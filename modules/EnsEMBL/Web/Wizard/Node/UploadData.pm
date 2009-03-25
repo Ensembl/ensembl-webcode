@@ -6,6 +6,7 @@ use strict;
 use warnings;
 no warnings "uninitialized";
 
+use EnsEMBL::Web::Tools::Misc;
 use EnsEMBL::Web::Tools::Encryption qw(checksum);
 use EnsEMBL::Web::TmpFile::Text;
 use EnsEMBL::Web::RegObj;
@@ -88,7 +89,7 @@ sub upload {
     my $file = new EnsEMBL::Web::TmpFile::Text(
       prefix => 'user_upload',
       ($method eq 'url') ?
-      (content      => get_url_content($self->object->param('url'))) :
+      (content      => EnsEMBL::Web::Tools::Misc::get_url_content($self->object->param('url'))) :
       (tmp_filename => $self->object->[1]->{'_input'}->tmpFileName($self->object->param('file'))),
     );
 

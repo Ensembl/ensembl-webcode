@@ -17,7 +17,7 @@
   <body>
 
 <div id="masthead">
-  <h1><a href="/"><img src="/img/e-bang.gif" style="width: 46px; height: 40px; vertical-align:bottom; border:0px; padding-bottom:2px" alt="" title="Home" /></a><a href="/" class="home serif">Ensembl</a>
+  <h1><a href="/"><img src="/img/vega.gif" style="width: 111px; height: 40px; vertical-align:bottom; border:0px; padding-bottom:2px" alt="" title="Home" /></a><a href="/" class="home serif"></a>
   <xsl:apply-templates select="*" mode="masthead" />
   </h1>
 </div>
@@ -126,12 +126,10 @@ body { background-image: none }
 
 <xsl:template name="release_and_links">
 <div id="release-t">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</div>
-<div id="release"><div>Ensembl release 43 - <a href="/Multi/newsview?rel=43" title="What's New">Feb 2007</a></div></div>
+<div id="release"><div>Vega release 35 - <a href="/Multi/newsview?rel=27" title="What's New">Mar 2009</a></div></div>
 <div id="help"><strong>
   <a href="/">HOME</a> &#183;
-  <a href="/das/sources">DAS&#160;SOURCES</a> &#183;
   <a href="/multi/blastview">BLAST</a> &#183;
-  <a href="/biomart/martview/">BIOMART</a> &#183;
   <a href="/sitemap.html">SITEMAP</a>
   <a href="javascript:void(window.open('/perl/helpview','helpview','width=700,height=550,resizable,scrollbars'))" class="blue-button">HELP</a>
 </strong></div>
@@ -141,7 +139,8 @@ body { background-image: none }
 <p class="center">
   &#169; 2007 <a href="http://www.sanger.ac.uk/" class="nowrap">WTSI</a> /
   <a href="http://www.ebi.ac.uk/" style="white-space:nowrap">EBI</a>.
-  Ensembl is available to <a href="/info/data/download.html">download for public use</a> - please see the <a href="/info/about/code_licence.html">code licence</a> for details.
+  <br /><a href="http://www.ensembl.org/info/about/ensembl_powered.html"><img src="/img/empowered.png" height="20" width="98" alt="Powered by Ensembl code" /></a><br />
+            We are keen to receive extra information on annotation, and to hear your comments, problems, and suggestions on Vega. Please send us <a href="javascript:void(window.open('/perl/helpview','helpview','width=700,height=550,resizable,scrollbars'))">feedback</a>.
 </p>
 </xsl:template>
 
@@ -202,7 +201,7 @@ body { background-image: none }
 
 <!-- DSN templates -->
 <xsl:template match="DASDSN" mode="title">
-  Ensembl DAS DSN
+  Vega DAS DSN
 </xsl:template>
 
 <xsl:template match="DASDSN" mode="hack"></xsl:template>
@@ -259,7 +258,7 @@ body { background-image: none }
 <!-- SOURCES templates -->
 
 <xsl:template match="SOURCES" mode="title">
-  Ensembl DAS Sources
+  Vega DAS Sources
 </xsl:template>
 <xsl:template match="SOURCES" mode="masthead">
   <a class="section"> DAS</a><span class="viewname serif">Sources</span>
@@ -351,7 +350,7 @@ body { background-image: none }
 <xsl:template match="DASEP" mode="hack"><xsl:call-template name="hack_js" /></xsl:template>
 
 <xsl:template match="DASEP" mode="title">
-  Ensembl DAS EntryPoints
+  Vega DAS EntryPoints
 </xsl:template>
 
 <xsl:template match="DASEP" mode="masthead">
@@ -422,8 +421,8 @@ body { background-image: none }
 
 <xsl:template match="DASSEQUENCE" mode="hack"><xsl:call-template name="hack_js" /></xsl:template>
 <xsl:template match="DASDNA"      mode="hack"><xsl:call-template name="hack_js" /></xsl:template>
-<xsl:template match="DASSEQUENCE" mode="title">Ensembl Sequence</xsl:template>
-<xsl:template match="DASDNA"      mode="title">Ensembl DNA Sequence</xsl:template>
+<xsl:template match="DASSEQUENCE" mode="title">Vega Sequence</xsl:template>
+<xsl:template match="DASDNA"      mode="title">Vega DNA Sequence</xsl:template>
 
 <xsl:template match="DASSEQUENCE" mode="masthead">
   <a class="section" id="masthead_species"><i>DAS</i></a>
@@ -510,7 +509,7 @@ body { background-image: none }
 
 <xsl:template match="DASTYPES" mode="hack"></xsl:template>
 <xsl:template match="DASTYPES" mode="title">
-  Ensembl <xsl:call-template name="species_name">
+  Vega <xsl:call-template name="species_name">
     <xsl:with-param name="string" select="substring-after( GFF/@href, '/das/' )" />
   </xsl:call-template>&#160;<xsl:call-template name="last_bit">
     <xsl:with-param name="string" select="substring-before( GFF/@href, '/types?' )" />
@@ -538,7 +537,7 @@ body { background-image: none }
 
 <xsl:template match="DASGFF" mode="hack"></xsl:template>
 <xsl:template match="DASGFF" mode="title">
-  Ensembl <xsl:call-template name="species_name">
+  Vega <xsl:call-template name="species_name">
     <xsl:with-param name="string" select="substring-after( GFF/@href, '/das/' )" />
   </xsl:call-template>&#160;<xsl:call-template name="last_bit">
     <xsl:with-param name="string" select="substring-before( GFF/@href, '/features?' )" />
@@ -856,7 +855,7 @@ body { background-image: none }
 <!-- LAST BUT NOT LEAST STYLESHEETS -->
 
 <xsl:template match="DASSTYLE" mode="title">
-  Ensembl DAS StyleSheet
+  Vega DAS StyleSheet
 </xsl:template>
 
 <xsl:template match="DASSTYLE" mode="masthead">

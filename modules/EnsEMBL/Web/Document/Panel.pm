@@ -678,7 +678,7 @@ if ($component eq 'das_features') {
             my $URL = join '/', '', $ENV{'ENSEMBL_SPECIES'},'Component',$ENV{'ENSEMBL_TYPE'},$plugin,$module;
     	      $URL .= "/$function_name" if $function_name && $comp_obj->can( "content_$function_name" );
             $URL .= "?$ENV{'QUERY_STRING'}";
-            $URL .= ";__ref=". Digest::MD5::md5($ENV{'REQUEST_URI'});
+            $URL .= ";__ref=". Digest::MD5::md5_hex($ENV{'REQUEST_URI'});
             # $self->renderer->{'r'}->parsed_uri->query;
 
             ## Check if ajax enabled

@@ -4,6 +4,7 @@ use strict;
 
 use HTTP::Request;
 use Data::Dumper;
+use Digest::MD5 qw();
 use CGI qw(escape escapeHTML);
 
 use EnsEMBL::Web::Root;
@@ -676,7 +677,10 @@ if ($component eq 'das_features') {
             my( $ensembl, $plugin, $component, $type, $module ) = split '::', $module_name;
             my $URL = join '/', '', $ENV{'ENSEMBL_SPECIES'},'Component',$ENV{'ENSEMBL_TYPE'},$plugin,$module;
     	      $URL .= "/$function_name" if $function_name && $comp_obj->can( "content_$function_name" );
-            $URL .= "?$ENV{'QUERY_STRING'}"; # $self->renderer->{'r'}->parsed_uri->query;
+            $URL .= "?$ENV{'QUERY_STRING'}";
+            $URL .= "?$ENV{'QUERY_STRING'}";
+            $URL .= ";ref=". Digest::MD5::md5_base64($ENV{'REQUEST_URI'});
+            # $self->renderer->{'r'}->parsed_uri->query;
 
             ## Check if ajax enabled
             if( $ENSEMBL_WEB_REGISTRY->check_ajax ) {

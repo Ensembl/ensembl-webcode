@@ -679,7 +679,7 @@ if ($component eq 'das_features') {
     	      $URL .= "/$function_name" if $function_name && $comp_obj->can( "content_$function_name" );
             $URL .= "?$ENV{'QUERY_STRING'}";
             $URL .= "?$ENV{'QUERY_STRING'}";
-            $URL .= ";ref=". Digest::MD5::md5($ENV{'REQUEST_URI'});
+            $URL .= ";uref=". Digest::MD5::md5($ENV{'REQUEST_URI'});
             # $self->renderer->{'r'}->parsed_uri->query;
 
             ## Check if ajax enabled

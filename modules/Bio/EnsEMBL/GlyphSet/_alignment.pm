@@ -161,7 +161,7 @@ sub render_normal {
 
     my $regexp = $pix_per_bp > 0.1 ? '\dI' : ( $pix_per_bp > 0.01 ? '\d\dI' : '\d\d\dI' );
 
-
+    next unless keys %id;
     foreach my $i ( sort {
       $id{$a}[0][3] <=> $id{$b}[0][3]  ||
       $id{$b}[-1][4] <=> $id{$a}[-1][4]
@@ -269,7 +269,8 @@ sub render_normal {
         }));
       }
     }
-    $y_offset -= $strand * ( ($self->_max_bump_row + 1) * ( $h + $gap + $label_h ) + 6 );
+    $y_offset -= $strand * ( ($self->_max_bump_row ) * ( $h + $gap + $label_h ) + 6 );
+warn "...", $self->_max_bump_row, " $h + $gap + $label_h ", "... $y_offset" ;
   }
   $self->errorTrack( "No features from '".$self->my_config('name')."' in this region" )
     unless( $features_drawn || $self->get_parameter( 'opt_empty_tracks')==0 );
@@ -283,6 +284,12 @@ sub render_normal {
   }
   $self->timer_push( 'Features drawn' );
 ## No features show "empty track line" if option set....
+}
+
+sub render_ungrouped_labels {
+  my $self = shift;
+  $self->{'show_labels'} = 1;
+  $self->render_ungrouped(@_);
 }
 
 sub render_ungrouped {
@@ -306,11 +313,22 @@ sub render_ungrouped {
 
   my $y_offset = 0;
 
+  my $label_h = 0;
+  my( $fontname, $fontsize ) ;
+
+  if( $self->{'show_labels'} ) {
+    ( $fontname, $fontsize ) = $self->get_font_details( 'outertext' );
+    my( $txt, $bit, $w,$th ) = $self->get_text_width( 0, 'X', '', 'ptsize' => $fontsize, 'font' => $fontname );
+    $label_h = $th;
+  }
+
   foreach my $feature_key ( $strand < 0 ? sort keys %features : reverse sort keys %features ) {
+    my $flag = 0;
     $self->{'track_key'} = $feature_key;
     my $colour_key     = $self->colour_key( $feature_key );
     my $feature_colour = $self->my_colour( $self->my_config( 'sub_type' ), undef  );
 
+    $self->_init_bump( undef, '0.5' );
     foreach my $f (
       sort { $a->[0] <=> $b->[0]      }
       map  { [$_->start, $_->end,$_ ] }
@@ -327,6 +345,7 @@ sub render_ungrouped {
       $features_drawn++;
       my $cigar;
       eval { $cigar = $feat->cigar_string; };
+$flag++;
       if($DRAW_CIGAR || $cigar =~ /$regexp/ ) {
         $self->draw_cigar_feature( $self, $feat, $h, $feature_colour, 'black', $pix_per_bp, $strand_flag eq 'r' );
       } else {
@@ -339,8 +358,34 @@ sub render_ungrouped {
           'absolutey'  => 1,
         }));
       }
+      if( $self->{'show_labels'} ) {
+        my( $txt, $bit, $w, $th );
+        my $bump_start = int($X * $pix_per_bp) - 1;
+        my $title = $self->feature_label( $f->[2] );
+        my( $txt, $bit, $tw,$th ) = $self->get_text_width( 0, $title, '', 'ptsize' => $fontsize, 'font' => $fontname );
+        my $bump_end = $bump_start + $tw + 1;
+        my $row        = $self->bump_row( $bump_start, $bump_end );
+        if( $row < 0.5 ) {
+          $self->push( $self->Text({
+            'font'      => $fontname,
+            'colour'    => $feature_colour,
+            'height'    => $fontsize,
+            'ptsize'    => $fontsize,
+            'text'      => $title,
+            'title'     => $title,
+            'halign'    => 'left',
+            'valign'    => 'center',
+            'x'         => $X,
+            'y'         => $y_offset + $h,
+            'width'     => ($bump_end-$bump_start) / $pix_per_bp,
+            'height'    => $label_h,
+            'absolutey' => 1
+          }));
+        }
+      }
     }
-    $y_offset -= $strand * ($h+2);
+warn ".... $feature_key $flag ...";
+    $y_offset -= $strand * ($h+2);# + ( $self->{'show_labels'} ? $label_h+2 : 0 ) ) if $flag;
   }
   $self->errorTrack( "No ".$self->my_config('name')." features in this region" )
     unless( $features_drawn || $self->get_parameter( 'opt_empty_tracks')==0 );

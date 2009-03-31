@@ -217,14 +217,28 @@ sub transHandler_das {
   my( $r, $session_cookie, $path_segments, $querystring ) = @_;
   my $DSN     = $path_segments->[0];
   my $command = '';
+
+  ## These are static content files due to the time to generate...
+  ## These files are created by utils/initialized_das.pl
+warn "... ",$SiteDefs::ENSEMBL_SERVERROOT."/htdocs/das/$DSN/entry_points";
   if(
-    $path_segments->[1] eq 'entry_points' && -e $SiteDefs::ENSEMBL_SERVERROOT."/htdocs/das/$DSN/entry_points" ||
+    $path_segments->[1] eq 'entry_points' && (
+      -e $SiteDefs::ENSEMBL_SERVERROOT."/htdocs/das/$DSN/entry_points"
+    ) ||
     $DSN                eq 'sources' ||
     $DSN                eq 'dsn'     
   ) { ## Fall through this is a static page!!
+warn ">>>>>>>";
     return undef;
   }
 
+  ## We have a DAS URL of the form...
+  ## /das/{species}.{assembly}.{feature_type}/command
+  ## 
+  ## feature_type consists of type and subtype separated by a -
+  ## e.g. gene-core-ensembl
+  ##
+  ## command is e.g. features, ...
   my @dsn_fields  = split (/\./, $DSN);
   my $das_species = shift @dsn_fields;
   my $type        = pop @dsn_fields;
@@ -233,11 +247,15 @@ sub transHandler_das {
   ( $type, $subtype ) = split (/-/,$type,2);
   $command = $path_segments->[1];
   my $FN = $SiteDefs::ENSEMBL_SERVERROOT."/perl/das/$command";
+
+  ## Map the species to its real value!
   $das_species = $SPECIES_MAP{lc($das_species)} || '';
   if( ! $das_species ) {
     $command = 'das_error';
     $r->subprocess_env->{'ENSEMBL_DAS_ERROR'} = 'unknown-species';
   }
+  
+  ## Initialize session and set various environment variables...
   $ENSEMBL_WEB_REGISTRY->initialize_session({ 'r' => $r, 'cookie'  => $session_cookie, 'species' => $das_species, 'script'  => $command });
   $r->subprocess_env->{'ENSEMBL_SPECIES'     } = $das_species;
   $r->subprocess_env->{'ENSEMBL_DAS_ASSEMBLY'} = $assembly;
@@ -245,6 +263,8 @@ sub transHandler_das {
   $r->subprocess_env->{'ENSEMBL_TYPE'    } = 'DAS';
   $r->subprocess_env->{'ENSEMBL_DAS_SUBTYPE' } = $subtype;
   $r->subprocess_env->{'ENSEMBL_SCRIPT'      } = $command;
+
+  ## Now look for the appropriate DAS script
   my $error_filename = '';
   foreach my $dir ( @PERL_TRANS_DIRS ) {
     my $filename          = sprintf( $dir, 'das' )."/das/$command";
@@ -253,39 +273,49 @@ sub transHandler_das {
     next unless -r $filename;
     $r->filename( $filename );
     $r->uri( "/perl/das/$DSN/$command" );
-    if( $ENSEMBL_DEBUG_FLAGS & $SiteDefs::ENSEMBL_DEBUG_HANDLER_ERRORS ) {
-      my @X = localtime();
-      $LOG_INFO = sprintf( "SCRIPT:%8s:%-10d %04d-%02d-%02d %02d:%02d:%02d /%s/%s?%s\n",
-        substr($THIS_HOST,0,8), $$, $X[5]+1900, $X[4]+1, $X[3], $X[2],$X[1],$X[0],
-        'das', "$DSN/$command", $querystring );
-      warn $LOG_INFO;
-      $LOG_TIME = time();
-    }
+    push_script_line( 'das', "$DSN/$command", $querystring )
+     if $ENSEMBL_DEBUG_FLAGS & $SiteDefs::ENSEMBL_DEBUG_HANDLER_ERRORS;
     $r->push_handlers( PerlCleanupHandler => \&cleanupHandler_script      );
-#warn "PUSHING BLASTSCRIPTXX.... $ENSEMBL_BLASTSCRIPT";
-#          $r->push_handlers( PerlCleanupHandler => \&cleanupHandler_blast       ) if $ENSEMBL_BLASTSCRIPT;
     $r->push_handlers( PerlCleanupHandler => \&Apache2::SizeLimit::handler );
     return OK;
   }
+
+  ## Poo! It's not there anymore
+  ## If not handle this as an "unknown command response".... if that script exists!
   if( -r $error_filename ) {
     $r->subprocess_env->{'ENSEMBL_DAS_ERROR'}  = 'unknown-command';
     $r->filename( $error_filename );
     $r->uri( "/perl/das/$DSN/$command" );
-    if( $ENSEMBL_DEBUG_FLAGS & $SiteDefs::ENSEMBL_DEBUG_HANDLER_ERRORS ) {
-      my @X = localtime();
-      $LOG_INFO = sprintf( "SCRIPT:%8s:%-10d %04d-%02d-%02d %02d:%02d:%02d /%s/%s?%s\n",
-        substr($THIS_HOST,0,8), $$, $X[5]+1900, $X[4]+1, $X[3], $X[2],$X[1],$X[0],
-        'das', "$DSN/$command", $querystring );
-      warn $LOG_INFO;
-      $LOG_TIME = time();
-    }
+    push_script_line( 'das', "$DSN/$command", $querystring )
+     if $ENSEMBL_DEBUG_FLAGS & $SiteDefs::ENSEMBL_DEBUG_HANDLER_ERRORS;
     $r->push_handlers( PerlCleanupHandler => \&cleanupHandler_script      );
-#warn "PUSHING BLASTSCRIPTYY.... $ENSEMBL_BLASTSCRIPT";
-#          $r->push_handlers( PerlCleanupHandler => \&cleanupHandler_blast       ) if $ENSEMBL_BLASTSCRIPT;
     $r->push_handlers( PerlCleanupHandler => \&Apache2::SizeLimit::handler );
     return OK;
   }
+
+  ## Otherwise panic!!
   return DECLINED;
+}
+
+sub push_endscr_line {
+  push_script_line( @_, 'ENDSCR' );
+}
+
+sub push_script_line {
+  my $species = shift;
+  my $command = shift;
+  my $qs      = shift;
+  my $prefix  = @_ ? shift : 'SCRIPT';
+
+  my @X = localtime();
+  $LOG_INFO = sprintf(
+    "%s:%8s:%-10d %04d-%02d-%02d %02d:%02d:%02d /%s/%s?%s\n",
+    $prefix, substr($THIS_HOST,0,8), $$,
+    $X[5]+1900, $X[4]+1, $X[3], $X[2],$X[1],$X[0],
+    $species, $command, $qs
+  );
+  warn $LOG_INFO;
+  $LOG_TIME = time();
 }
 
 sub transHandler_no_species {
@@ -321,14 +351,8 @@ sub transHandler_no_species {
     $r->filename( $to_execute );
     $r->uri( "/perl/common/$script" );
     $r->subprocess_env->{'PATH_INFO'} = "/$path_info" if $path_info;
-    if( $ENSEMBL_DEBUG_FLAGS & $SiteDefs::ENSEMBL_DEBUG_HANDLER_ERRORS && $script ne 'ladist' && $script ne 'la' ) {
-      my @X = localtime();
-      $LOG_INFO = sprintf( "SCRIPT:%8s:%-10d %04d-%02d-%02d %02d:%02d:%02d /%s/%s?%s\n",
-        substr($THIS_HOST,0,8), $$, $X[5]+1900, $X[4]+1, $X[3], $X[2],$X[1],$X[0],
-        $species, $script, $querystring );
-
-      $LOG_TIME = time();
-    }
+    push_script_line( $species, $script, $querystring )
+      if $ENSEMBL_DEBUG_FLAGS & $SiteDefs::ENSEMBL_DEBUG_HANDLER_ERRORS;
     $r->push_handlers( PerlCleanupHandler => \&cleanupHandler_script       ); 
     $r->push_handlers( PerlCleanupHandler => \&Apache2::SizeLimit::handler );
     return OK;
@@ -427,14 +451,8 @@ sub transHandler_species {
     $r->filename( $to_execute );
     $r->uri( "/perl/$species/$script" );
     $r->subprocess_env->{'PATH_INFO'} = "/$path_info" if $path_info;
-    if( $ENSEMBL_DEBUG_FLAGS & $SiteDefs::ENSEMBL_DEBUG_HANDLER_ERRORS && $script ne 'ladist' && $script ne 'la' ) {
-      my @X = localtime();
-      $LOG_INFO = sprintf( "SCRIPT:%8s:%-10d %04d-%02d-%02d %02d:%02d:%02d /%s/%s?%s\n",
-        substr($THIS_HOST,0,8), $$, $X[5]+1900, $X[4]+1, $X[3], $X[2],$X[1],$X[0],
-        $species, $script, $querystring );
-      warn $LOG_INFO;
-      $LOG_TIME = time();
-    }
+    push_script_line( $species, $script, $querystring )
+      if $ENSEMBL_DEBUG_FLAGS & $SiteDefs::ENSEMBL_DEBUG_HANDLER_ERRORS;
     $r->push_handlers( PerlCleanupHandler => \&cleanupHandler_script       );
     $r->push_handlers( PerlCleanupHandler => \&Apache2::SizeLimit::handler );
     return OK;

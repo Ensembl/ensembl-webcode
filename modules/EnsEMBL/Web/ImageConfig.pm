@@ -20,7 +20,8 @@ our $alignment_renderers = [
   'half_height' => 'Half height',
   'stack'       => 'Stacked',
   'unlimited'   => 'Stacked unlimited',
-  'ungrouped'   => 'Ungrouped'
+  'ungrouped'   => 'Ungrouped',
+#  'ungrouped_labels'   => 'Ungrouped with labels',
 ];
 our $MEMD = EnsEMBL::Web::Cache->new;
 

@@ -523,20 +523,12 @@ sub transHandler {
   if( $species eq 'das' ) {
     my $return = transHandler_das( $r, $session_cookie, \@path_segments, $querystring );
     $ENSEMBL_WEB_REGISTRY->timer_push( 'Transhandler for DAS scripts finished', undef, 'Apache' );
-    if (defined $return) {
-      $MEMD->incr("::TOTALS") if $MEMD;
-      $MEMD->incr("DAS::TOTALS") if $MEMD;
-      return $return ;
-    }
+    return $return if defined $return;
   }
   if( $OBJECT_TO_SCRIPT{ $species } && $path_segments[0]!~/\./ ) { # Species less script??
     my $return = transHandler_no_species( $r, $session_cookie, $species, \@path_segments, $querystring );
     $ENSEMBL_WEB_REGISTRY->timer_push( 'Transhandler for non-species scripts finished', undef, 'Apache' );
-    if (defined $return) {
-      $MEMD->incr("::TOTALS") if $MEMD;
-      $MEMD->incr("NO_SPECIES::TOTALS") if $MEMD;
-      return $return ;
-    }
+    return $return if defined $return;
   }
   if( $species && $species_name ) { # species script
     my $return = transHandler_species(
@@ -549,11 +541,7 @@ sub transHandler {
       $species_name eq $species
     );
     $ENSEMBL_WEB_REGISTRY->timer_push( 'Transhandler for species scripts finished', undef, 'Apache' );
-    if (defined $return) {
-      $MEMD->incr("::TOTALS") if $MEMD;
-      $MEMD->incr("SPECIES::TOTALS") if $MEMD;
-      return $return ;
-    }
+    return $return if defined $return;
     shift @path_segments;
     shift @path_segments;
   }

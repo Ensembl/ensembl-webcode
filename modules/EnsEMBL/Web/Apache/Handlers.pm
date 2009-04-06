@@ -514,6 +514,7 @@ sub transHandler {
   my @tags = map { $prefix = join('/', $prefix, $_); $prefix; } @path_segments;
   @tags = map { ("/$species$_", $_) } @tags;
   $ENV{CACHE_TAGS}{$_} = 1 for @tags;
+  $MEMD->incr("::TOTALS") if $MEMD;
   ## /memcached tags
     
   my $Tspecies  = $species;
@@ -521,16 +522,22 @@ sub transHandler {
   my $path_info = undef;
   my $species_name = $SPECIES_MAP{ lc($species) };
   if( $species eq 'das' ) {
+    $MEMD->incr("DAS::TOTALS") if $MEMD;
+
     my $return = transHandler_das( $r, $session_cookie, \@path_segments, $querystring );
     $ENSEMBL_WEB_REGISTRY->timer_push( 'Transhandler for DAS scripts finished', undef, 'Apache' );
     return $return if defined $return;
   }
   if( $OBJECT_TO_SCRIPT{ $species } && $path_segments[0]!~/\./ ) { # Species less script??
+    $MEMD->incr("NO_SPECIES::TOTALS") if $MEMD;
+
     my $return = transHandler_no_species( $r, $session_cookie, $species, \@path_segments, $querystring );
     $ENSEMBL_WEB_REGISTRY->timer_push( 'Transhandler for non-species scripts finished', undef, 'Apache' );
     return $return if defined $return;
   }
   if( $species && $species_name ) { # species script
+    $MEMD->incr("SPECIES::TOTALS") if $MEMD;
+
     my $return = transHandler_species(
       $r,
       $session_cookie,

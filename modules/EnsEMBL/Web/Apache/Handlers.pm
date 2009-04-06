@@ -506,13 +506,16 @@ sub transHandler {
 
   my @path_segments = split( m|/|, $file );
   shift @path_segments; # Always empty
+  
+  my $species   = shift @path_segments;
 
   ## Some memcached tags (mainly for statistics)
   my $prefix = '';
   my @tags = map { $prefix = join('/', $prefix, $_); $prefix; } @path_segments;
+  @tags = map { ("/$species$_", $_) } @tags;
   $ENV{CACHE_TAGS}{$_} = 1 for @tags;
-  
-  my $species   = shift @path_segments;
+  ## /memcached tags
+    
   my $Tspecies  = $species;
   my $script    = undef;
   my $path_info = undef;

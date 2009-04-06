@@ -146,6 +146,7 @@ sub get {
   ## Hits & Misses statistics
   if ($self->{hm_stats} && @tags) {
     my $suffix = $result ? '::HITS' : '::MISSES';
+    @tags = grep { $_ ne '' } @tags; 
     $self->incr("$_$suffix") for ('', @tags);
     $self->incr("::TOTAL");
   }

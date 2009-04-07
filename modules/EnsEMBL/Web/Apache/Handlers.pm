@@ -513,6 +513,7 @@ sub transHandler {
   my $prefix = '';
   my @tags = map { $prefix = join('/', $prefix, $_); $prefix; } @path_segments;
   @tags = map { ("/$species$_", $_) } @tags;
+  push @tags, "/$species";
   $ENV{CACHE_TAGS}{$_} = 1 for @tags;
   ## /memcached tags
     

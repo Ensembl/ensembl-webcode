@@ -25,8 +25,10 @@ sub content {
     $html
     );
   }
- 
-  my $freq_data = $object->freqs; 
+
+  ## Hacked version of $objects->freqs to allow the return of multiple rows of data per population
+  my $freq_data = $object->freqs_hack; 
+  #my $freq_data = $object->freqs; 
   unless (%$freq_data ){
     my $html = "<p>No genotypes for this variation</p>"; 
     return $self->_info(

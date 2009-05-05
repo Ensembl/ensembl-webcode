@@ -379,7 +379,7 @@ sub render_transcripts {
             'height'    => $h,
             'colour'    => $colour,
             'absolutey' => 1,
-            'strand'    => $strand,
+            'strand'    => $gene->strand,
           }));
         } else { 
             # else draw a "not in slice" intron

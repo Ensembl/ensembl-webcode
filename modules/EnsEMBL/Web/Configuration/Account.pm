@@ -70,12 +70,12 @@ sub user_populate_tree {
     [], { 'command' => 'EnsEMBL::Web::Command::Account::Interface::Annotation',
         'availability' => 1, 'concise' => 'Annotations' }
     ));
-    $settings_menu->append(
-      $self->create_node( 'Newsfilter/List', "News Filters ([[counts::news_filters]])", [],
-        { 'command' => 'EnsEMBL::Web::Command::Account::Interface::Newsfilter', 
-          'availability' => 1, 'concise' => 'News Filters' },
-      )
-    );
+#    $settings_menu->append(
+#      $self->create_node( 'Newsfilter/List', "News Filters ([[counts::news_filters]])", [],
+#        { 'command' => 'EnsEMBL::Web::Command::Account::Interface::Newsfilter', 
+#          'availability' => 1, 'concise' => 'News Filters' },
+#      )
+#    );
 
     my $groups_menu = $self->create_submenu( 'Groups', 'Groups' );
     

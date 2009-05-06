@@ -18,7 +18,7 @@ sub pretty_date {
 
 sub get_url_content {
   my $url   = shift;
-  my $proxy = shift;
+  my $proxy = shift || $ENSEMBL_WEB_REGISTRY->species_defs->ENSEMBL_WWW_PROXY;
   my $content;
 
   my $ua = new LWP::UserAgent;

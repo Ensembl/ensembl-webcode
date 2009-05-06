@@ -607,7 +607,7 @@ sub _compara_tree_jalview_html {
   # Constructs the html needed to launch jalview for fasta and nh file urls
   my( $self, $url_fa, $url_nh ) = @_;
   my $url_site  = $self->object->species_defs->ENSEMBL_BASE_URL;
-  my $html = sprintf( $_JALVIEW_HTML_TMPL, $url_site, $url_fa, $url_nh );
+  my $html = sprintf( $_JALVIEW_HTML_TMPL, $url_site, $url_site.$url_fa, $url_site.$url_nh );
   return $html;
 }
 

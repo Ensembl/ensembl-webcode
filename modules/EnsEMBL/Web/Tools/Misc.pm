@@ -2,6 +2,7 @@ package EnsEMBL::Web::Tools::Misc;
 
 ## Just a bunch of useful tools
 use LWP::UserAgent;
+use EnsEMBL::Web::RegObj;
 
 use base qw(Exporter);
 our @EXPORT = qw(pretty_date get_url_content);
@@ -38,7 +39,8 @@ sub get_url_content {
 
 sub get_url_filesize {
 ## Returns the size of a file in bytes, or -1 if the request fails
-  my ($url, $proxy) = @_;
+  my $url   = shift;
+  my $proxy = shift || $ENSEMBL_WEB_REGISTRY->species_defs->ENSEMBL_WWW_PROXY;
   my $file_size = 0;
 
   my $ua = new LWP::UserAgent;

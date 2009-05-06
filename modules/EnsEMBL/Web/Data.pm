@@ -192,6 +192,9 @@ sub withdraw_data {
 sub fertilize_data {
   my $self = shift;
   my $data = $self->data || {};
+
+  return unless ref $data;
+
   foreach my $field (keys %{ $self->data_fields }) {
     $data->{$field} = $self->$field;
   }

@@ -227,7 +227,7 @@ sub init_label {
     'font'      => $font,
     'ptsize'    => $fsze,
     'title'     => "$name; $desc",
-    'href'      => '#'.$self->_url({ 'contigviewbottom', $self->{'my_config'}->key.'=off'}),
+#    'href'      => '#'.$self->_url({ 'contigviewbottom', $self->{'my_config'}->key.'=off'}),
     'colour'    => $self->{'label_colour'} || 'black',
     'absolutey' =>1,'height'=>$res[3]}
   ));

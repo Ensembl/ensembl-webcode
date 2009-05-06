@@ -57,8 +57,9 @@ sub content {
 
 sub table_data { 
   my ($object, $external_data) = @_;
-  my (%rows, @data_row);
+  my %rows;
   foreach my $va (@$external_data){ 
+    my @data_row;
     my $disorder = $va->phenotype_description;
     if (exists $rows{lc ($disorder)}) { 
       @data_row = @{ $rows{lc ($disorder)} };

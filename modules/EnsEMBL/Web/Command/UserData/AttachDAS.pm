@@ -8,6 +8,7 @@ use Class::Std;
 use EnsEMBL::Web::RegObj;
 use EnsEMBL::Web::DASConfig;
 use base 'EnsEMBL::Web::Command';
+use EnsEMBL::Web::Filter::DAS;
 
 {
 

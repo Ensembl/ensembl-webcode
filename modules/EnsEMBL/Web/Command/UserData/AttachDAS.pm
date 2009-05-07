@@ -36,7 +36,12 @@ sub process {
 
       foreach my $source (@{ $sources }) {
         my $source_id = $source->{'source_id'}; ## Save for use later in loop
+        ($source->{'url'}) = 
         $source->{'url'} = $self->object->param('das_server');
+        if( $source->{'full_url'} =~  /^(.*\/das)\/[^\/]+$/ ) {
+          $source->{'url'} = $1;
+        }
+        
         delete($source->{'source_id'}); ## Parameter only used by web interface
 
         my $das_config = EnsEMBL::Web::DASConfig->new_from_hashref( $source );

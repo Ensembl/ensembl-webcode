@@ -1191,7 +1191,7 @@ sub add_alignments {
           'colourset'      => 'multiple',
           'order'          => sprintf('%12d::%s::%s', 1e12-$n_species*10, $row->{'type'}, $row->{'name'}),
           'strand'         => 'f',
-          'display'        => $row->{'id'} == 352 ? 'signal_map' : 'off', ## Default to on at the moment - change to off by default!
+          'display'        => $row->{'id'} == 364 ? 'signal_map' : 'off', ## Default to on at the moment - change to off by default!
           'renderers'      => [ 'off' => 'Off', 'signal_map' => 'Signal map' ]
         };
         
@@ -1210,7 +1210,7 @@ sub add_alignments {
           'colourset'      => 'multiple',
           'order'          => sprintf( '%12d::%s::%s',1e12-$n_species*10+1, $row->{'type'}, $row->{'name'} ),
           'strand'         => 'f',
-          'display'        => $row->{'id'} == 352 ? 'compact' : 'off', ## Default to on at the moment - change to off by default!
+          'display'        => $row->{'id'} == 364 ? 'compact' : 'off', ## Default to on at the moment - change to off by default!
           'renderers'      => [qw( off Off compact Normal )]
         };
       }

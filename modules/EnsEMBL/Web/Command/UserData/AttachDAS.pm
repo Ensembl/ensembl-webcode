@@ -37,8 +37,9 @@ sub process {
 
       foreach my $source (@{ $sources }) {
         my $source_id = $source->{'source_id'}; ## Save for use later in loop
-        ($source->{'url'}) = 
+
         $source->{'url'} = $self->object->param('das_server');
+
         if( $source->{'full_url'} =~  /^(.*\/das)\/[^\/]+$/ ) {
           $source->{'url'} = $1;
         }
@@ -85,6 +86,7 @@ sub process {
         );
       }
       $self->object->get_session->save_das;
+      $self->object->get_session->store;
       $url .= 'DasFeedback';
       $param->{'added'} = \@success;
       $param->{'skipped'} = \@skipped;

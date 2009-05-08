@@ -597,7 +597,7 @@ sub _dump_tree_as_text{
 our $_JALVIEW_HTML_TMPL = qq(
 <applet code="jalview.bin.JalviewLite"
        width="140" height="35"
-       archive="%s/jalview/jalviewApplet.jar">
+       archive="%s/jalview/jalviewAppletOld.jar">
   <param name="file" value="%s">
   <param name="treeFile" value="%s">
   <param name="defaultColour" value="clustal">

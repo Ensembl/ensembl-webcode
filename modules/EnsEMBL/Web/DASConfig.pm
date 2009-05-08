@@ -273,6 +273,7 @@ sub _guess_views {
 
   push @views, qw(
     cytoview
+    contigviewtop
     contigviewbottom
     gene_summary
   ) if $positional;
@@ -282,6 +283,7 @@ sub _guess_views {
     Transcript/ExternalData
   ) if $nonpositional;
   
+  warn $self->label." GUESSED VIEWS @views";
   return \@views;
 }
 

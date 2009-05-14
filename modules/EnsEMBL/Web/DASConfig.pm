@@ -283,7 +283,6 @@ sub _guess_views {
     Transcript/ExternalData
   ) if $nonpositional;
   
-  warn $self->label." GUESSED VIEWS @views";
   return \@views;
 }
 

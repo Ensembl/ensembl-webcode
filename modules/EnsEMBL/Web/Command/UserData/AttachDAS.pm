@@ -6,7 +6,7 @@ use warnings;
 use Class::Std;
 
 use EnsEMBL::Web::RegObj;
-use EnsEMBL::Web::DASConfig;
+use Bio::EnsEMBL::ExternalData::DAS::CoordSystem;
 use base 'EnsEMBL::Web::Command';
 use EnsEMBL::Web::Filter::DAS;
 

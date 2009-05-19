@@ -3,6 +3,8 @@ package EnsEMBL::Web::Fake;
 ## Module used by CoreObjects to create an ersatz core object for pages that aren't 
 ## based on an actual location, gene or transcript (e.g. the whole genome)
 
+use strict;
+
 sub new {
   my( $class, $self ) = @_;
   bless $self, $class;

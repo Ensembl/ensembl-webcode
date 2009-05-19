@@ -591,6 +591,8 @@ sub _configurator {
   my $obj  = $self->{'object'};
   my $vc   = $obj->get_viewconfig();
 
+warn "... $vc ...";
+warn ">>>>> ", $vc->has_form ," <<<<<";
   my $conf;
   my $config_key = $obj->param('config');
   eval {

@@ -1,6 +1,8 @@
 package EnsEMBL::Web::Tools::Misc;
 
 ## Just a bunch of useful tools
+use strict;
+
 use LWP::UserAgent;
 use EnsEMBL::Web::RegObj;
 
@@ -19,52 +21,43 @@ sub pretty_date {
 sub get_url_content {
   my $url   = shift;
   my $proxy = shift || $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->species_defs->ENSEMBL_WWW_PROXY;
-  my $content;
 
   my $ua = new LWP::UserAgent;
-  $ua->timeout(10);
-  $ua->proxy('http', $proxy) if $proxy;
+     $ua->timeout( 10 );
+     $ua->proxy(  'http', $proxy) if $proxy;
 
   my $request = new HTTP::Request( 'GET', $url );
-  $request->header('Cache-control' => 'no-cache');
-  $request->header('Pragma'        => 'no-cache');
+     $request->header('Cache-control' => 'no-cache');
+     $request->header('Pragma'        => 'no-cache');
+
   my $response = $ua->request($request);
-  if ($response->is_success) {
-    return {'content' => $response->content};
-  }
-  else {
-    return {'error' => $response->content};
-  }
+
+  return $response->is_success
+       ? { 'content' => $response->content }
+       : { 'error'   => $response->content }
+       ;
 }
 
 sub get_url_filesize {
 ## Returns the size of a file in bytes, or -1 if the request fails
   my $url   = shift;
   my $proxy = shift || $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->species_defs->ENSEMBL_WWW_PROXY;
-  my $file_size = 0;
 
   my $ua = new LWP::UserAgent;
   $ua->timeout(10);
   $ua->proxy('http', $proxy) if $proxy;
 
   my $request = new HTTP::Request( 'GET', $url );
-  $request->header('Cache-control' => 'no-cache');
-  $request->header('Pragma'        => 'no-cache');
+     $request->header('Cache-control' => 'no-cache');
+     $request->header('Pragma'        => 'no-cache');
+
   my $response = $ua->request($request);
 
-  if ($response->is_success) {
-    $file_size = $response->header('Content-Length');
-    unless ($file_size) {
-      my $content = $response->content;
-      if ($content) {
-        $file_size = length($content);
-      }
-    }
-  }
-  else {
-    $file_size = -1;
-  }
-  return $file_size;
+  return $response->is_success 
+       ? ( $response->header('Content-Length') || length( $response->content || '' ) )
+       : -1
+       ;
+
 }
 
 sub style_by_filesize {

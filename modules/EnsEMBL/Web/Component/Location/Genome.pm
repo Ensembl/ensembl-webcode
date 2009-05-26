@@ -75,6 +75,7 @@ sub content {
         my $pointer_ref = $image->add_pointers( $object, {
 	        'config_name'   => 'Vkaryotype',
 	        'zmenu_config'  => $zmenu_config,
+          'features'      => $set->[0],
 	        'feature_type'  => $set->[2],
           'color'         => $defaults->[0],
           'style'         => $defaults->[1],
@@ -100,6 +101,9 @@ sub content {
       push @$pointers, @$user_pointers; 
       $image->imagemap = 'no';
     } 
+    my $gene = $pointers->[0];
+    use Data::Dumper;
+    warn "POINTER ", Dumper($gene);
 
     if (!@$pointers) { ## Ordinary "KaryoView"
       $image->image_name = "karyotype-$species";

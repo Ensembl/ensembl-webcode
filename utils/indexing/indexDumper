@@ -217,8 +217,8 @@ sub dumpSNP {
     my $extra = '';
     my $x = $SNP_EXTRA{$ID};
     if( $x ) {
-      push @K, $x->[1], $x->[3],$x->[4];
-      $extra = '; and is associated with following phenotypes:'. $x->[4];
+      push @K, $x->[1], $x->[3],$x->[4],$x[5];
+      $extra = '; and is associated with following phenotypes:'. $x->[4]." ($x[5])";
       if( $x->[1] ) {
         $extra .= sprintf ', through %s', $x->[1];
       }

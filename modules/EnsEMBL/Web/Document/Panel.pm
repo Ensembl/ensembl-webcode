@@ -682,7 +682,9 @@ if ($component eq 'das_features') {
             # $self->renderer->{'r'}->parsed_uri->query;
 
             ## Check if ajax enabled
-            if( $ENSEMBL_WEB_REGISTRY->check_ajax ) {
+            ## This was currently disabled against scripting
+            
+#            if( $ENSEMBL_WEB_REGISTRY->check_ajax ) {
 
               if( $caption ) {
                 $self->printf( qq(<div class="ajax" title="['%s','%s']"></div>), CGI::escapeHTML($caption),CGI::escapeHTML($URL) );
@@ -690,14 +692,14 @@ if ($component eq 'das_features') {
                 $self->printf( qq(<div class="ajax" title="['%s']"></div>), CGI::escapeHTML($URL) );
               }
 
-            } elsif ($self->renderer->isa('EnsEMBL::Web::Document::Renderer::Assembler')) {
-
-              ## if ajax disabled - we get all content by parallel requests to ourself
-              $self->print(
-                HTTP::Request->new('GET', $self->{'object'}->species_defs->ENSEMBL_BASE_URL.$URL)
-              );
-
-            }
+#            } elsif ($self->renderer->isa('EnsEMBL::Web::Document::Renderer::Assembler')) {
+#
+#              ## if ajax disabled - we get all content by parallel requests to ourself
+#              $self->print(
+#                HTTP::Request->new('GET', $self->{'object'}->species_defs->ENSEMBL_BASE_URL.$URL)
+#              );
+#
+#            }
 
           } else {
             my $content;

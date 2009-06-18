@@ -21,7 +21,7 @@ sub render {
   my $html = q(
 <div class="center">);
 
-  my $search_url = $species_defs->ENSEMBL_WEB_ROOT.'/'.$page_species.'/psychic';
+  my $search_url = '/'.($page_species||$species_defs->ENSEMBL_PRIMARY_SPECIES).'/psychic';
   my $default_search_code = $species_defs->ENSEMBL_DEFAULT_SEARCHCODE;
 
   $html .= sprintf q(
@@ -35,7 +35,7 @@ sub render {
   if (!$page_species) {
     $html .= q(
     <label for="species">Search</label>: <select id="species" name="species">
-      <option value="">All species</option>
+      <option value="all">All species</option>
       <option value="">---</option>
 );
     $input_size = 30;

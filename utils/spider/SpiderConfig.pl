@@ -79,11 +79,14 @@ sub test_url {
                exonview           goview              miscsetview     searchview
 
                Account Alignment ArchiveStableId Blast DAS Feature Gene Interface Location Marker MultipleLocation
-               Search Sequence Server SNP Transcript Translation UniSearch UserData Variation Oct2008 Help/http);
+               Search Sequence Server SNP Transcript Translation UniSearch UserData Variation Help/http);
 
   foreach my $ban (@ban) {
-    return 0 if $uri eq "" || $uri =~ m!/$ban! || $uri =~ m/\.archive\.ensembl\.org/;
+    return 0 if $uri =~ m!/$ban!;
   }
+
+  return 0 if if $uri eq "" || $uri !~ m/staging/;
+
   return 1;
 }
 

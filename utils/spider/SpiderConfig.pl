@@ -85,7 +85,7 @@ sub test_url {
     return 0 if $uri =~ m!/$ban!;
   }
 
-  return 0 if if $uri eq "" || $uri !~ m/staging/;
+  return 0 if $uri eq "" || $uri !~ m/staging/;
 
   return 1;
 }

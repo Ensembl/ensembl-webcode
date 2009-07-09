@@ -216,7 +216,7 @@ sub VARIATION_OPTIONS {
       'opt_regulatory_region'       =>  ['on', 'Regulatory region', 256],
       'opt_stop_gained'             =>  ['on', 'Stop gained', 2],
       'opt_stop_lost'               =>  ['on', 'Stop lost', 4],
-      'opt_sara'                    =>  ['on', 'SARA (same as ref.assembly)', 65537]
+      'opt_sara'                    =>  ['on', 'SARA (same as ref.assembly)', 65537],
       'opt_complex_indel'           =>  ['on', 'Complex Indel', 8],
       'opt_within_mature_mirna'     =>  ['on', 'Within mature miRNA', 512],
       'opt_within_non_coding_gene'  =>  ['on', 'Within non coding gene', 8192],

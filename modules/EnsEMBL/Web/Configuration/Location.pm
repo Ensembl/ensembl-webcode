@@ -297,10 +297,10 @@ sub populate_tree {
 #      zoomnav EnsEMBL::Web::Component::Location::Compara_AlignSliceZoomNav
 #      zoom    EnsEMBL::Web::Component::Location::Compara_AlignSliceZoom
 
-  $align_menu->append( $self->create_node( 'Comparison', "Multi-species comp.",
-    [qw(selector    EnsEMBL::Web::Component::Location::UnderConstruction)],
-    { 'availability' => 'slice database:compara', 'concise' => 'Multi-species comparison' }
-  ));
+#  $align_menu->append( $self->create_node( 'Comparison', "Multi-species comp.",
+#    [qw(selector    EnsEMBL::Web::Component::Location::UnderConstruction)],
+#    { 'availability' => 'slice database:compara', 'concise' => 'Multi-species comparison' }
+#  ));
 
 #  $align_menu->append( $self->create_node( 'Comparison', "Multi-species comp. ([[counts::pairwise_alignments]])",
 #    [qw(selector    EnsEMBL::Web::Component::Location::SelectAlignment

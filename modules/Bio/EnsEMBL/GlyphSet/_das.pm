@@ -52,13 +52,18 @@ sub features       {
 
     my $stylesheet = $data->{ $logic_name }{ 'stylesheet' }{ 'object' }
       || Bio::EnsEMBL::ExternalData::DAS::Stylesheet->new();
+    my %data = ();
     for my $segment ( keys %{ $data->{ $logic_name }{ 'features' } } ) {
       
       my $f_data = $data->{ $logic_name }{ 'features' }{ $segment };
       push @urls,   $f_data->{ 'url' };
       push @errors, $f_data->{'error'};
-      
       for my $f ( @{ $f_data->{'objects'} } ) {
+        $data{ join ':',$f->start,$f->end,$f->display_id,$f->strand} ||= $f;
+      }
+    }
+    
+    foreach my $f ( values %data ) {
         # Skip nonpositional features
         $f->start || $f->end || next;
         
@@ -144,7 +149,6 @@ sub features       {
               'features'=>{$style_key=>[$f]},'start'=>$f->start,'end'=>$f->end
             };
           }
-        }
       }
     
     }

@@ -374,7 +374,7 @@ sub _summarise_funcgen_db {
     '       
   );
   my $sth = $dbh->prepare(
-    'select count(pf.probe_feature_id)
+    'select pf.probe_feature_id
        from array_chip ac, probe p, probe_feature pf, seq_region sr, coord_system cs
        where ac.array_chip_id=p.array_chip_id and p.probe_id=pf.probe_id  
        and pf.seq_region_id=sr.seq_region_id and sr.coord_system_id=cs.coord_system_id 
@@ -386,9 +386,11 @@ sub _summarise_funcgen_db {
     my $array_name = $row->[0] .':'. $row->[1];
     $sth->bind_param(1, $row->[2]);
     $sth->execute;
-    my $count = $sth->fetchrow_array(); warn $array_name ." ". $count;
-    if (exists $self->db_details($db_name)->{'tables'}{'oligo_feature'}{'arrays'}{$array_name} ) {warn "FOUND";}
-    $self->db_details($db_name)->{'tables'}{'oligo_feature'}{'arrays'}{$array_name} = $count;
+    my $count = $sth->fetchrow_array();# warn $array_name ." ". $count;
+    if( exists $self->db_details($db_name)->{'tables'}{'oligo_feature'}{'arrays'}{$array_name} ) {
+      warn "FOUND";
+    }
+    $self->db_details($db_name)->{'tables'}{'oligo_feature'}{'arrays'}{$array_name} = $count ? 1 : 0;
   }
   $sth->finish;
 #

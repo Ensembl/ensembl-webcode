@@ -1238,7 +1238,7 @@ sub add_alignments {
         'renderers'      => [qw( off Off compact Compact normal Normal )],
       };
     } else {
-      my $n_species = grep { $_ ne 'Ancestral_sequences' } keys %{$row->{'species'}};
+      my $n_species = grep { $_ ne 'Ancestral_sequences' && $_ ne 'merged' } keys %{$row->{'species'}};
       
       if ($row->{'conservation_score'}) {
         my ($program) = $hashref->{'CONSERVATION_SCORES'}{$row->{'conservation_score'}}{'type'} =~ /(.+)_CONSERVATION_SCORE/;
@@ -1293,7 +1293,7 @@ sub add_alignments {
         'method_link_species_set_id' => $row->{'id'},
         'class'          => $row->{'class'},
         'description'    => "<a href=\"/info/docs/compara/analyses.html#conservation\">$n_species way whole-genome multiple alignments</a>.; ".
-            join("; ", sort map {$self->species_defs->species_label( $_, "no_formatting" )} grep { $_ ne 'Ancestral_sequences' } keys %{$row->{'species'}}),
+            join("; ", sort map {$self->species_defs->species_label( $_, "no_formatting" )} grep { $_ ne 'Ancestral_sequences' && $_ ne 'merged' } keys %{$row->{'species'}}),
         'colourset'      => 'multiple',
         'order'          => sprintf('%12d::%s::%s', 1e12-$n_species*10-1, $row->{'type'}, $row->{'name'}),
         'strand'         => 'f',

@@ -626,7 +626,7 @@ sub _configurator {
   my $conf;
   my $config_key = $obj->param('config');
   eval {
-    $conf = $obj->image_config_hash( $obj->param('config'), undef, 'merged' ) if $obj->param('config');
+    $conf = $obj->image_config_hash( $obj->param('config') ) if $obj->param('config');
   };
   my $action = $ENV{'ENSEMBL_TYPE'}.'/'.$ENV{'ENSEMBL_ACTION'};
      $action .= '/'.$ENV{'ENSEMBL_FUNCTION'} if $ENV{'ENSEMBL_FUNCTION'};

@@ -815,7 +815,7 @@ sub _local_tools {
 
   my $disabled_upload = 1;
   my $vc_2_flag = 0;
-  if( $ENV{'ENSEMBL_ACTION'} ne 'ExternalData' ) {
+  unless( $ENV{'ENSEMBL_ACTION'} eq 'ExternalData' || ($ENV{'ENSEMBL_TYPE'}.'/'.$ENV{'ENSEMBL_ACTION'} eq 'Transcript/Summary') ) {
     my $vc_2 = $obj->get_viewconfig( undef, 'ExternalData' );
     $vc_2_flag = $vc_2 && $vc_2->can_upload;
   }

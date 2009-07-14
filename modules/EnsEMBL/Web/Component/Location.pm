@@ -1048,6 +1048,9 @@ sub ld_dump {
     $pop_param = $object->param('opt_pop');
     $snp_param = $object->param('v');
   }
+
+  $pop_param =~ s/(%3A|:)on//; # FIXME: Hack to remove :on from opt_pop (is being added in Component/VariationSummary, I don't know why)
+
   my $zoom = 20000; # Currently non-configurable
   
   if (!$pop_param) {

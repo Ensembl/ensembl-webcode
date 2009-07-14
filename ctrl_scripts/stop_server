@@ -98,7 +98,10 @@ Options:
 
 my $hostname = hostname_long();
 
-require $_ for @stop_before;
+for (@stop_before) {
+  eval { require $_; };
+  warn $@ if $@;
+}
 
 # stop the server
 warn "Stopping httpd daemon...\n";

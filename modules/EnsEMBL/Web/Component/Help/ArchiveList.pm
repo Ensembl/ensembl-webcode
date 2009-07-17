@@ -49,11 +49,25 @@ sub content {
       $html .= "<p>The following archives are available for this page:</p>
 <ul>\n";
       my $missing = 0;
+      #can this go ?
       if ($type =~ /\.html/ || $action =~ /\.html/) {
         foreach my $release (reverse sort keys %archive) {
-          next if $release == $object->species_defs->VERSION;
+          next if $release == $object->species_defs->ENSEMBL_VERSION;
           $html .= $self->_output_link(\%archive, $release, $url);
         }
+      }
+      #species home pages
+      if ($type eq 'Info' && $action eq 'Index') {
+	foreach my $release (reverse sort keys %archive) {
+	  next if $release == $object->species_defs->ENSEMBL_VERSION;
+	  if ($release > 50) {
+	    $html .= $self->_output_link(\%archive, $release, $url);
+	  }
+	  else {
+	    $url =~ s/Info\/Index/index\.html/;
+	    $html .= $self->_output_link(\%archive, $release, $url);
+	  }
+	}
       }
       else {
 	my $releases = EnsEMBL::Web::OldLinks::get_archive_redirect($type, $action, $object);

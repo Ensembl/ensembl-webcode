@@ -28,7 +28,7 @@ sub process {
   my $param = {};
   if ($self->object->param($method)) {
     $param = upload($method, $self->object);
-    if ($param->{'format'} eq 'none') {
+    if ($param->{'format'} && $param->{'format'} eq 'none') {
       $url .= '/UserData/MoreInput';
     }
     else {

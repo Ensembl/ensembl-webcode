@@ -40,16 +40,20 @@ sub content {
   
   # Get all slices for the gene
   my ($slices, $slice_length) = $self->get_slices($object, $slice, $align, $object->species);
-  
-  if ($align && $slice_length >= $self->{'subslice_length'}) {
-    my ($table, $padding) = $self->get_slice_table($slices, 1);
-    my $base_url = qq{/@{[$object->species]}/Component/$ENV{'ENSEMBL_TYPE'}/Web/Compara_Alignments/sub_slice?padding=$padding;length=$slice_length};
+  if ($slices && scalar(@$slices)) {
+    if ($align && $slice_length >= $self->{'subslice_length'}) {
+      my ($table, $padding) = $self->get_slice_table($slices, 1);
+      my $base_url = qq{/@{[$object->species]}/Component/$ENV{'ENSEMBL_TYPE'}/Web/Compara_Alignments/sub_slice?padding=$padding;length=$slice_length};
    
-    $html = $self->get_key($object) . $table . $self->chunked_content($slice_length, $self->{'subslice_length'}, $base_url) . $warnings;
-  } else {    
-    $html = $self->content_sub_slice($slice, $slices, $warnings); # Direct call if the sequence length is short enough
+      $html = $self->get_key($object) . $table . $self->chunked_content($slice_length, $self->{'subslice_length'}, $base_url) . $warnings;
+    } 
+    else {    
+      $html = $self->content_sub_slice($slice, $slices, $warnings); # Direct call if the sequence length is short enough
+    }
   }
-  
+  else {
+    $html =$self->_info('No alignment', '<p>No alignment could be found for this species. Please try another option.</p>');
+  } 
   return $html;
 }
 
@@ -143,7 +147,8 @@ sub get_slices {
   my $vega_compara = $object->species_defs->multi_hash->{'DATABASE_COMPARA'}{'VEGA_COMPARA'};
 
   if ($align) {
-    push @slices, @{$self->get_alignments(@_)};
+    my $alignments = $self->get_alignments(@_);
+    push @slices, @$alignments if $alignments;
   } else {
     push @slices, $slice; # If no alignment selected then we just display the original sequence as in geneseqview
   }
@@ -194,8 +199,12 @@ sub get_alignments {
   unshift (@selected_species, $species) if scalar @selected_species;
   
   $align_slice = $align_slice->sub_AlignSlice($start, $end) if ($start && $end);
-   
-  return $align_slice->get_all_Slices(@selected_species);
+  if ($align_slice) { 
+    return $align_slice->get_all_Slices(@selected_species);
+  }
+  else {
+    return undef;
+  }
 }
 
 sub check_for_errors {

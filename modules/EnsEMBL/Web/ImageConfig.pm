@@ -1164,6 +1164,7 @@ sub add_synteny {
   my $self_label = $self->species_defs->species_label( $species, "no_formatting" );
 
   foreach my $species_2 ( @synteny_species ) {
+    next if $species_2 eq 'merged';
     ( my $species_readable = $species_2 ) =~ s/_/ /g;
     my ($a,$b) = split / /, $species_readable;
     my $caption = substr($a,0,1).".$b synteny";
@@ -1198,7 +1199,7 @@ sub add_alignments {
     next unless $row->{'species'}{$species};
     
     if ($row->{'class'} =~ /pairwise_alignment/) {
-      my ($other_species) = grep { $species ne $_ } keys %{$row->{'species'}};
+      my ($other_species) = grep { $species ne $_ && $_ ne 'merged'} keys %{$row->{'species'}};
       my $other_label = $self->species_defs->species_label($other_species, "no_formatting");
       (my $other_species_hr = $other_species ) =~ s/_/ /g;
       my $menu_key;

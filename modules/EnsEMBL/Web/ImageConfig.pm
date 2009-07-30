@@ -898,7 +898,7 @@ sub add_gene {
   foreach my $type ( @TRANSCRIPT_TYPES ) {
     my $menu = $self->get_node( $type );
     next unless $menu;
-    foreach my $key_2 ( @$keys ) {
+    foreach my $key_2 ( @$keys ) {  
       $menu->append( $self->create_track( $type.'_'.$key.'_'.$key_2, $data->{$key_2}{'name'}, {
         'db'          => $key,
         'glyphset'    => ($type=~/_/?'':'_').$type, ## QUICK HACK..
@@ -1392,7 +1392,7 @@ sub add_regulation_feature { ## needs configuring so tracks only display if data
   my $fg_data           = \%all_data;
   
   foreach my $key_2 ( @all_keys ) { 
-    my $K = $fg_data->{$key_2}{'type'}||'other';
+    my $K = $fg_data->{$key_2}{'type'}||'other';  
     next if $K eq 'other';
     my $render = ['off'=> 'Off','normal' => 'Normal'];
     my $legend_flag = 0; 
@@ -1402,8 +1402,9 @@ sub add_regulation_feature { ## needs configuring so tracks only display if data
     if ( $fg_data->{$key_2}{'renderers'} ) {
       my %renderers = %{ $fg_data->{$key_2}{'renderers'} };
       my @temp;
-      foreach (sort keys %renderers){
-        my $value = $renderers{$_};
+      foreach (sort keys %renderers){ 
+        my $value = $renderers{$_}; 
+        if ($_ =~/signal/) { $_ = 'tiling';}
         push @temp, $_ => $value;
         $wiggle_flag = 1 if /tiling/ && $fg_data->{$key_2}{'type'} !~ /histone/;
       }

@@ -47,19 +47,15 @@ sub init {
   }
 
   $self->modify_configs(
-    [qw(regulatory_regions_funcgen_search)],
+    [qw(functional)],
     {qw(display normal)}
   );
   $self->modify_configs(
-    [qw(regulatory_regions_funcgen)],
-    {qw(display normal)}
-  );
-  $self->modify_configs(
-    [qw(ctcf_funcgen)],
+    [qw(ctcf_funcgen_Nessie_NG_STD_2)],
     {qw(display tiling)}
   );
   $self->modify_configs(
-    [qw(ctcf_funcgen_blocks)],
+    [qw(ctcf_funcgen_blocks_Nessie_NG_STD_2)],
     {qw(display compact)}
   );
   $self->modify_configs(

@@ -7,9 +7,10 @@ use strict;
 use warnings;
 
 use LWP::UserAgent qw();
-use XML::RSS qw();
+use XML::Atom::Feed;
 use Data::Dumper;
 
+use EnsEMBL::Web::RegObj;
 use EnsEMBL::Web::Cache;
 
 use base qw(EnsEMBL::Web::Root);
@@ -23,44 +24,41 @@ our $MEMD = EnsEMBL::Web::Cache->new(
 {
 
 sub render {
-  my $self = shift;
-
+  my $self  = shift;
   ## Ensembl blog (ensembl.blogspot.com)
-  my $html = qq(<h2>Latest Blog Entries</h2>);
 
-  my $items = $MEMD ? $MEMD->get('::BLOG') : undef;
-
-  unless ($items) {
+  my $html = $MEMD && $MEMD->get('::BLOG') || '';
+  
+  unless ($html) {
     my $ua = new LWP::UserAgent;
-    $ua->proxy(['http', 'ftp'], 'http://wwwcache.sanger.ac.uk:3128/');
+    my $proxy = $EnsEMBL::Web::RegObj::ENSEMBL_WEB_REGISTRY->species_defs->ENSEMBL_WWW_PROXY;
+    $ua->proxy( 'http', $proxy ) if $proxy;
   
     my $response = $ua->get('http://ensembl.blogspot.com/rss.xml');
-    my $rss = new XML::RSS;
+    my $feed = XML::Atom::Feed->new(\$response->decoded_content);
     
-    my $r = $rss->parse($response->decoded_content);
-    
-    $items = $rss->{'items'};
-    $ENV{CACHE_TIMEOUT} = 3600;
-    $MEMD->set('::BLOG', $items, $ENV{CACHE_TIMEOUT}, qw(STATIC BLOG))
+    my @entries = $feed->entries;
+
+    my $count = 3;
+    if (@entries) {
+      $html .= "<ul>";
+      for (my $i = 0; $i < $count && $i < scalar(@entries);$i++) {
+        my $title  = $entries[$i]->title;
+        my ($link) = grep { $_->rel eq 'alternate' } $entries[$i]->link;
+        my $date   = substr($entries[$i]->updated, 0, 10);
+  
+        $html .= '<li>'. $date .': <a href="'. $link->href .'">'. $title .'</a></li>'; 
+      }
+      $html .= "</ul>";
+    } else {
+      $html .= qq(<p>Sorry, no feed is available from our blog at the moment</p>);
+    }
+  
+    $html .= qq(<a href="http://ensembl.blogspot.com/">Go to Ensembl blog &rarr;</a>);
+
+    $MEMD->set('::BLOG', $html, 3600, qw(STATIC BLOG))
       if $MEMD;
   }
-
-  my $count = 3;
-  if (@$items) {
-    $html .= "<ul>\n";
-    for (my $i = 0; $i < $count && $i < scalar(@$items);$i++) {
-      my $item = $items->[$i];
-      my $title = $item->{'title'};
-      my $url   = $item->{'link'};
-      my $date  = substr($item->{'pubDate'}, 0, 16);
-      $html .= "<li>$date: <a href=\"$url\">$title</a></li>\n"; 
-    }
-    $html .= "</ul>\n";
-  } else {
-    $html .= qq(<p>Sorry, no feed is available from our blog at the moment</p>);
-  }
-
-  $html .= qq(<a href="http://ensembl.blogspot.com/">Go to Ensembl blog &rarr;</a>);
 
   return $html;
 }

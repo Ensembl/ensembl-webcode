@@ -164,6 +164,9 @@ sub _init {
 	      $snp_ref->[3]{ $reference_base } = $conf_colours->{'same'}{'default'};
       }
     }
+    else {
+      $snp_ref->[3]{ $reference_base } = $conf_colours->{'same'}{'default'};
+    }
 
     $snp_ref->[4] = $reference_base ;
     $self->do_glyphs($offset, $th, $tmp_width, $pix_per_bp, $fontname, $fontsize, $Config, $label, $snp_ref->[0],  $snp_ref->[1], $colour, $reference_base);

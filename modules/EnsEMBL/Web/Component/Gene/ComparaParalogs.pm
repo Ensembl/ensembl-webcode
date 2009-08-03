@@ -61,8 +61,9 @@ sub content {
           'g' => $stable_id,
           'r' => undef
         });
-        my $EXTRA = sprintf '<span class="small">[<a href="%s;s1=%s;g1=%s;context=1000">MultiContigView</a>]</span>',
-          $MCV_STUB, $spp, CGI::escapeHTML( $stable_id );
+				my $EXTRA;
+#        my $EXTRA = sprintf '<span class="small">[<a href="%s;s1=%s;g1=%s;context=1000">MultiContigView</a>]</span>',
+#          $MCV_STUB, $spp, CGI::escapeHTML( $stable_id );
         if( $paralogue_desc ne 'DWGA' ) {
           my $url = $gene->_url({ 'action' => 'Compara_Paralog/Alignment', 'g1' => $stable_id });
           $EXTRA .= sprintf '&nbsp;<span class="small">[<a href="%s">Align</a>]</span>', $url;

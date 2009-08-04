@@ -40,7 +40,7 @@ sub count_alignments {
 sub _availability { 
   my $self = shift;
   my $hash = {
-    map { ('database:'.lc(substr($_,9)) => 1) } keys %{ $self->species_defs->databases }
+    map { ('database:'.lc(substr($_,9)) => 1) } keys %{ $self->species_defs->databases  || {} }
   };
   $hash->{'database:compara'} = 1 if $self->species_defs->compara_like_databases;
   return $hash;

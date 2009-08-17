@@ -5,7 +5,7 @@ use warnings;
 use Bio::EnsEMBL::AlignStrainSlice;
 no warnings "uninitialized";
 use base qw(EnsEMBL::Web::Component::Location);
-
+use Data::Dumper;
 sub _init {
   my $self = shift;
   $self->cacheable(1);
@@ -101,7 +101,9 @@ sub content {
     }
     
     my ($sequence, $markup) = $self->get_sequence_data($config->{'slices'}, $config);
-    
+#    warn Dumper $sequence;
+#    warn Dumper $markup;
+
     # Order is important for the key to be displayed correctly
     $self->markup_exons($sequence, $markup, $config) if $config->{'exon_display'};
     $self->markup_codons($sequence, $markup, $config) if $config->{'codons_display'};

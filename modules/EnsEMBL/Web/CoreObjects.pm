@@ -192,7 +192,6 @@ sub _generate_objects_Gene {
   my $self = shift;
   $self->{'parameters'}{'db'} ||= 'core';
   my $db_adaptor = $self->database($self->{'parameters'}{'db'});
-  warn "G = ".$self->{'parameters'}{'g'};
   my $t = $db_adaptor->get_GeneAdaptor->fetch_by_stable_id( $self->{'parameters'}{'g'} );
   $self->timer_push( 'Gene fetched', undef, 'fetch' );
   $self->gene( $t );
@@ -204,7 +203,6 @@ sub _generate_objects_Variation {
   my $db_adaptor = $self->database($self->{'parameters'}{'vdb'});
   my $t = $db_adaptor->getVariationAdaptor->fetch_by_name( $self->{'parameters'}{'v'}, $self->{'parameters'}{'source'} );
   $self->timer_push( 'Gene fetched', undef, 'fetch' );
-  warn $t;
   $self->variation( $t );
   $self->timer_push( 'Fetching location', undef );
   $self->_generate_objects_Location;
@@ -325,6 +323,7 @@ sub _generate_objects {
     }   
   }
   $self->{'parameters'}{'r'} = $self->location->seq_region_name.':'.$self->location->start.'-'.$self->location->end if $self->location;
+  
   if( $self->param('r') ) {
     my($r,$s,$e) = $self->param('r') =~ /^([^:]+):(-?\w+\.?\w*)-(-?\w+\.?\w*)/;
     $r ||= $self->param('r');
@@ -335,6 +334,7 @@ sub _generate_objects {
         my $t = $db_adaptor->get_SliceAdaptor->fetch_by_region( 'toplevel', $r, $s, $e );
         if( $t ) {
           my @attrib = @{ $t->get_all_Attributes( 'toplevel' )||[] }; ## Check to see if top-level as "toplevel" above is b*ll*cks
+
           if( @attrib && ( $s < 1 || $e > $t->seq_region_length ) ) {
             $s = 1 if $s<1;
             $e = $t->seq_region_length if $e > $t->seq_region_length;
@@ -345,7 +345,7 @@ sub _generate_objects {
             $self->{'parameters'}{'r'} = $t->seq_region_name.':'.$t->start.'-'.$t->end;
           }
         }
-        }
+    }
       } else {
         my $db_adaptor= $self->database('core');
         if($db_adaptor){
@@ -392,13 +392,23 @@ sub _generate_objects {
 sub _get_gene_location_from_transcript {
   my $self = shift; 	 
   return unless $self->transcript; 	 
+
   $self->gene( 	 
     $self->transcript->adaptor->db->get_GeneAdaptor->fetch_by_transcript_stable_id( 	 
       $self->transcript->stable_id 	 
     ) 	 
   ); 	 
   my $slice = $self->transcript->feature_Slice; 	 
-     $slice = $slice->invert() if $slice->strand < 0; 	 
+  $slice = $slice->invert() if $slice->strand < 0; 	 
+
+# in case genes are attached to contigs or supercontigs we need to get the chromosome coordinates 
+  if (! $slice->is_toplevel) {
+      my $toplevel_projection = $slice->project('toplevel');
+      if (my $seg = shift @$toplevel_projection) {
+	  $slice = $seg->to_Slice();
+      }
+  }
+  
   $self->location( $slice ); 	 
 }
 
@@ -406,8 +416,17 @@ sub _get_location_from_gene {
   my( $self ) = @_;
   return unless $self->gene;
 
+
   my $slice = $self->gene->feature_Slice;
-     $slice = $slice->invert() if $slice->strand < 0;
+  $slice = $slice->invert() if $slice->strand < 0;
+# in case genes are attached to contigs or supercontigs we need to get the chromosome coordinates 
+  if (! $slice->is_toplevel) {
+      my $toplevel_projection = $slice->project('toplevel');
+      if (my $seg = shift @$toplevel_projection) {
+	  $slice = $seg->to_Slice();
+      }
+  }
+
   $self->location( $slice );
 }
 

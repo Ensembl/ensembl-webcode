@@ -9,7 +9,7 @@ sub create {
   ### Returns: none
   my $species = shift;
   my $sd      = shift;
-  my $root    = $sd->ENSEMBL_HTDOCS_DIRS->[0];
+  my $root    = shift @{$sd->ENSEMBL_HTDOCS_DIRS || []};
   my @allowed = @{$sd->ENSEMBL_EXTERNAL_SEARCHABLE||[]};
 
   my %ignore = qw(robots.txt 1 .cvsignore 1);

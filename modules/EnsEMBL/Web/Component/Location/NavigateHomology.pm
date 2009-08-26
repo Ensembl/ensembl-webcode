@@ -26,7 +26,8 @@ sub content {
     return;
   } 
 
-  my $seq_region_end = $object->param('r')=~/:/ ? $object->seq_region_end : 1e6;
+  my $max_len = $object->seq_region_end < 1e6 ? $object->seq_region_end : 1e6;
+  my $seq_region_end = $object->param('r')=~/:/ ? $object->seq_region_end : $max_len;
 
   my $chr     = $object->seq_region_name; 
   my $html;

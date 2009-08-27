@@ -97,7 +97,7 @@ sub render_Text {
 
 	my $h = $y - $b;
 
-	warn "      $x $y [$h] $a $b [$text]";
+#	warn "      $x $y [$h] $a $b [$text]";
   my $S = ($glyph->{'ptsize'}||8)* $self->{sf};
   my $T = $self->{'canvas'}{'t'};
      $T->font( $self->{'canvas'}{'font'}, $S );
@@ -109,7 +109,7 @@ sub render_Text {
   } else {
     $y = $b;
 	}
-  warn "$glyph->{valign} $y";
+#  warn "$glyph->{valign} $y";
   if( $glyph->{'halign'} eq 'right' ) {
     $T->translate( $a, $y );
     $T->text_right( $text );

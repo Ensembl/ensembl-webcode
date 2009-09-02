@@ -273,13 +273,6 @@ sub _matches {
   }
 
   my @links = map { @{$object->__data->{'links'}{$_}||[]} } @keys;
-  unless (@links) {
-## Check if XREFs are attached to the gene
-      my @similarity_links = @{$object->get_gene_similarity_hash($obj)};
-      return unless (@similarity_links);
-      $self->_sort_similarity_links( @similarity_links);
-      @links = map { @{$object->__data->{'links'}{$_}||[]} } @keys;
-  }
   return unless @links;
 
   my $db = $object->get_db();

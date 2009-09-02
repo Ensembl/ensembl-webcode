@@ -271,7 +271,7 @@ sub _matches {
     return unless (@similarity_links);
     $self->_sort_similarity_links( @similarity_links);
 
-    unless (@similarity_links) {
+    unless (@{$object->__data->{'links'}{'go'}||[]}) {
 # No GO terms attached to the transcript - check if they are attached to the gene
 	@similarity_links = @{$object->get_gene_similarity_hash($obj)};
 	$self->_sort_similarity_links( @similarity_links);

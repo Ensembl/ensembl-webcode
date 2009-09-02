@@ -270,15 +270,16 @@ sub _matches {
     my @similarity_links = @{$object->get_similarity_hash($obj)};
     return unless (@similarity_links);
     $self->_sort_similarity_links( @similarity_links);
-
-    unless (@{$object->__data->{'links'}{'go'}||[]}) {
-# No GO terms attached to the transcript - check if they are attached to the gene
-	@similarity_links = @{$object->get_gene_similarity_hash($obj)};
-	$self->_sort_similarity_links( @similarity_links);
-    }
   }
 
   my @links = map { @{$object->__data->{'links'}{$_}||[]} } @keys;
+  unless (@links) {
+## Check if XREFs are attached to the gene
+      my @similarity_links = @{$object->get_gene_similarity_hash($obj)};
+      return unless (@similarity_links);
+      $self->_sort_similarity_links( @similarity_links);
+      @links = map { @{$object->__data->{'links'}{$_}||[]} } @keys;
+  }
   return unless @links;
 
   my $db = $object->get_db();

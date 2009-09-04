@@ -170,7 +170,7 @@ sub cache_print {
 
 sub site_name {
   my $self = shift;
-  our $sitename = $SiteDefs::SITE_NAME || $SiteDefs::ENSEMBL_SITETYPE;
+  our $sitename = $SiteDefs::ENSEMBL_SITETYPE;
   return $sitename;
 }
 
@@ -368,8 +368,8 @@ sub _sort_similarity_links {
 	    ( $externalDB =~/^(SWISS|SPTREMBL|LocusLink|protein_id|RefSeq|EMBL|Gene-name|Uniprot)/i ) ) {
 	my $seq_arg = $display_id;
 	$seq_arg = "LL_$seq_arg" if $externalDB eq "LocusLink";
-	$text .= sprintf( ' [<a href="/%s/Transcript/Similarity/Align?t=%s;sequence=%s;db=%s;extdb=%s">align</a>] ',
-			  $object->species, $object->stable_id, $seq_arg, $db, lc($externalDB) );
+	$text .= sprintf( ' [<a href="/%s/Transcript/Similarity/Align?t=%s;sequence=%s;db=%s">align</a>] ',
+			  $object->species, $object->stable_id, $seq_arg, $db );
       }
     }
     if($externalDB =~/^(SWISS|SPTREMBL)/i) { # add Search GO link
@@ -403,11 +403,7 @@ sub _sort_similarity_links {
 	'id'     => $link_name,
 	'ftype'  => $link_type,
     });
-
-### Skip EG internal IDs
-    unless ( uc($externalDB) eq 'EMBL_DNA' || uc($externalDB) eq 'REFSEQ_DNA') {
-	$text .= qq(  [<a href="$k_url">view all locations</a>]);
-    }
+    $text .= qq(  [<a href="$k_url">view all locations</a>]);
 
     $text .= '</div>';
     push @{$object->__data->{'links'}{$type->type}}, [ $type->db_display_name || $externalDB, $text ] ;
@@ -1172,7 +1168,6 @@ sub build_sequence {
   # Temporary patch because Firefox doesn't copy/paste anything but inline styles
   # If we remove this patch, look at version 1.79 for the correct code to revert to
   my $styles = $self->object->species_defs->colour('sequence_markup');
-
   my %class_to_style = (
     con =>  [ 1,  { 'background-color' => "#$styles->{'SEQ_CONSERVATION'}->{'default'}" } ],
     dif =>  [ 2,  { 'background-color' => "#$styles->{'SEQ_DIFFERENCE'}->{'default'}" } ],

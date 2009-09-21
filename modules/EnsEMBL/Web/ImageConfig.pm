@@ -1058,8 +1058,8 @@ sub add_oligo_probe {
   ## Different loop - no analyses - base on probeset query results... = $hashref->{'oligo_feaature'}{'arrays'};
   foreach my $key_2 ( sort keys %$data ) {
     my $key_3 = $key_2;
-    $key_2 =~s/:/__/; 
-    $menu->append( $self->create_track( 'oligo_'.$key.'_'.$key_2, $key_3, {
+    $key_2 =~s/:/__/;
+    $menu->append( $self->create_track( 'oligo_'.$key.'_'.uc($key_2), uc($key_3), {
       'glyphset'    => '_oligo',
       'db'          => $key,
       'sub_type'    => 'oligo',

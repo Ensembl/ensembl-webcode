@@ -77,8 +77,10 @@ sub db_connect {
   return unless exists $self->tree->{'databases'}->{$db_name};
   my $dbname  = $self->tree->{'databases'}->{$db_name}{'NAME'};
   return unless $dbname;
-
-  #warn "Connecting to $db_name";
+  warn "Connecting to $db_name";
+  foreach (qw(HOST PORT USER PASS)) {
+    warn "\t $_ :", $self->tree->{'databases'}->{$db_name}{$_}, "\n";
+  }
   my $dbhost  = $self->tree->{'databases'}->{$db_name}{'HOST'};
   my $dbport  = $self->tree->{'databases'}->{$db_name}{'PORT'};
   my $dbuser  = $self->tree->{'databases'}->{$db_name}{'USER'};

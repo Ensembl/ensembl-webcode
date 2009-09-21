@@ -99,7 +99,7 @@ sub _summarise_core_tables {
 ## Grab each of the analyses - will use these in a moment...
 ##
   my $t_aref = $dbh->selectall_arrayref(
-    'select a.analysis_id, a.logic_name, a.created,
+    'select a.analysis_id, lower(a.logic_name), a.created,
             ad.display_label, ad.description,
             ad.displayable, ad.web_data
        from analysis a left join analysis_description as ad on a.analysis_id=ad.analysis_id'

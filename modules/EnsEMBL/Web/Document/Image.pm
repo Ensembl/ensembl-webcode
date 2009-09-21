@@ -148,7 +148,7 @@ sub add_pointers {
   my $high        = { style => $style };
   
   foreach my $row (@data) {
-    my $chr = $row->{'chr'};
+    my $chr = $row->{'chr'} || $row->{'region'};
     
     my $point = {
       start => $row->{'start'},

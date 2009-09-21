@@ -580,8 +580,13 @@ sub _sort_similarity_links_ek {
 sub remove_redundant_xrefs {
   my ($self,@links) = @_;
   my %priorities;
+
   foreach my $link (@links) {
     my ( $key, $text ) = @$link;
+    #e56 hack since we have no ALT_GENE type xref
+    if ($key eq 'Havana gene') {
+      return ( [ 'Havana Gene', $text ]);
+    }
     if ($text =~ />OTT|>ENST/) {
       $priorities{$key} = $text;
     }

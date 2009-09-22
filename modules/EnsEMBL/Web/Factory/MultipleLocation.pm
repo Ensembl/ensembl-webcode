@@ -87,11 +87,12 @@ sub createObjects {
     }
     
     eval { $slice = $self->slice_adaptor->fetch_by_region(undef, $chr, $s, $e, $strand); };
-    warn $@ and next if $@;
+    next if $@;
     
     push @slices, {
       slice      => $slice,
-      species    => $inputs{$_}->{'s'},
+      species    => $species,
+      target     => $chr,
       name       => $slice->seq_region_name,
       short_name => $object->chr_short_name($slice, $species),
       start      => $slice->start,

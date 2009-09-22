@@ -224,6 +224,8 @@ sub _global_context {
 
 sub modal_context {
   my $self = shift;
+
+  return if $self->{'page'}->{'modal_context_called'}++;
   
   $self->_user_context('modal_context') if $self->{'page'}->{'modal_context'};
 }

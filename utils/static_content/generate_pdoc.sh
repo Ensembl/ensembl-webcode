@@ -133,10 +133,10 @@ cd $PERLMOD_LOC
 
 # generate e! docs:
 echo "Generating e! docs:";
-rm -Rf $PERLMOD_LOC/htdocs/info/docs/webcode/edoc/*
+#rm -Rf $PERLMOD_LOC/htdocs/info/docs/webcode/edoc
 perl $PERLMOD_LOC/utils/edoc/update_docs.pl
 echo "Copying temp files to live directory"
-cp -r $PERLMOD_LOC/utils/edoc/temp htdocs/info/docs/webcode/edoc/
+cp -r $PERLMOD_LOC/utils/edoc/temp htdocs/info/docs/webcode/edoc
 echo "Clearing up e! docs temp files:";
 rm -Rf $PERLMOD_LOC/utils/edoc/temp
 

@@ -44,7 +44,7 @@ P2WDOC_LOC="/localsw/ensembl_web/pdoc-live"  # Pdoc code location
 P2WDOCER="/localsw/ensembl_web/pdoc-live/scripts/perlmod2www.pl"
 BIOPERL="/localsw/ensembl_web/bioperl-live"
 
-F1=bioperl-live
+#F1=bioperl-live
 F2=ensembl
 F3=ensembl-analysis
 F4=ensembl-compara
@@ -76,16 +76,16 @@ do
   echo "CURRENT MODULE: $i"
   cp $P2WDOC_LOC/Pdoc/Html/Data/perl.css $PDOC_LOC/$i 
  	echo "#CURRENT MODULE: $i" >> $P2WDOC_LOC/make_html_docs.sh 
-  if [$i == 'bioperl-live']
-   then $SOURCE = $BIOPERL.'/'.$i
-  else
-    $SOURCE = $PERLMOD_LOC.'/'.$i
-  fi
-  if test $i = "ensembl"
-   then	echo "$P2WDOCER -skip Collection,Utils,chimp,Lite -source $SOURCE -target $PDOC_LOC/$i -raw -webcvs http://cvs.sanger.ac.uk/cgi-bin/viewvc.cgi/$i/?root=ensembl -xltable $P2WDOC_LOC/$i.xlinks " >> $P2WDOC_LOC/make_html_docs.sh
- else
+#  if [$i == 'bioperl-live']
+#   then $SOURCE = $BIOPERL.'/'.$i
+#  else
+    SOURCE="$PERLMOD_LOC/$i"
+#  fi
+#  if test $i = "ensembl"
+#   then	echo "$P2WDOCER -skip Collection,Utils,chimp,Lite -source $SOURCE -target $PDOC_LOC/$i -raw -webcvs http://cvs.sanger.ac.uk/cgi-bin/viewvc.cgi/$i/?root=ensembl -xltable $P2WDOC_LOC/$i.xlinks " >> $P2WDOC_LOC/make_html_docs.sh
+# else
  	echo "$P2WDOCER -source $SOURCE -target $PDOC_LOC/$i -raw -webcvs http://cvs.sanger.ac.uk/cgi-bin/viewvc.cgi/$i/?root=ensembl -xltable $P2WDOC_LOC/$i.xlinks " >> $P2WDOC_LOC/make_html_docs.sh
- fi
+# fi
 
   echo "$PERLMOD_LOC/$F1 $HTTP/$F1
 $PERLMOD_LOC/$F2 $HTTP/$F2

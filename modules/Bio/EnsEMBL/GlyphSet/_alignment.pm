@@ -185,7 +185,6 @@ sub render_normal {
     my $join_colour    = $self->my_colour( $self->my_config( 'sub_type' ), 'join' );
     my $max_score      = $config->{'max_score'} || 1000;
     my $min_score      = $config->{'min_score'} || 0;
-    my $range          = $max_score - $min_score;
     if ($config && $config->{'useScore'} == 2) {
       $cgGrades = $config->{'cgGrades'} || 20;
       $score_per_grade =  ($max_score - $min_score)/ $cgGrades ;

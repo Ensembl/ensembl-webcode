@@ -82,6 +82,7 @@ sub new {
 
 ## Special code here to set species back to default if cannot merge!!
   $self->{'species'} = $ENV{'ENSEMBL_SPECIES'} if $species eq 'merged' && ! $self->mergeable_config;
+  $species = $self->{'species'};
      
 ## Check to see if we have a user/session saved copy of tree.... 
 ##   Load tree from cache...

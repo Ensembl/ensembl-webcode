@@ -72,8 +72,6 @@ sub render_collapsed {
     # Get all the exons which overlap the region for this gene
     my @exons = map { $_->start > $length || $_->end < 1 ? () : $_ } map { @{$_->get_all_Exons} } @{$gene->get_all_Transcripts};
     
-    next unless @exons;
-    
     $transcript_drawn = 1;
     
     my $gene_stable_id = $gene->stable_id;

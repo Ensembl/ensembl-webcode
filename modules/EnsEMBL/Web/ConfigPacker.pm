@@ -612,17 +612,17 @@ sub _summarise_compara_db {
 #    warn "genomic regions are ",Dumper(\%genomic_regions);
 
     #get details of methods in the database -
-    $q = qq(select mlss.method_link_species_set_id, ml.type
-                from method_link_species_set mlss, 
+    $q = qq(select mlss.method_link_species_set_id, ml.type, mlss.name
+                from method_link_species_set mlss,
                      method_link ml
                where mlss.method_link_id = ml.method_link_id);
     $sth = $dbh->prepare( $q );
     $rv  = $sth->execute || die( $sth->errstr );
-    my %methods;
-    while (my ($mlss, $type) = $sth->fetchrow_array ) {
+    my (%methods, %names );
+    while (my ($mlss, $type, $name ) = $sth->fetchrow_array ) {
       $methods{$mlss} = $type;
+      $names{$mlss}  = $name;
     }
-#    warn "methods are ",Dumper(\%methods);
 
     #get details of alignments
     $q = qq(select genomic_align_block_id,
@@ -714,10 +714,15 @@ sub _summarise_compara_db {
 	    my $source_name  = $config{$method}{$p_species}{$s_species}{$comp}{'source_name'};
 	    my $source_start = $config{$method}{$p_species}{$s_species}{$comp}{'source_start'};
 	    my $source_end   = $config{$method}{$p_species}{$s_species}{$comp}{'source_end'};
+	    my $mlss_id      = $config{$method}{$p_species}{$s_species}{$comp}{'mlss_id'};
+	    my $name = $names{$mlss_id};
 	    push @{$region_summary->{$p_species}{$source_name}}, {'secondary_species' => $s_species,
 								  'target_name'       => $target_name,
 								  'start'             => $source_start,
-								  'end'               => $source_end   };
+								  'end'               => $source_end,
+								  'mlss_id'           => $mlss_id,
+								  'alignment_name'    => $name,
+								};
 	  }
 	}
       }
@@ -725,6 +730,7 @@ sub _summarise_compara_db {
 #    &eprof_end('new parsing');				
     $self->db_tree->{ $db_name }{'VEGA_COMPARA'} = \%config;
     $self->db_tree->{ $db_name }{'VEGA_COMPARA'}{'REGION_SUMMARY'} = $region_summary;
+#    warn Data::Dumper::Dumper($region_summary);
   }
   ##That's the end of the compara region munging!
 

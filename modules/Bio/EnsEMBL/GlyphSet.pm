@@ -563,12 +563,20 @@ sub draw_cigar_feature {
   my $hstart      = $o == 1 ? $f->hstart : $f->hend;
   my $hend        = $o == 1 ? $f->hend : $f->hstart;
   my $length      = $self->{'container'}->length;
-  my $slice_start = $f->slice->start;
-  my $slice_end   = $f->slice->end;
   my $fstrand     = $f->strand;
   my $hstrand     = $f->hstrand;
-  my $tag1        = join ':', $f->species, $f->slice->seq_region_name;
-  my $tag2        = join ':', $f->hspecies, $f->hseqname;
+  my ($slice_start, $slice_end, $tag1, $tag2);
+  if ($f->slice) {
+    $slice_start = $f->slice->start;
+    $slice_end   = $f->slice->end;
+    $tag1        = join ':', $f->species, $f->slice->seq_region_name;
+    $tag2        = join ':', $f->hspecies, $f->hseqname;
+  }
+  else {
+    $slice_start = $f->seq_region_start;
+    $slice_end   = $f->seq_region_end;
+    $tag1        = $f->seqname;
+  }
   my @delete;
   my $cigar;
   

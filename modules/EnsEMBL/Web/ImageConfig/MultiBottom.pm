@@ -155,7 +155,7 @@ sub join_genes {
   
   my ($prev_species, $next_species) = @species;
   ($prev_species, $next_species) = ('', $prev_species) if ($pos == 1 && $total == 2) || ($pos == 2 && $total > 2);
-  $next_species = $prev_species if $pos > 2 && $total > 3;
+  $next_species = $prev_species if $pos > 2 && $pos < $total && $total > 3;
   
   foreach ($self->get_node('transcript')->nodes) {
     $_->set('previous_species', $prev_species) if $prev_species;

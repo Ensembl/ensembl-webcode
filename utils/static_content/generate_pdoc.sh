@@ -35,10 +35,10 @@
 
 #. /etc/profile
 
-PERLMOD_LOC="/ensemblweb/www/www_52"   # current server root
+PERLMOD_LOC="/ensemblweb/www/www_56"   # current server root
 #PERLMOD_LOC="/ensemblweb/www/server"   # current server root
 
-PDOC_LOC="$PERLMOD_LOC/public-plugins/ensembl/htdocs/info/docs/Pdoc"    # where you want Pdocs created
+PDOC_LOC="$PERLMOD_LOC/htdocs/info/docs/Pdoc"    # where you want Pdocs created
 HTTP="/info/docs/Pdoc"
 P2WDOC_LOC="/localsw/ensembl_web/pdoc-live"  # Pdoc code location
 P2WDOCER="/localsw/ensembl_web/pdoc-live/scripts/perlmod2www.pl"
@@ -69,7 +69,8 @@ cd $PERLMOD_LOC
 echo "Check out ensembl-pipeline, ensembl-analysis ensembl-hive"
 cvs co ensembl-pipeline ensembl-analysis ensembl-hive
 
-for i in bioperl-live ensembl ensembl-analysis ensembl-compara ensembl-functgenomics ensembl-external ensembl-variation ensembl-hive perl biomart-perl public-plugins ensembl-pipeline
+#for i in bioperl-live ensembl ensembl-analysis ensembl-compara ensembl-functgenomics ensembl-external ensembl-variation ensembl-hive perl biomart-perl public-plugins ensembl-pipeline
+for i in ensembl ensembl-analysis ensembl-compara ensembl-functgenomics ensembl-external ensembl-variation ensembl-hive perl biomart-perl public-plugins ensembl-pipeline
 do
   mkdir $PDOC_LOC/$i
   echo "CURRENT MODULE: $i"
@@ -132,10 +133,10 @@ cd $PERLMOD_LOC
 
 # generate e! docs:
 echo "Generating e! docs:";
-rm -Rf $PERLMOD_LOC/public-plugins/ensembl/htdocs/info/docs/webcode/edoc
+rm -Rf $PERLMOD_LOC/htdocs/info/docs/webcode/edoc/*
 perl $PERLMOD_LOC/utils/edoc/update_docs.pl
 echo "Copying temp files to live directory"
-cp -r $PERLMOD_LOC/utils/edoc/temp public-plugins/ensembl/htdocs/info/docs/webcode/edoc
+cp -r $PERLMOD_LOC/utils/edoc/temp htdocs/info/docs/webcode/edoc/
 echo "Clearing up e! docs temp files:";
 rm -Rf $PERLMOD_LOC/utils/edoc/temp
 

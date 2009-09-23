@@ -45,7 +45,12 @@ sub content {
       slice_number    => "$i|2",
       multi           => 1
     });
-    
+ 
+    if ($image_config->get_node('annotation_status')) {
+      $image_config->get_node('annotation_status')->set('caption', '');
+      $image_config->get_node('annotation_status')->set('menu', 'no');
+    };
+
     $image_config->get_node('ruler')->set('caption', $_->{'short_name'});
     $image_config->highlight($highlight_gene) if $highlight_gene;
     

@@ -6,7 +6,6 @@ Ensembl.Panel.ModalContainer = Ensembl.Panel.Overlay.extend({
     
     Ensembl.EventManager.register('modalOpen', this, this.open);
     Ensembl.EventManager.register('modalClose', this, this.close);
-    Ensembl.EventManager.register('updateModalTab', this, this.updateTab);
     Ensembl.EventManager.register('queuePageReload', this, this.setPageReload);
   },
   

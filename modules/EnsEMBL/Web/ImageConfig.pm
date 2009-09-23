@@ -592,11 +592,12 @@ sub load_tracks {
     $self->add_decorations(           $key,$dbs_hash->{$db}{'tables'} );
   }
 
+  $self->add_synteny('compara',$multi_hash->{'DATABASE_COMPARA'}, $species ); # Add to synteny tree
+
   foreach my $db ( @{$self->species_defs->compara_like_databases||[]} ) {
     next unless exists $multi_hash->{$db};
     my $key = lc(substr($db,9));
     ## Configure dna_dna_align features and synteny tracks
-    $self->add_synteny(               $key,$multi_hash->{$db}, $species ); # Add to synteny tree                         ##DONE
     $self->add_alignments(            $key,$multi_hash->{$db}, $species ); # Add to compara_align tree                   ##DONE
   }
   foreach my $db ( @{$self->sd_call('funcgen_like_databases')||[]} ) {

@@ -1630,17 +1630,18 @@ sub create_submenu {
 
 
 sub create_option {
-  my ($self, $code, $caption, $values, $renderers) = @_;
+  my ($self, $code, $caption, $values, $renderers, $display) = @_;
   
   $values ||= {qw(off 0 normal 1)};
   $renderers ||= [qw(off Off normal On)];
   
-  return $self->tree->create_node( $code, {
+  return $self->tree->create_node($code, {
     'node_type' => 'option',
     'caption'   => $caption,
     'name'      => $caption,
     'values'    => $values,
-    'renderers' => $renderers
+    'renderers' => $renderers,
+    'display'   => $display || 'normal'
   });
 }
 

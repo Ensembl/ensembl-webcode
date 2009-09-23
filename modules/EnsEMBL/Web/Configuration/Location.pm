@@ -145,7 +145,7 @@ sub populate_tree {
       botnav   EnsEMBL::Web::Component::Location::ViewBottomNav
       bottom   EnsEMBL::Web::Component::Location::Compara_AlignSliceBottom
     )],
-    { 'availability' => 'slice database:compara', 'concise' => 'Alignments (image)' }
+    { 'availability' => 'slice database:compara has_alignments', 'concise' => 'Alignments (image)' }
   ));
   
   $caption = $availability->{'slice'} ? 'Alignments (text) ([[counts::alignments]])' : 'Alignments (text)';
@@ -156,7 +156,7 @@ sub populate_tree {
       botnav     EnsEMBL::Web::Component::Location::ViewBottomNav
       alignments EnsEMBL::Web::Component::Location::Compara_Alignments
     )],
-    { 'availability' => 'slice database:compara', 'concise' => 'Alignments (text)' }
+    { 'availability' => 'slice database:compara has_alignments', 'concise' => 'Alignments (text)' }
   ));
   
   $caption = $availability->{'slice'} ? 'Multi-species view ([[counts::pairwise_alignments]])' : 'Multi-species view';
@@ -168,7 +168,7 @@ sub populate_tree {
       botnav   EnsEMBL::Web::Component::Location::ViewBottomNav
       bottom   EnsEMBL::Web::Component::Location::MultiBottom
     )],
-    { 'availability' => 'slice database:compara', 'concise' => 'Multi-species view' }
+    { 'availability' => 'slice database:compara has_pairwise_alignments', 'concise' => 'Multi-species view' }
   ));
   
   $align_menu->append($self->create_subnode('ComparaGenomicAlignment', '',

@@ -420,8 +420,8 @@ sub _create_RegulatoryFactor {
   my $feats = (); 
 
   my %fset_types = (
-   "cisRED group motif" => "cisRED group motifs",
-   "miRanda miRNA_target" => "miRanda miRNA",
+   "cisRED group motif" => "cisRED motifs",
+   "miRanda miRNA_target" => "miRanda miRNA targets",
    "BioTIFFIN motif" => "BioTIFFIN motifs",
    "VISTA" => 'VISTA enhancer set'
   );

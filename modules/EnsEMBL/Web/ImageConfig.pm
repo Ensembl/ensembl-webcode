@@ -1528,7 +1528,7 @@ sub add_decorations {
     }));
   }
   if( $key eq 'core' && $hashref->{'misc_feature'}{'sets'}{'NoAnnotation'} ) {
-    $menu->append( $self->create_track( 'annotation_status_'.$key, 'Annotation status',{
+    $menu->append( $self->create_track( 'annotation_status', 'Annotation status',{
       'db'            => $key,
       'glyphset'      => 'annotation_status',
       'height'        => 2,
@@ -1538,7 +1538,7 @@ sub add_decorations {
       'short_labels'  => 0,
       'depth'         => 0,
       'description'   => 'Unannotated regions',
-      'colourset'     => 'annotation_status'
+      'colourset'     => 'annotation_status',
     }));
   }
 }

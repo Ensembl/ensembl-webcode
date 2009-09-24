@@ -950,14 +950,14 @@ sub species_path {
     my $site_hash = $sd->ENSEMBL_SPECIES_SITE($current_species);
     my $url_hash = $sd->ENSEMBL_EXTERNAL_URLS($current_species);
 
-    my $nospaces = $sd->SYSTEM_NAME($species) || $species; 
+    my $nospaces = lc($sd->SYSTEM_NAME($species) || $species); 
     $nospaces =~ s/ /_/g;
 
 # Get the location of the requested species 
     my $spsite = uc($site_hash->{$nospaces});
 
 # Get the location of the current site species
-    my $cssite = uc($site_hash->{$current_species});
+    my $cssite = uc($site_hash->{lc($current_species)});
 
 # Get the URL for the location
     my $base_url = $url_hash->{$spsite} || '';
@@ -969,10 +969,12 @@ sub species_path {
 # as the current species - in that case we don't need the host name bit
 
     if ($base_url =~ /\#\#\#SPECIES\#\#\#/) {
-      if (substr($spsite, 0, 5) eq substr($cssite,0, 5)) {
-	  $URL =~ s/^http\:\/\/[^\/]+\//\//;
-      }
-  }
+	if (substr($spsite, 0, 5) eq substr($cssite,0, 5)) {
+	    $URL =~ s/^http\:\/\/[^\/]+\//\//;
+	}
+    }
+
+    return "/$species" unless $URL; # in case species have not made to the SPECIES_SITE there is a good chance the species name as it is will do
 
     return $URL;
 }
@@ -987,13 +989,14 @@ sub species_display_label {
     my ($self, $species, $no_formatting) = @_;
 
     my $sd = $self;
-    (my $ss = $species) =~ s/_/ /g;
+    (my $ss = lc($species)) =~ s/ /_/g;
 
 
 
     my $current_species = $sd->SYSTEM_NAME($ENV{ENSEMBL_SPECIES}) || $ENV{ENSEMBL_SPECIES};
     my $sdhash = $sd->SPECIES_DISPLAY_NAME($current_species);
-    my $slb = $sdhash->{$species} || $sdhash->{$ss} || '';
+    my $slb = $sdhash->{$ss} || '';
+
     return $slb if ($slb);
 #    warn Dumper $sdhash;
 
@@ -1004,11 +1007,9 @@ sub species_display_label {
     my $site_hash = $sd->ENSEMBL_SPECIES_SITE($current_species);
     my $url_hash = $sd->ENSEMBL_EXTERNAL_URLS($current_species);
 
-    ( my $nospaces = $species ) =~ s/ /_/g;
-
-    my $spsite = uc($site_hash->{$nospaces});
+    my $spsite = uc($site_hash->{$ss});
     return $species if ($spsite);
-    return "Ancestral sequence";
+    return "Ancestral sequence ($species)";
 }
 
 1;

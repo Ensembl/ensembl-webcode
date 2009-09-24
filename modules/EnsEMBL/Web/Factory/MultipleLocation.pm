@@ -26,6 +26,7 @@ sub createObjects {
   my $gene = 0;
   my $action_id = $self->param('id');
   my $invalid = 0;
+  my $chr_flag;
   
   my %inputs = (
     0 => { 
@@ -36,7 +37,9 @@ sub createObjects {
   );
   
   foreach ($self->param) {
-    $inputs{$2}->{$1} = $self->param($_) if /^([sgr])(\d+)$/;
+    $inputs{$2}->{$1} = $self->param($_) if /^([gr])(\d+)$/;
+    ($inputs{$1}->{'s'}, $inputs{$1}->{'chr'}) = split '--', $self->param($_) if /^s(\d+)$/;
+    $chr_flag = 1 if $inputs{$1} && $inputs{$1}->{'chr'};
   }
   
   # Strip bad parameters (r/g without s)
@@ -52,18 +55,20 @@ sub createObjects {
   return $self->problem('redirect', $self->_url($self->multi_params)) if $invalid || $self->input_genes(\%inputs);
   
   foreach (sort { $a <=> $b } keys %inputs) {
-    my ($species, $chr) = split '--', $inputs{$_}->{'s'};
-    my $r = $inputs{$_}->{'r'};
+    my $species = $inputs{$_}->{'s'};
+    my $r       = $inputs{$_}->{'r'};
     
     next unless $species && $r;
     
     $self->__set_species($species);
     
-    my $action = $inputs{$_}->{'action'};
     my ($seq_region_name, $s, $e, $strand) = $r =~ /^([^:]+):(-?\w+\.?\w*)-(-?\w+\.?\w*)(?::(-?\d+))?/;
-    my $slice;
     
-    $chr ||= $seq_region_name;
+    $inputs{$_}->{'chr'} ||= $seq_region_name if $chr_flag;
+    
+    my $action = $inputs{$_}->{'action'};
+    my $chr    = $inputs{$_}->{'chr'} || $seq_region_name;
+    my $slice;
     
     my $modifiers = {
       in      => sub { ($s, $e) = ((3*$s + $e)/4, (3*$e + $s)/4) },     # Half the length
@@ -242,8 +247,8 @@ sub input_genes {
   my $gene = 0;
   
   foreach (grep { $inputs->{$_}->{'g'} && !$inputs->{$_}->{'r'} } keys %$inputs) {
-    my ($species) = split '--', $inputs->{$_}->{'s'};
-    my $g = $inputs->{$_}->{'g'};
+    my $species = $inputs->{$_}->{'s'};
+    my $g       = $inputs->{$_}->{'g'};
     
     next unless $species;
     
@@ -283,7 +288,7 @@ sub check_slice_exists {
       my $slice;
       
       eval { $slice = $self->slice_adaptor->fetch_by_region($system->name, $chr, $start, $end, $strand); };
-      warn $@ and next if $@;
+      next if $@;
       
       if ($slice) {
         if ($start > $slice->seq_region_length || $end > $slice->seq_region_length) {
@@ -332,15 +337,17 @@ sub realign {
 sub change_primary_species {
   my ($self, $inputs, $id) = @_;
   
+  my $old_species = $inputs->{0}->{'s'} . ($inputs->{0}->{'chr'} ? "--$inputs->{0}->{'chr'}" : '');
+  
   $inputs->{$id}->{'r'} =~ s/:-?1$//; # Remove strand parameter for the new primary species
   
   $self->param('r', $inputs->{$id}->{'r'});
   $self->param('g', $inputs->{$id}->{'g'}) if $inputs->{$id}->{'g'};
-  $self->param('s99999', $inputs->{0}->{'s'}); # Set arbitrarily high - will be recuded by remove_species_and_generate_url
+  $self->param('s99999', $old_species); # Set arbitrarily high - will be recuded by remove_species_and_generate_url
   $self->param('align', ''); # Remove the align parameter because it may not be applicable for the new species
   
   foreach my $i (grep $_, keys %$inputs) {
-    if ($inputs->{$i}->{'s'} eq $self->species) {
+    if ($inputs->{$i}->{'s'} eq $self->species && !$inputs->{$i}->{'chr'}) {
       $self->param($_ . $i, '') for keys %{$inputs->{$i}}; # Remove parameters if one of the secondary species is the same as the primary (looking at an paralogue)
     } elsif ($i != $id) {
       $self->param("$_$i", '') for qw(r g); # Strip location-setting parameters on other non-primary species

@@ -63,8 +63,8 @@ sub counts {
   
   my $obj = $self->Obj;
   my $key = "::COUNTS::LOCATION::$ENV{'ENSEMBL_SPECIES'}";
-  my $counts = $MEMD->get($key) if $MEMD;
-  
+  my $counts = $MEMD ? $MEMD->get($key) : undef;
+ 
   if (!$counts) {
     my %synteny = $self->species_defs->multi('DATABASE_COMPARA', 'SYNTENY');
     my $alignments = $self->count_alignments;

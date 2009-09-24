@@ -136,7 +136,7 @@ sub populate_tree {
 
   my $align_menu = $self->create_submenu('Compara', 'Comparative Genomics');
   
-  $caption = $availability->{'slice'} ? 'Alignments (image) ([[counts::alignments]])' : 'Alignments (image)';
+  $caption = $availability->{'has_alignments'} ? 'Alignments (image) ([[counts::alignments]])' : 'Alignments (image)';
   
   $align_menu->append($self->create_node('Compara_Alignments/Image', $caption, 
     [qw(
@@ -148,7 +148,7 @@ sub populate_tree {
     { 'availability' => 'slice database:compara has_alignments', 'concise' => 'Alignments (image)' }
   ));
   
-  $caption = $availability->{'slice'} ? 'Alignments (text) ([[counts::alignments]])' : 'Alignments (text)';
+  $caption = $availability->{'has_alignments'} ? 'Alignments (text) ([[counts::alignments]])' : 'Alignments (text)';
   
   $align_menu->append($self->create_node('Compara_Alignments', $caption,
     [qw(
@@ -159,7 +159,7 @@ sub populate_tree {
     { 'availability' => 'slice database:compara has_alignments', 'concise' => 'Alignments (text)' }
   ));
   
-  $caption = $availability->{'slice'} ? 'Multi-species view ([[counts::pairwise_alignments]])' : 'Multi-species view';
+  $caption = $availability->{'has_pairwise_alignments'} ? 'Multi-species view ([[counts::pairwise_alignments]])' : 'Multi-species view';
   
   $align_menu->append($self->create_node('Multi', $caption,
     [qw(
@@ -176,7 +176,7 @@ sub populate_tree {
     { 'no_menu_entry' => 1 }
   ));
   
-  $caption = $availability->{'chromosome'} ? 'Synteny ([[counts::synteny]])' : 'Synteny';
+  $caption = $availability->{'has_synteny'} ? 'Synteny ([[counts::synteny]])' : 'Synteny';
   
   $align_menu->append($self->create_node('Synteny', $caption,
     [qw(
@@ -191,7 +191,7 @@ sub populate_tree {
   
   my $variation_menu = $self->create_submenu( 'Variation', 'Genetic Variation' );
   
-  $caption = $availability->{'slice'} ? 'Resequencing ([[counts::reseq_strains]])' : 'Resequencing';
+  $caption = $availability->{'has_strains'} ? 'Resequencing ([[counts::reseq_strains]])' : 'Resequencing';
   
   $variation_menu->append($self->create_node('SequenceAlignment', $caption,
     [qw(

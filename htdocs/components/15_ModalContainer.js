@@ -125,7 +125,7 @@ Ensembl.Panel.ModalContainer = Ensembl.Panel.Overlay.extend({
         if (e.status != 500 && failures < 3) {
           setTimeout(function () { myself.getContent(url, ++failures); }, 2000);
         } else {
-          myself.elLk.content.html('<p class="ajax_error">Failure: The resource failed to load');
+          myself.elLk.content.html('<p class="ajax_error">Failure: The resource failed to load</p>');
         }
       }
     });

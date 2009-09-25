@@ -665,28 +665,40 @@ sub _ajax_zmenu_av {
       $end = $feature->{reference_genomic_align}->dnafrag_end;
     }
   }
+  
+  $panel->{'caption'} = $caption;
+  
   $panel->add_entry({
     'type'  => 'start',
     'label' => $start,
     'priority' => 110,
   });
+  
   $panel->add_entry({
     'type'  => 'end',
     'label' => $end,
     'priority' => 109,
   });
+  
   $panel->add_entry({
     'type'  => 'length',
     'label' => ($end-$start+1). " bp",
     'priority' => 108,
   });
-  $panel->{'caption'} = $caption;
+  
   $panel->add_entry({
-    'label' => 'View alignments',
+    'label' => 'View alignments (text)',
     'link'  => $url,
     'priority' => 100, # default
   });
-  return;
+  
+  $url =~ s/Compara_Alignments/Compara_Alignments\/Image/;
+  
+  $panel->add_entry({
+    'label' => 'View alignments (image)',
+    'link'  => $url,
+    'priority' => 101,
+  });
 }
 
 sub _ajax_zmenu_ga {

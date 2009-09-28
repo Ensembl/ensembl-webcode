@@ -44,8 +44,7 @@ sub process {
     my @mail_attributes = ();
     my @T = localtime();
     my $date = sprintf "%04d-%02d-%02d %02d:%02d:%02d", $T[5]+1900, $T[4]+1, $T[3], $T[2], $T[1], $T[0];
-    my $url = 'http://'.$species_defs->ENSEMBL_SERVERNAME;
-    $url .= ':'.$species_defs->ENSEMBL_PORT if $species_defs->ENSEMBL_PORT != '80';
+    my $url = $species_defs->ENSEMBL_BASE_URL;
     $url .= CGI::unescape($object->param('_referer'));
     $url = undef if $url =~ m#Help/SendEmail#; ## Compensate for auto-filling of _referer!
     push @mail_attributes, (

@@ -293,6 +293,7 @@ sub _matches {
   if( $keys[0] eq 'ALT_TRANS' ) {
       @links = $self->remove_redundant_xrefs(@links);
   }
+  return unless @links;
   my $old_key = '';
   foreach my $link (@links) {
     my ( $key, $text ) = @$link;
@@ -591,6 +592,7 @@ sub remove_redundant_xrefs {
       $priorities{$key} = $text;
     }
   }
+  return () if (ref($self->object->Obj) eq 'Bio::EnsEMBL::Gene'); #another hack to deal with mouse which has no 'Havana gene'
   foreach my $type (
     'Transcript having exact match between ENSEMBL and HAVANA',
     'Ensembl transcript having exact match with Havana',

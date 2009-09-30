@@ -977,7 +977,7 @@ sub ajax_zmenu_variation {
 
   
   my $type;
-  if ($obj->param('snp_fake') && $feature) { $type = $feature->display_consequence; }
+  if ( ($obj->param('snp_fake') || $obj->param('var_box') ) && $feature) { $type = $feature->display_consequence; }
   elsif ($trans_variation){ $type =  join ", ", @{$trans_variation->consequence_type || [] };}
   elsif ($obj->param('consequence')){$type = $obj->param('consequence') || '';}
   else  { $type = $feature->display_consequence; }

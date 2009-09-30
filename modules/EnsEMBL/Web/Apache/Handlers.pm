@@ -6,6 +6,7 @@ use Exporter;
 
 use Apache2::Const qw(:common :http :methods);
 use Apache2::SizeLimit;
+use Apache2::Connection ();
 use Apache2::URI;
 use APR::URI;
 use CGI::Cookie;
@@ -23,7 +24,16 @@ use EnsEMBL::Web::OldLinks qw(get_redirect);
 use EnsEMBL::Web::Registry;
 use EnsEMBL::Web::RegObj;
 
+our $species_defs = new EnsEMBL::Web::SpeciesDefs;
 our $MEMD = new EnsEMBL::Web::Cache;
+our $GEO;
+
+eval q/
+  use Geo::IP;
+  $GEO = Geo::IP->new( GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE );
+/;
+
+warn $@ if $@;
 
 our $THIS_HOST;
 our $LOG_INFO; 
@@ -146,6 +156,77 @@ sub childInitHandler {
   $ENSEMBL_WEB_REGISTRY->timer->set_process_start_time(time);
   
   printf STDERR "Child %9d: - initialised at %30s\n", $$, '' . gmtime if $ENSEMBL_DEBUG_FLAGS & $SiteDefs::ENSEMBL_DEBUG_HANDLER_ERRORS;
+}
+
+sub redirect_to_nearest_mirror {
+  my $r = shift;
+
+  if ($species_defs->ENSEMBL_MIRRORS && $GEO) {
+    my $unparsed_uri = $r->unparsed_uri();
+
+    warn "unparsed_uri = $unparsed_uri";
+
+    ## Check url
+    if ($unparsed_uri =~ /do_not_redirect=please/) {
+      ##$ENV{'USER_MESSAGE'} = "You've been redirected to your nearest mirror, hit 'back' button in your browser to return or select other mirror from top menu at any time";
+      my $cookie = CGI::Cookie->new(
+        -name    => 'do_not_redirect',
+        -value   => 'please',
+        -expires => 'Thu, 31-Dec-2037 22:22:22 GMT', ## End of time :)     
+      );
+      $r->headers_out->add('Set-Cookie' => $cookie);
+
+      return DECLINED;
+    }
+
+    ## Check "don't redirect me" cookie
+    my %cookies = CGI::Cookie->parse($r->headers_in->{'Cookie'});
+    
+    return DECLINED
+      if $cookies{'do_not_redirect'} && $cookies{'do_not_redirect'}->value eq 'please';
+
+    my $ip = $r->headers_in->{'X-Forwarded-For'} || $r->connection->remote_ip;
+
+    ## Ok, so which country you from
+    my $country  = $GEO->country_code_by_addr($ip);
+
+    if (my $location = $species_defs->ENSEMBL_MIRRORS->{$country} || $species_defs->ENSEMBL_MIRRORS->{'OTHER'}) {
+      return DECLINED
+        if $location eq $species_defs->ENSEMBL_SERVERNAME;
+
+      ## Deleting cookie for current site
+      my $cookie = CGI::Cookie->new(
+        -name    => 'do_not_redirect',
+        -value   => 'please',
+        -expires => '+1h',         
+      );
+
+      $unparsed_uri .= $unparsed_uri =~ /\?/ ? ';do_not_redirect=please' : '?do_not_redirect=please';
+
+      $r->err_headers_out->add('Set-Cookie' => $cookie);
+      $r->headers_out->set(Location => "http://$location$unparsed_uri");
+      
+      ## Reset all following handlers just in case
+      ## as it turned out - not really necessary
+      #  $r->set_handlers(postReadRequestHandler  => []);
+      #  $r->set_handlers(PerlTransHandler        => []);
+      #  $r->set_handlers(PerlMapToStorageHandler => []);
+      #  $r->set_handlers(PerlHeaderParserHandler => []);
+      #  $r->set_handlers(PerlInitHandler         => []);
+      #  $r->set_handlers(PerlAccessHandler       => []);
+      #  $r->set_handlers(PerlAuthenHandler       => []);
+      #  $r->set_handlers(PerlAuthzHandler        => []);
+      #  $r->set_handlers(PerlTypeHandler         => []);
+      #  $r->set_handlers(PerlFixupHandler        => []);
+      #  $r->set_handlers(PerlResponseHandler     => []);
+      #  $r->set_handlers(PerlLogHandler          => []);
+      #  $r->set_handlers(PerlCleanupHandler      => []);
+      
+      return Apache2::Const::REDIRECT;       
+    }
+  }
+
+  return DECLINED;
 }
 
 sub postReadRequestHandler {
@@ -885,8 +966,6 @@ sub _get_loads {
 sub queue_pending_blast_jobs {
   my $queue_class = 'EnsEMBL::Web::Queue::LSF';
 
-  my $species_defs = new EnsEMBL::Web::SpeciesDefs;
-  
   my $DB = {
     NAME => 'ensembl_blast',
     USER => 'ensadmin',

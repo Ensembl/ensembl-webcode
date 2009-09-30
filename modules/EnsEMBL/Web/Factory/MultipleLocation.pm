@@ -63,6 +63,7 @@ sub createObjects {
     $self->__set_species($species);
     
     my ($seq_region_name, $s, $e, $strand) = $r =~ /^([^:]+):(-?\w+\.?\w*)-(-?\w+\.?\w*)(?::(-?\d+))?/;
+    $s = 1 if $s < 1;
     
     $inputs{$_}->{'chr'} ||= $seq_region_name if $chr_flag;
     

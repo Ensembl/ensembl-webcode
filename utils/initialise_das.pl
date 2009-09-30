@@ -4,6 +4,12 @@
 # for DAS. Unfortunately lots of strange things have to happen to map between
 # Ensembl and DAS coordinate systems, so this does require some maintenance.
 
+# One issue is that the script attempts to add entries to the DAS registry for
+# new species/assemblies (line ~440 but this currently failing with a 400 error from
+# the Registry. Can be worked around by setting $load_registry to zero - this then prints
+# a list of new assemblies to be added which can be done manually by Jonathan Warren (jw12)
+# Don't know how to fix this at present - new version of LWP::UserAgent perhaps ?
+
 use strict;
 use warnings;
 
@@ -17,6 +23,8 @@ use Pod::Usage;
 use DBI;
 use Data::Dumper;
 use Compress::Zlib;
+
+my $load_registry = 1; # set to zero to get output of assemblies to add (not tested)
 
 # --- load libraries needed for reading config ---
 use vars qw( $SERVERROOT );
@@ -183,6 +191,7 @@ SPECIES: foreach my $sp (@$species) {
   
   my $toplevel_example  = $toplevel_slices->[0];
   my %coords = ();
+ SLICE:
   for (@$toplevel_slices) {
     # Set up the coordinate system details
     $_->[6] ||= ''; # version
@@ -195,6 +204,7 @@ SPECIES: foreach my $sp (@$species) {
       if (!$cs_xml) {
         # Add to the registry and check it came back OK
         my $tmp = _get_das_coords(_coord_system_as_xml($_->[5], $_->[6], $sp, $taxid), "$_->[5] $_->[6]");
+				next SLICE unless ($load_registry);
         $cs_xml = $tmp->{$sp}{$_->[5]}{$_->[6]};
         if (!$cs_xml) {
           print STDERR "[ERROR] Coordinate system $_->[5] $_->[6] is not in the DAS Registry! Skipping\n";
@@ -418,11 +428,15 @@ sub _get_das_coords {
   # If we have XML for a new coordinate system, add it
   if ($add_data) {
     print STDERR "[INFO]  Adding coordinate system '$add_name' to the DAS Registry\n";
+		unless ($load_registry) {
+			print STDERR "Data to be manually added to registry is $add_data";			
+			return;
+		}
     $add_data = qq(<?xml version='1.0' ?>\n<DASCOORDINATESYSTEM>\n  $add_data\n</DASCOORDINATESYSTEM>);
     $req->content($add_data);
     $req->content_length(length $add_data);
   }
-  
+
   my $resp = $ua->request( $req );
   $resp->is_success || die "Unable to retrieve coordinate system list from the DAS Registry: ".$resp->status_line." : ".$resp->content;
   

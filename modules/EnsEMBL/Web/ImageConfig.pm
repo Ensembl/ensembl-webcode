@@ -532,11 +532,10 @@ sub databases {
 
 sub get_track_key {
   my( $self, $prefix, $obj ) = @_;
-
   my $logic_name = $obj->gene ? $obj->gene->analysis->logic_name : $obj->analysis->logic_name;
   my $db         = $obj->get_db();
   my $db_key     = 'DATABASE_'.uc($db);
-  my $key        = $self->databases->{$db_key}{'tables'}{'gene'}{'analyses'}{$logic_name}{'web'}{'key'} || $logic_name;
+  my $key        = $self->databases->{$db_key}{'tables'}{'gene'}{'analyses'}{lc($logic_name)}{'web'}{'key'} || $logic_name;
   return join '_', $prefix, $db, $key;
 }
 
@@ -926,9 +925,7 @@ sub add_ditag_feature {
 sub add_gene {
   my( $self, $key, $hashref ) = @_;
 ## Gene features end up in each of these menus..
-
   return unless $self->_check_menus( @TRANSCRIPT_TYPES );
-
   my( $keys, $data )   = $self->_merge( $hashref->{'gene'}, 'gene' );
 
   my $flag = 0;

@@ -52,7 +52,7 @@ sub createObjects {
   
   # If we had bad parameters, redirect to remove them from the url.
   # If we came in on an a gene, redirect so that we use the location in the url instead.
-  return $self->problem('redirect', $self->_url($self->multi_params)) if $invalid || $self->input_genes(\%inputs);
+  return $self->problem('redirect', $self->_url($self->multi_params)) if $invalid || $self->input_genes(\%inputs) || $self->change_all_locations(\%inputs);
   
   foreach (sort { $a <=> $b } keys %inputs) {
     my $species = $inputs{$_}->{'s'};
@@ -79,8 +79,8 @@ sub createObjects {
       right   => sub { ($s, $e) = ($s + ($e-$s)/10, $e + ($e-$s)/10) }, # Shift right by length/10
       right2  => sub { ($s, $e) = ($s + ($e-$s)/2,  $e + ($e-$s)/2) },  # Shift right by length/2
       flip    => sub { ($strand ||= 1) *= -1 },
-      realign => sub { $self->realign(\%inputs, $_); },
-      primary => sub { $self->change_primary_species(\%inputs, $_); }
+      realign => sub { $self->realign(\%inputs, $_) },
+      primary => sub { $self->change_primary_species(\%inputs, $_) }
     };
     
     # We are modifying the url - redirect.
@@ -356,6 +356,39 @@ sub change_primary_species {
   }
   
   $self->remove_species_and_generate_url($id, $inputs->{$id}->{'s'});
+}
+
+sub change_all_locations {
+  my ($self, $inputs) = @_;
+  
+  if ($self->param('multi_action') eq 'all') {
+    my $all_s = $self->param('all_s');
+    my $all_w = $self->param('all_w');
+    
+    foreach (keys %$inputs) {
+      my ($seq_region_name, $s, $e, $strand) = $inputs->{$_}->{'r'} =~ /^([^:]+):(-?\w+\.?\w*)-(-?\w+\.?\w*)(?::(-?\d+))?/;
+      
+      $self->__set_species($inputs->{$_}->{'s'});
+      
+      my $max = $self->slice_adaptor->fetch_by_region(undef, $seq_region_name, $s, $e, $strand)->seq_region_length;
+      
+      if ($all_s) {
+        $s += $all_s;
+        $e += $all_s;
+      } else {
+        my $c = int(($s + $e) / 2);
+        ($s, $e) = ($c - int($all_w/2) + 1, $c + int($all_w/2));
+      }
+      
+      ($s, $e) = (1, $e - $s || 1) if $s < 1;
+      ($s, $e) = ($max - ($e - $s), $max) if $e > $max;
+      $s = 1 if $s < 1;
+      
+      $self->param($_ ? "r$_" : 'r', "$seq_region_name:$s-$e" . ($strand ? ":$strand" : ''));
+    }
+    
+    return 1;
+  }
 }
 
 sub slice_adaptor {

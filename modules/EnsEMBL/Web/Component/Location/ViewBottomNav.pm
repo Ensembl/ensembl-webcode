@@ -101,7 +101,8 @@ sub _nav_url {
   my $max = $object->seq_region_length;
   
   ($s, $e) = (1, $e - $s || 1) if $s < 1;
-  ($s, $e) = ($s == 1 ? 1 : $max - ($e - $s), $max) if $e > $max;
+  ($s, $e) = ($max - ($e - $s), $max) if $e > $max;
+  $s = 1 if $s < 1;
   
   return $object->_url({ 
     %{$object->multi_params(0)},

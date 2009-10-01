@@ -280,8 +280,7 @@ sub render_normal {
             height         => $h, 
             feature_colour => $feature_colour, 
             delete_colour  => 'black', 
-            scalex         => $pix_per_bp, 
-            do_not_flip    => $strand_flag eq 'r'
+            scalex         => $pix_per_bp
           });
         } else {
           my $START = $s < 1 ? 1 : $s;
@@ -423,8 +422,7 @@ sub render_ungrouped {
           height         => $h, 
           feature_colour => $feature_colour, 
           delete_colour  => 'black', 
-          scalex         => $pix_per_bp, 
-          do_not_flip    => $strand_flag eq 'r'
+          scalex         => $pix_per_bp
         });
       } else {
         $self->push($self->Rect({

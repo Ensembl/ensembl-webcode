@@ -35,7 +35,6 @@ sub default_otherspecies {
   my $sd = $self->object->species_defs;
   my %synteny = $sd->multi('DATABASE_COMPARA', 'SYNTENY');
   my @has_synteny = sort keys %synteny;
-  my $sp;
 
   ## Set default as primary species, if available
   unless ($ENV{'ENSEMBL_SPECIES'} eq $sd->ENSEMBL_PRIMARY_SPECIES) {
@@ -48,15 +47,21 @@ sub default_otherspecies {
 
   ## Set default as secondary species, if primary not available
   unless ($ENV{'ENSEMBL_SPECIES'} eq $sd->ENSEMBL_SECONDARY_SPECIES) {
-    foreach $sp (@has_synteny) {
+    foreach my $sp (@has_synteny) {
       if ($sp eq $sd->ENSEMBL_SECONDARY_SPECIES) {
         return $sp;
       }
     }
   }
 
-  ## otherwise choose first in list
-  return $has_synteny[0];
+  ## otherwise choose first in list which is not equal to the current species
+  foreach my $sp (@has_synteny) {
+  	if($ENV{'ENSEMBL_SPECIES'} ne $sp) {
+  		return $sp;
+  	}
+  }
+
+  return; #Shouldn't get here as we must have some data to display
 }
 
 sub chr_list {
@@ -162,10 +167,10 @@ sub multi_ideogram {
 ## Start the box containing the image
   $panel->printf(
     qq(<div style="width: %dpx; border: solid 1px %s" class="autocenter navbox">),
-    $object->param('image_width'), $panel->option( 'red_edge' ) ? 'red' : 'black'  
+    $object->param('image_width'), $panel->option( 'red_edge' ) ? 'red' : 'black'
   );
   foreach my $loc ( $object->Locations ) {
-## Foreach of the "species slices, draw an image of the slice within this box!  
+## Foreach of the "species slices, draw an image of the slice within this box!
     my $slice = $object->database('core', $loc->real_species )->get_SliceAdaptor()->fetch_by_region(
       $loc->seq_region_type, $loc->seq_region_name, 1, $loc->seq_region_length, 1
     );
@@ -186,7 +191,7 @@ sub multi_ideogram {
          'URL'    => "/@{[$loc->real_species]}/@{[$object->script]}",
          'hidden' => {
            'click_left'        => int( $wuc->transform->{'translatex'} ),
-           'click_right'       => int( $wuc->transform->{'scalex'} * $loc->seq_region_length +  
+           'click_right'       => int( $wuc->transform->{'scalex'} * $loc->seq_region_length +
                                   int( $wuc->transform->{'translatex'} ) ),
            'seq_region_strand' => $loc->seq_region_strand,
            'seq_region_left'   => 1,
@@ -257,7 +262,7 @@ sub multi_bottom {
   my $array = [];
   my @other_slices = map { {'location' => $_, 'ori' => $_->seq_region_strand, 'species' => $_->real_species} } @secondary;
   my $base_URL = "/".$primary->real_species."/".$object->script."?".$object->generate_query_url;
-  if( @secondary > 1 ) { ## We do S_0, P, S_1, P, S_2 .... 
+  if( @secondary > 1 ) { ## We do S_0, P, S_1, P, S_2 ....
     my $C = 1;
     push_secondary( $array, shift @secondary, $C );
     while( my $T = shift @secondary ) {
@@ -286,7 +291,7 @@ sub multi_bottom {
        $config->{'next_species'}       = $next_species;
        $config->{'slice_id'}           = $i;
        $config->{'other_slices'}       = \@other_slices;
-       $config->{'primary_slice'}      = $primary_slice; 
+       $config->{'primary_slice'}      = $primary_slice;
     if( $previous_species && $next_species eq $previous_species ) {
       if( $flags{'match'} ) {
         foreach(qw( BLASTZ_RAW PHUSION_BLASTN BLASTZ_NET BLASTZ_GROUP BLASTZ_RECIP_NET BLASTZ_CHAIN) ) {
@@ -485,12 +490,12 @@ sub alignsliceviewbottom_text {
       viewable region use the zoom buttons above - or click on the top
       display to centre and zoom the image
     </p>
-  </div>) 
+  </div>)
   );
   return 0;
 }
 
-sub multi_species_list { 
+sub multi_species_list {
 	my( $object,$species ) = @_;
 	$species ||= $object->species;
 	my %species_hash;
@@ -532,10 +537,10 @@ sub ldview_nav           {
     'bottom' => $pop                   || undef,
     'source' => $_[1]->param('source'),
     'h'      => $_[1]->highlights_string || undef,
-  } );    
+  } );
 }
 
-sub alignsliceviewbottom_menu {  
+sub alignsliceviewbottom_menu {
     my($panel, $object ) = @_;
     my $configname = 'alignsliceviewbottom';
 
@@ -585,10 +590,10 @@ sub misc_set_form {
     'requried' => 'yes', 'name' => 'set',
     'value'    => $object->param('set'),
     'values'   => $miscsets
-  ); 
+  );
   $form->add_element( 'type' => 'DropDown', 'select' => 'select',
     'label'    => 'Output format',
-    'required' => 'yes', 'name' => '_format', 
+    'required' => 'yes', 'name' => '_format',
     'values'   => $formats,
     'value'    => $object->param('_format') || 'HTML'
   );
@@ -626,10 +631,10 @@ sub alignsliceviewbottom {
     my $mlss_adaptor = $comparadb->get_adaptor("MethodLinkSpeciesSet");
 
     my $aID = $wuc->get("alignslice", "id");
-    my $method_link_species_set = $mlss_adaptor->fetch_by_dbID($aID); 
+    my $method_link_species_set = $mlss_adaptor->fetch_by_dbID($aID);
 
 # With every new release the compara team update the alignment IDs
-# It would be much better if we had something permanent to refer to, but as for 
+# It would be much better if we had something permanent to refer to, but as for
 # now we have to check that the selected alignment is still in the compara database.
 # If it's not we just choose the first alignment that we can find for this species
 
@@ -641,7 +646,7 @@ sub alignsliceviewbottom {
         $aID = $a;
         $wuc->get("alignslice", "id", $aID, 1);
 #        $wuc->save;
-        $method_link_species_set = $mlss_adaptor->fetch_by_dbID($aID); 
+        $method_link_species_set = $mlss_adaptor->fetch_by_dbID($aID);
         last;
       }
     }
@@ -705,7 +710,7 @@ sub alignsliceviewbottom {
 
     push @ARRAY, $as, $CONF;
     $cmpstr = 'secondary';
-    
+
     }
 
     my $image = $object->new_image( \@ARRAY, $object->highlights );
@@ -785,7 +790,7 @@ sub alignsliceviewzoom {
     while (@inters) {
         $ms = (shift (@inters) || 1);
         my $mtype = shift (@inters);
-        
+
         $fc += $ms;
 
         if ($mtype =~ /M/) {
@@ -800,7 +805,7 @@ sub alignsliceviewzoom {
         while (@inters) {
         $ms = (shift (@inters) || 1);
         my $mtype = shift (@inters);
-        
+
         $fc += $ms;
 
         if ($mtype =~ /M/) {
@@ -817,7 +822,7 @@ sub alignsliceviewzoom {
         ->fetch_by_region($object->seq_region_type, $object->seq_region_name, $gstart, $gend, 1 );
 
     my $query_slice_adaptor = Bio::EnsEMBL::Registry->get_adaptor($species, "core", "Slice");
-    
+
     my $query_slice= $query_slice_adaptor->fetch_by_region($slice->coord_system_name, $slice->seq_region_name, $slice->start, $slice->end);
 
     my $comparadb = $object->database('compara');
@@ -903,14 +908,14 @@ sub exons_markup {
        push @genes, @{ $slice->get_all_Genes($analysis, $db_alias) };
    }
    my $slice_length = length($slice->seq);
-   
+
    my @exons;
    foreach (@genes) {
        my $tlist = $_->get_all_Transcripts();
        foreach my $t (@$tlist) {
          my $elist = $t->get_all_Exons();
          foreach my $ex (@$elist) {
-#         warn("exon:".join('*', $ex->start, $ex->end, $ex->get_aligned_start, $ex->get_aligned_end, $ex->exon->start, $ex->exon->end)); 
+#         warn("exon:".join('*', $ex->start, $ex->end, $ex->get_aligned_start, $ex->get_aligned_end, $ex->exon->start, $ex->exon->end));
              next if (!$ex->start);
 
              my ($active_start, $active_end)  = (0, 0);
@@ -922,7 +927,7 @@ sub exons_markup {
              $active_end = 1;
          }
 
-         
+
          if ($ex->get_aligned_start == 1 && $ex->start > 0) {
              $active_start = 1;
          }
@@ -936,7 +941,7 @@ sub exons_markup {
          }
          }
 
-#warn("EXON:".join('*', $slice_length, $ex->start, $ex->end, $ex->get_aligned_start, $ex->get_aligned_end, $ex->exon->start, $ex->exon->end, $active_start, $active_end)); 
+#warn("EXON:".join('*', $slice_length, $ex->start, $ex->end, $ex->get_aligned_start, $ex->get_aligned_end, $ex->exon->start, $ex->exon->end, $active_start, $active_end));
             push @exons, {
                  'start' => $ex->start,
                  'end' => $ex->end,
@@ -1001,7 +1006,7 @@ sub alignsliceviewtop {
     }
 
      my $image    = $object->new_image( $slice, $wuc, $object->highlights );
- 
+
      $image->set_button( 'form',
                       'name'   => 'click',
                        'id'     => 'click_top',
@@ -1025,20 +1030,20 @@ sub alignsliceviewtop {
 
 sub content_export {
   my $self = shift;
-  
+
   my $custom_outputs = {
     'ld' => sub { return $self->ld_dump($self->object); }
   };
-  
+
   return $self->_export($custom_outputs);
 }
 
 sub ld_dump {
   my $self = shift;
   my ($object, $file, $params) = @_;
-  
+
   my ($format, $pop_param, $snp_param);
-  
+
   if ($params) {
     $format = 'Excel';
     $pop_param = $params->{'opt_pop'}->[0];
@@ -1052,93 +1057,93 @@ sub ld_dump {
   $pop_param =~ s/(%3A|:)on//; # FIXME: Hack to remove :on from opt_pop (is being added in Component/VariationSummary, I don't know why)
 
   my $zoom = 20000; # Currently non-configurable
-  
+
   if (!$pop_param) {
     warn "****** ERROR: No population defined";
     return;
   }
-  
+
   my @colour_gradient = (
-    'ffffff', 
+    'ffffff',
     $object->image_config_hash('ldview')->colourmap->build_linear_gradient(41, 'mistyrose', 'pink', 'indianred2', 'red')
   );
-  
+
   my $ld_values = ld_values($object, $pop_param, $snp_param, $zoom);
-  
+
   my $table;
   my $text;
   my $html;
   my $header_style = "background-color:#CCCCCC;font-weight:bold;";
-  
+
   my $populations = {};
   map { $populations->{$_} = 1 } map { keys %{$ld_values->{$_}} } keys %$ld_values;
-  
+
   foreach my $pop_name (sort { $a cmp $b } keys %$populations) {
     my $flag = 1;
 
-    foreach my $ld_type (keys %$ld_values) {      
+    foreach my $ld_type (keys %$ld_values) {
       next unless $ld_values->{$ld_type}{$pop_name}{'data'};
-      
+
       my ($starts, $snps, $data) = (@{$ld_values->{$ld_type}{$pop_name}{'data'}});
-      
+
       unshift (@$data, []);
-      
+
       if ($format eq 'Excel') {
         if (!$table) {
           my $renderer = new EnsEMBL::Web::Document::Renderer::Excel({ fh => $file });
           $table = $renderer->new_table_renderer;
         }
-        
+
         (my $sheet_name = $pop_name) =~ s/[^\w\s]/_/g;
-        
+
         if ($flag) {
           $table->new_sheet($sheet_name); # Start a new sheet(and new table)
           $flag = 0;
         } else {
           $table->new_table; # Start a new table
         }
-        
+
         $table->set_width(2 + @$snps);
         $table->heading($ld_values->{$ld_type}{$pop_name}{'text'});
         $table->new_row;
-        
+
         $table->write_header_cell('bp position');
         $table->write_header_cell('SNP');
-        
+
         $table->write_header_cell($_) for @$snps;
         $table->new_row;
       } elsif ($format eq 'Text') {
         $text = join ("\t", 'bp position', 'SNP', @$snps) . "\n";
       } else {
         $table = new EnsEMBL::Web::Document::SpreadSheet;
-        
+
         $table->add_option('cellspacing', 2);
         $table->add_option('rows', '', ''); # No row colouring
         $table->add_columns(map {{ 'title' => $_, 'align' => 'center' }} ( 'bp&nbsp;position', 'SNP', @$snps ));
       }
-      
+
       foreach my $row (@$data) {
         next unless ref $row eq 'ARRAY';
-        
+
         my $snp = shift @$snps;
         my $pos = shift @$starts;
-        
+
         my @ld_values = map { $_ ? sprintf("%.3f", $_) : '-' } @$row;
         my @row_style = map { 'background-color:#' . ($_ eq '-' ? 'ffffff' : $colour_gradient[floor($_*40)]) . ';' } @ld_values;
-        
+
         if ($format eq 'Excel') {
           $table->write_header_cell($pos);
           $table->write_header_cell($snp);
-          
+
           foreach my $value (@ld_values) {
             my $format = $table->new_format({
               'align'   => 'center',
               'bgcolor' => $value eq '-' ? 'ffffff' : $colour_gradient[floor($value*40)]
             });
-            
+
             $table->write_cell($value, $format);
           }
-          
+
           $table->write_header_cell($snp);
           $table->new_row;
         } elsif ($format eq 'Text') {
@@ -1148,9 +1153,9 @@ sub ld_dump {
           $table->add_option('row_style', [ $header_style, $header_style, @row_style, $header_style ]);
         }
       }
-      
+
       next if $format eq 'Excel'; # No html to return
-      
+
       if ($format eq 'Text') {
         $html .= "$ld_values->{$ld_type}{$pop_name}->{'text'}\n";
         $html .= ("=" x length $ld_values->{$ld_type}{$pop_name}->{'text'}) . "\n\n";
@@ -1167,26 +1172,26 @@ sub ld_dump {
 
 sub ld_values {
   my ($object, $populations, $snp, $zoom) = @_;
-  
+
   ## set path information for LD calculations
   $Bio::EnsEMBL::Variation::DBSQL::LDFeatureContainerAdaptor::BINARY_FILE = $object->species_defs->ENSEMBL_CALC_GENOTYPES_FILE;
   $Bio::EnsEMBL::Variation::DBSQL::LDFeatureContainerAdaptor::TMP_PATH = $object->species_defs->ENSEMBL_TMP_TMP;
-  
+
   my %ld_values;
   my $display_zoom = $object->round_bp($zoom);
 
   foreach my $pop_name (sort split (/\|/, $populations)) {
     my $pop_obj = $object->pop_obj_from_name($pop_name);
-    
+
     next unless $pop_obj;
-    
+
     my $pop_id = $pop_obj->{$pop_name}{'dbID'};
     my $data = $object->ld_for_slice($pop_obj->{$pop_name}{'PopObject'}, $zoom);
-    
+
     foreach my $ld_type ('r2', 'd_prime') {
       my $display = $ld_type eq 'r2' ? 'r2' : "D'";
       my $no_data = "No $display linkage data in $display_zoom window for population $pop_name";
-      
+
       unless (%$data && keys %$data) {
         $ld_values{$ld_type}{$pop_name}{'text'} = $no_data;
         next;
@@ -1202,25 +1207,25 @@ sub ld_values {
       # Do each column starting from 1 because first col is empty
       my @table;
       my $flag = 0;
-      
-      for (my $x = 0; $x < scalar @snp_list; $x++) { 
+
+      for (my $x = 0; $x < scalar @snp_list; $x++) {
         # Do from left side of table row across to current snp
         for (my $y = 0; $y < $x; $y++) {
           my $ld_pair1 = "$snp_list[$x]->[0]" . -$snp_list[$y]->[0];
           my $ld_pair2 = "$snp_list[$y]->[0]" . -$snp_list[$x]->[0];
           my $cell;
-          
+
           if ($data->{'ldContainer'}{$ld_pair1}) {
             $cell = $data->{'ldContainer'}{$ld_pair1}{$pop_id}{$ld_type};
           } elsif ($data->{'ldContainer'}{$ld_pair2}) {
             $cell = $data->{'ldContainer'}{$ld_pair2}{$pop_id}{$ld_type};
           }
-          
+
           $flag = $cell ? 1 : 0 unless $flag;
           $table[$x][$y] = $cell;
         }
       }
-      
+
       unless ($flag) {
         $ld_values{$ld_type}{$pop_name}{'text'} = $no_data;
         next;
@@ -1230,35 +1235,35 @@ sub ld_values {
       # Make current SNP bold
       my @snp_names;
       my @starts_list;
-      
+
       foreach (@snp_list) {
         my $name = $_->[1]->variation_name;
-        
+
         if ($name eq $snp || $name eq "rs$snp") {
           push (@snp_names, "*$name*");
-        } else { 
+        } else {
           push (@snp_names, $name);
         }
 
         my ($start, $end) = ($_->[1]->start, $_->[1]->end);
         my $pos = $start;
-        
+
         if ($start > $end) {
           $pos = "between $start & $end";
         } elsif ($start < $end) {
           $pos = "$start-$end";
         }
-        
+
         push (@starts_list, $pos);
       }
 
       my $location = $object->seq_region_name . ':' . $object->seq_region_start . '-' . $object->seq_region_end;
-      
+
       $ld_values{$ld_type}{$pop_name}{'text'} = "Pairwise $display values for $location. Population: $pop_name";
       $ld_values{$ld_type}{$pop_name}{'data'} = [ \@starts_list, \@snp_names, \@table ];
     }
   }
-  
+
   return \%ld_values;
 }
 

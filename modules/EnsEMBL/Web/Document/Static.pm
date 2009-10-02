@@ -25,6 +25,7 @@ sub _initialize {
     search_box      EnsEMBL::Web::Document::HTML::SearchBox
     breadcrumbs     EnsEMBL::Web::Document::HTML::BreadCrumbs
     tools           EnsEMBL::Web::Document::HTML::ToolLinks
+    message         EnsEMBL::Web::Document::HTML::Message
     content         EnsEMBL::Web::Document::HTML::Content
     global_context  EnsEMBL::Web::Document::HTML::GlobalContext
     modal_context   EnsEMBL::Web::Document::HTML::ModalContext

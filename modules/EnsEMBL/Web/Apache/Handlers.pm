@@ -28,12 +28,13 @@ our $species_defs = new EnsEMBL::Web::SpeciesDefs;
 our $MEMD = new EnsEMBL::Web::Cache;
 our $GEO;
 
-eval q/
-  use Geo::IP;
-  $GEO = Geo::IP->new( GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE );
-/;
-
-warn $@ if $@;
+if ($species_defs->ENSEMBL_MIRRORS) {
+  eval q/
+    use Geo::IP;
+    $GEO = Geo::IP->new( GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE );
+  /;
+  warn $@ if $@;
+};
 
 our $THIS_HOST;
 our $LOG_INFO; 
@@ -161,14 +162,23 @@ sub childInitHandler {
 sub redirect_to_nearest_mirror {
   my $r = shift;
 
-  if ($species_defs->ENSEMBL_MIRRORS && $GEO) {
+  if ($species_defs->ENSEMBL_MIRRORS) {
     my $unparsed_uri = $r->unparsed_uri();
-
-    warn "unparsed_uri = $unparsed_uri";
 
     ## Check url
     if ($unparsed_uri =~ /do_not_redirect=please/) {
-      ##$ENV{'USER_MESSAGE'} = "You've been redirected to your nearest mirror, hit 'back' button in your browser to return or select other mirror from top menu at any time";
+
+      ## Display the redirect message (but only if user comes from other mirror)
+      if (my $referer = $r->headers_in->{'Referer'}) {
+       if (my ($referer_server) = grep { $referer =~ /$_/ } values %{ $species_defs->ENSEMBL_MIRRORS }) {
+        if ($referer_server ne $species_defs->ENSEMBL_SERVERNAME) {
+            $referer .= $referer =~ /\?/ ? ';do_not_redirect=please' : '?do_not_redirect=please';
+            $ENV{'USER_MESSAGE'} = qq| You've been redirected to your nearest mirror - | . $species_defs->ENSEMBL_SERVERNAME . "\n";
+            $ENV{'USER_MESSAGE'}.= qq| <ul><li>Please take me back to <a href="$referer">$referer_server</a></li></ul> |;
+        }
+       }
+      }
+      
       my $cookie = CGI::Cookie->new(
         -name    => 'do_not_redirect',
         -value   => 'please',
@@ -185,44 +195,47 @@ sub redirect_to_nearest_mirror {
     return DECLINED
       if $cookies{'do_not_redirect'} && $cookies{'do_not_redirect'}->value eq 'please';
 
-    my $ip = $r->headers_in->{'X-Forwarded-For'} || $r->connection->remote_ip;
-
     ## Ok, so which country you from
-    my $country  = $GEO->country_code_by_addr($ip);
-
-    if (my $location = $species_defs->ENSEMBL_MIRRORS->{$country} || $species_defs->ENSEMBL_MIRRORS->{'OTHER'}) {
-      return DECLINED
-        if $location eq $species_defs->ENSEMBL_SERVERNAME;
-
-      ## Deleting cookie for current site
-      my $cookie = CGI::Cookie->new(
-        -name    => 'do_not_redirect',
-        -value   => 'please',
-        -expires => '+1h',         
-      );
-
-      $unparsed_uri .= $unparsed_uri =~ /\?/ ? ';do_not_redirect=please' : '?do_not_redirect=please';
-
-      $r->err_headers_out->add('Set-Cookie' => $cookie);
-      $r->headers_out->set(Location => "http://$location$unparsed_uri");
+    if ($GEO) {
       
-      ## Reset all following handlers just in case
-      ## as it turned out - not really necessary
-      #  $r->set_handlers(postReadRequestHandler  => []);
-      #  $r->set_handlers(PerlTransHandler        => []);
-      #  $r->set_handlers(PerlMapToStorageHandler => []);
-      #  $r->set_handlers(PerlHeaderParserHandler => []);
-      #  $r->set_handlers(PerlInitHandler         => []);
-      #  $r->set_handlers(PerlAccessHandler       => []);
-      #  $r->set_handlers(PerlAuthenHandler       => []);
-      #  $r->set_handlers(PerlAuthzHandler        => []);
-      #  $r->set_handlers(PerlTypeHandler         => []);
-      #  $r->set_handlers(PerlFixupHandler        => []);
-      #  $r->set_handlers(PerlResponseHandler     => []);
-      #  $r->set_handlers(PerlLogHandler          => []);
-      #  $r->set_handlers(PerlCleanupHandler      => []);
+      my $ip = $r->headers_in->{'X-Forwarded-For'} || $r->connection->remote_ip;
+      my $country  = $GEO->country_code_by_addr($ip);
+  
+      if (my $location = $species_defs->ENSEMBL_MIRRORS->{$country} || $species_defs->ENSEMBL_MIRRORS->{'MAIN'}) {
+        return DECLINED
+          if $location eq $species_defs->ENSEMBL_SERVERNAME;
+  
+        ## Deleting cookie for current site
+        my $cookie = CGI::Cookie->new(
+          -name    => 'do_not_redirect',
+          -value   => '',
+          -expires => '-1h',         
+        );
+  
+        $unparsed_uri .= $unparsed_uri =~ /\?/ ? ';do_not_redirect=please' : '?do_not_redirect=please';
+  
+        $r->err_headers_out->add('Set-Cookie' => $cookie);
+        $r->headers_out->set(Location => "http://$location$unparsed_uri");
+        
+        ## Reset all following handlers just in case
+        ## as it turned out - not really necessary
+        #  $r->set_handlers(postReadRequestHandler  => []);
+        #  $r->set_handlers(PerlTransHandler        => []);
+        #  $r->set_handlers(PerlMapToStorageHandler => []);
+        #  $r->set_handlers(PerlHeaderParserHandler => []);
+        #  $r->set_handlers(PerlInitHandler         => []);
+        #  $r->set_handlers(PerlAccessHandler       => []);
+        #  $r->set_handlers(PerlAuthenHandler       => []);
+        #  $r->set_handlers(PerlAuthzHandler        => []);
+        #  $r->set_handlers(PerlTypeHandler         => []);
+        #  $r->set_handlers(PerlFixupHandler        => []);
+        #  $r->set_handlers(PerlResponseHandler     => []);
+        #  $r->set_handlers(PerlLogHandler          => []);
+        #  $r->set_handlers(PerlCleanupHandler      => []);
+        
+        return Apache2::Const::REDIRECT;       
+      }
       
-      return Apache2::Const::REDIRECT;       
     }
   }
 

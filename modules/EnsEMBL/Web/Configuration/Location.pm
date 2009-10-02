@@ -165,7 +165,7 @@ sub populate_tree {
     [qw(
       selector EnsEMBL::Web::Component::Location::SelectAlignment
       top      EnsEMBL::Web::Component::Location::MultiTop
-      botnav   EnsEMBL::Web::Component::Location::ViewBottomNav
+      botnav   EnsEMBL::Web::Component::Location::MultiBottomNav
       bottom   EnsEMBL::Web::Component::Location::MultiBottom
     )],
     { 'availability' => 'slice database:compara has_pairwise_alignments', 'concise' => 'Multi-species view' }

@@ -2,7 +2,7 @@ package EnsEMBL::Web::Object;
 
 ### Base object class - all Ensembl web objects are derived from this class,
 ### this class is derived from proxiable - as it is usually proxied through an
-### {{EnsEMBL::Web::Proxy}} object to handle the dynamic multiple inheritance 
+### {{EnsEMBL::Web::Proxy}} object to handle the dynamic multiple inheritance
 ### functionality.
 
 use strict;
@@ -18,29 +18,29 @@ use Bio::EnsEMBL::VDrawableContainer;
 use base qw(EnsEMBL::Web::Proxiable);
 
 
-sub counts       { return {}; } 
+sub counts       { return {}; }
 
 sub count_alignments {
   my $self = shift;
-  
+
   my $species = $self->species;
   my %alignments = $self->species_defs->multi('DATABASE_COMPARA','ALIGNMENTS');
   my $c_align;
     my $c_species;
-  
+
   foreach (values %alignments) {
     $c_align++ if $_->{'species'}{$species} && $_->{'type'} !~ /TRANSLATED_BLAT/;
-    
-    next unless $_->{'species'}{$species} && (keys %{$_->{'species'}} == 2);
-    
+
+    next unless $_->{'species'}{$species} && (keys %{$_->{'species'}} >= 2);
+
     my ($other_species) = grep { $_ ne $species } keys %{$_->{'species'}};
     $c_species->{$other_species}++;
   }
-  
-  return ($c_align, $c_species); 
+
+  return ($c_align, $c_species);
 }
 
-sub _availability { 
+sub _availability {
   my $self = shift;
   my $hash = {
     map { ('database:'.lc(substr($_,9)) => 1) } keys %{ $self->species_defs->databases }
@@ -87,7 +87,7 @@ sub prefix {
 }
 
 sub Obj {
-### a 
+### a
 ### Gets the underlying Ensembl object wrapped by the web object
   return $_[0]{'data'}{'_object'};
 }
@@ -114,9 +114,9 @@ sub get_db {
   return $db eq 'est' ? 'otherfeatures' : $db;
 }
 
-sub dataobj { 
+sub dataobj {
 ### Deprecated
-### a 
+### a
 ### Gets the underlying Ensembl object wrapped by the web object
   warn "dataobj - TRY TO AVOID - THIS NEEDS TO BE REMOVED... Use Obj instead...";
   return $_[0]->Obj;
@@ -151,12 +151,12 @@ sub mapview_link {
 ### Returns name of seq_region $feature is on. If the passed features is
 ### on a "real chromosome" then this is encapsulated in a link to mapview.
   my( $self, $feature ) = @_;
-  my $coords = $feature->coord_system_name; 
+  my $coords = $feature->coord_system_name;
   my $name   = $feature->seq_region_name;
   my %real_chr = map { $_, 1 } @{$self->species_defs->ENSEMBL_CHROMOSOMES};
-  
+
   return $real_chr{ $name } ?
-    sprintf( '<a href="%s">%s</a>', $self->URL( 'script' => 'mapview', 'chr' => $name ), $name ) : 
+    sprintf( '<a href="%s">%s</a>', $self->URL( 'script' => 'mapview', 'chr' => $name ), $name ) :
     $name;
 }
 
@@ -185,7 +185,7 @@ sub full_URL {
   my $self = shift; return $self->_URL( 1,@_ );
 }
 
-sub _URL { 
+sub _URL {
 ### Returns either a full link or absolute link to a script
   my( $self, $full, %details ) = @_;
   my $URL  = $full ? $self->species_defs->ENSEMBL_BASE_URL : '';
@@ -278,7 +278,7 @@ sub fetch_homologues_of_gene_in_species {
 
     my $ma = $self->database('compara')->get_MemberAdaptor;
     my $qy_member = $ma->fetch_by_source_stable_id("ENSEMBLGENE",$gene_stable_id);
-    return [] unless (defined $qy_member); 
+    return [] unless (defined $qy_member);
 
     my $ha = $self->database('compara')->get_HomologyAdaptor;
     my @homologues;
@@ -286,9 +286,9 @@ sub fetch_homologues_of_gene_in_species {
       foreach my $member_attribute (@{$homology->get_all_Member_Attribute}) {
         my ($member, $attribute) = @{$member_attribute};
         next if ($member->stable_id eq $qy_member->stable_id);
-        push @homologues, $member;  
+        push @homologues, $member;
       }
-    }    
+    }
     return \@homologues;
 }
 
@@ -296,15 +296,15 @@ sub bp_to_nearest_unit {
     my $self = shift ;
     my ($bp,$dp) = @_;
     $dp = 2 unless defined $dp;
-    
+
     my @units = qw( bp Kb Mb Gb Tb );
-    
+
     my $power_ranger = int( ( length( abs($bp) ) - 1 ) / 3 );
     my $unit = $units[$power_ranger];
     my $unit_str;
 
     my $value = int( $bp / ( 10 ** ( $power_ranger * 3 ) ) );
-      
+
     if ( $unit ne "bp" ){
     $unit_str = sprintf( "%.${dp}f%s", $bp / ( 10 ** ( $power_ranger * 3 ) ), " $unit" );
     }else{
@@ -323,7 +323,7 @@ sub _help_URL {
   my @params;
   while (my ($k, $v) = each (%$options)) {
     push @params, "$k=$v";
-  } 
+  }
   push @params, "ref=$ref";
   $URL .= join(';', @params);
   return $URL;

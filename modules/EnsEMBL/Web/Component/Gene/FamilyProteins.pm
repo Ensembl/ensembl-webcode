@@ -22,18 +22,18 @@ sub content_other {
   my $family = $object->create_family($object->param('family'));
   return '' unless $family;
   my $html;
-  
+
   ## External protein IDs
   my %sources = EnsEMBL::Web::Constants::FAMILY_EXTERNAL();
   my $count = 0;
-  
+
   my $member_skipped_count   = 0;
   my @member_skipped_species = ();
 
   foreach my $key ( sort keys %sources ) {
     my @peptides = map { $_->[0]->stable_id } @{$object->member_by_source($family, $sources{$key}{'key'} )};
     if( @peptides ) {
-      $count += @peptides; 
+      $count += @peptides;
       unless( $object->param( "opt_$key" ) eq 'yes' ) {
         push @member_skipped_species, $sources{$key}{'name'};
         $member_skipped_count += @peptides;
@@ -55,6 +55,7 @@ sub content_other {
         $pep_table->add_row( [@table_data] );
         @table_data = ();
       }
+      $pep_table->add_row( [@table_data] ) if @table_data;
       $html .= sprintf( '<h3>%s proteins in this family</h3>', $sources{$key}{'name'} ). $pep_table->render;
     }
   }
@@ -106,7 +107,7 @@ sub content_ensembl {
     foreach my $species (sort {$a->binomial cmp $b->binomial} @taxa ){
       my $display_species = $species->binomial;
       (my $species_key = $display_species) =~ s/\s+/_/;
-       
+
       unless( $object->param( "species_".lc($species_key) ) eq 'yes' ) {
         push @member_skipped_species, $display_species;
         $member_skipped_count += @{$data{$species}};

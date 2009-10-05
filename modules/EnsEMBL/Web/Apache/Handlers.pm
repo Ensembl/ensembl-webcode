@@ -14,6 +14,7 @@ use Data::Dumper;
 use Fcntl ':flock';
 use Sys::Hostname;
 use Time::HiRes qw(time);
+use URI::Escape;
 
 use SiteDefs qw(:APACHE);
 
@@ -166,25 +167,42 @@ sub redirect_to_nearest_mirror {
     my $unparsed_uri = $r->unparsed_uri();
 
     ## Check url
-    if ($unparsed_uri =~ /do_not_redirect=please/) {
-
+    if ($unparsed_uri =~ /redirect=mirror/) {
       ## Display the redirect message (but only if user comes from other mirror)
-      if (my $referer = $r->headers_in->{'Referer'}) {
-       if (my ($referer_server) = grep { $referer =~ /$_/ } values %{ $species_defs->ENSEMBL_MIRRORS }) {
-        if ($referer_server ne $species_defs->ENSEMBL_SERVERNAME) {
-            $referer .= $referer =~ /\?/ ? ';do_not_redirect=please' : '?do_not_redirect=please';
-            $ENV{'USER_MESSAGE'} = qq| You've been redirected to your nearest mirror - | . $species_defs->ENSEMBL_SERVERNAME . "\n";
-            $ENV{'USER_MESSAGE'}.= qq| <ul><li>Please take me back to <a href="$referer">$referer_server</a></li></ul> |;
+      if (my ($referer) = $unparsed_uri =~ /source=([\w\.-]+)/) {
+       if (grep { $referer =~ /$_/ } values %{ $species_defs->ENSEMBL_MIRRORS }) {
+        if ($referer ne $species_defs->ENSEMBL_SERVERNAME) {
+            my $back = 'http://' . $referer . $unparsed_uri;
+            $back =~ s/source=$referer//;
+
+            my $user_message = qq| You've been redirected to your nearest mirror - | . $species_defs->ENSEMBL_SERVERNAME . "\n";
+            $user_message   .= qq| <ul><li>Take me back to <a href="$back">$referer</a></li></ul> |;
+            
+            my $cookie = CGI::Cookie->new(
+              -name    => 'user_message',
+              -value   => uri_escape($user_message),
+              -expires => '+1m',     
+            );
+            
+            ## Redirecting to same page, but without redirect params in url
+            $r->err_headers_out->add('Set-Cookie' => $cookie);
+            $unparsed_uri =~ s/;?source=$referer//;
+            $unparsed_uri =~ s/;?redirect=mirror//;
+            $unparsed_uri =~ s/\?$//;
+            $r->headers_out->set(Location => $species_defs->ENSEMBL_BASE_URL . $unparsed_uri);
+            
+            return Apache2::Const::REDIRECT;              
+            
         }
        }
       }
       
       my $cookie = CGI::Cookie->new(
-        -name    => 'do_not_redirect',
-        -value   => 'please',
+        -name    => 'redirect',
+        -value   => 'mirror',
         -expires => 'Thu, 31-Dec-2037 22:22:22 GMT', ## End of time :)     
       );
-      $r->headers_out->add('Set-Cookie' => $cookie);
+      $r->err_headers_out->add('Set-Cookie' => $cookie);
 
       return DECLINED;
     }
@@ -193,7 +211,7 @@ sub redirect_to_nearest_mirror {
     my %cookies = CGI::Cookie->parse($r->headers_in->{'Cookie'});
     
     return DECLINED
-      if $cookies{'do_not_redirect'} && $cookies{'do_not_redirect'}->value eq 'please';
+      if $cookies{'redirect'} && $cookies{'redirect'}->value eq 'mirror';
 
     ## Ok, so which country you from
     if ($GEO) {
@@ -207,31 +225,16 @@ sub redirect_to_nearest_mirror {
   
         ## Deleting cookie for current site
         my $cookie = CGI::Cookie->new(
-          -name    => 'do_not_redirect',
+          -name    => 'redirect',
           -value   => '',
           -expires => '-1h',         
         );
   
-        $unparsed_uri .= $unparsed_uri =~ /\?/ ? ';do_not_redirect=please' : '?do_not_redirect=please';
+        $unparsed_uri .= $unparsed_uri =~ /\?/ ? ';redirect=mirror' : '?redirect=mirror';
+        $unparsed_uri .= ';source=' . $species_defs->ENSEMBL_SERVERNAME;
   
         $r->err_headers_out->add('Set-Cookie' => $cookie);
         $r->headers_out->set(Location => "http://$location$unparsed_uri");
-        
-        ## Reset all following handlers just in case
-        ## as it turned out - not really necessary
-        #  $r->set_handlers(postReadRequestHandler  => []);
-        #  $r->set_handlers(PerlTransHandler        => []);
-        #  $r->set_handlers(PerlMapToStorageHandler => []);
-        #  $r->set_handlers(PerlHeaderParserHandler => []);
-        #  $r->set_handlers(PerlInitHandler         => []);
-        #  $r->set_handlers(PerlAccessHandler       => []);
-        #  $r->set_handlers(PerlAuthenHandler       => []);
-        #  $r->set_handlers(PerlAuthzHandler        => []);
-        #  $r->set_handlers(PerlTypeHandler         => []);
-        #  $r->set_handlers(PerlFixupHandler        => []);
-        #  $r->set_handlers(PerlResponseHandler     => []);
-        #  $r->set_handlers(PerlLogHandler          => []);
-        #  $r->set_handlers(PerlCleanupHandler      => []);
         
         return Apache2::Const::REDIRECT;       
       }
@@ -275,11 +278,10 @@ sub postReadRequestHandler {
     r      => $r
   });
   
-  # Ajax cookie
+  ## Ajax cookie
   my %cookies = CGI::Cookie->parse($r->headers_in->{'Cookie'});
-  
   $ENSEMBL_WEB_REGISTRY->check_ajax($cookies{'ENSEMBL_AJAX'});
-  
+
   $r->subprocess_env->{'ENSEMBL_AJAX_VALUE'}  = $cookies{'ENSEMBL_AJAX'}  ? $cookies{'ENSEMBL_AJAX'}->value  : 'none';
   $r->subprocess_env->{'ENSEMBL_IMAGE_WIDTH'} = $cookies{'ENSEMBL_WIDTH'} ? $cookies{'ENSEMBL_WIDTH'}->value : ($SiteDefs::ENSEMBL_IMAGE_WIDTH || 800);
   
@@ -715,7 +717,7 @@ sub transHandler {
   }
 
   # Search the htdocs dirs for a file to return
-  return DECLINED if$species eq 'biomart' && $script =~ /^mart(service|results|view)/;
+  return DECLINED if $species eq 'biomart' && $script =~ /^mart(service|results|view)/;
 
   my $path = join '/', $species || (), $script || (), $path_info || ();
   

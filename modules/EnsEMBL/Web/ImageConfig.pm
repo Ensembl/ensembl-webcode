@@ -1284,6 +1284,12 @@ sub add_alignments {
         };
       }
       
+      my $target_anchor = ($row->{type} =~ /EPO/)     ? 'epo'
+                        : ($row->{type} =~ /ORTHEUS/) ? 'epo'
+                        : ($row->{type} =~ /PECAN/)   ? 'pecan'
+                        :                               'conservation'
+                        ;
+
       $alignments->{'multiple_align'}{$row->{'id'}} = {
         'db'             => $key,
         'glyphset'       => '_alignment_multiple',
@@ -1294,7 +1300,7 @@ sub add_alignments {
         'species_set_id' => $row->{'species_set_id'},
         'method_link_species_set_id' => $row->{'id'},
         'class'          => $row->{'class'},
-        'description'    => "<a href=\"/info/docs/compara/analyses.html#conservation\">$n_species way whole-genome multiple alignments</a>.; ".
+        'description'    => "<a href=\"/info/docs/compara/analyses.html#${target_anchor}\">$n_species way whole-genome multiple alignments</a>.; ".
             join("; ", sort map {$self->species_defs->species_label( $_, "no_formatting" )} grep { $_ ne 'Ancestral_sequences' && $_ ne 'merged' } keys %{$row->{'species'}}),
         'colourset'      => 'multiple',
         'order'          => sprintf('%12d::%s::%s', 1e12-$n_species*10-1, $row->{'type'}, $row->{'name'}),

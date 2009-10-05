@@ -90,6 +90,23 @@ Ensembl.LayoutManager.extend({
     }).mouseup(function (e) {
       Ensembl.EventManager.trigger('dragStop', e);
     });
+    
+    var userMessage = unescape(Ensembl.cookie.get('user_message'));
+    
+    if (userMessage) {
+      userMessage = userMessage.split('\n');
+      
+      var message = $('<div class="hint" style="margin: 10px 25%;">' + userMessage[1] + '</div>').prependTo('#main');
+      
+      message.prepend('<h3>' + userMessage[0] + '<img src="/i/close.gif" alt="Hide hint panel" title="Hide hint panel" /></h3>');
+      
+      $('h3 img', message).click(function () {
+        $(this).parents('div.hint').remove();
+        Ensembl.cookie.set('user_message', '', -1);
+      });
+      
+      message = null;
+    }
   },
   
   reloadPage: function () {

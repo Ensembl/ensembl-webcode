@@ -84,27 +84,30 @@ sub multi {
   foreach my $db (@{$self->species_defs->compara_like_databases||[]}) {
     next unless exists $multi_hash->{$db};
     
-    foreach my $align (values %{$multi_hash->{$db}->{'ALIGNMENTS'}}) {
-      next unless $methods->{$align->{'type'}};
-      next unless $align->{'class'} =~ /pairwise_alignment/;
-      next unless $align->{'species'}->{$sp};
-      next unless grep $align->{'species'}->{$_->{'species'}}, @slices;
-
+    foreach (values %{$multi_hash->{$db}->{'ALIGNMENTS'}}) {
+      next unless $methods->{$_->{'type'}};
+      next unless $_->{'class'} =~ /pairwise_alignment/;
+      next unless $_->{'species'}->{$sp};
+      
+      my %align = %$_;
+      
+      next unless grep $align{'species'}->{$_->{'species'}}, @slices;
+      
       $i = $p;
       
       foreach (@slices) {
-        if ($align->{'species'}->{$_->{'species'}}) {
-          $align->{'order'} = $i;
-          $align->{'other_ori'} = $_->{'ori'};
-          $align->{'gene'} = $_->{'g'};
+        if ($align{'species'}->{$_->{'species'}}) {
+          $align{'order'} = $i;
+          $align{'other_ori'} = $_->{'ori'};
+          $align{'gene'} = $_->{'g'};
           last;
         }
         
         $i++;
       }
       
-      $align->{'db'} = lc substr $db, 9;
-      push @{$alignments{$align->{'order'}}}, $align;
+      $align{'db'} = lc substr $db, 9;
+      push @{$alignments{$align{'order'}}}, \%align;
     }
   }
   

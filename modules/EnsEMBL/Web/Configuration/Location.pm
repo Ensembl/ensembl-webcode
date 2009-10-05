@@ -291,14 +291,14 @@ sub _ajax_zmenu_view {
     if ($obj->param('assembly')) {
       my $this_assembly = $obj->species_defs->ASSEMBLY_NAME;
       my $alt_assembly  = $obj->param('assembly');
-      $caption = $alt_assembly.':'.$r;
-
+      my $l = $obj->param('new_r');
+      $caption = $alt_assembly.':'.$l;
       # choose where to jump to
       if ($this_assembly eq 'VEGA') {
-        $url = sprintf("%s%s/%s/%s?r=%s", $self->object->species_defs->ENSEMBL_EXTERNAL_URLS->{'ENSEMBL'}, $obj->[1]{'_species'}, 'Location', $action, $r);
+        $url = sprintf("%s%s/%s/%s?r=%s", $self->object->species_defs->ENSEMBL_EXTERNAL_URLS->{'ENSEMBL'}, $obj->[1]{'_species'}, 'Location', $action, $l);
         $link_title = 'Jump to Ensembl';
       } elsif ($alt_assembly eq 'VEGA') {
-        $url = sprintf("%s%s/%s/%s?r=%s", $self->object->species_defs->ENSEMBL_EXTERNAL_URLS->{'VEGA'}   , $obj->[1]{'_species'}, 'Location', $action, $r);
+        $url = sprintf("%s%s/%s/%s?r=%s", $self->object->species_defs->ENSEMBL_EXTERNAL_URLS->{'VEGA'}   , $obj->[1]{'_species'}, 'Location', $action, $l);
         $link_title = 'Jump to VEGA';
       } else {
         # TODO: put URL to the latest archive site showing the other assembly (from mapping_session table)

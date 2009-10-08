@@ -57,6 +57,7 @@ Ensembl.Panel.Configurator = Ensembl.Panel.ModalContent.extend({
         }
         
         myself.query = this.value;
+        myself.regex = new RegExp(this.value, 'i');
         
         myself.searchTimer = setTimeout(function () { myself.search(); }, 250);
       }
@@ -226,7 +227,7 @@ Ensembl.Panel.Configurator = Ensembl.Panel.ModalContent.extend({
       $('dt', menu).each(function () {
         var dt = $(this);
         
-        if ($('span', dt).html().match(myself.query, 'i') || dt.next('dd').text().match(myself.query, 'i')) {
+        if ($('span', dt).html().match(myself.regex, 'i') || dt.next('dd').text().match(myself.regex, 'i')) {
           dt.show();
           show = true;
         } else {

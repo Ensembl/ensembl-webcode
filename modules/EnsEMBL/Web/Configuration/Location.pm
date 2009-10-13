@@ -99,7 +99,7 @@ sub extra_populate_tree {
 
 sub populate_tree {
   my $self = shift;
-  my $object = $self->object;
+  my $object = $self->object; 
   my $availability = $object->availability;
   my $caption;
   
@@ -260,7 +260,7 @@ sub ajax_zmenu {
 sub _ajax_zmenu_view {
   my $self  = shift;
   
-  my $panel = $self->_ajax_zmenu;
+  my $panel = $self->_ajax_zmenu; 
   my $obj   = $self->object;
   
   if ($obj->param('mfid')) {
@@ -579,13 +579,28 @@ sub _ajax_zmenu_misc_feature {
   foreach my $name (@names) {
     my $value = $mf->get_scalar_attribute($name->[0]);
     my $entry;
+    my $link; 
 
     # hacks for these type of entries
     if ($name->[0] eq 'BACend_flag') {
-      $value = ('Interpolated', 'Start located', 'End located', 'Both ends located') [$value]; 
+      $value = ('Interpolated', 'Start located', 'End located', 'Both ends located') [$value];
     }
     if ($name->[0] eq 'synonym') {
-      $value = "http://www.sanger.ac.uk/cgi-bin/humace/clone_status?clone_name=$value" if $mf->get_scalar_attribute('organisation') eq 'SC';
+      if ($obj->species =~/Sus_scrofa_map/){
+        $name->[2] = 'PIG_CLONE' if $mf->get_scalar_attribute('organisation') eq 'SC';
+      } else{
+        $value = "http://www.sanger.ac.uk/cgi-bin/humace/clone_status?clone_name=$value" if $mf->get_scalar_attribute('organisation') eq 'SC';
+      }
+    }
+    if ($name->[0] eq 'embl_acc' && $obj->species =~/Sus_scrofa_map/){
+      next unless $value;
+      my $link = $obj->get_ExtURL('ENS_SUS_SEARCH', $value);
+      $entry = {
+        'label'=> 'Jump to Pig in Ensembl',
+        'link' => $link,
+      };    
+      $panel->add_entry($entry);
+      $priority--;
     }
     if ($value) {
       $entry = {

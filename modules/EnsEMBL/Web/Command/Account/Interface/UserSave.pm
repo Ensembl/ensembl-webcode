@@ -22,7 +22,7 @@ sub process {
   $interface->cgi_populate($object);
 
   ## Check input for spam content, etc
-  # $self->filters(['EmailAddress', 'Spam']);
+  $self->filters(['EmailAddress', 'Spam']);
   my $fail = $self->not_allowed($object);
   if ($fail) { 
     $url .= '/Add';

@@ -351,6 +351,13 @@ sub stuff {
   # Check to see if the user has changed the configuration of the page
   # either by adding a shared URL, changing a config parameter, or an imageconfig name parameter
   my $input = new CGI;
+
+  if( $input->param('db')=~/^(\w+);(\w+)=(.*)$/ ) {
+    $input->param('db',$1);
+    $input->param($2,$3);
+    CGI::redirect( $input->self_url );
+    return "redirect";
+  }
   my $url;
   
   $session->set_input($input);

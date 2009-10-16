@@ -308,13 +308,17 @@ sub do_SE_align_menu {
   my $obj  = $self->object;
   my $hit_name   = $obj->param('id');
   my $hit_db     = $obj->get_sf_hit_db_name($hit_name);
+  my $link_name = $hit_name;
+  if ($hit_db eq 'RFAM') {
+    ($link_name) = split '-', $hit_name;
+  }
   my $hit_length = $obj->param('hit_length');
-  my $hit_url    = $obj->get_ExtURL_link( $hit_name, $hit_db, $hit_name );
+  my $hit_url    = $obj->get_ExtURL_link( $link_name, $hit_db, $link_name );
   my $tsid       = $obj->param('t');
   if (my $esid = $obj->param('exon')) {
     my $exon_length = $obj->param('exon_length');
     #this is drawn for exons
-    my $align_url = $obj->_url({'type'=>'Transcript', 'action' => 'SupportingEvidence', 'function' => 'Alignment'}).";sequence=$hit_name;exon=$esid";        
+    my $align_url = $obj->_url({'type'=>'Transcript', 'action' => 'SupportingEvidence', 'function' => 'Alignment'}).";sequence=$hit_name;exon=$esid";
     $panel->{'caption'} = "$hit_name ($hit_db)";
     $panel->add_entry({
       'type'     => 'View alignments',

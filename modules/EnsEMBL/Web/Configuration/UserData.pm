@@ -208,7 +208,7 @@ sub populate_tree {
   $convert_menu->append(
     $self->create_node( 'SelectFeatures', 'Assembly Converter', 
       [qw(select_features EnsEMBL::Web::Component::UserData::SelectFeatures)],
-      {'availability' => scalar(@{$self->object->species_defs->ASSEMBLY_MAPPINGS})},
+      {'availability' => scalar(@{$self->object->species_defs->ASSEMBLY_MAPPINGS || []})},
     )
   );
   $convert_menu->append(

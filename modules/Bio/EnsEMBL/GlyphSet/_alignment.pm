@@ -231,9 +231,6 @@ sub render_normal {
           my $grade = ($score >= $max_score) ? ($cgGrades - 1) : int(($score - $min_score) / $score_per_grade);
           $feature_colour = $colour_gradient[$grade];
         }
-        elsif ($config->{'itemRgb'} =~ /on/i) {
-          $feature_colour = $f->external_data->{'item_colour'}[0];
-        }
       }
       if( $self->{'show_labels'} ) {
         my $title = $self->feature_label( $F[0][2],$db_name );
@@ -258,6 +255,9 @@ sub render_normal {
       my $X = -1e8;
       foreach my $f ( @F ){ ## Loop through each feature for this ID!
         my( $s, $e, $feat ) = @$f;
+        if ($config->{'itemRgb'} =~ /on/i) {
+          $feature_colour = $feat->external_data->{'item_colour'}[0];
+        }
         next if int($e * $pix_per_bp) <= int( $X * $pix_per_bp );
         $features_drawn++;
         my $cigar;

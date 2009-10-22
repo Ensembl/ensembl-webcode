@@ -125,7 +125,7 @@ sub parse {
           my ($chr, $start, $end) = $empty->coords($columns);
           $chr =~ s/chr//;
 
-          if (keys %$valid_coords) {
+          if (keys %$valid_coords && scalar(@$columns) >1) {
             ## We only validate on chromosomal coordinates, to prevent errors on vertical code
             next unless $valid_coords->{$chr}; ## Chromosome is valid and has length
             next unless $start > 0 && $end <= $valid_coords->{$chr};

@@ -1367,6 +1367,8 @@ sub build_sequence {
     bold => [ 24, { 'font-weight' => 'bold' } ]
   );
 
+  my $single_line = scalar @{$sequence->[0]} <= $config->{'display_width'}; # Only one line of sequence to display
+  
   foreach my $lines (@$sequence) {
     my ($row, $title, $previous_title, $new_line_title, $class, $previous_class, $new_line_class, $pre, $post);
     my ($count, $i);
@@ -1418,7 +1420,7 @@ sub build_sequence {
       $i++;
   
       if ($count == $config->{'display_width'} || $i == scalar @$lines) {
-        if ($i == $config->{'display_width'}) {
+        if ($i == $config->{'display_width'} || $single_line) {
           $row = "$row</span>";
         } else {
           my $new_line_style;

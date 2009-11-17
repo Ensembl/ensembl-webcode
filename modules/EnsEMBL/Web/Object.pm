@@ -53,7 +53,7 @@ sub availability { return {}; }
 sub core_params {
   my $self = shift;
   my $params = [];
-  if ($self->core_objects->location) {
+  if ($self->core_objects->location && ref($self->core_objects->location) ne 'EnsEMBL::Web::Fake') {
     push @$params, 'r='.$self->core_objects->location->seq_region_name.':'.$self->core_objects->location->start.'-'
                     .$self->core_objects->location->end;
   }

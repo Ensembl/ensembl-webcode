@@ -34,6 +34,7 @@ sub render {
   my @options = (
     [ 'ensembl_all', 'Ensembl search all species' ],
     $search_url =~ m!/common/psychic! ? [ 'ensembl', 'Ensembl search' ] : [ 'ensembl', 'Ensembl search this species' ],
+    [ 'ensembl_genomes', 'Ensembl genomes search'],
     [ 'vega', 'Vega search' ],
     [ 'ebi', 'EBI search' ],
     [ 'sanger', 'Sanger search' ]

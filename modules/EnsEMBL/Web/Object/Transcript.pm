@@ -247,6 +247,7 @@ sub count_similarity_matches {
       next if $det->{'db_name'} eq 'Vega_transcript';
       next if $det->{'db_name'} eq 'Vega_translation';
       next if $det->{'db_name'} eq 'GO';
+      next if $det->{'db_name'} eq 'goslim_goa';
       next if $det->{'db_name'} eq 'OTTP' && $det->{'display_label'} =~ /^\d+$/; #ignore xrefs to vega translation_ids
       push @counted_xrefs, $id;
     }
@@ -287,7 +288,7 @@ sub count_go {
       FROM object_xref ox, xref x, external_db edb
      WHERE ox.xref_id = x.xref_id
        AND x.external_db_id = edb.external_db_id
-       AND edb.db_name = 'GO'
+       AND (edb.db_name = 'GO' OR edb.db_name = 'goslim_goa')
        AND ox.ensembl_object_type = 'Translation'
        AND ox.ensembl_id = ?};
        
@@ -1185,7 +1186,8 @@ sub get_go_list {
   my $trans = $self->transcript;
   my $goadaptor = $self->get_databases('go')->{'go'};
   my @dblinks = @{$trans->get_all_DBLinks};
-  my @goxrefs = grep { $_->dbname eq 'GO' } @dblinks;
+  my $dbname_to_match = shift || 'GO';
+  my @goxrefs = grep { $_->dbname eq $dbname_to_match } @dblinks;
 
   my %go_hash;
   my %hash;

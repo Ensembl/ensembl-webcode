@@ -47,21 +47,30 @@ if ($dest_site eq 'ebi') {
   $URL = 'http://www.ebi.ac.uk/ebisearch/search.ebi?db=allebi&query='.$query;
   $webpage->redirect($URL);
   exit;
-} elsif ($dest_site eq 'sanger') {
+}
+elsif ($dest_site eq 'sanger') {
   $URL = 'http://search.sanger.ac.uk/cgi-bin/exasearch?_q='.$query;
   $webpage->redirect($URL);
   exit;
-} elsif ($dest_site =~ /vega/) {
+} 
+elsif ($dest_site eq 'ensembl_genomes') {
+  $URL = "http://www.ensemblgenomes.org/search?site=ensembl&q=$query&site=&x=0&y=0&genomic_unit=all";
+  $webpage->redirect($URL);
+  exit;
+}
+elsif ($dest_site =~ /vega/) {
   if ($site_type eq 'vega') {
     $URL = "/Homo_sapiens/Search/Results?species=all&idx=All&q=$query";
   } else {
     $URL = "/Homo_sapiens/Search/Results?species=all&idx=All&q=$query";
     $other_site_url = 'http://vega.sanger.ac.uk';
   }
-} elsif ($site_type eq 'vega') {
+}
+elsif ($site_type eq 'vega') {
   $URL = "/Homo_sapiens/Search/Results?species=all&idx=All&q=$query";
   $other_site_url = 'http://www.ensembl.org'; 
-} else {
+}
+else {
   $URL = "/Homo_sapiens/Search/Results?species=$species&idx=All&q=$query";
 }
 

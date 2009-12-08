@@ -4,12 +4,6 @@
 # for DAS. Unfortunately lots of strange things have to happen to map between
 # Ensembl and DAS coordinate systems, so this does require some maintenance.
 
-# One issue is that the script attempts to add entries to the DAS registry for
-# new species/assemblies (line ~440 but this currently failing with a 400 error from
-# the Registry. Can be worked around by setting $load_registry to zero - this then prints
-# a list of new assemblies to be added which can be done manually by Jonathan Warren (jw12)
-# Don't know how to fix this at present - new version of LWP::UserAgent perhaps ?
-
 use strict;
 use warnings;
 
@@ -24,13 +18,11 @@ use DBI;
 use Data::Dumper;
 use Compress::Zlib;
 
-my $load_registry = 1; # set to zero to get output of assemblies to add (not tested)
 
 # --- load libraries needed for reading config ---
 use vars qw( $SERVERROOT );
 BEGIN{
   $SERVERROOT = dirname( $Bin );
-
   unshift @INC, "$SERVERROOT/conf";
   unshift @INC, "$SERVERROOT";
   eval{ require SiteDefs };
@@ -39,6 +31,12 @@ BEGIN{
   require Bio::EnsEMBL::ExternalData::DAS::SourceParser;
   import Bio::EnsEMBL::ExternalData::DAS::SourceParser qw(is_genomic %COORD_MAPPINGS %TYPE_MAPPINGS %AUTHORITY_MAPPINGS %NON_GENOMIC_COORDS);
 }
+
+my ($force_update,$check_registry) = (0,0);
+GetOptions(
+  "force", \$force_update,
+  "check", \$check_registry,
+);
 
 my $source_types = {
   'karyotype' => {
@@ -97,11 +95,38 @@ my $source_types = {
    where t.seq_region_id = s.seq_region_id',
     'source_id'    => 7,
   },
+  'constrained_element' => {
+    'master_db' => 'DATABASE_COMPARA',
+    'master_table' => 'constrained_element',
+    'name'         => 'GERP Constrained elements',
+    'query'        => qq{
+   SELECT f.name, ce.dnafrag_start, ce.dnafrag_end 
+     FROM constrained_element ce, dnafrag f, genome_db g 
+     WHERE ce.dnafrag_id = f.dnafrag_id and f.genome_db_id = g.genome_db_id and g.name = ? 
+     LIMIT 1 },
+    'params' => {
+	species => 1,
+    },
+    'source_id'    => 8,
+  },
+  'spine' => {
+    'master_table' => 'gene',
+    'name'         => 'Gene Summary',
+    'coord_system' => 'ensembl_gene',
+    'query'        => '
+  select sid.stable_id
+    from gene t, gene_stable_id  sid
+   where t.gene_id = sid.gene_id limit 1',
+    'source_id'    => 9,
+    'multi_species' => 1,
+  },
 };
-my @feature_types       = keys %$source_types;
+
+my @feature_types       = grep {! $source_types->{$_}->{multi_species}} keys %$source_types; 
+
 my %featuresMasterTable = map { ( $_ => $source_types->{$_}{'master_table'} ) } keys %$source_types;
 my %featuresQuery       = map { ( $_ => $source_types->{$_}{'query'}        ) } keys %$source_types;
-my %sourcesIds          = ('reference'=>1, map { ( $_ => $source_types->{$_}{'source_id'} ) } keys %$source_types );
+my %sourcesIds          = ('reference'=>1, map { ( $_ => $source_types->{$_}{'source_id'} ) } keys %$source_types); 
 
 # Load modules needed for reading config -------------------------------------
 require EnsEMBL::Web::SpeciesDefs;
@@ -120,6 +145,7 @@ my $cdb = Bio::EnsEMBL::Compara::DBSQL::DBAdaptor->new(
   -driver => $cdb_info->{'DRIVER'},
 );
 
+my $cdbh = $cdb->dbc->db_handle;
 my $ta = $cdb->get_NCBITaxonAdaptor();
 my $hash = $species_defs;
 
@@ -129,9 +155,10 @@ my $species = $SiteDefs::ENSEMBL_DATASETS || [];
 my $shash;
 $| = 1;
 
-my $force_update = $ARGV[0] && $ARGV[0] =~ m/^-f|--force$/;
+publish_multi_species_sources();
 
-SPECIES: foreach my $sp (@$species) {
+SPECIES:
+foreach my $sp (@$species) {
   my $search_info = $species_defs->get_config($sp, 'SEARCH_LINKS');
   (my $vsp = $sp) =~ s/\_/ /g;
   $species_info->{$sp}->{'species'}  = $vsp;
@@ -161,13 +188,15 @@ SPECIES: foreach my $sp (@$species) {
   );
   my $meta = $db->get_MetaContainer();
   my $taxid = $meta->get_taxonomy_id();
-  
-  # Must have these coordinates for all species' (though we don't create sources for them yet):
+
+  # Must have these coordinates for all species (though we don't create sources for them yet):
   for my $coord_type ('ensembl_gene', 'ensembl_peptide') {
     unless (exists $das_coords->{$sp}{$coord_type}) {
       # Add to the registry and check it came back OK
       my $tmp = _get_das_coords(_coord_system_as_xml($coord_type, '', $sp, $taxid), $coord_type);
-      $tmp->{$sp}{$coord_type} || die "[FATAL] Unable to create $coord_type $sp coordinates";
+      if (! $check_registry) {
+	$tmp->{$sp}{$coord_type} || die "[FATAL] Unable to create $coord_type $sp coordinates";
+      }
     }
   }
 
@@ -187,10 +216,10 @@ SPECIES: foreach my $sp (@$species) {
     left join
          coord_system as cs on cs.coord_system_id = sr.coord_system_id
    where sr.seq_region_id = sra.seq_region_id and
-         sra.attrib_type_id = at.attrib_type_id and at.code = "toplevel"
+         sra.attrib_type_id = at.attrib_type_id and at.code = "toplevel" and cs.name not like 'LRG%'
    group by sr.seq_region_id
   ));
-  
+
   my $toplevel_example  = $toplevel_slices->[0];
   my %coords = ();
  SLICE:
@@ -205,8 +234,8 @@ SPECIES: foreach my $sp (@$species) {
       }
       if (!$cs_xml) {
         # Add to the registry and check it came back OK
-        my $tmp = _get_das_coords(_coord_system_as_xml($_->[5], $_->[6], $sp, $taxid), "$_->[5] $_->[6]");
-				next SLICE unless ($load_registry);
+        my $tmp = _get_das_coords(_coord_system_as_xml(ucfirst($_->[5]), $_->[6], $sp, $taxid), ucfirst($_->[5])." $_->[6]");
+	next SPECIES if ($check_registry);
         $cs_xml = $tmp->{$sp}{$_->[5]}{$_->[6]};
         if (!$cs_xml) {
           print STDERR "[ERROR] Coordinate system $_->[5] $_->[6] is not in the DAS Registry! Skipping\n";
@@ -229,18 +258,22 @@ SPECIES: foreach my $sp (@$species) {
 
   entry_points( $toplevel_slices, "$SiteDefs::ENSEMBL_BASE_URL/das/$mapmaster/entry_points", "$docroot/htdocs/das/$mapmaster" );
   foreach my $feature (@feature_types) {
-    my $dbn = 'DATABASE_CORE';
+    my $dbn = $source_types->{$feature}->{master_db} || 'DATABASE_CORE';
     my $table = $featuresMasterTable{$feature};
     my $rv = $species_defs->table_info_other( $sp, $dbn, $table );
     my $rows = $rv ? $rv->{'rows'} : 0;
-    next unless $rows;
+
+    print STDERR "\t $sp : $feature : $table => ", $rv || 'Off',  "\n";
+    next unless $rows || $source_types->{$feature}->{params}->{species};
     my $sql = $featuresQuery{$feature};
-    my $sth = $dbh->prepare($sql);
-    $sth->execute();
+    
+    my $sth = ($dbn =~ /COMPARA/) ? $cdbh->prepare($sql) : $dbh->prepare($sql);
+    my @params = $source_types->{$feature}->{params}->{species} ? ($vsp) : ();
+
+    $sth->execute(@params);
     my @r = $sth->fetchrow();
-#   print STDERR "\t $sp : $feature => Off\n" and next unless @r;
-#   print STDERR "\t $sp : $feature : $table => ", $rv || 'Off',  "\n";
-#   print STDERR "\t\t\tTEST REGION : ", join('*', @r), "\n";
+    print STDERR "\t $sp : $feature => Off\n" and next unless @r;
+    print STDERR "\t\t\tTEST REGION : ", join('*', @r), "\n";
     next unless @r;
 
     my $dsn = sprintf("%s.%s.%s", $sp, $type, $feature);
@@ -258,6 +291,10 @@ SPECIES: foreach my $sp (@$species) {
       $shash->{$dsn}->{coords} = \%coords;
     }
   }
+}
+if ($check_registry) {
+  print STDERR "\n[INFO] Rerun without the -check option to create the xml\n";
+  exit;
 }
 
 sources( $shash, "$docroot/htdocs/das/sources", $sitetype );
@@ -338,7 +375,6 @@ sub sources {
         $coordinates .= "      $coords{$cs_name}{$cs_ver}\n";
       }
     }
-
     my $id;
     my $source_type_id = $sourcesIds{$sourcetype} || die "Unknown source type: $sourcetype";
     if ($sitetype eq 'Vega') {
@@ -442,11 +478,11 @@ sub _get_das_coords {
   
   # If we have XML for a new coordinate system, add it
   if ($add_data) {
+    if ($check_registry) {
+      print STDERR "[WARN]  Data to be manually added to registry is $add_data\n";			
+      return;
+    }
     print STDERR "[INFO]  Adding coordinate system '$add_name' to the DAS Registry\n";
-		unless ($load_registry) {
-			print STDERR "Data to be manually added to registry is $add_data";			
-			return;
-		}
     $add_data = qq(<?xml version='1.0' ?>\n<DASCOORDINATESYSTEM>\n  $add_data\n</DASCOORDINATESYSTEM>);
     $req->content($add_data);
     $req->content_length(length $add_data);
@@ -482,6 +518,73 @@ sub _get_das_coords {
   return \%coords;
 }
 
+sub publish_multi_species_sources {
+# Now Multi species sources, e.g EnsemblGene Id etc
+    my $sp = $species_defs->ENSEMBL_PRIMARY_SPECIES;
+
+    my $sources_info = $source_types;
+    my @feature_types       = grep {$sources_info->{$_}->{multi_species}} keys %$sources_info;
+
+    my $db_info = $species_defs->get_config($sp, 'databases')->{'DATABASE_CORE'};
+    my $db = Bio::EnsEMBL::DBSQL::DBAdaptor->new(
+					     -species => $sp,
+					     -dbname  => $db_info->{'NAME'},
+					     -host    => $db_info->{'HOST'},
+					     -port    => $db_info->{'PORT'},
+					     -user    => $db_info->{'USER'},
+					     -driver  => $db_info->{'DRIVER'},
+					     );
+
+    my $dbh = $db->dbc->db_handle;
+    my $meta = $db->get_MetaContainer();
+    my $taxid = $meta->get_taxonomy_id();
+    (my $vsp = $sp) =~ s/\_/ /g;
+  
+    foreach my $feature (@feature_types) {
+	print STDERR "[INFO]  Parsing Multi species source * $feature * at ".gmtime()."\n";
+	my $coord_type = $sources_info->{$feature}->{coord_system} or next;
+	unless (exists $das_coords->{$sp}{$coord_type}) {
+	    # Add to the registry and check it came back OK
+	    my $tmp = _get_das_coords(_coord_system_as_xml($coord_type, '', $sp, $taxid), $coord_type);
+	    $tmp->{$sp}{$coord_type} || die "[FATAL] Unable to create $coord_type $sp coordinates";
+	}
+
+	my $dbn = $sources_info->{$feature}->{master_db} || 'DATABASE_CORE';
+	my $table = $sources_info->{$feature}->{master_table};
+	my $rv = $species_defs->table_info_other( $sp, $dbn, $table );
+	my $rows = $rv ? $rv->{'rows'} : 0;
+	
+	print STDERR "\t $feature : $table => ", $rv || 'Off',  "\n";
+
+	next unless $rows || $sources_info->{$feature}->{params}->{species};
+	my $sql = $sources_info->{$feature}->{query};
+	my $sth = ($dbn =~ /COMPARA/) ? $cdbh->prepare($sql) : $dbh->prepare($sql);
+	my @params = $sources_info->{$feature}->{params}->{species} ? ($vsp) : ();
+	
+	$sth->execute(@params);
+	my @r = $sth->fetchrow();
+	print STDERR "\t $sp : $feature => Off\n" and next unless @r;
+	print STDERR "\t\t\tTEST REGION : ", join('*', @r), "\n";
+	next unless @r;
+
+
+
+	my %coords = ();
+	# Set up the coordinate system details
+	my $cs_xml = $das_coords->{''}{$coord_type}{''} || next;
+	my $test_range = $r[0];
+
+	$cs_xml =~ s/test_range=""/test_range="$test_range"/;
+	$coords{$coord_type}{''} = $cs_xml;
+	my $dsn = sprintf("Multi.Ensembl-GeneID.%s", $feature);
+	$shash->{$dsn}->{coords} = \%coords;
+	$shash->{$dsn}->{mapmaster} = $species_defs->ENSEMBL_BASE_URL;
+	$shash->{$dsn}->{description} = $sources_info->{$feature}->{description} || sprintf("%s Annotation source ", $sources_info->{$feature}->{name});
+    }
+}
+
+
+
 __END__
            
 =head1 NAME
@@ -494,16 +597,22 @@ A script that generates XML file that effectivly is a response to
 /das/dsn and /das/sources commands to this server. The script prints the XML to
 htdocs/dsn and htdocs/sources.
 
-./initialise_das.pl
+One unsolved issue is that although the script should be able to add entries to the
+DAS registry for new assemblies, it currently fails with a 400 error (from line ~440).
+Until this is solved first run the script to report new assemblies and then ask
+Jonathan Warren (jw12) to add them to the registry. When this is done the script
+can then be run to then generate the xml
 
-OR
+./initialise_das.pl --check
 
-./initialise_das.pl --force|-f     (forces processing of previously generated species')
+THEN
 
-If this script complains about coordinate systems, check that they actually exist
-in the DAS registry (http://www.dasregistry.org). If not, request they be added.
+./initialise_das.pl --force
+
+The (optional) --force forces processing of previously generated species
 
 =head1 AUTHOR
+
                                                                                 
 [Eugene Kulesha], Ensembl Web Team
 [Andy Jenkinson], EMBL-EBI

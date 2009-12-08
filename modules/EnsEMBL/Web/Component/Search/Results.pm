@@ -17,6 +17,18 @@ sub content {
   my $exa_obj = $object->Obj;
   my $html;
 
+# hack to deal with structural variations that had to be removed for e57
+if ( $object->param('q') =~/esv/ ) {
+  my $query = $object->param('q');
+  $query =~s/esv//;
+  if ($query > 1433 && $query < 2753 ) {
+    my $q = 'esv'. $query;
+    my $html = qq(<p>Your search for <strong>$q</strong> returned no results</p>);
+    return $html;
+  }
+}
+
+
   my @groups;
   foreach my $group ( $exa_obj->groups ) {
     my $name = $group->name;

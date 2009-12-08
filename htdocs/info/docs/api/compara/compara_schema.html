@@ -1457,11 +1457,11 @@ databases and the cigar lines as explained before.
 TABLE GENOMIC_ALIGN_TREE
 #####################################################################
 -->
-<h4 id="genomic_align_group">genomic_align_tree</h4>
+<h4 id="genomic_align_tree">genomic_align_tree</h4>
 
 
 <p>This table is used to index tree alignments, e.g. EPO alignments. These alignments include inferred ancestral sequences. The tree required
-to index these sequences is stored in this table. This table stores the sturcture of the tree. Each node links to an entry in the <a href="#genomic_algin_group">genomic_align_group</a> table, which links to one or several entries in the <a href="#genomic_algin">genomic_align</a> table.</p>
+to index these sequences is stored in this table. This table stores the sturcture of the tree. Each node links to an entry in the <a href="#genomic_align_group">genomic_align_group</a> table, which links to one or several entries in the <a href="#genomic_align">genomic_align</a> table.</p>
 
 
 <table class="spreadsheet">
@@ -2635,7 +2635,7 @@ handle more than just pairwise relations.
       <td>MUL</td>
       <td></td>
       <td></td>
-      <td>external reference to <a href="#source">method_link_species_set.method_link_species_set_id</a></td>
+      <td>external reference to <a href="#method_link_species_set">method_link_species_set.method_link_species_set_id</a></td>
     </tr>
     <tr>
       <td>description</td>

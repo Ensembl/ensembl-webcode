@@ -1015,7 +1015,6 @@ sub _munge_meta {
   while (my ($species_id, $meta_hash) = each (%$meta_info)) {
     next unless $species_id && $meta_hash && ref($meta_hash) eq 'HASH';
 
-
     ## Do species name and group
     my ($species, $bioname, $bioshort);
     my $taxonomy = $meta_hash->{'species.classification'};
@@ -1047,12 +1046,12 @@ sub _munge_meta {
 # Now make all meta keys available via species defs, you just need to replace non-alpha numeric characters with underscores, e.g
 # species.stable_id_prefix can be accessed via species_defs->SPECIES_STABLE_ID_PREFIX
     foreach my $key ( keys %$meta_hash ) {
-	(my $mkey = uc($key)) =~ s/[^\w]/_/g;
-	if( ref $meta_hash->{$key} eq 'ARRAY') {
-	    @{$self->tree($species)->{$mkey}} = @{$meta_hash->{$key}};
-	} else {
-	    $self->tree($species)->{$mkey} = $meta_hash->{$key};
-	}
+      (my $mkey = uc($key)) =~ s/[^\w]/_/g;
+      if( (ref($meta_hash->{$key} eq 'ARRAY')) && (ref($meta_hash->{$key} eq 'ARRAY')) ) {
+	@{$self->tree($species)->{$mkey}} = @{$meta_hash->{$key}};
+      } else {
+	$self->tree($species)->{$mkey} = $meta_hash->{$key};
+      }
     }
 
     if ($self->tree->{'ENSEMBL_SPECIES'}) {

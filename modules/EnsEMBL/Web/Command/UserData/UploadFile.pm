@@ -77,6 +77,7 @@ sub upload {
     }
   }
 
+  $format = uc $object->param('upload_format') if $object->param('upload_format');
   ## Get original path, so can save file name as default name for upload
   my $name = $object->param('name');
   unless ($name) {

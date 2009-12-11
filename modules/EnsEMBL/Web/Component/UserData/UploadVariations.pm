@@ -30,13 +30,14 @@ sub content {
   my $html;
 
   my $form = $self->modal_form('select', "/$current_species/UserData/CheckConvert");
-  $form->add_notes({'heading'=>'IMPORTANT NOTE:', 'text' => qq(<p>Data should be uploaded as a list of tab or comma separated values for more information on the expected format see <a href="/info/website/upload/snp_consequence.html">here.</a></p>) });
+  $form->add_notes({'heading'=>'IMPORTANT NOTE:', 'text' => qq(<p>Data should be uploaded as a list of tab or comma separated values for more information on the expected format see <a href="/info/website/upload/snp_consequence.html">here.</a> There is also a 5.0MB limit on data uploads.</p>) });
   my $subheader = 'Upload file';
 
    ## Species now set automatically for the page you are on
   $form->add_element( type => 'NoEdit', name => 'show_species', label => 'Species', 'value' => $self->object->species_defs->species_label($current_species));
   $form->add_element( type => 'Hidden', name => 'species', 'value' => $current_species);
   $form->add_element( type => 'Hidden', name => 'consequence_mapper', 'value' => 1);
+  $form->add_element( type => 'Hidden', name => 'upload_format', 'value' => 'consequence');
   $form->add_element('type' => 'SubHeader', 'value' => $subheader);
 
   $form->add_element( type => 'String', name => 'name', label => 'Name for this upload (optional)' );

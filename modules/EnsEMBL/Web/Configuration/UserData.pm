@@ -204,6 +204,12 @@ sub populate_tree {
      [ qw(idmapper  EnsEMBL::Web::Component::UserData::IDmapper) ],
      { 'no_menu_entry' => 1 }
   );
+  $self->create_node ('ConsequenceCalculator', '',
+    [ qw(consequence EnsEMBL::Web::Component::UserData::ConsequenceTool)],
+    {'no_menu_entry' => 1}
+  );
+
+
 
   ## Data conversion
   my $convert_menu = $self->create_submenu( 'Conversion', 'Data Converters' );
@@ -258,6 +264,19 @@ sub populate_tree {
       {'availability' => 1, 'no_menu_entry' => 1},
     )
   );
+  $convert_menu->append(
+    $self->create_node( 'UploadVariations', 'SNP Effect Predictor',
+      [qw(upload_snps EnsEMBL::Web::Component::UserData::UploadVariations)],
+      {'availability' => 1,},
+    )
+  );
+  $convert_menu->append(
+    $self->create_node( 'SNPConsequence', '', [],
+      {'command' => 'EnsEMBL::Web::Command::UserData::SNPConsequence',
+      'availability' => 1, 'no_menu_entry' => 1},
+    )
+  );
+
   ## Add "invisible" nodes used by interface but not displayed in navigation
   $self->create_node( 'Message', '',
     [qw(message EnsEMBL::Web::Component::CommandMessage

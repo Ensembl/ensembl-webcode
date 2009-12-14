@@ -293,20 +293,21 @@ sub _user_context {
   }
   
   $active = $section eq 'global_context' && $type eq 'UserData';
-  
-  $self->{'page'}->$section->add_entry(
-    'type'    => 'UserData',
-    'id'      => 'user_data',
-    'caption' => 'Custom Data',
-     $active ? ( 'class' => 'active' ) : ( 
-     'url' => $object->_url({
-      'time' => time,
-      '_referer' => $referer,
-      '__clear'  => 1,
-      'type'     => 'UserData',
-      'action'   => 'ManageData',
-     }))
-  );
+ 
+#no link for this release of Vega only 
+#  $self->{'page'}->$section->add_entry(
+#    'type'    => 'UserData',
+#    'id'      => 'user_data',
+#    'caption' => 'Custom Data',
+#     $active ? ( 'class' => 'active' ) : ( 
+#     'url' => $object->_url({
+#      'time' => time,
+#      '_referer' => $referer,
+#      '__clear'  => 1,
+#      'type'     => 'UserData',
+#      'action'   => 'ManageData',
+#     }))
+#  );
   
   $active = $section eq 'global_context' && $type eq 'Account'; # Now the user account link - varies depending on whether the user is logged in or not
   
@@ -644,18 +645,19 @@ sub _local_tools {
       'title'   => 'There are no options for this page'
     );
   }
-  
-  $self->{'page'}->local_tools->add_entry(
-    'caption' => 'Manage your data',
-    'class'   => 'modal_link',
-    'url'     => $obj->_url({
-      'time'     => time,
-      'type'     => 'UserData',
-      'action'   => 'ManageData',
-      '_referer' => $referer,
-      '__clear'  => 1 
-    })
-  );
+ 
+#no link for this release of Vega only  
+#  $self->{'page'}->local_tools->add_entry(
+#    'caption' => 'Manage your data',
+#    'class'   => 'modal_link',
+#    'url'     => $obj->_url({
+#      'time'     => time,
+#      'type'     => 'UserData',
+#      'action'   => 'ManageData',
+#      '_referer' => $referer,
+#      '__clear'  => 1 
+#    })
+#  );
   
   if ($obj->can_export) {       
     $self->{'page'}->local_tools->add_entry(

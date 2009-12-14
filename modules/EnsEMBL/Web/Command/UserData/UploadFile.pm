@@ -4,9 +4,10 @@ package EnsEMBL::Web::Command::UserData::UploadFile;
 
 use strict;
 use warnings;
+no warnings 'uninitialized';
 
 use Class::Std;
-use CGI qw(escape escapeHTML);
+use CGI qw(escape escapeHTML header);
 
 use EnsEMBL::Web::RegObj;
 use EnsEMBL::Web::Tools::Misc;
@@ -16,20 +17,29 @@ use base 'EnsEMBL::Web::Command';
 
 sub process {
   my $self = shift;
+  my $object = $self->object;
+  my $url = '/'.$object->data_species;
+  my $param = {};
+
+  if (my $error = $object->[1]->{'_input'}->cgi_error()) {
+    warn ">>> CGI ERROR $error";
+    if ($error =~ /413/) {
+      $param->{'filter_module'} = 'Data';
+      $param->{'filter_code'} = 'too_big';
+    }
+  }
 
   my @methods = qw(text file url);
   my $method;
   foreach my $M (@methods) {
-    if ($self->object->param($M)) {
+    if ($object->param($M)) {
       $method = $M;
       last;
     }
   }
 
-  my $url = '/'.$self->object->data_species;
-  my $param = {};
-  if ($self->object->param($method)) {
-    $param = upload($method, $self->object);
+  if ($object->param($method)) {
+    $param = upload($method, $object);
     if ($param->{'format'} eq 'none') {
       $url .= '/UserData/MoreInput';
     }
@@ -40,44 +50,52 @@ sub process {
   else {
     $url .= '/UserData/SelectFile';
   }
-  $param->{'_referer'} = $self->object->param('_referer');
-  $param->{'x_requested_with'} = $self->object->param('x_requested_with');
- 
-  if( $self->object->param('uploadto' ) eq 'iframe' ) {
-    CGI::header( -type=>"text/html",-charset=>'utf-8' );
-    printf q(
-    <html>
-    <head>
-      <script type="text/javascript">
-        window.parent.Ensembl.EventManager.trigger('modalOpen', { href: '%s', title: 'File uploaded' });
-      </script>
-    </head>
-    <body><p>UP</p></body>
-    </html>), CGI::escapeHTML($self->url($url, $param));
-  } 
-  else {
-    $self->ajax_redirect($url, $param); 
-  }
+  $param->{'_referer'} = $object->param('_referer');
+  $param->{'x_requested_with'} = $object->param('x_requested_with');
+
+  $url = escapeHTML($self->url($url, $param));
+
+  header(-type => 'text/html', -charset => 'utf-8');
+
+  print qq{
+  <html>
+  <head>
+    <script type="text/javascript">
+      if (!window.parent.Ensembl.EventManager.trigger('modalOpen', { href: '$url', title: 'File uploaded' })) {
+        window.parent.location = '$url';
+      }
+    </script>
+  </head>
+  <body><p>UP</p></body>
+  </html>};
 }
 
 sub upload {
 ## Separate out the upload, to make code reuse easier
   my ($method, $object) = @_;
   my $param = {};
+  my ($error, $format, $filename, $full_ext, %args);
 
   ## Try to guess the format from the extension
-  my ($format, $filename);
   unless ($method eq 'text') {
     my @orig_path = split('/', $object->param($method));
     $filename = $orig_path[-1];
-    $filename =~ /\.(\w{1,4})$/;
-    my $ext = $1;
+    my @parts = split('\.', $filename);
+    my $ext = $parts[-1];
+    #$full_ext = $ext;
+    if ($ext =~ /gz/i) {
+      $ext = $parts[-2];
+      #$full_ext = $ext.'.'.$full_ext;
+    }
     if ($ext =~ /bed/i || $ext =~ /psl/i || $ext =~ /gff/i || $ext =~ /gtf/i || $ext =~ /wig/i) {
       $format = uc($ext);
     }
   }
 
-  $format = uc $object->param('upload_format') if $object->param('upload_format');
+  if ($object->param('upload_format')){
+    $format = uc ($object->param('upload_format'));
+  }
+
   ## Get original path, so can save file name as default name for upload
   my $name = $object->param('name');
   unless ($name) {
@@ -86,12 +104,11 @@ sub upload {
     }
     else {
       $name = $filename;
+      $args{'filename'} = $filename;
     }
   }
   $param->{'name'} = $name;
 
-  ## Cache data (TmpFile::Text knows whether to use memcached or temp file)
-  my ($error, %args);
   if ($method eq 'url') {
     my $url = $object->param('url');
     $url = 'http://'.$url unless $url =~ /^http/;
@@ -103,10 +120,10 @@ sub upload {
     $args{'content'} = $object->param('text');
   }
   else {
-    $args{tmp_filename} = $object->[1]->{'_input'}->tmpFileName($object->param($method));
+    #$args{'extension'} = $full_ext;
+    $args{'tmp_filename'} = $object->[1]->{'_input'}->tmpFileName($object->param($method));
   }
   if ($error) {
-    ## Put error message into session for display?
     $param->{'filter_module'} = 'Data';
     $param->{'filter_code'} = 'no_response';
   }
@@ -115,14 +132,6 @@ sub upload {
   
     if ($file->content) {
       if ($file->save) {
-        ## Final attempt to work out format!
-        my $data = $file->retrieve;
-        my $parser = EnsEMBL::Web::Text::FeatureParser->new($object->species_defs);
-        $parser->check_format($data);
-        $format = $parser->format unless $format;
-        if (!$format) {
-          $param->{'format'}  = 'unknown';
-        }
         my $code = $file->md5 . '_' . $object->get_session->get_session_id;
      
         $param->{'species'} = $object->param('species') || $object->species;
@@ -136,7 +145,6 @@ sub upload {
           name      => $name,
           species   => $object->param('species'),
           format    => $format,
-          style     => $parser->style,
           assembly  => $object->param('assembly'),
         );
 

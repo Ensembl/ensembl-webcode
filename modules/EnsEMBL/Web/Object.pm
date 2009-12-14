@@ -95,7 +95,7 @@ sub Obj {
 sub get_adaptor {
   my ($self, $method, $db, $species) = @_;
   $db = 'core' if !$db;
-  $species = $self->species if !$species;
+  $species = $self->species if !$species; 
   my $adaptor;
   eval { $adaptor =  $self->database($db, $species)->$method(); };
 

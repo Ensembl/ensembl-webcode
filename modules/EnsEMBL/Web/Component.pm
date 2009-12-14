@@ -13,6 +13,7 @@ our @EXPORT = @EXPORT_OK;
 
 use CGI qw(escape);
 use Data::Dumper;
+use Digest::MD5 qw(md5_hex);
 use Text::Wrap qw(wrap);
 
 use Bio::EnsEMBL::Variation::Utils::Sequence qw(ambiguity_code);
@@ -76,6 +77,21 @@ sub _hint    {
   my($self,$ID,$caption,$desc,$width) = @_;
   return sprintf '<div id="%s" style="width:%s" class="hint hint_flag"><h3>%s</h3><div class="error-pad">%s</div></div>',
     $ID, $width || $self->image_width.'px', $caption, $desc;
+}
+
+sub ajax_url {
+  my ($self, $function_name, $no_query_string) = @_;
+
+  my $object = $self->object;
+  my ($ensembl, $plugin, $component, $type, $module) = split '::', ref $self;
+
+  my $url = '/' . join '/', $object->species, 'Component', $object->type, $plugin, $module;
+  $url .= "/$function_name" if $function_name && $self->can("content_$function_name");
+  $url .= '?_rmd=' . substr md5_hex($ENV{'REQUEST_URI'}), 0, 4;
+  $url .= ";$ENV{'QUERY_STRING'}" unless $no_query_string;
+  warn ">>> $url";
+
+  return $url;
 }
 
 sub _export_image {

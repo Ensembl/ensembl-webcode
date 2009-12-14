@@ -7,23 +7,28 @@ use strict;
 use warnings;
 no warnings "uninitialized";
 use EnsEMBL::Web::Root;
+use List::MoreUtils;
 use Data::Dumper;
 
+our ($nearest_region, $nearest_start, $nearest_end, $done);    
+
 sub new {
-  my ($class, $species_defs) = @_;
+  my ($class, $species_defs, $location) = @_;
   my $data = {
   'format'            => '',
   'style'             => '',
   'feature_count'     => 0,
+  'current_location'  => $location,
+  'nearest'           => undef,
+  'drawn_chrs'        => $species_defs->ENSEMBL_CHROMOSOMES,
   'valid_coords'      => {},
   'browser_switches'  => {},
   'tracks'            => {},
   'filter'            => undef,
   '_current_key'      => 'default',
   };
-  my $drawn_chrs = $species_defs->ENSEMBL_CHROMOSOMES;
   my $all_chrs = $species_defs->ALL_CHROMOSOMES;
-  foreach my $chr (@$drawn_chrs) {
+  foreach my $chr (@{$data->{'drawn_chrs'}}) {
     $data->{'valid_coords'}{$chr} = $all_chrs->{$chr};  
   }
   bless $data, $class;
@@ -53,6 +58,24 @@ sub style {
   my $self = shift;
   $self->{style} = shift if @_;
   return $self->{'style'};
+}
+
+sub feature_count {
+  my $self = shift;
+  $self->{feature_count} = shift if @_;
+  return $self->{'feature_count'};
+}
+
+sub drawn_chrs {
+  my $self = shift;
+  $self->{drawn_chrs} = shift if @_;
+  return $self->{'drawn_chrs'};
+}
+
+sub nearest {
+  my $self = shift;
+  $self->{nearest} = shift if @_;
+  return $self->{'nearest'};
 }
 
 sub filter {
@@ -85,7 +108,6 @@ sub parse {
     if (EnsEMBL::Web::Root::dynamic_use(undef, $sub_package)) {
       bless $self, $sub_package;
     }
-
     ## Create an empty feature that gives us access to feature info
     my $feature_class = 'EnsEMBL::Web::Text::Feature::'.uc($format); 
     my $empty = $feature_class->new();
@@ -93,6 +115,13 @@ sub parse {
     my $current_max = 0;
     my $current_min = 0;
     my $valid_coords = $self->{'valid_coords'};
+
+    ## On upload, keep track of current location so we can find nearest feature
+    my ($current_index, $current_region, $current_start, $current_end);    
+    if (@{$self->{'drawn_chrs'}} && (my $location = $self->{'current_location'})) {
+      ($current_region, $current_start, $current_end) = split(':|-', $location);
+      $current_index = List::MoreUtils::first_index {$_ eq $current_region} @{$self->drawn_chrs} if $current_region;
+    }
 
     foreach my $row ( split /\n|\r/, $data ) {
       ## Skip crap and clean up what's left
@@ -107,13 +136,16 @@ sub parse {
       elsif ($row =~ /^track/) {
         $row =~ s/^track\s+(.*)$/$1/i;
         $self->add_track($row);
+        if ($row =~ /type=bedGraph/ || $row =~ /type=wiggle/ || $row =~ /useScore=[3|4]/) {
+          $self->style('wiggle');
+        }
         ## Reset max and min in case this is a multi-track file
         $current_max = 0;
         $current_min = 0;
       }
       else {
-        my $columns;
-        if (ref($self) eq 'EnsEMBL::Web::Text::FeatureParser') {
+        my $columns; 
+        if (ref($self) eq 'EnsEMBL::Web::Text::FeatureParser') { ;
           ## 'Normal' format consisting of a straightforward feature
           ($columns) = $self->split_into_columns($row, $format);
         }
@@ -121,9 +153,25 @@ sub parse {
           ## Complex format requiring special parsing (e.g. WIG)
           $columns = $self->parse_row($row);
         }
-        if ($columns && scalar(@$columns)) {
-          my ($chr, $start, $end) = $empty->coords($columns);
+        if ($columns && scalar(@$columns)) {  
+          my ($chr, $start, $end) = $empty->coords($columns); 
           $chr =~ s/chr//;
+
+          ## We currently only do this on initial upload (by passing current location)  
+          $done = $self->_find_nearest(
+                      {
+                        'region'  => $current_region, 
+                        'start'   => $current_start, 
+                        'end'     => $current_end, 
+                        'index'   => $current_index,
+                      }, 
+                      {
+                        'region'  => $chr, 
+                        'start'   => $start, 
+                        'end'     => $end,
+                        'index'   => List::MoreUtils::first_index {$_ eq $chr} @{$self->drawn_chrs},
+                      }
+            )  unless $done;
 
           if (keys %$valid_coords && scalar(@$columns) >1) {
             ## We only validate on chromosomal coordinates, to prevent errors on vertical code
@@ -133,7 +181,6 @@ sub parse {
           }
 
           ## Optional - filter content by location
-          my $filter = $self->filter;
           if ($filter->{'chr'}) {
             next unless ($chr eq $filter->{'chr'} || $chr eq 'chr'.$filter->{'chr'}); 
             if ($filter->{'start'} && $filter->{'end'}) {
@@ -152,6 +199,8 @@ sub parse {
               $current_min = $self->{'tracks'}{$self->current_key}{'config'}{'min_score'};
               $current_max = $feature->score if $feature->score > $current_max;
               $current_min = $feature->score if $feature->score < $current_min;
+              $current_max = 0 unless $current_max; ## Because shit happens...
+              $current_min = 0 unless $current_min;
               $self->{'tracks'}{$self->current_key}{'config'}{'max_score'} = $current_max;
               $self->{'tracks'}{$self->current_key}{'config'}{'min_score'} = $current_min;
             }
@@ -162,20 +211,27 @@ sub parse {
       }
     }
     $self->{'feature_count'} = $count;
+    ## Extend sample coordinates a bit!
+    if ($nearest_region) {
+      my $midpoint = int(abs($nearest_start - $nearest_end)/2) + $nearest_start;
+      my $start = $midpoint < 50000 ? 0 : ($midpoint - 50000);
+      my $end = $start + 100000;
+      $self->{'nearest'} = $nearest_region.':'.$start.'-'.$end;
+    }
   }
 }
 
 sub split_into_columns {
   my ($self, $row, $format) = @_;
-  my @columns;
+  my @columns; ;
   my $tabbed = 0;
   if ($format) { ## Parsing a known file
     if ($format =~ /^GF/) {
       @columns = split /\t/, $row;
       $tabbed = 1;
     }
-    else {
-      @columns = split /\t|\s/, $row;
+    else { 
+      @columns = split /\t|\s/, $row; ; 
     } 
   }
   else { ## Trying to identify the format
@@ -189,6 +245,45 @@ sub split_into_columns {
   }
   @columns = grep /\S/, @columns;
   return (\@columns, $tabbed);
+}
+
+
+sub _find_nearest {
+### Find the feature nearest the current location
+  my ($self, $current, $feature) = @_;
+
+  ## Set first feature as nearest if no location / chromosomes
+  unless (exists($current->{'index'})) {
+    ($nearest_region, $nearest_start, $nearest_end) 
+        = ($feature->{'region'}, $feature->{'start'}, $feature->{'end'});
+    return 1;
+  }
+
+  my $nearest_index = List::MoreUtils::first_index {$_ eq $nearest_region} @{$self->drawn_chrs};
+
+  if ($nearest_region) {
+    if ($feature->{'region'} eq $current->{'region'}) { ## We're getting warm!
+      $nearest_region = $feature->{'region'};
+      ## Is this feature start nearer?
+      if (abs($current->{'start'} - $feature->{'start'}) < abs($current->{'start'} - $nearest_start)) {
+        ($nearest_start, $nearest_end) = ($feature->{'start'}, $feature->{'end'});
+      }
+    }
+    else {
+      ## Is this chromosome nearer?
+      if (exists($feature->{'index'}) 
+          && (abs($current->{'index'} - $feature->{'index'}) < abs($current->{'index'} - $nearest_index))) {
+        ($nearest_region, $nearest_start, $nearest_end) 
+          = ($feature->{'region'}, $feature->{'start'}, $feature->{'end'});
+      }
+    }
+  }
+  else {
+    ## Establish a baseline
+    ($nearest_region, $nearest_start, $nearest_end) 
+      = ($feature->{'region'}, $feature->{'start'}, $feature->{'end'});
+  }
+  return 0;
 }
 
 sub check_format {
@@ -206,12 +301,10 @@ sub check_format {
       }
       elsif ($row =~ /^track\s+/i) {
         if ($row =~ /type=wiggle0/) {
-          $self->style('wiggle');
           $format = 'WIG';
           last;
         }
         elsif ($row =~ /type=bedGraph/ || $row =~ /type=wiggle_0/ || $row =~ /useScore=[3|4]/) {
-          $self->style('wiggle');
           $format = 'BED';
           last;
         }
@@ -225,10 +318,12 @@ sub check_format {
   }
 
   ## Sanity check - can we actually parse this?
-  if (!$format || !(EnsEMBL::Web::Root::dynamic_use(undef, 'EnsEMBL::Web::Text::Feature::'.uc($format))) ) {
+  if ($format && !(EnsEMBL::Web::Root::dynamic_use(undef, 'EnsEMBL::Web::Text::Feature::'.uc($format))) ) {
+    return 'Unsupported format';
+  }
+  if (!$format) {
     return 'Unrecognised format';
   }
-
   $self->format($format);
   return undef;
 }
@@ -245,7 +340,7 @@ sub analyse_row {
   ## Split row into columns by either tabs or whitespaces, then remove empty values 
   my ($columns, $tabbed) = $self->split_into_columns($row);
 
-  if (scalar(@$columns) == 1) {
+  if (scalar(@$columns) == 1) { 
     ## one element per line assume we have list of stable IDs
     $format = 'ID';
   }
@@ -259,7 +354,7 @@ sub analyse_row {
     else {
       $format = 'GFF';   
     }
-  } 
+  }
   elsif ( _is_strand($columns->[9])) { # DAS format accepted by Ensembl
     $format = 'DAS';   
   } 
@@ -268,7 +363,7 @@ sub analyse_row {
   } 
   elsif (scalar(@$columns) > 2 && scalar(@$columns) < 13 && $columns->[1] =~ /\d+/ && $columns->[2] =~ /\d+/) { 
     $format = 'BED';   
-  }
+  } 
   return $format;
 }
 

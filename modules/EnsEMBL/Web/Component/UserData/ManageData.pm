@@ -29,23 +29,41 @@ sub content {
   my @data; 
   
   # Control panel fixes
-  my $dir = '/'.$ENV{'ENSEMBL_SPECIES'};
-  $dir = '' if $dir !~ /_/;
+  my $dir = '/'.$object->species;
+  $dir = '/' if $dir !~ /_/;
   
   my $html;
   $html .= '<div class="modal_reload"></div>' if $object->param('reload');
-  $html .= '<h3>Your data</h3>';
-
-  $html .= '<p class="space-below"><a href="/info/website/upload/index.html">Help on supported formats, display types, etc</a></p>';
-  
-  push @data, $user->uploads if $user;
-  push @data, $object->get_session->get_data('type' => 'upload');
-
-  push @data, $user->urls if $user;
-  push @data, $object->get_session->get_data('type' => 'url');
-
-  push @data, $user->dases if $user;
-  push @data, values %{$object->get_session->get_all_das};
+  $html .= '<h3>Your data</h3>'; # Uploads
+ 
+  my ($saved_data, $temp_data);
+  if ($user) { 
+    if ($user->uploads) {
+      push @data, $user->uploads;
+      $saved_data = 1;
+    }
+    if ($user->urls) {
+      push @data, $user->urls;
+      $saved_data = 1;
+    }
+    if ($user->dases) {
+      push @data, $user->dases;
+      $saved_data = 1;
+    } 
+  }
+  my @tmp;
+  if (@tmp = $object->get_session->get_data('type' => 'upload')) {
+    push @data, @tmp;
+    $temp_data = 1;
+  }
+  if (@tmp = $object->get_session->get_data('type' => 'url')) {
+    push @data, @tmp;
+    $temp_data = 1;
+  }
+  if (@tmp = values %{$object->get_session->get_all_das}) {
+    push @data, @tmp;
+    $temp_data = 1;
+  }
 
   if (@data) {
     my $table = EnsEMBL::Web::Document::SpreadSheet->new;
@@ -71,7 +89,7 @@ sub content {
     my $not_found = 0;
      
     foreach my $file (@data) { 
-      if ($file->{'filename'} && !EnsEMBL::Web::TmpFile::Text->new(filename => $file->{'filename'})->exists) {
+      if ($file->{'filename'} && !EnsEMBL::Web::TmpFile::Text->new(filename => $file->{'filename'}, extension => $file->{'extension'})->exists) {
         $file->{'name'} .= ' (File could not be found)';
         $not_found++;
       }
@@ -82,14 +100,22 @@ sub content {
       
       my $delete_class = $sharers ? 'modal_confirm' : 'modal_link';
       my $title = ' title="This data is shared with other users"' if $sharers;
+      my ($type, $name, $species, $date, $rename, $share, $delete);
       
       ## FROM USER ACCOUNT -------------------------------------------------------------
       if (ref ($file) =~ /Record/) {
-        my ($type, $name, $date, $rename, $share, $delete);
+        ($species = $file->species) =~ s/_/&nbsp;/;
         if (ref ($file) =~ /Upload/) {
           $type = 'Upload';
-          $name = '<strong>'.$file->name.'</strong><br />';
-          $name .= $file->format.' file for '.$file->species;
+          $name = '<strong>';
+          if ($file->{'nearest'}) {
+            $name .= '<a href="/'.$file->{'species'}.'/Location/View?r='.$file->{'nearest'}
+                        .'" title="Jump to sample region with data">'.$file->{'name'}.'</a>';
+          }
+          else {
+            $name .= $file->{'name'};
+          }
+          $name .= '</strong><br />'.$file->format." file for <em>$species</em>";
           $date = $file->modified_at || $file->created_at;
           $date = $self->pretty_date($date);
           $rename = sprintf('<a href="%s/UserData/RenameRecord?accessor=uploads;id=%s;%s" class="%s"%s>Rename</a>', $dir, $file->id, $referer, $delete_class, $title);
@@ -104,8 +130,15 @@ sub content {
           $delete = sprintf('<a href="%s/UserData/DeleteRemote?type=das;id=%s;%s" class="modal_link">Delete</a>', $dir, $file->id, $referer);
         } elsif (ref ($file) =~ /URL/) {
           $type = 'URL';
-          $name = '<strong>'.$file->name.'</strong><br />' if $file->name;
-          $name .= $file->url.' ('.$file->species.')';
+          $name = '<strong>';
+          if ($file->{'nearest'}) {
+            $name .= '<a href="/'.$file->{'species'}.'/Location/View?r='.$file->{'nearest'}
+                        .'" title="Jump to sample region with data">'.$file->{'name'}.'</a>';
+          }
+          else {
+            $name .= $file->{'name'};
+          }
+          $name .= '</strong><br />'.$file->url." (<em>$species</em>)";
           $date = '-';
           $rename = sprintf('<a href="%s/UserData/RenameRecord?accessor=urls;id=%s;%s" class="%s">Rename</a>', $dir, $file->id, $referer, $delete_class);
           $share = sprintf('<a href="%s/UserData/SelectShare?id=%s;%s" class="modal_link">Share</a>', $dir, $file->id, $referer);
@@ -120,7 +153,7 @@ sub content {
       } else {
       ## TEMP DATA STORED IN SESSION --------------------------------------------
         my $save = sprintf('<a href="%s/Account/Login?%s" class="modal_link">Log in to save</a>', $dir, $referer);
-        my ($type, $name, $delete, $share, $rename);
+        ($species = $file->{'species'}) =~ s/_/&nbsp;/;
         
         if (ref ($file) =~ /DASConfig/i) {
           $type = 'DAS';
@@ -133,8 +166,15 @@ sub content {
           $delete = sprintf('<a href="%s/UserData/DeleteRemote?logic_name=%s;%s" class="modal_link">Delete</a>', $dir, $file->logic_name, $referer);
         } elsif ($file->{'url'}) {
           $type = 'URL';
-          $name = "<strong>$file->{'name'}</strong><br />" if $file->{'name'};
-          $name .= "$file->{'url'} ($file->{'species'})";
+          $name = '<strong>';
+          if ($file->{'nearest'}) {
+            $name .= '<a href="/'.$file->{'species'}.'/Location/View?r='.$file->{'nearest'}
+                        .'" title="Jump to sample region with data">'.$file->{'name'}.'</a>';
+          }
+          else {
+            $name .= $file->{'name'};
+          }
+          $name .= "</strong><br />$file->{'url'} (<em>$species</em>)";
           
           if ($sd->ENSEMBL_LOGINS && $user) {
             $save = sprintf('<a href="%s/UserData/SaveRemote?code=%s;species=%s;%s" class="modal_link">Save to account</a>', $dir, $file->{'code'}, $file->{'species'}, $referer);
@@ -145,12 +185,18 @@ sub content {
           $delete = sprintf('<a href="%s/UserData/DeleteRemote?type=url;code=%s;%s" class="%s">Delete</a>', $dir, $file->{'code'}, $referer, $delete_class);
         } else {
           $type = 'Upload';
-          $name = '<p>';
-          $name .= "<strong>$file->{'name'}</strong><br />" if $file->{'name'};
-          $name .= "$file->{'format'} file for $file->{'species'}";
+          $name = '<strong>';
+          if ($file->{'nearest'}) {
+            $name .= '<a href="/'.$file->{'species'}.'/Location/View?r='.$file->{'nearest'}
+                        .'" title="Jump to sample region with data">'.$file->{'name'}.'</a>';
+          }
+          else {
+            $name .= $file->{'name'};
+          }
+          $name .= "</strong><br />$file->{'format'} file for <em>$species</em>";
           my $extra = "type=$file->{'type'};code=$file->{'code'}"; 
           
-          if ($file->{'format'} && ( $file->{'format'} eq "ID" || $file->{'format'} eq "CONSEQUENCE" ) ){ 
+          if ($file->{'format'} && ( $file->{'format'} eq "ID" || $file->{'format'} eq "CONSEQUENCE") ) { 
             $save = '';
           } else {
             $save = qq{<a href="$dir/UserData/SaveUpload?$extra;$referer" class="modal_link">Save to account</a>} if ($sd->ENSEMBL_LOGINS && $user);
@@ -204,21 +250,18 @@ sub content {
   }
 
   # URL
-  if ($user && $user->find_administratable_groups) {
+  if ($temp_data && $user && $user->find_administratable_groups) {
     $html .= $self->_hint(
       'manage_user_data', 'Sharing with groups',
       qq(<p>Please note that you cannot share temporary data with a group until you save it to your account.</p>),
       '100%',
     );
   }
-  else { 
-    unless ($self->is_configurable) {
-      $html .= $self->_hint(
-        'manage_user_data', 'Adding tracks',
-        qq(<p>Please note that custom data can only be added on pages that allow these tracks to be configured, for example 'Region in detail' images</p>),
-        '100%',
-      );
-    }
+  else {
+    $html .= $self->_hint('user_data_formats', 'Help',
+      qq(<p class="space-below"><a href="/info/website/upload/index.html" class="popup">Help on supported formats, display types, etc</a></p>),
+      '100%',
+    );
   }
 
   return $html;

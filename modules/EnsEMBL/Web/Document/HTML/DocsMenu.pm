@@ -89,13 +89,14 @@ sub render {
 <dl class="local_context">
 <dt>Help &amp; Documentation</dt>
 );
-  if ($page_count > 5) {
-    $html .= qq(
-<dd><a href="/info/">Alphabetical List of Pages</a></dd>
-  );
-  }
+#  if ($page_count > 5) {
+#    $html .= qq(
+#<dd><a href="/info/">Alphabetical List of Pages</a></dd>
+#  );
+#  }
   $html .= $menu;
-  $html .= '</dl>'; 
+  $html .= '</dl>';
+#  warn $html;
   $self->print($html);
 }
 

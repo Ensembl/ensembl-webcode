@@ -20,6 +20,7 @@ use EnsEMBL::Web::TmpFile::Text;
 use EnsEMBL::Web::DASConfig;
 use Bio::EnsEMBL::StableIdHistoryTree;
 use Bio::EnsEMBL::Variation::DBSQL::VariationFeatureAdaptor;
+use Bio::EnsEMBL::Variation::DBSQL::TranscriptVariationAdaptor;
 
 my $DEFAULT_CS = 'DnaAlignFeature';
 
@@ -706,7 +707,13 @@ sub format_consequence_data {
     { 'key' => 'snp',         'title' =>'Corresponding Variation', 'align' => 'center'}
   );
 
-  my $transcript_variation_adaptor = $self->get_adaptor('get_TranscriptVariationAdaptor', 'variation', $self->species);
+  my $transcript_variation_adaptor;
+  if ($self->species_defs->variation_like_databases){
+    $transcript_variation_adaptor = $self->get_adaptor('get_TranscriptVariationAdaptor', 'variation', $self->species);
+  } else  {
+    $transcript_variation_adaptor  = Bio::EnsEMBL::Variation::DBSQL::TranscriptVariationAdaptor->new_fake($self->species);
+  }
+
   my $slice_adaptor = $self->get_adaptor('get_SliceAdaptor', 'core', $self->species);
   my $gene_adaptor = $self->get_adaptor('get_GeneAdaptor', 'core', $self->species);  
   my %slices;

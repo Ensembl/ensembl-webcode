@@ -329,8 +329,10 @@ sub render {
     my $html = qq{<div class="panel js_panel"><input type="hidden" class="panel_type" value="$panel_type" />};
     my $counts = {};
     
+    warn $object->type;
+
     if (!$self->{'omit_header'}) {
-      if (exists $self->{'previous'} || exists $self->{'next'}) {
+      if ( (exists $self->{'previous'} || exists $self->{'next'}) && $object->type ne 'Search') {
         my @buttons = (
           [ 'previous', 'left',  '&laquo;&nbsp;%s' ],
           [ 'next',     'right', '%s&nbsp;&raquo;' ]

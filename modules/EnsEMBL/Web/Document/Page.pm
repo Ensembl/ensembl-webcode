@@ -401,6 +401,7 @@ sub render {
       <div id="nav" class="print_hide">
         [[local_context]]
         [[local_tools]]
+        [[acknowledgements]]
         <p class="invisible">.</p>
       </div>};
     }

@@ -35,7 +35,10 @@ sub process {
   else {
     my $mailer = EnsEMBL::Web::Mailer->new();
     my $spam;
-    $spam = 1 if $object->param('email') eq 'neverdiespike@hanmail.net';
+
+		#will prob need a list of these blacklisted addresses, but do this for now to fix Vega spam
+    $spam = 1 if $object->param('address') eq 'neverdiespike@hanmail.net';
+
     ## Check honeypot fields first
     if ($object->param('honeypot_1') || $object->param('honeypot_2')) {
       $spam = 1;

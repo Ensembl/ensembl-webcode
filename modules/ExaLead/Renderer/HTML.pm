@@ -110,7 +110,8 @@ sub _render_hit {
   $URL =~ s{Location/View\?marker}{Location/Marker\?m}; #cope with incorrect marker URLs
   $URL =~ s{Karyotype\?type=}{Genome\?ftype=}; #cope with incorrect feature URLs
   $URL =~ s{Genome\?ftype=OligoFeature}{Genome\?ftype=ProbeFeature;fdb=funcgen;ptype=pset}; #cope with incorrect oligoprobe feature URLs
-  $URL =~ s{Location/\?ftype=}{Location/Genome\?type=}; #cope with stuffed Vega Genomic alignments (r37 only)
+  $URL =~ s{Location/\?ftype=}{Location/Genome\?type=}; #cope with stuffed Vega Genomic alignments
+  $URL =~ s{markerview\?marker=}{Location/Marker\?m=}; #cope with stuffed Vega Markers (r37 only)
   $URL =~ s/Transcript\/Domains\/Genes\?domain=(IPR\d{6}).*/Location\/Genome\?ftype=Domain;id=$1/; #no need to have Transcript IDs on Domain results
   #remove url for unmapped features
   if ($URL =~ /Location\/Genome\?ftype=UnmappedObject/) {

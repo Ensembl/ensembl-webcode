@@ -596,7 +596,7 @@ sub _ajax_zmenu_misc_feature {
       next unless $value;
       my $link = $obj->get_ExtURL('ENS_SUS_SEARCH', $value);
       $entry = {
-        'label'=> 'Jump to Pig in Ensembl',
+        'label_html'=> 'Jump to Pig in Ensembl',
         'link' => $link,
       };    
       $panel->add_entry($entry);

@@ -98,6 +98,7 @@ sub get_sequence_by_id {
     my $dbname = $dbnames->{lc $dbname_b};
     if(!$dbname) {
 		warn "Database name not found for ID ($dbname_b): $id";
+		$dbname = $dbname_b;
     }
 
     if ( $dbname =~ /emblcds|refseq/ || $dbname eq 'embl') {

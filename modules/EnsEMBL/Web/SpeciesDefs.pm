@@ -990,10 +990,10 @@ sub species_path {
     $nospaces =~ s/ /_/g;
 
 # Get the location of the requested species 
-    my $spsite = uc($site_hash->{$nospaces});
+    my $spsite = uc($site_hash->{lc($nospaces)});
 
 # Get the location of the current site species
-    my $cssite = uc($site_hash->{$current_species});
+    my $cssite = uc($site_hash->{lc($current_species)});
 
 # Get the URL for the location
     my $base_url = $url_hash->{$spsite} || '';

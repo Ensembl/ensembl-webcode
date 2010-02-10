@@ -1029,16 +1029,16 @@ sub species_display_label {
 
     my $current_species = $sd->SYSTEM_NAME($ENV{ENSEMBL_SPECIES}) || $ENV{ENSEMBL_SPECIES};
     my $sdhash = $sd->SPECIES_DISPLAY_NAME($current_species);
-    my $slb = $sdhash->{$species} || $sdhash->{$ss} || '';
+    my $slb = $sdhash->{lc $species} || $sdhash->{lc $ss} || '';
     return $slb if ($slb);
-#    warn Dumper $sdhash;
+
 
     my $label = $self->species_label($species);
 #    warn "L:$species * $label";
     return $label unless ($label =~ /Ancestral/);
 
-    my $site_hash = $sd->ENSEMBL_SPECIES_SITE($current_species);
-    my $url_hash = $sd->ENSEMBL_EXTERNAL_URLS($current_species);
+    my $site_hash = $sd->ENSEMBL_SPECIES_SITE(lc $current_species );
+    my $url_hash = $sd->ENSEMBL_EXTERNAL_URLS(lc $current_species );
 
     ( my $nospaces = $species ) =~ s/ /_/g;
 

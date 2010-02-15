@@ -986,12 +986,17 @@ sub species_path {
     my $site_hash = $sd->ENSEMBL_SPECIES_SITE($current_species) || $sd->ENSEMBL_SPECIES_SITE;
     my $url_hash = $sd->ENSEMBL_EXTERNAL_URLS($current_species) || $sd->ENSEMBL_EXTERNAL_URLS;
 
+    $species ||= $current_species;
+
     my $nospaces = $sd->SYSTEM_NAME($species) || $species; 
     $nospaces =~ s/ /_/g;
 
 
 # Get the location of the requested species 
     my $spsite = uc($site_hash->{lc($nospaces)});
+
+# if the species not configured in DEFAULTS.ini then they must be local
+    return "/$nospaces" unless $spsite;
 
 # Get the location of the current site species
     my $cssite = uc($site_hash->{lc($current_species)});

@@ -1189,7 +1189,7 @@ sub ajax_zmenu_variation_transcript {
     });
     $panel->add_entry({
       'label_html'  => 'Export Protein',
-      'link'        => $obj->_url({'type' => 'Transcript', 'action' => 'Export/fasta', 't' => $trans_id, 'st' => 'peptide', '_format' =>'Text' }),
+      'link'        => $obj->_url({'type' => 'Transcript', 'action' => 'Export/fasta', 't' => $trans_id, 'param' => 'peptide', '_format' =>'Text' }),
       'priority'    => 5,
     });
   }
@@ -1201,7 +1201,7 @@ sub ajax_zmenu_variation_transcript {
   });
   $panel->add_entry({
     'label_html'  => 'Export cDNA',
-    'link'        => $obj->_url({'type' => 'Transcript', 'action' => 'Export/fasta', 't' => $trans_id, 'st' => 'cdna', '_format' =>'Text' }),
+    'link'        => $obj->_url({'type' => 'Transcript', 'action' => 'Export/fasta', 't' => $trans_id, 'param' => 'cdna', '_format' =>'Text' }),
     'priority'    => 6,
   });
 

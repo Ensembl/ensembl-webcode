@@ -1,0 +1,299 @@
+package EnsEMBL::Web::Component::Location::Genome;
+
+### Module to replace Karyoview
+
+use strict;
+use warnings;
+no warnings 'uninitialized';
+
+use EnsEMBL::Web::Apache::SendDecPage;
+use EnsEMBL::Web::Document::SpreadSheet;
+
+use base qw(EnsEMBL::Web::Component::Location);
+
+sub _init {
+  my $self = shift;
+  $self->cacheable(0);
+  $self->ajaxable(1);
+  $self->configurable(1);
+}
+
+sub content {
+  my $self = shift;
+  my $object = $self->object; 
+  my $species = $object->species;
+
+  my ($html, $table);
+  
+  my @features;
+  
+  if (my $id = $object->param('id')) { ## "FeatureView"
+    my $f_objects = $object->create_features; ## Now that there's no Feature factory, we create these on the fly
+    ## TODO: Should there be some generic object->hash functionality for use with drawing code?
+    @features = @{$object->retrieve_features($f_objects)};
+    if (@features) { $table = $self->feature_tables(\@features); }
+  } 
+
+  if ($object->species_defs->ENSEMBL_CHROMOSOMES && scalar(@{$object->species_defs->ENSEMBL_CHROMOSOMES}) && $object->species_defs->MAX_CHR_LENGTH) {
+    ## Now check if we have any features mapped to chromosomes
+    my $draw_karyotype = @features ? 0 : 1;
+    my $not_drawn;
+    my %chromosome = map { $_ => 1 } @{$object->species_defs->ENSEMBL_CHROMOSOMES};
+    
+    foreach (map @{$_->[0]}, @features) {
+      if (ref($_) eq 'HASH' && $chromosome{$_->{'region'}}) {
+        $draw_karyotype = 1;
+      } else {
+        $not_drawn++;
+      }
+    }
+
+    if ($draw_karyotype) {
+      my $image    = $self->new_karyotype_image;
+      my $pointers = [];
+
+      ## Form with hidden elements for click-through
+      my $config = $object->get_imageconfig('Vkaryotype');
+      my $hidden = {
+        'karyotype'   => 'yes',
+        'max_chr'     => $config->get_parameter('image_height'),
+        'margin'      => $config->get_parameter('top_margin'),
+        'chr'         => $object->seq_region_name,
+        'start'       => $object->seq_region_start,
+        'end'         => $object->seq_region_end,
+      };
+
+      ## Deal with pointer colours
+      my %used_colour;
+      my %pointer_default = (
+        'DnaAlignFeature'     => ['red', 'rharrow'],
+        'ProteinAlignFeature' => ['red', 'rharrow'],
+        'RegulatoryFactor'    => ['red', 'rharrow'],
+        'ProbeFeature'        => ['red', 'rharrow'],
+        'XRef'                => ['red', 'rharrow'],
+        'Gene'                => ['blue','lharrow'],
+        'Domain'              => ['blue','lharrow'], 
+      );
+
+      ## Do internal Ensembl data
+      if (@features) { ## "FeatureView"
+        my $text = @features > 1 ? 'Locations of features' : 'Location of feature';
+        my $data_type = $object->param('type');
+        
+      if ($object->param('ftype') eq 'Phenotype'){
+        my $phenotype_name = $object->param('phenotype_name');
+        $text = "Location of variants associated with phenotype $phenotype_name:";
+      }        
+
+        $used_colour{$data_type}++;        
+        $html = qq(<h2>$text</h2>);
+        $image->image_name = "feature-$species";
+        $image->imagemap = 'yes';
+        
+        foreach my $set  (@features) {
+          my $defaults = $pointer_default{$set->[2]};
+          my $pointer_ref = $image->add_pointers($object, {
+            'config_name'   => 'Vkaryotype',
+            'features'      => $set->[0],
+            'feature_type'  => $set->[2],
+            'color'         => $defaults->[0],
+            'style'         => $defaults->[1],
+          });
+          
+          push(@$pointers, $pointer_ref);
+        }
+      }
+
+      my $colours = $self->colour_array;
+      my $ok_colours = [];
+      
+      ## Remove any colours being used by features from the highlight colour array
+      foreach my $colour (@$colours) {
+        next if $used_colour{$colour};
+        push @$ok_colours, $colour;
+      }
+
+      my ($user_pointers, $table2) = $self->create_user_set($image, $ok_colours);
+
+      ## Add some settings, if there is any user data
+      if( @$user_pointers ) {
+        push @$pointers, @$user_pointers; 
+        $image->imagemap = 'no';
+      } 
+      if (!@$pointers) { ## Ordinary "KaryoView"
+        $image->image_name = "karyotype-$species";
+        $image->imagemap = 'no';
+      }
+  
+      $image->set_button('drag', 'title' => 'Click on a chromosome' );
+      $image->caption = 'Click on the image above to jump to a chromosome, or click and drag to select a region';
+      $image->imagemap = 'yes';
+      $image->karyotype( $object, $pointers, 'Vkaryotype' );
+
+      $html .= $image->render;
+    }
+    
+    if ($not_drawn) {
+      my $plural = $not_drawn > 1 ? 's' : '';
+      $not_drawn = 'These' if $not_drawn == @features;
+      my $message = $draw_karyotype ? 'therefore have not been drawn' : 'therefore the karyotype has not been drawn';
+      $html .= $self->_info( 'Undrawn features', "<p>$not_drawn feature$plural do not map to chromosomal coordinates and $message.</p>" );
+    }
+  } else {
+    $html .= $self->_info( 'Unassembled genome', '<p>This genome has yet to be assembled into chromosomes</p>' );
+  }
+
+  if ($table) {
+    $html .= $table;
+  } else {
+    my $file = '/ssi/species/stats_'.$object->species.'.html';
+    $html .= EnsEMBL::Web::Apache::SendDecPage::template_INCLUDE(undef, $file);
+    
+  }
+
+  return $html;
+}
+
+sub feature_tables {
+  my $self = shift;
+  my $feature_dets = shift;
+  my $object = $self->object;
+  my $data_type = $object->param('ftype');  
+  my $html;
+  my @tables;  
+ 
+  foreach my $feature_set (@{$feature_dets}) {
+    my $features = $feature_set->[0];
+    
+    my $extra_columns = $feature_set->[1];
+    my $feat_type = $feature_set->[2];   
+ 
+    # could show only gene links for xrefs, but probably not what is wanted:
+    # next SET if ($feat_type eq 'Gene' && $data_type =~ /Xref/);
+    
+    my $data_type = ($feat_type eq 'Gene') ? 'Gene Information:'
+      : ($feat_type eq 'Transcript') ? 'Transcript Information:'
+      : 'Feature Information:';
+
+    if ($feat_type eq 'Domain'){
+      my $domain_id = $object->param('id');
+      my $feature_count = scalar @$features;
+      $data_type = "Domain $domain_id maps to $feature_count Genes. The gene Information is shown below:";
+    }
+
+    my $table = new EnsEMBL::Web::Document::SpreadSheet( [], [], {'margin' => '1em 0px'} );
+    
+    if ($feat_type =~ /Gene|Transcript|Domain/) {
+      $table->add_columns({'key'=>'names',  'title'=>'Ensembl ID',      'width'=>'25%','align'=>'left' });
+      $table->add_columns({'key'=>'extname','title'=>'External names',  'width'=>'25%','align'=>'left' });
+    } 
+    elsif ($feat_type =~ /Variation/i) {
+      $table->add_columns({'key'=>'loc',   'title'=>'Genomic location(strand)','width'=>'100px','align'=>'left' });    
+      $table->add_columns({'key'=>'names', 'title'=>'Name(s)','width'=>'100px','align'=>'left' });
+    } 
+    else {	    
+      $table->add_columns({'key'=>'loc',   'title'=>'Genomic location(strand)','width' =>'15%','align'=>'left' });
+      $table->add_columns({'key'=>'length','title'=>'Genomic length',  'width'=>'10%','align'=>'left' });
+      $table->add_columns({'key'=>'names', 'title'=>'Name(s)',        'width'=>'25%','align'=>'left' });
+    }
+        
+    my $c = 1;
+    
+    for( @{$extra_columns||[]} ) {
+      my $width  =  ($feat_type =~ /Variation/i) ? '300px' : '10%';
+      $table->add_columns({'key'=>"extra_$c",'title'=>$_,'width'=>$width,'align'=>'left' });      
+      $c++;
+    }
+        
+    my @data = map { $_->[0] }
+      sort { $a->[1] <=> $b->[1] || $a->[2] cmp $b->[2] || $a->[3] <=> $b->[3] }
+      map { [$_, $_->{'region'} =~ /^(\d+)/ ? $1 : 1e20, $_->{'region'}, $_->{'start'}] }
+      @$features;
+    
+    foreach my $row (@data) {
+      my $contig_link = 'Unmapped';
+      my $names = '';
+      my $data_row;
+      
+      
+      if ($row->{'region'}) {
+        $contig_link = sprintf(
+          '<a href="%s/Location/View?r=%s:%d-%d;h=%s">%s:%d-%d(%d)</a>',
+          $object->species_path,
+          $row->{'region'}, $row->{'start'}, $row->{'end'}, $row->{'label'},          
+          $row->{'region'}, $row->{'start'}, $row->{'end'},
+          $row->{'strand'}
+        );
+
+        if ($feat_type =~ /Gene|Transcript|Domain/ && $row->{'label'}) {
+          $feat_type = 'Gene' if $feat_type eq 'Domain';
+          my $t = $feat_type eq 'Gene' ? 'g' : 't';
+          
+          $names = sprintf(
+            '<a href="%s/%s/Summary?%s=%s;r=%s:%d-%d">%s</a>',
+            $object->species_path, $feat_type, $t, $row->{'label'},
+            $row->{'region'}, $row->{'start'}, $row->{'end'},
+            $row->{'label'}
+          );
+         
+          my $extname = $row->{'extname'};
+          my $desc =  $row->{'extra'}[0];
+          $data_row = { 'extname' => $extname, 'names' => $names };
+        } else {
+          if ($feat_type !~ /align|RegulatoryFactor|ProbeFeature/i && $row->{'label'}) {
+            $names = sprintf(
+              '<a href="%s/Gene/Summary?g=%s;r=%s:%d-%d">%s</a>',
+              $object->species_path, $row->{'label'},
+              $row->{'region'}, $row->{'start'}, $row->{'end'},
+              $row->{'label'}
+            );            
+          } 
+          if ($feat_type =~ /Variation/i && $row->{'label'}) {            
+            my $species_path = $object->species_path;
+            
+            #setting phenotype variation track on 
+            my $track = qq{contigviewbottom=variation_set_Phenotype-associated variations=normal};
+            $contig_link = qq{<a href="$species_path/Location/View?r=$row->{'region'}:$row->{'start'}-$row->{'end'};h=$row->{'label'};$track">$row->{'region'}:$row->{'start'}-$row->{'end'}($row->{'strand'})</a>};   #better way of doing a simple link for Genomic location
+            $names = qq{<a href="$species_path/Variation/Phenotype?v=$row->{'label'}">$row->{'label'}</a>};   #better way of doing a simple link for Name(s)
+          }
+          else {
+            $names  = $row->{'label'} if $row->{'label'};
+          }
+          
+          my $length = $row->{'length'};
+          $data_row = { 'loc'  => $contig_link, 'length' => $length, 'names' => $names };
+        }
+      }
+      
+      my $c = 1;
+      
+      for( @{$row->{'extra'}||[]} ) {
+        $data_row->{"extra_$c"} = $_;
+        $c++;
+      }
+      
+      $c = 0;
+      
+      for( @{$row->{'initial'}||[]} ) {
+        $data_row->{"initial$c"} = $_;
+        $c++;
+      }
+      
+      $table->add_row($data_row);
+    }
+    
+    if (@data) {
+      $html .= qq(<strong>$data_type</strong>);
+      $html .= $table->render;
+    }
+  }
+  
+  if (!$html) {
+    my $id = $object->param('id');
+    $html .= qq(<br /><br />No mapping of $id found<br /><br />);
+  }
+  
+  return $html;
+}
+
+1;

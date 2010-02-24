@@ -1,0 +1,92 @@
+#!/usr/local/bin/perl
+
+=head1 NAME
+
+taillog - script to tail -f the current log
+
+=head1 SYNOPSIS
+
+    ctrl_scripts/taillog [--access] [--host=hostname]
+
+=head1 DESCRIPTION
+
+This script starts a "tail -f" on the current apache log.
+By default, it tails the latest error log for the current host, but
+specifying --access tails the access log instead, and --host=hostname 
+changes the host
+
+=head1 LICENCE
+
+This code is distributed under an Apache style licence:
+Please see http://www.ensembl.org/code_licence.html for details
+
+=head1 AUTHOR
+
+Jim Stalker <jws@sanger.ac.uk>
+
+=cut
+
+use strict;
+use warnings;
+no warnings 'uninitialized';
+
+use Getopt::Long;
+use FindBin qw($Bin);
+use File::Basename qw( dirname );
+use Sys::Hostname::Long;
+
+my $serverroot;
+
+BEGIN {
+  $serverroot = dirname($Bin);
+  unshift @INC, "$serverroot/conf";
+};
+
+use SiteDefs;
+
+
+my ($help, $do_access, $both, $do_nginx);
+&GetOptions(
+  "nginx"   => \$do_nginx,
+  "access"  => \$do_access,
+  "both"    => \$both,
+  "h"       => \$help,
+);
+die '
+------------------------------------------------------------------------
+Usage:
+  ctrl_scripts/taillog
+    [-a|--access]
+    [-b|--both]
+    [-h|--help]
+        
+Options:
+  -a, --access    : Tails access log instead of error log
+  -b, --both      : Tails access and error log (using multitail)
+  -h, --help      : print this help message
+
+Notes:
+  For -b to work must have multitail installed
+  http://www.vanheusden.com/multitail/
+	
+------------------------------------------------------------------------
+' if $help;
+
+my ($al) = split /\s+/, ( $SiteDefs::ENSEMBL_CUSTOMLOG );
+my $el = $SiteDefs::ENSEMBL_ERRORLOG;
+
+if( $do_nginx ) {
+  $al = $SiteDefs::ENSEMBL_LOGDIR.'/nginx.access_log';
+  $el = $SiteDefs::ENSEMBL_LOGDIR.'/nginx.error_log';
+}
+
+my $cmd = '';
+if( $both ) {
+  $cmd = "multitail -o check_mail:0 --mergeall -ci yellow,,bold $al $el";
+} elsif( $do_access ) {
+  $cmd = "tail -f $al";
+} else {
+  $cmd = "tail -f $el";
+}
+exec($cmd) or die "Could not tail log: $!.\n";
+

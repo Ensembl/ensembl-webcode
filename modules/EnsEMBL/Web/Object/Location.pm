@@ -824,7 +824,7 @@ sub retrieve_Variation {
       #only get associated gene and phenotype for matching variation id
       if($variation->{'_variation_id'} eq $v->{'_variation_id'})
       {          
-          $associated_phenotype .= qq{$variation->{'phenotype_description'}, } if($associated_phenotype !~ /$variation->{'phenotype_description'}/g);          
+          $associated_phenotype .= qq{$variation->{'phenotype_description'}, } if($associated_phenotype !~ /, $variation->{'phenotype_description'}/g);          
                 
           if($variation->{'_phenotype_id'} eq $phenotype_id)
           {

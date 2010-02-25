@@ -169,7 +169,7 @@ sub content {
   foreach (map { $_->[2] } sort { $a->[0] cmp $b->[0] || $a->[1] cmp $b->[1] } map { [ $_->external_name, $_->stable_id, $_ ] } @$transcripts) {
     my $transcript_length = $_->length;
     my $protein = 'No protein product';
-    my $protein_length = 'N/A';
+    my $protein_length = '-';
     
     my $url = $self->object->_url({
       type   => 'Transcript',
@@ -190,7 +190,7 @@ sub content {
       $protein_length = $_->translation->length;
     }
 
-    my $ccds = "N/A";
+    my $ccds = "-";
     if(my @CCDS = grep { $_->dbname eq 'CCDS' } @{$_->get_all_DBLinks} ) {
       my %T = map { $_->primary_id,1 } @CCDS;
       @CCDS = sort keys %T;

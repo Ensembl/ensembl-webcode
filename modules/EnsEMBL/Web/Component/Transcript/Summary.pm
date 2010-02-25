@@ -144,7 +144,7 @@ sub content {
 
   $html .= "</tr>";
     my %biotype_rows;
-    foreach (@$transcripts) {
+    foreach (map { $_->[2] } sort { $a->[0] cmp $b->[0] || $a->[1] cmp $b->[1] } map { [ $_->external_name, $_->stable_id, $_ ] } @$transcripts) {
       my $transcript_length = $_->length;
       my $protein = 'No protein product';
       my $protein_length = 'N/A';

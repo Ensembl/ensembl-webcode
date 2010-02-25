@@ -143,8 +143,8 @@ sub content {
   }
 
   $html .= "</tr>";
-    
-    foreach (map $_->[2], sort { $a->[0] cmp $b->[0] || $a->[1] cmp $b->[1] } map {[ $_->external_name, $_->stable_id, $_ ]} @$transcripts) {
+    my %biotype_rows;
+    foreach (@$transcripts) {
       my $transcript_length = $_->length;
       my $protein = 'No protein product';
       my $protein_length = 'N/A';
@@ -178,7 +178,7 @@ sub content {
       }
 
       (my $biotype = $_->biotype) =~ s/_/ /g;
-      $html .= sprintf('
+      my $html_row .= sprintf('
         <tr%s>
           <th>%s</th>
           <td><a href="%s">%s</a></td>
@@ -193,15 +193,25 @@ sub content {
         $transcript_length,
         $protein,
         $protein_length,
-        $self->glossary_mouseover(ucfirst($biotype), $_->biotype),
+        $self->glossary_mouseover(ucfirst($biotype), ucfirst($biotype)),
       );
 
       if ($object->species =~/^Homo|Mus/){
-        $html .= "<td>$ccds</td>";
+        $html_row .= "<td>$ccds</td>";
       }
-      $html .= "</tr>";
+      $html_row .= "</tr>";
+      if ($biotype eq 'protein coding'){ $biotype = '.';}
+      $biotype_rows{$biotype} = [] unless exists $biotype_rows{$biotype};
+      push @{$biotype_rows{$biotype}}, $html_row;
     }
-    
+
+    # Add rows to transcript table sorted by biotype
+    foreach my $type ( sort{$a cmp $b}  keys %biotype_rows){
+      foreach (@{$biotype_rows{$type}}){
+        $html .= $_;
+      }
+    }
+
     $html .= '
       </table>';
     

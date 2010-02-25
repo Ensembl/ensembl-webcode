@@ -51,8 +51,11 @@ our %DOCUMENT_TYPES = (
 
 sub new {
   my ($class, $data) = @_;
-  
-  my $format = $data->{'input'} ? $data->{'input'}->param('_format') : $data->{'outputtype'};
+ 
+  my $format = $data->{'outputtype'};
+  if ($data->{'input'} && $data->{'input'}->param('_format')) {
+    $format = $data->{'input'}->param('_format');
+  }  
   
   my $self = {
     body_attr        => {},

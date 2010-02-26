@@ -154,7 +154,7 @@ sub _output_story {
     my @species = $item->species_ids; 
     my $sp_text;
   
-    if (!@species) {
+    if (!@species || !$species[0]) {
       $sp_text = 'all species';
     }
     elsif (@species > 5) {

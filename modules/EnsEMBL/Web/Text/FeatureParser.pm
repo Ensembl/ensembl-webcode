@@ -252,6 +252,11 @@ sub split_into_columns {
     $_ =~ s/^\s+//;
     $_ =~ s/\s+$//;
   }
+
+  ## If this is removed SNP effect predictor breaks ...
+  if ($format =~/^CON/){
+    @columns = grep /\S/, @columns;
+  }
   return (\@columns, $tabbed);
 }
 

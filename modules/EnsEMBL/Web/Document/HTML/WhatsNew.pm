@@ -92,7 +92,7 @@ sub render {
           $sp_name = join(', ', @names);
         }
 ## generate HTML
-        $html .= sprintf(qq(<li><strong><a href="%s#%s" style="text-decoration:none">%s</a></strong> (%s)</li>\n),
+        $html .= sprintf(qq(<li><strong><a href="%s#news_%s" style="text-decoration:none">%s</a></strong> (%s)</li>\n),
               $news_url, $item->news_item_id, $item->title, $sp_name);
 
       }

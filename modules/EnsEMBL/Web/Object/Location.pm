@@ -268,7 +268,6 @@ sub create_features {
   my $features = {};
 
   my $db        = $self->param('db')  || 'core'; 
-  if ($self->param('fdb')){ $db = $self->param('fdb');}
   my ($identifier, $fetch_call, $featureobj, $dataobject, $subtype);
   
   ## Are we inputting IDs or searching on a text term?

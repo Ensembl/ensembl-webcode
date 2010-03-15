@@ -276,7 +276,8 @@ sub create_features {
     $features = $self->search_Xref($db, \@exdb, $self->param('xref_term'));
   }
   else {
-    my $feature_type  = $self->param('ftype') ||$self->param('type') || 'ProbeFeature';  
+    my $feature_type  = $self->param('ftype') ||$self->param('type') || 'ProbeFeature'; 
+    $db = 'funcgen'; 
     if ( ($self->param('ftype') eq 'ProbeFeature') && $self->param('ptype')) {
       $subtype = $self->param('ptype');
     } 

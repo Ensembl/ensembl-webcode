@@ -253,7 +253,6 @@ sub create_features {
   my $features = {};
 
   my $db        = $self->param('db')  || 'core'; 
-  if ($self->param('fdb')){ $db = $self->param('fdb');}
   my ($identifier, $fetch_call, $featureobj, $dataobject, $subtype);
   
   ## Are we inputting IDs or searching on a text term?
@@ -263,8 +262,11 @@ sub create_features {
   }
   else {
     my $feature_type  = $self->param('ftype') ||$self->param('type') || 'ProbeFeature';  
-    if ( ($self->param('ftype') eq 'ProbeFeature') && $self->param('ptype')) {
-      $subtype = $self->param('ptype');
+    if ( ($self->param('ftype') eq 'ProbeFeature')){ 
+      $db = 'funcgen';
+      if ( $self->param('ptype')) {
+        $subtype = $self->param('ptype');
+      }
     } 
    ## deal with xrefs
     if ($feature_type =~ /^Xref_/) {

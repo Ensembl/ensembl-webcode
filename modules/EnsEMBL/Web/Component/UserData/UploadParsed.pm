@@ -30,7 +30,7 @@ sub content_ajax {
   my $self = shift;
   
   my $object = $self->object;
-  my $upload = $object->get_session->get_data('code' => $object->param('code'));
+  my $upload = $object->get_session->get_data('code' => ($object->param('code'))[0]);
   my $html;
 
   # Here's what we actually want to do!

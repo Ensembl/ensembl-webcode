@@ -75,7 +75,7 @@ sub process {
   }
   else {
     $param->{'_referer'} = $object->param('_referer');
-    $object->redirect($url, $param);
+    $object->redirect($self->url($url, $param));
   }
   
 }

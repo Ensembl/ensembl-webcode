@@ -36,8 +36,8 @@ sub content {
   $self->_attach_das($image_config);
 
   my $key = $image_config->get_track_key('transcript', $gene);
-  my $n   = $image_config->get_node($key);
-  
+  my $n   = $image_config->get_node(lc($key));
+
   $n->set('display', 'transcript_label') if $n && $n->get('display') eq 'off';
 
   my $image = $self->new_image($gene_slice, $image_config, [ $gene->Obj->stable_id ]);

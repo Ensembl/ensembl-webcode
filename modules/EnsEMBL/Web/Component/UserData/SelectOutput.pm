@@ -41,6 +41,7 @@ sub content {
   
   $convert_file  = ';convert_file=' . $object->param('convert_file') if $object->param('convert_file');
   $convert_file .= ';id_limit=' . $object->param('id_limit') if $object->param('id_limit');
+  $convert_file .= ';variation_limit=' . $object->param('variation_limit') if $object->param('variation_limit');
   
   my $html_url = "$species_path/UserData/$html_target?format=html" . $convert_file . $species . $referer;
   my $text_url = "$species_path/UserData/$text_target?format=text" . $convert_file . $species . $extra_param;

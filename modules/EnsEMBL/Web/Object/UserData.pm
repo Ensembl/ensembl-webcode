@@ -603,13 +603,14 @@ sub get_stable_id_history_data {
 
 #------------------------------- Variation functionality -------------------------------
 sub calculate_consequence_data {
-  my ($self, $file) = @_;
+  my ($self, $file, $size_limit) = @_;
   my $data = $self->fetch_userdata_by_id($file);
   my %slice_hash;
   my %consequence_results;
   my ($f, @new_vfs);
   my $count =0;
-
+  my $feature_count = 0;
+  my $file_count = 0;
 
   if (my $parser = $data->{'parser'}){
     foreach my $track ($parser->{'tracks'}) {
@@ -625,6 +626,8 @@ sub calculate_consequence_data {
         }
 
         while ( $f = shift @{$features}){
+          $file_count++;
+          next if $feature_count >= $size_limit;
           # Get Slice
           my $slice;
           if (defined $slice_hash{$f->seqname}){
@@ -691,13 +694,18 @@ sub calculate_consequence_data {
             $consequence_results{$count} = \@feature_block;
             @new_vfs = ();
           }
+          $feature_count++;
         }
       }
     }
   }
 
   my $table = $self->format_consequence_data(\%consequence_results);
-  return $table;
+  if ($file_count <= 1000){
+    return $table;
+  } else {
+    return ($table, $file_count);
+  }
 }
 
 sub format_consequence_data {

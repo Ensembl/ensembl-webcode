@@ -31,7 +31,13 @@ sub content {
     my ($table, $file_count) = $object->calculate_consequence_data($file, $size_limit);
     if ($file_count){
       $html .= $self->_hint ('', '<p>' .'Your file contained '.$file_count .' features however
-       this web tool will only convert the first '. $size_limit .' features in the file.</p>');
+       this web tool will only convert the first '. $size_limit .' features in the file.</p','<p>To 
+       process all your variations you can split your file into smaller chunks and process them 
+       one at a time, or you may wish to use the 
+       <a href="/info/docs/api/variation/variation_tutorial.html#Consequence">variation API</a> 
+       or a standalone
+       <a href="ftp://ftp.ensembl.org/pub/misc-scripts/SNP_effect_predictor_1.0/">perl script</a> 
+       which you can run on your own machine to generate the same results as this web tool.</p>');
     }
     $html .= $table->render;
   }

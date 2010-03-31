@@ -28,7 +28,7 @@ sub process {
     my ($table, $file_count) = $object->calculate_consequence_data($file, $size_limit);
     
     if ($file_count){
-      $output .= 'Your file contained '.$file_count .' features however this web tool will only conver the first '. $size_limit .' features in the file.'."\n\n";
+      $output .= 'Your file contained '.$file_count .' features however this web tool will only convert the first '. $size_limit .' features in the file.'."\n\n";
       $output .= $table->render_Text;
     } else {
      $output .= $table->render_Text;

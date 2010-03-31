@@ -688,7 +688,7 @@ sub calculate_consequence_data {
           push @new_vfs, $vf;
 
           # if the array is "full" or there are no more items in @features
-          if(scalar @new_vfs == 1000 || scalar @$features == 0) {
+          if(scalar @new_vfs == $size_limit || scalar @$features == 0) {
             $count++;
             my @feature_block = @new_vfs;
             $consequence_results{$count} = \@feature_block;
@@ -701,7 +701,7 @@ sub calculate_consequence_data {
   }
 
   my $table = $self->format_consequence_data(\%consequence_results);
-  if ($file_count <= 1000){
+  if ($file_count <= $size_limit){
     return $table;
   } else {
     return ($table, $file_count);
@@ -746,7 +746,7 @@ sub format_consequence_data {
     $transcript_variation_adaptor->fetch_all_by_VariationFeatures($var_features);
     foreach my $var_feature (@{$var_features}){
       my $transcript_variations = $var_feature->get_all_TranscriptVariations();
-      foreach my $tv (@{$transcript_variations}){
+      foreach my $tv (@{$transcript_variations}){ 
         foreach my $consequence_string (@{$tv->consequence_type}){
           my $row = {};
 

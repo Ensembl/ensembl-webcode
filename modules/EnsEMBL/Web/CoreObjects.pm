@@ -109,6 +109,8 @@ sub _generate_objects {
   $self->_generate_gene;
   $self->_generate_location;
   
+  $self->param($_, $self->{'parameters'}->{$_}) for keys %{$self->{'parameters'}};
+  
   $self->{'parameters'}{'h'} = $self->param('h') if $self->param('h');
 }
 

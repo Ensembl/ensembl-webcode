@@ -984,14 +984,13 @@ sub _summarise_dasregistry {
   # Fetch the sources for the current species
   my %reg_logic = map { $_->logic_name => $_ } @reg_sources;
   my %reg_url   = map { $_->full_url   => $_ } @reg_sources;
-  
+ 
   # The ENSEMBL_INTERNAL_DAS_SOURCES section is a list of enabled DAS sources
   # Then there is a section for each DAS source containing the config
   $self->tree->{'ENSEMBL_INTERNAL_DAS_SOURCES'}     ||= {};
   $self->das_tree->{'ENSEMBL_INTERNAL_DAS_CONFIGS'} ||= {};
   while (my ($key, $val) 
          = each %{ $self->tree->{'ENSEMBL_INTERNAL_DAS_SOURCES'} }) {
-
     # Skip disabled sources
     $val || next;
     # Start with an empty config

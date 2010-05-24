@@ -45,13 +45,19 @@ information, visit the <a href="http://www.lrg-sequence.org">LRG website</a>.
   } 
   else {
     my($edb, $acc);
-    my $description = ' LRG region '. $hub->param('lrg');
+    my $description = ' LRG region '. $hub->param('lrg').'.';
     if ($description) {
       if ($description ne 'No description') {
+        my @genes = @{$self->object->Obj->get_all_Genes('LRG_import')||[]};
+        my $db_entry = $genes[0]->get_all_DBLinks('HGNC');
+        warn ">>> XREF ".$db_entry->[0];
+        $description .= ' This LRG was created as a reference standard for the '.$db_entry->[0]->display_id.' gene';
+      
         $description =~ s/EC\s+([-*\d]+\.[-*\d]+\.[-*\d]+\.[-*\d]+)/$self->EC_URL($1)/e;
         $description =~ s/\[\w+:([-\w\/\_]+)\;\w+:(\w+)\]//g;
         ($edb, $acc) = ($1, $2);
 	      my $link = $self->model->hub->get_ExtURL_link("Source: $edb $acc",$edb, $acc);
+        warn ">>> ACC $acc, LINK $link";
         if ($acc ne 'content') { 
           $description .= '<span class="small">'
                         .@{[ $self->model->hub->get_ExtURL_link("Source: $edb $acc",$edb, $acc) ]}

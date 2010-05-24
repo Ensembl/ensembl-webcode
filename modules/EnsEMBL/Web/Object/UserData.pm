@@ -610,6 +610,7 @@ sub calculate_consequence_data {
   my $count =0;
   my $feature_count = 0;
   my $file_count = 0;
+  my $nearest;
 
   if (my $parser = $data->{'parser'}){ 
     foreach my $track ($parser->{'tracks'}) {
@@ -703,13 +704,14 @@ sub calculate_consequence_data {
         }
       }
     }
+    $nearest = $parser->nearest;
   }
 
   my $table = $self->format_consequence_data(\%consequence_results);
-  if ($file_count <= 1000){
-    return $table;
+  if ($file_count <= $size_limit){
+    return ($table, $nearest);
   } else {
-    return ($table, $file_count);
+    return ($table, $nearest, $file_count);
   }
 }
 

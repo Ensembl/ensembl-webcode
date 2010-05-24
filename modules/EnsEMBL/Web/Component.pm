@@ -445,7 +445,6 @@ sub _sort_similarity_links {
         $text = $word;
       }
     }
-    
     if ($type->isa('Bio::EnsEMBL::IdentityXref')) {
       $text .= ' <span class="small"> [Target %id: ' . $type->target_identity . '; Query %id: ' . $type->query_identity . ']</span>';
       $join_links = 1;
@@ -497,6 +496,13 @@ sub _sort_similarity_links {
     
     $text .= qq{  [<a href="$k_url">view all locations</a>]};
     $text .= '</div>';
+   
+    ## FIXME - another LRG hack! 
+    if ($externalDB eq 'ENS_LRG_gene') {
+      $text = qq{<a href="/Homo_sapiens/LRG/Summary?lrg=$display_id">$display_id</a>
+ [<a href="/Homo_sapiens/LRG/Genome?lrg=$display_id">view all locations</a>]
+};
+    }
     
     push @{$object->__data->{'links'}{$type->type}}, [ $type->db_display_name || $externalDB, $text ];
   }

@@ -484,27 +484,40 @@ sub _sort_similarity_links {
     }
 
     # add link to featureview
-    my $link_name = $fv_type eq 'OligoFeature' ? $display_id : $primary_id;
-    my $link_type = $fv_type eq 'OligoFeature' ? $fv_type : "${fv_type}_$externalDB";
-    
-    my $k_url = $self->model->hub->url({
-      type   => 'Location',
-      action => 'Genome',
-      id     => $link_name,
-      ftype  => $link_type
-    });
-    
-    $text .= qq{  [<a href="$k_url">view all locations</a>]};
-    $text .= '</div>';
-   
     ## FIXME - another LRG hack! 
     if ($externalDB eq 'ENS_LRG_gene') {
-      $text = qq{<a href="/Homo_sapiens/LRG/Summary?lrg=$display_id">$display_id</a>
- [<a href="/Homo_sapiens/LRG/Genome?lrg=$display_id">view all locations</a>]
+      my $lrg_url = $self->model->hub->url({
+        type    => 'LRG',
+        action  => 'Genome',
+        lrg     => $display_id,
+      });
+    
+      $text .= qq{ [<a href="$lrg_url">view all locations</a>]
 };
     }
+    else {
     
-    push @{$object->__data->{'links'}{$type->type}}, [ $type->db_display_name || $externalDB, $text ];
+      my $link_name = $fv_type eq 'OligoFeature' ? $display_id : $primary_id;
+      my $link_type = $fv_type eq 'OligoFeature' ? $fv_type : "${fv_type}_$externalDB";
+    
+      my $k_url = $self->model->hub->url({
+        type   => 'Location',
+        action => 'Genome',
+        id     => $link_name,
+        ftype  => $link_type
+      });
+    
+      $text .= qq{  [<a href="$k_url">view all locations</a>]};
+      $text .= '</div>';
+    }
+
+    ## FIXME Yet another LRG hack!
+    my $label = $type->db_display_name || $externalDB;
+    if ($externalDB eq 'ENS_LRG_gene') {
+      $label = 'LRG';
+    }
+    
+    push @{$object->__data->{'links'}{$type->type}}, [ $label, $text ];
   }
 }
 

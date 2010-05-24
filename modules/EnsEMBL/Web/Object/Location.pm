@@ -54,7 +54,7 @@ sub availability {
     $availability->{'karyotype'}       = 1;
     $availability->{'chromosome'}      = exists $chrs{$seq_region_name};
     $availability->{'has_chromosomes'} = scalar @chromosomes;
-    $availability->{'has_strains'}     = $variation_db && $variation_db->{'#STRAINS'};
+    $availability->{'has_strains'}     = $variation_db && $variation_db->{'#STRAINS'} && $self->species ne 'Danio_rerio'; # Danio_rerio hack because the variation team screwed up. DO NOT MERGE TO HEAD
     $availability->{'slice'}           = $seq_region_name && $seq_region_name ne $self->hub->core_param('r');
     $availability->{'has_synteny'}     = scalar keys %{$synteny_hash{$self->species} || {}};
     $availability->{'has_LD'}          = $variation_db && $variation_db->{'DEFAULT_LD_POP'};
@@ -89,6 +89,7 @@ sub counts {
     };
     
     $counts->{'reseq_strains'} = $self->species_defs->databases->{'DATABASE_VARIATION'}{'#STRAINS'} if $self->species_defs->databases->{'DATABASE_VARIATION'};
+    $counts->{'reseq_strains'} = 0 if $self->species eq 'Danio_rerio'; # Danio_rerio hack because the variation team screwed up. DO NOT MERGE TO HEAD
     
     $counts = {%$counts, %{$self->_counts}};
     

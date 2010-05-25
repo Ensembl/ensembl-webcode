@@ -62,7 +62,6 @@ sub variation_table {
   my( $self, $lrg, $transcript ) = @_;
   my %snps = %{$transcript->__data->{'transformed'}{'snps'}||{}};
   my @gene_snps = @{$transcript->__data->{'transformed'}{'gene_snps'}||[]};
-
   my $lrgslice = $lrg->Obj->feature_Slice;
 
   my $tr_start = $transcript->__data->{'transformed'}{'start'};

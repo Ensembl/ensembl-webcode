@@ -29,7 +29,6 @@ sub process {
   
   foreach my $file_name (@files) {
     next unless $file_name;
-    warn "FILE $file_name";
 
     my ($file, $name) = split ':', $file_name;
     my ($results, $nearest, $file_count) = $object->calculate_consequence_data($file, $size_limit);

@@ -34,10 +34,16 @@ sub allele_string {
   return $A[2];
 }
 
-sub location        { return $_[0]->{'__raw__'}[1]; }
-sub gene            { return $_[0]->{'__raw__'}[2]; }
-sub transcript      { return $_[0]->{'__raw__'}[3]; }
-sub consequence     { return $_[0]->{'__raw__'}[4]; }
+sub location          { return $_[0]->{'__raw__'}[1]; }
+sub gene              { return $_[0]->{'__raw__'}[2]; }
+sub transcript        { return $_[0]->{'__raw__'}[3]; }
+sub consequence       { return $_[0]->{'__raw__'}[4]; }
+sub cdna_position     { return $_[0]->{'__raw__'}[5]; }
+sub protein_position  { return $_[0]->{'__raw__'}[6]; }
+sub aa_change         { return $_[0]->{'__raw__'}[7]; }
+sub snp               { return $_[0]->{'__raw__'}[8]; }
+
+
 sub external_data   { return undef; }
 
 sub id       { my $self = shift; return $self->{'__raw__'}[0]; }

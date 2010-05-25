@@ -870,7 +870,12 @@ sub get_compara_Member{
   return $self->{$cachekey};
 }
 
-sub get_ProteinTree{
+sub get_ProteinTree {
+  # deprecated, use get_GeneTree
+  return get_GeneTree(@_);
+}
+
+sub get_GeneTree {
   # Returns the Bio::EnsEMBL::Compara::ProteinTree object
   # corresponding to this gene
   my $self = shift;
@@ -1078,23 +1083,38 @@ sub store_TransformedTranscripts {
 sub store_TransformedSNPS {
     my $self = shift;
     my $valids = $self->valids; 
+	my $tva = $self->get_adaptor('get_TranscriptVariationAdaptor', 'variation');
     foreach my $trans_obj ( @{$self->get_all_transcripts} ) {
-	my $T = $trans_obj->stable_id;
-#	warn "T : $T";
-	my $snps = {};
-	foreach my $S ( @{$self->__data->{'SNPS'}} ) {
-#	    warn "\t S: ", join ' # ', @$S, "\n";
-	    foreach( @{$S->[2]->get_all_TranscriptVariations||[]} ) {
-### WHY ?!?!??!
-#		next unless  $T eq $_->transcript->stable_id;
-		foreach my $type ( @{ $_->consequence_type || []} ) {
-		    next unless $valids->{'opt_'.lc($type)};
-		    $snps->{ $S->[2]->dbID } = $_;
-		    last;
+		my $T = $trans_obj->stable_id;
+	#	warn "T : $T";
+		my $snps = {};
+		
+		# get TVs by transcipt instead of by SNP - way faster and only gets the
+		# ones we are interested in
+		if(defined($tva)) {
+			foreach my $tv(@{$tva->fetch_all_by_Transcripts([$trans_obj->transcript]) || []}) {
+				foreach my $type(@{$tv->consequence_type || []}) {
+					next unless $valids->{'opt_'.lc($type)};
+					$snps->{$tv->variation_feature->dbID} = $tv;
+					last;
+				}
+			}
 		}
-	    }
-	}
-	$trans_obj->__data->{'transformed'}{'snps'} = $snps;
+	
+	# OLD CODE - too slow since TVs are calculated on the fly for LRGs
+	#	foreach my $S ( @{$self->__data->{'SNPS'}} ) {
+	##	    warn "\t S: ", join ' # ', @$S, "\n";
+	#		foreach( @{$S->[2]->get_all_TranscriptVariations||[]} ) {
+	#### WHY ?!?!??!
+	#			next unless  $T eq $_->transcript->stable_id;
+	#			foreach my $type ( @{ $_->consequence_type || []} ) {
+	#				next unless $valids->{'opt_'.lc($type)};
+	#				$snps->{ $S->[2]->dbID } = $_;
+	#				last;
+	#			}
+	#		}
+	#	}
+		$trans_obj->__data->{'transformed'}{'snps'} = $snps;
     }
 }
 

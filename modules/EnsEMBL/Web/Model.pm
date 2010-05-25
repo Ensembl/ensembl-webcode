@@ -77,6 +77,7 @@ sub object {
 ### Returns the first object in the array of the appropriate type
   my ($self, $type, $object) = @_;
   $type ||= $self->hub->factorytype;
+  $type = 'DAS' if $type =~ /^DAS/;
   if ($object) {
     my $m = $self->{'_objects'}{$type} || [];
     push @$m, $object; 
@@ -103,6 +104,7 @@ sub add_objects {
   my ($self, $data, $type) = @_;
   return unless $data;
   $type ||= $self->hub->factorytype;
+  $type = 'DAS' if $type =~ /^DAS/;
   
   ### Proxy Object(s)
   if (ref($data) eq 'ARRAY') {

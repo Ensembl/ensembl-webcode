@@ -537,6 +537,39 @@ sub _summarise_funcgen_db {
     $self->db_details($db_name)->{'tables'}{'feature_type'}{'ids'}{$feature_type_key} = 2;
   }
 
+  my $mt_aref = $dbh->selectall_arrayref(
+    'select meta_key, meta_value 
+       from meta 
+      where meta_key like "%regbuild%" and 
+            meta_key like "%ids"'
+  );
+  foreach my $row (@$mt_aref ){
+    my ($meta_key, $meta_value) = @$row;
+    $meta_key =~s/regbuild\.//;
+    my @key_info = split(/\./,$meta_key); 
+    my %data;  
+    my @ids = split(/\,/,$meta_value);
+    my $sth = $dbh->prepare(
+          'select feature_type_id
+             from feature_set
+            where feature_set_id = ?'
+    );
+    foreach (@ids){
+      if($key_info[1] =~/focus/){
+        my $feature_set_id = $_;
+        $sth->bind_param(1, $feature_set_id);
+        $sth->execute;
+        my ($feature_type_id)= $sth->fetchrow_array;
+        $data{$feature_type_id} = $_;
+      }
+      else {
+        $data{$_} = 1;
+      }
+      $sth->finish;
+    } 
+    $self->db_details($db_name)->{'tables'}{'meta'}{$key_info[1]}{$key_info[0]} = \%data;
+  }
+
   $dbh->disconnect();
 }
 
@@ -984,13 +1017,14 @@ sub _summarise_dasregistry {
   # Fetch the sources for the current species
   my %reg_logic = map { $_->logic_name => $_ } @reg_sources;
   my %reg_url   = map { $_->full_url   => $_ } @reg_sources;
- 
+  
   # The ENSEMBL_INTERNAL_DAS_SOURCES section is a list of enabled DAS sources
   # Then there is a section for each DAS source containing the config
   $self->tree->{'ENSEMBL_INTERNAL_DAS_SOURCES'}     ||= {};
   $self->das_tree->{'ENSEMBL_INTERNAL_DAS_CONFIGS'} ||= {};
   while (my ($key, $val) 
          = each %{ $self->tree->{'ENSEMBL_INTERNAL_DAS_SOURCES'} }) {
+
     # Skip disabled sources
     $val || next;
     # Start with an empty config

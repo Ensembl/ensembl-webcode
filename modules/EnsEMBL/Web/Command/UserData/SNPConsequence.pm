@@ -29,16 +29,11 @@ sub process {
   
   foreach my $file_name (@files) {
     next unless $file_name;
+    warn "FILE $file_name";
 
     my ($file, $name) = split ':', $file_name;
-    my ($table, $nearest, $file_count) = $object->calculate_consequence_data($file, $size_limit);
-
-    if ($file_count){
-      $output .= 'Your file contained '.$file_count .' features however this web tool will only conver the first '. $size_limit .' features in the file.'."\n\n";
-      $output .= $table->render_Text;
-    } else {      
-     $output .= $table->render_Text;
-    }
+    my ($results, $nearest, $file_count) = $object->calculate_consequence_data($file, $size_limit);
+    my $table = $object->consequence_table($results);
 
     # Output new data to temp file
     my $temp_file = new EnsEMBL::Web::TmpFile::Text(
@@ -47,7 +42,7 @@ sub process {
       content_type => 'text/plain; charset=utf-8',
     );
     
-    $temp_file->print($output);
+    $temp_file->print($table->render_Text);
     
     push @$temp_files, $temp_file->filename . ':' . $name;
  
@@ -63,6 +58,8 @@ sub process {
 
     $hub->session->set_data(%$session_data);
     $param->{'code'} = $code;
+    $param->{'count'} = $file_count;
+    $param->{'size_limit'} = $size_limit;
   }
  
   $param->{'convert_file'} = $temp_files;

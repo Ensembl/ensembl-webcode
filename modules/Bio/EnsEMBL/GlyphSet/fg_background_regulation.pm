@@ -33,7 +33,7 @@ sub _init {
   my $features = $reg_feat_adaptor->fetch_all_by_Slice($slice);
   foreach my $f (@$features){
     next unless $f->stable_id eq  $target_feature_id;
-    $x = $f->start;
+    $x = $f->start -1;
     $x_end = $f->end;
   }
    

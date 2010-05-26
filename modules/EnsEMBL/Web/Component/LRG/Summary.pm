@@ -45,7 +45,7 @@ information, visit the <a href="http://www.lrg-sequence.org">LRG website</a>.
   } 
   else {
     my($edb, $acc);
-    my $description = ' LRG region '. $hub->param('lrg').'.';
+    my $description = ' LRG region <a target="_blank" href="http://www.lrg-sequence.org/LRG/'. $hub->param('lrg').'">'.$hub->param('lrg').'</a>.';
     if ($description) {
       if ($description ne 'No description') {
         my @genes = @{$self->object->Obj->get_all_Genes('LRG_import')||[]};

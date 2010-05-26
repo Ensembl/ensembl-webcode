@@ -114,8 +114,8 @@ sub process_wiggle_data {
     @features   = sort { $a->scores->[0] <=> $b->scores->[0]  } @features;
     my ($f_min_score, $f_max_score) = @{$features[0]->get_min_max_scores()};
     if ($wsize ==0){
-      $f_min_score = $features[0]->scores->[0];
-      $f_max_score = $features[-1]->scores->[0];
+      $f_min_score = $features[0]->scores->[0]; warn $f_min_score;
+      $f_max_score = $features[-1]->scores->[0]; warn $f_max_score;
     } else {
       my @rfs = ();
       foreach my $rf (@features){
@@ -142,7 +142,9 @@ sub process_wiggle_data {
 
   if ($max_score <=10){ 
     if ($cell_line =~/IMR90/) {
-      $max_score = 2;
+      unless ($max_score >= 2){
+        $max_score =2;
+      }
     } else {
       $max_score = 10;
     }

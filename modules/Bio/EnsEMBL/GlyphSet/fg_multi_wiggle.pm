@@ -20,7 +20,7 @@ sub draw_features {
     if ($data->{$cell_line}{'focus'}{'block_features'}){
       my $configured_tracks = scalar @{$Config->{'configured_tracks'}{$cell_line}{'configured'}{'focus'}};
       my $available_tracks =  scalar @{$Config->{'configured_tracks'}{$cell_line}{'available' }{'focus'}};
-      my $tracks_on = "($configured_tracks/$available_tracks features turned on)"; 
+      my $tracks_on = "$configured_tracks/$available_tracks features turned on"; 
       my $feature_set_data = $data->{$cell_line}{'focus'}{'block_features'};
       $self->draw_blocks($feature_set_data, 'Core Evidence' . $cell_line, undef, $colours, $tracks_on);
       $drawn_data = 1;
@@ -41,7 +41,7 @@ sub draw_features {
     if ($data->{$cell_line}{'non_focus'}{'block_features'}){
       my $configured_tracks = scalar @{$Config->{'configured_tracks'}{$cell_line}{'configured'}{'non_focus'}};
       my $available_tracks =  scalar @{$Config->{'configured_tracks'}{$cell_line}{'available' }{'non_focus'}};
-      my $tracks_on = "($configured_tracks/$available_tracks features turned on)";
+      my $tracks_on = "$configured_tracks/$available_tracks features turned on";
       my $feature_set_data = $data->{$cell_line}{'non_focus'}{'block_features'};
       $self->draw_blocks($feature_set_data, 'Other Evidence for ' . $cell_line, undef, $colours, $tracks_on);
       $drawn_data = 1;

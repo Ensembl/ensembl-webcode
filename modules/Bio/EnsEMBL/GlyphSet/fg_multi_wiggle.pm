@@ -18,8 +18,11 @@ sub draw_features {
   foreach my $cell_line (keys %$data){   
     # First draw core block features
     if ($data->{$cell_line}{'focus'}{'block_features'}){
+      my $configured_tracks = scalar @{$Config->{'configured_tracks'}{$cell_line}{'configured'}{'focus'}};
+      my $available_tracks =  scalar @{$Config->{'configured_tracks'}{$cell_line}{'available' }{'focus'}};
+      my $tracks_on = "($configured_tracks/$available_tracks features turned on)"; 
       my $feature_set_data = $data->{$cell_line}{'focus'}{'block_features'};
-      $self->draw_blocks($feature_set_data, 'Core Evidence' . $cell_line, undef, $colours);
+      $self->draw_blocks($feature_set_data, 'Core Evidence' . $cell_line, undef, $colours, $tracks_on);
       $drawn_data = 1;
     } else {
        $self->display_error_message($cell_line, 'focus', 'peaks');
@@ -36,8 +39,11 @@ sub draw_features {
     }
     # Next draw other block features
     if ($data->{$cell_line}{'non_focus'}{'block_features'}){
+      my $configured_tracks = scalar @{$Config->{'configured_tracks'}{$cell_line}{'configured'}{'non_focus'}};
+      my $available_tracks =  scalar @{$Config->{'configured_tracks'}{$cell_line}{'available' }{'non_focus'}};
+      my $tracks_on = "($configured_tracks/$available_tracks features turned on)";
       my $feature_set_data = $data->{$cell_line}{'non_focus'}{'block_features'};
-      $self->draw_blocks($feature_set_data, 'Other Evidence for ' . $cell_line, undef, $colours);
+      $self->draw_blocks($feature_set_data, 'Other Evidence for ' . $cell_line, undef, $colours, $tracks_on);
       $drawn_data = 1;
     } else {
       $self->display_error_message($cell_line, 'non_focus', 'peaks');
@@ -66,9 +72,13 @@ sub draw_features {
 }
 
 sub draw_blocks { 
-  my ($self, $fs_data, $display_label, $bg_colour, $colours) = @_;
+  my ($self, $fs_data, $display_label, $bg_colour, $colours, $tracks_on) = @_;
   $self->draw_track_name($display_label, 'black', -118, 0);
-  $self->draw_space_glyph();
+  if ($tracks_on ){
+     $self->draw_track_name($tracks_on, 'grey40', -118, 0);
+  } else {  
+    $self->draw_space_glyph();
+  }
 
   foreach my $f_set (sort { $a cmp $b  } keys %$fs_data){
     my $feature_name = $f_set; 

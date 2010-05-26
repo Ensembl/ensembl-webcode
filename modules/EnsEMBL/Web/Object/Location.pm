@@ -1072,6 +1072,7 @@ sub get_synteny_matches {
   my $OTHER = $self->param('otherspecies') || 
               $self->param('species')      ||
 	      $self->_default_otherspecies;
+  warn "OTHER SPECIES $OTHER";
   my $gene2_adaptor = $self->database( 'core', $OTHER )->get_GeneAdaptor();
   my $localgenes = $self->get_synteny_local_genes;
   my $offset = $self->seq_region_start;
@@ -1156,34 +1157,36 @@ sub _default_otherspecies {
     my $sp;
 
   ## Set default as primary species, if available
-
+  ## FIXME - THIS ADDITION BREAKS ENSEMBL
+=pod
     my $species = $self->species;
     if (my $spg = $sd->SPECIES_GROUP($species)) {
-	foreach $sp (@has_synteny) {
-	    my $ospg = $sd->SPECIES_GROUP($sp);
-	    if ($ospg eq $spg)  {
-		if ($sp ne $species) {
-		    return $sp;
-		}
+	    foreach $sp (@has_synteny) {
+	      my $ospg = $sd->SPECIES_GROUP($sp);
+	      if ($ospg eq $spg)  {
+		      if ($sp ne $species) {
+		        return $sp;
+		      }
+	      }
 	    }
-	}
     }
+=cut
 
     unless ($ENV{'ENSEMBL_SPECIES'} eq $sd->ENSEMBL_PRIMARY_SPECIES) {
-	foreach my $sp (@has_synteny) {
-	    if ($sp eq $sd->ENSEMBL_PRIMARY_SPECIES) {
-		return $sp;
+	    foreach my $sp (@has_synteny) {
+	      if ($sp eq $sd->ENSEMBL_PRIMARY_SPECIES) {
+		      return $sp;
+	      }
 	    }
-	}
     }
 
   ## Set default as secondary species, if primary not available
     unless ($ENV{'ENSEMBL_SPECIES'} eq $sd->ENSEMBL_SECONDARY_SPECIES) {
-	foreach $sp (@has_synteny) {
-	    if ($sp eq $sd->ENSEMBL_SECONDARY_SPECIES) {
-		return $sp;
+	    foreach $sp (@has_synteny) {
+	      if ($sp eq $sd->ENSEMBL_SECONDARY_SPECIES) {
+		      return $sp;
+	      }
 	    }
-	}
     }
 
   ## otherwise choose first in list

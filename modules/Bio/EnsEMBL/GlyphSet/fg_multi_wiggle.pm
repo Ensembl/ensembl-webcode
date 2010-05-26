@@ -249,6 +249,7 @@ sub display_error_message {
       $self->draw_track_name('Core Evidence '.$cell_line , 'black', -118, 2, 1);
       $self->display_no_data_error($error_message);
     } elsif($type eq 'wiggle') {
+      return if $cell_line eq 'MultiCell'; 
       if ($number_available >= 1){
         my $error_message = "No core evidence supporting set features for $cell_line in this region. $number_configured/$number_available of the available feature sets are currently turned on";
         $self->draw_track_name('Core support '.$cell_line , 'black', -118, 2, 1);

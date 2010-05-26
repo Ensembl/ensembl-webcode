@@ -352,7 +352,6 @@ sub get_evidence_data {
 
   foreach my $regf_fset(@{$fset_a->fetch_all_by_type('regulatory')}){
     my $regf_data_set = $dset_a->fetch_by_product_FeatureSet($regf_fset);
-warn $regf_data_set->cell_type->name;
     foreach my $reg_attr_fset(@{$regf_data_set->get_supporting_sets}){
       my $reg_attr_dset = $dset_a->fetch_by_product_FeatureSet($reg_attr_fset);
       my @sset = @{$reg_attr_dset->get_displayable_supporting_sets('result')};

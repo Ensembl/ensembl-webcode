@@ -37,7 +37,7 @@ sub _init {
     $x_end = $f->end;
   }
    
-  my $glyph = $self->Rect({
+  my $glyph = $self->Space({
     x => $x,
     y => 0,
     width => $x_end-$x+1,

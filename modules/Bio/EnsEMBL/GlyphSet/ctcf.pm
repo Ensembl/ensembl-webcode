@@ -77,7 +77,6 @@ sub draw_features {
           \@features,                      ## Features array
           { 'min_score' => $min_score, 'max_score' => $max_score },
           [$colour],
-          ['CTCF', $label],
         );
       }
       $self->draw_space_glyph() if $drawn_wiggle_flag;

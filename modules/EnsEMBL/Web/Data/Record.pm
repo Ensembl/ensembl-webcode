@@ -20,6 +20,7 @@ __PACKAGE__->add_queriable_fields(type => 'string');
 
 sub new {
   my $class = shift; 
+  warn "@@@ @_";
 
   return $class->SUPER::new(@_)
      unless $class eq 'EnsEMBL::Web::Data::Record';

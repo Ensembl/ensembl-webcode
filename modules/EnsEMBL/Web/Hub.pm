@@ -49,7 +49,7 @@ sub new {
     _species_defs  => $args{'_species_defs'}  || new EnsEMBL::Web::SpeciesDefs, 
     _cache         => $args{'_cache'}         || new EnsEMBL::Web::Cache(enable_compress => 1, compress_threshold => 10000),
     _problem       => $args{'_problem'}       || {},    
-    _user          => $args{'_user'}          || undef,                    
+    _user          => $args{'_user'}          || $ENSEMBL_WEB_REGISTRY->get_user,                    
     _view_configs  => $args{'_view_configs_'} || {},
     _user_details  => $args{'_user_details'}  || 1,
     _timer         => $args{'_timer'}         || $ENSEMBL_WEB_REGISTRY->timer, # Diagnostic object
@@ -407,9 +407,10 @@ sub fetch_userdata_by_id {
     $data = $self->get_data_from_session($status, $type, $id);
   } 
   else {
-    my $fa = $self->databases('userdata', $self->species)->get_DnaAlignFeatureAdaptor;
+    my $fa = $self->database('userdata', $self->species)->get_DnaAlignFeatureAdaptor;
     my $user = $self->user;
-    my @records = $user->uploads($id);
+    return unless $user;
+    my @records = $user->uploads($record_id);
     my $record = $records[0];
 
     if ($record) {

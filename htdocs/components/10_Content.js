@@ -393,6 +393,7 @@ Ensembl.Panel.Content = Ensembl.Panel.extend({
   },
   
   getSequenceKey: function () {
+    var myself = this;
     var params = {};
     var urlParams;
     
@@ -409,7 +410,7 @@ Ensembl.Panel.Content = Ensembl.Panel.extend({
         }
       });
       
-      this.getContent(this.params.updateURL.replace(/\?/, '/key?') + ';' + $.param(urlParams, true), $('.sequence_key', this.el));
+      myself.getContent(myself.params.updateURL.replace(/\?/, '/key?') + ';' + $.param(urlParams, true), $('.sequence_key', myself.el));
     }
     
     if ($('> .ajax > .js_panel > input.panel_type[value=TextSequence]', this.el).length) {

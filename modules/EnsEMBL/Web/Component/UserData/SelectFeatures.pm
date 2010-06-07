@@ -25,8 +25,12 @@ sub content {
   my $current_species = $object->data_species;
 
   ## Get assembly info
-  my $html = qq(<p class="space-below">Map your data to the current assembly. Accepted file formats: GFF, GTF, BED, PSL</p>
-<p class="space-below">N.B. Export is currently in GFF only</p>);
+  my $html = $self->_info('Tips',
+qq(<p class="space-below">Map your data to the current assembly. Accepted file formats: GFF, GTF, BED, PSL</p>
+<p class="space-below">N.B. Export is currently in GFF only</p>
+<p>For large data sets, you may find it more efficient to use our <a href="ftp://ftp.ensembl.org/pub/misc-scripts/Assembly_mapper_1.0/">ready-made converter script</a>.</p>
+)
+);
 
   my $form = $self->modal_form('select', $object->species_path($current_species) . "/UserData/CheckConvert");
   my $subheader = 'Upload file';

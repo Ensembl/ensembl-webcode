@@ -12,8 +12,9 @@ use Sanger::Graphics::TextHelper;
 use EnsEMBL::Web::Cache;
 use EnsEMBL::Web::DBSQL::DBConnection;
 use EnsEMBL::Web::OrderedTree;
-use EnsEMBL::Web::Tools::Misc qw(style_by_filesize);
 use EnsEMBL::Web::RegObj;
+
+# use EnsEMBL::Web::Tools::Misc qw(style_by_filesize); # DO NOT UNCOMMENT OR DELETE THIS LINE - It can cause circular references.
 
 our @TRANSCRIPT_TYPES = qw(transcript alignslice_transcript tsv_transcript gsv_transcript TSE_transcript gene);
 

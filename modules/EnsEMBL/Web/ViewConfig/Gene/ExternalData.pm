@@ -25,8 +25,9 @@ sub form {
   my ($view_config, $object) = @_;
   
   $view_config->add_fieldset('DAS sources');
+  my $view =  $object->__objecttype .'/ExternalData';
   
-  my @all_das = sort { lc $a->label cmp lc $b->label } grep { $_->is_on(_view) } values %{$ENSEMBL_WEB_REGISTRY->get_all_das};
+  my @all_das = sort { lc $a->label cmp lc $b->label } grep { $_->is_on($view) } values %{$ENSEMBL_WEB_REGISTRY->get_all_das};
   
   for my $das (@all_das) {
     $view_config->add_form_element({

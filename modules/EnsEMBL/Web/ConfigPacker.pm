@@ -809,7 +809,7 @@ sub _summarise_compara_db {
       if ($id eq $prev_id) {
         my $this_method    = $methods{$mlss_id};
         my $this_sr        = $genomic_regions{$df_id}->{'seq_region'};
-        my $this_species   = $genomic_regions{$df_id}->{'species'};
+        my $this_species   = ucfirst($genomic_regions{$df_id}->{'species'});
         my $this_coord_sys = $genomic_regions{$df_id}->{'coord_system'};
         my $comparison     = "$this_sr:$prev_sr";
         my $coords         = "$this_coord_sys:$prev_coord_sys";
@@ -831,22 +831,22 @@ sub _summarise_compara_db {
         $prev_sr        = $genomic_regions{$df_id}->{'seq_region'};
         $prev_species   = $genomic_regions{$df_id}->{'species'};
         $prev_coord_sys = $genomic_regions{$df_id}->{'coord_system'};
-      }        
+      }
     }
-    
+
     # add reciprocal entries for each comparison
     foreach my $method (keys %config) {
       foreach my $p_species (keys %{$config{$method}}) {
-        foreach my $s_species (keys %{$config{$method}{$p_species}}) {                                                
+        foreach my $s_species (keys %{$config{$method}{$p_species}}) {
           foreach my $comp (keys %{$config{$method}{$p_species}{$s_species}}) {
             my $revcomp = join ':', reverse(split ':', $comp);
-            
+
             if (!exists $config{$method}{$s_species}{$p_species}{$revcomp}) {
               my $coords = $config{$method}{$p_species}{$s_species}{$comp}{'coord_systems'};
               my ($a,$b) = split ':', $coords;
-              
+
               $coords = "$b:$a";
-              
+
               my $record = {
                 source_name    => $config{$method}{$p_species}{$s_species}{$comp}{'target_name'},
                 source_species => $config{$method}{$p_species}{$s_species}{$comp}{'target_species'},
@@ -859,7 +859,6 @@ sub _summarise_compara_db {
                 mlss_id        => $config{$method}{$p_species}{$s_species}{$comp}{'mlss_id'},
                 coord_systems  => $coords,
               };
-              
               $config{$method}{$s_species}{$p_species}{$revcomp} = $record;
             }
           }
@@ -871,7 +870,7 @@ sub _summarise_compara_db {
     my $region_summary;
     foreach my $method (keys %config) {
       foreach my $p_species (keys %{$config{$method}}) {
-        foreach my $s_species (keys %{$config{$method}{$p_species}}) {                                                
+        foreach my $s_species (keys %{$config{$method}{$p_species}}) {
           foreach my $comp (keys %{$config{$method}{$p_species}{$s_species}}) {
             my $target_name  = $config{$method}{$p_species}{$s_species}{$comp}{'target_name'};
             my $source_name  = $config{$method}{$p_species}{$s_species}{$comp}{'source_name'};
@@ -879,7 +878,7 @@ sub _summarise_compara_db {
             my $source_end   = $config{$method}{$p_species}{$s_species}{$comp}{'source_end'};
             my $mlss_id      = $config{$method}{$p_species}{$s_species}{$comp}{'mlss_id'};
             my $name         = $names{$mlss_id};
-            
+
             push @{$region_summary->{$p_species}{$source_name}}, {
               secondary_species => $s_species,
               target_name       => $target_name,
@@ -892,11 +891,11 @@ sub _summarise_compara_db {
         }
       }
     }
-    
+
     $self->db_tree->{$db_name}{'VEGA_COMPARA'} = \%config;
     $self->db_tree->{$db_name}{'VEGA_COMPARA'}{'REGION_SUMMARY'} = $region_summary;
   }
-  
+
   ## That's the end of the compara region munging!
 
   my $res_aref_2 = $dbh->selectall_arrayref(qq{

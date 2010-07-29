@@ -1,4 +1,3 @@
-#$Id$
 package EnsEMBL::Web::Object::Variation;
 
 ### NAME: EnsEMBL::Web::Object::Variation
@@ -1151,6 +1150,7 @@ sub transcript_variation {
             translation_start =>$tvari_obj->translation_start,
             translation_end =>  $tvari_obj->translation_end,
             pepallele =>        $tvari_obj->pep_allele_string,
+            codon =>            $tvari_obj->codons,
     });
   }
 

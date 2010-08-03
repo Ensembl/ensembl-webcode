@@ -829,7 +829,7 @@ sub _summarise_compara_db {
         $prev_start     = $start;
         $prev_end       = $end;
         $prev_sr        = $genomic_regions{$df_id}->{'seq_region'};
-        $prev_species   = $genomic_regions{$df_id}->{'species'};
+        $prev_species   = ucfirst($genomic_regions{$df_id}->{'species'});
         $prev_coord_sys = $genomic_regions{$df_id}->{'coord_system'};
       }
     }
@@ -895,6 +895,8 @@ sub _summarise_compara_db {
     $self->db_tree->{$db_name}{'VEGA_COMPARA'} = \%config;
     $self->db_tree->{$db_name}{'VEGA_COMPARA'}{'REGION_SUMMARY'} = $region_summary;
   }
+
+#  warn Data::Dumper::Dumper($self->db_tree->{$db_name}{'VEGA_COMPARA'});
 
   ## That's the end of the compara region munging!
 

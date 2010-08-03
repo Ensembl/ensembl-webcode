@@ -879,9 +879,9 @@ sub _summarise_compara_db {
             my $mlss_id      = $config{$method}{$p_species}{$s_species}{$comp}{'mlss_id'};
             my $name         = $names{$mlss_id};
 
-            push @{$region_summary->{$p_species}{$source_name}}, {
-              secondary_species => $s_species,
-              target_name       => $target_name,
+            push @{$region_summary->{ucfirst $p_species}{ ucfirst $source_name}}, {
+              secondary_species => ucfirst $s_species,
+              target_name       => ucfirst $target_name,
               start             => $source_start,
               end               => $source_end,
               mlss_id           => $mlss_id,

@@ -590,6 +590,9 @@ sub get_homology_matches {
         
         next unless $homology_desc =~ /$homology_description/;
         next if $disallowed_homology && $homology_desc =~ /$disallowed_homology/;
+	# Avoid to display duplicated (within-species and other paralogs) entries in the homology table (e!59).
+	# Skip the other paralog (or overwrite it)
+	next if ($homology_list{$display_spp}{$homologue->stable_id} and $homology_desc eq "other_paralog");
         
         $homology_list{$display_spp}{$homologue->stable_id} = { 
           homology_desc       => $desc_mapping{$homology_desc} || 'no description',

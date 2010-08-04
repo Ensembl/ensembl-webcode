@@ -301,8 +301,9 @@ sub check_slice_exists {
 
     my $db = $self->database('core');
     my $csa = $db->get_CoordSystemAdaptor();
-    my @coord_systems_names = @{$csa->fetch_all()};    
-    foreach my $system (@coord_systems_names) {  
+    my @coord_systems = @{$csa->fetch_all()};
+    push(@coord_systems, @{$self->__coord_systems} );
+    foreach my $system (@coord_systems) {  
       my $slice;
       
       eval { $slice = $self->slice_adaptor->fetch_by_region($system->name, $chr, $start, $end, $strand); };

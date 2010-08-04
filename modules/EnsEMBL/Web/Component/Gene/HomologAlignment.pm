@@ -67,6 +67,8 @@ sub content {
         my $location       = sprintf '%s:%d-%d', $member->chr_name, $member->chr_start, $member->chr_end;
         
         (my $species2 = $member_species) =~ s/ /_/g;
+	(my $sp_display = $member_species) =~ s/_/ /;
+	$sp_display = ucfirst($sp_display);
         
         if (!$second_gene && $species2 ne $species && $object->param('species_' . lc $species2) eq 'off') {
           $flag = 0;
@@ -76,7 +78,7 @@ sub content {
         
         if ($member->stable_id eq $gene_id) {
           push @$data, [
-            $member_species,
+            $sp_display,
             $member->stable_id,
             $peptide->stable_id,
             sprintf('%d aa', $peptide->seq_length),
@@ -84,18 +86,18 @@ sub content {
           ]; 
         } else {
           push @$data, [
-            $member_species,
+            $sp_display,
             sprintf('<a href="%s">%s</a>',
-              $object->_url({ species => $species2, type => 'Gene', action => 'Summary', g => $member->stable_id, r => undef }),
+              $object->_url({ species => ucfirst($species2), type => 'Gene', action => 'Summary', g => $member->stable_id, r => undef }),
               $member->stable_id
             ),
             sprintf('<a href="%s">%s</a>',
-              $object->_url({ species => $species2, type => 'Transcript', action => 'ProteinSummary', peptide => $peptide->stable_id, __clear => 1 }),
+              $object->_url({ species => ucfirst($species2), type => 'Transcript', action => 'ProteinSummary', peptide => $peptide->stable_id, __clear => 1 }),
               $peptide->stable_id
             ),
             sprintf('%d aa', $peptide->seq_length),
             sprintf('<a href="%s">%s</a>',
-              $object->_url({ species => $species2, type => 'Location', action => 'View', g => $member->stable_id, r => $location, t => undef }),
+              $object->_url({ species => ucfirst($species2), type => 'Location', action => 'View', g => $member->stable_id, r => $location, t => undef }),
               $location
             )
           ];

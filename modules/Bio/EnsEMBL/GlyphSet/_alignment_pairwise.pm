@@ -181,14 +181,15 @@ sub render_normal {
     }
     my $n1 = $features[0][1]->hseqname . ":$hs_net-$he_net";
     $net_composite->href($self->_url({
-      type   => 'Location',
-      'action' => 'PairwiseAlignment',
-      n0     => $n0,
-      n1     => $n1,
-      s1     => $other_species,
-      method => $self->my_config('type'),
-      align  => $mlss_id,
-      orient => $features[0][1]->hstrand * $features[0][1]->strand > 0 ? 'Forward' : 'Reverse'
+      type    => 'Location',
+      action  => 'PairwiseAlignment',
+      species => $url_species,
+      n0      => $n0,
+      n1      => $n1,
+      s1      => $other_species,
+      method  => $self->my_config('type'),
+      align   => $mlss_id,
+      orient  => $features[0][1]->hstrand * $features[0][1]->strand > 0 ? 'Forward' : 'Reverse'
     }));
     $self->push($net_composite);
     foreach my $internal_box (@$internal_boxes) {
@@ -196,7 +197,7 @@ sub render_normal {
       my $zmenu = {
         type    => 'Location',
         action  => 'PairwiseAlignment',
-        species => $self_species,
+        species => $url_species,
         r       => $r,
         r1      => $r1,
         n0      => $n0,

@@ -506,6 +506,12 @@ sub get_author_name {
   }
 }
 
+sub retrieve_remarks {
+  my $self = shift;
+  my @remarks = map { $_->value } @{ $self->Obj->get_all_Attributes('remark') };
+  return \@remarks;
+}
+
 sub gene_type {
   my $self = shift;
   my $db = $self->get_db;

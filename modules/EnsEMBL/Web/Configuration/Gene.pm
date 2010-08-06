@@ -98,7 +98,7 @@ sub populate_tree {
   
   $compara_menu->append($ol_node);
   
-  my $pl_node = $self->create_node('Compara_Paralog', 'Paralogues',
+  my $pl_node = $self->create_node('Compara_Paralog', 'Paralogues ([[counts::paralogs]])',
     [qw(paralogues EnsEMBL::Web::Component::Gene::ComparaParalogs)],
     { 'availability' => 'gene database:compara core has_paralogs', 'concise' => 'Paralogues' }
   );

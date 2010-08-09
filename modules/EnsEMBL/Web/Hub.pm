@@ -314,13 +314,20 @@ sub get_ext_seq {
   $args{'DB'} = $ext_db ? $ext_db : 'DEFAULT';
 
   eval { $seq_ary = $indexer->get_seq_by_id(\%args); };
-  
+
   if (!$seq_ary) {
     warn "The $ext_db server is unavailable: $@";
     return '';
   } else {
-    my $list = join ' ', @$seq_ary;
-    return $list =~ /no match/i ? '' : $list;
+    my ($list, $l);
+    foreach ( @$seq_ary ) {
+      unless ($_ =~ /^>/) {
+	$l += length($_);
+	$l-- if ($_ =~ /\n/); #don't count carriage returns
+      }
+      $list = "$list $_";
+    }
+    return $list =~ /no match/i ? [] : [$list,$l];
   }
 }
 

@@ -29,7 +29,7 @@ sub content {
   my $table       = new EnsEMBL::Web::Document::HTML::TwoCol;
   my $tsi         = $object->stable_id;
   my $input       = $object->input;
-  my $hit_id      = $input->{'sequence'}->[0];
+  my $hit_id      = $object->param('sequence');
   my $hit_db_name = $object->get_sf_hit_db_name($hit_id);
   my $html;
 

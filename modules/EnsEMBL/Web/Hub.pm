@@ -325,7 +325,7 @@ sub get_ext_seq {
 	$l += length($_);
 	$l-- if ($_ =~ /\n/); #don't count carriage returns
       }
-      $list = "$list $_";
+      $list = "$list"."$_";
     }
     return $list =~ /no match/i ? [] : [$list,$l];
   }

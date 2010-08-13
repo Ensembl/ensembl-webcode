@@ -57,6 +57,7 @@ sub content {
 
       foreach my $child ( sort {$a->name cmp $b->name} $group->children ) {
         my $c_name = $child->name;
+        if ($c_name eq 'SNP'){$c_name = 'Variation';}
         my $c_count    = $child->count;
         my $c_url;
         if ($child->link( 'refine' )) {

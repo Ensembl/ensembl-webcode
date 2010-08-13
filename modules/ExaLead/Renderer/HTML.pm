@@ -81,8 +81,8 @@ sub _render_group {
   }
 }
 
-sub _render_category {
-  my( $self, $category, $level ) = @_;
+sub _render_category { 
+  my( $self, $category, $level ) = @_; 
   my $out = '';
   if( $category->link( 'reset' ) ) {
     $out = sprintf qq(<dd style="margin-left: %fem"><a href="%s"><img align="top" src="/gfx/14-r.gif" height="14" width="14" alt="[R]" border="0" /></a> <a href="%s">%s</a>),
@@ -159,9 +159,42 @@ sub _render_hit {
   #remove '(Curated)' etc from HGNC names
   my $label = $hit->field('title')->getHighlighted;
 
+  # hack for release 59
+  my $desc = $hit->field('description') ? $hit->field('description')->getHighlighted : '--';   
+  my $text = join( '&nbsp;&nbsp; ',
+              map { '<strong>'.CGI::escapeHTML( $_->name =~ /answergroup\.(.*)/?$1:$_->name ).'</strong>: '.
+                    $self->_render_hitcats( $_->children ) } $hit->groups );
+
+  
+  if ($label =~/SNP/) { 
+    if ($label =~/COSMIC/) {
+      $label =~s/SNP/Mutation/;
+      $desc =~s/SNP/mutation/;
+      $text =~s/SNP/Mutation/g;
+    } else {
+      $label =~s/\sSNP/ Variation/;
+      $desc =~s/\sSNP/ variation/;
+      $text =~s/SNP/Variation/g;
+    }
+  }
+
   $label =~ s/dataBase/database/;
   $label =~ s/HGNC \(\w+\)/HGNC Symbol/;
 
+    my $a = $URL ? sprintf qq(<a href="%s">%s</a>),CGI::escapeHTML( $URL ),$label : $label;
+  return sprintf qq(
+<p><strong>%s</strong>%s<br />
+  %s
+</p>
+<blockquote>%s</blockquote>
+
+),
+    $a, $extra,
+    $desc,
+    $text;
+
+
+=cut
   my $a = $URL ? sprintf qq(<a href="%s">%s</a>),CGI::escapeHTML( $URL ),$label : $label;
   return sprintf qq(
 <p><strong>%s</strong>%s<br />
@@ -175,7 +208,7 @@ sub _render_hit {
     join( '&nbsp;&nbsp; ',
       map { '<strong>'.CGI::escapeHTML( $_->name =~ /answergroup\.(.*)/?$1:$_->name ).'</strong>: '.
             $self->_render_hitcats( $_->children ) } $hit->groups );
-
+=cut
 }
 
 sub _render_hitcats {

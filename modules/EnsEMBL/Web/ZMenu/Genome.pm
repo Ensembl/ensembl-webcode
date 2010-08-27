@@ -26,14 +26,19 @@ sub content {
   my $extdbs         = $external_db_id ? $hub->species_defs->databases->{'DATABASE_CORE'}{'tables'}{'external_db'}{'entries'} : {};
   my $hit_db_name    = $extdbs->{$external_db_id}->{'db_name'} || 'External Feature';
   
+  
+  
   my $logic_name     = $features->[0] ? $features->[0]->analysis->logic_name : undef;
   
   $hit_db_name = 'TRACE' if $logic_name =~ /sheep_bac_ends|BACends/; # hack to link sheep bac ends to trace archive;
 
   $self->caption("$id ($hit_db_name)");
 
-  my @seq  = $hit_db_name =~ /CCDS/ ? () : split "\n", $hub->get_ext_seq($id, $hit_db_name)->[0]; # don't show EMBL desc for CCDS
-  my $desc = $seq[0];
+  my (@seq, $desc);
+  eval {
+    @seq  = $hit_db_name =~ /CCDS/ ? () : split "\n", $hub->get_ext_seq($id, $hit_db_name)->[0]; # don't show EMBL desc for CCDS
+    $desc = $seq[0];
+  };
   if ($desc) {
     $desc =~ s/^\s//;
     if ($desc =~ s/^>//) {
@@ -66,6 +71,7 @@ sub content {
       __clear => 1
     })
   });
+  
 }
 
 1;

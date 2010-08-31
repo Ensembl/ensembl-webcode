@@ -2,7 +2,7 @@
 
 ##############################################################################
 #
-# SCRIPT FOR ENTERING CONTENT IN THE META TABLES FOR ENSEMBL WHICH WILL BE USED 
+# SCRIPT FOR ENTERING CONTENT IN THE STATS TABLES FOR ENSEMBL WHICH WILL BE USED 
 # FOR GENERATION OF 'ASSEMBLY AND GENEBUILD' PAGE AND 'TOP InterPro HITS' PAGE
 # Default is to do all configured species, or pass an array of
 # species names (typically in Genus_species format)
@@ -32,8 +32,8 @@ BEGIN{
   "dbuser|user=s",     \$user,
   "dbpass|pass=s",     \$pass,
   "dbport|port=i",     \$port,
-  "update_meta=i",     \$update_meta,        #if set to 1 the script updates the current records in meta tables with new values for each of the existing keys
-  "gen_pages=i",       \$generate_pages,     #if set to 1 the script  only generates the web pages without changing the content of meta table
+  "update_meta=i",     \$update_meta,        #if set to 1 the script updates the current records in stats tables with new values for each of the existing keys
+  "gen_pages=i",       \$generate_pages,     #if set to 1 the script only generates the web pages without changing the content of stats table
                'help'      => \$help,
                'info'      => \$info,
                'species=s' => \@user_spp,

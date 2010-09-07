@@ -35,9 +35,9 @@ sub init {
       my ($evidence_name, $evidence_id) = split /\:/, $evidence_type;  
       my $value = 'off';
       
-      if (exists $focus_set_ids{$cell_line}{$evidence_id}) {
+      if ( ($cell_line eq 'CD4' || $cell_line eq 'ES') && exists $focus_set_ids{$cell_line}{$evidence_id}) {
         $value = 'on';
-      } elsif ($cell_line eq 'MultiCell' && exists $feature_type_ids{'core'}{$evidence_id}) {
+      } elsif ($cell_line eq 'MultiCell' && exists $feature_type_ids{'MultiCell'}{$evidence_id}) {
         $value = 'on';
       }
       
@@ -71,7 +71,7 @@ sub form {
   
   # Allow focus sets to appear first
   # All MultiCell feature types are focus sets so add these in ($feature_type_ids{'core'})
-  foreach my $feature_sets (values(%focus_set_ids), $feature_type_ids{'core'}) {
+  foreach my $feature_sets (values(%focus_set_ids), $feature_type_ids{'MultiCell'}) {
     $focus_feature_type_ids{$_} ||= $focus_row++ for keys %$feature_sets;
   }
   
@@ -143,7 +143,7 @@ sub form {
         $disabled = 0; 
         $classes = [ "opt_cft_$cell_line", "opt_cft_$feature_name" ];
       } elsif ($cell_line eq 'MultiCell') {
-        if (exists $feature_type_ids{'core'}{$feature_id}) {
+        if (exists $feature_type_ids{'MultiCell'}{$feature_id}) {
           $disabled = 0;
           $classes  = [ "opt_cft_$cell_line", "opt_cft_$feature_name" ];
         }

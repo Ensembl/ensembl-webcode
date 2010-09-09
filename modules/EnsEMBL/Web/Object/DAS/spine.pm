@@ -67,7 +67,7 @@ sub Features {
               'TYPE'        => 'ensembl-provenance',
               'NOTE' => [ $enote1, $enote2 ],
               'LINK' => [
-                         { 'text' => "Click here to visit $slabel.",
+                         { 'text' => "View more information in $slabel.",
                            'href' => $base_url,
                        }
                          ],
@@ -108,7 +108,7 @@ sub Features {
 	      'ORIENTATION' => $self->ori($gene->strand),
 	      'NOTE' => [ ucfirst($description) ],
 	      'LINK' => [
-			 { 'text' => 'Ensembl Gene View',
+			 { 'text' => "View in $slabel",
 			   'href' => sprintf( $self->{'templates'}{'geneview_URL'}, $gene->stable_id, 'core' ),
 		       }
 			 ],
@@ -121,7 +121,7 @@ sub Features {
 	      'LABEL'       => "Image ".$gene_name,
 	      'TYPE'        => 'image',
 	      'LINK' => [
-			 { 'text' => "Click here to jump to $slabel gene summary page",
+			 { 'text' => "View the gene summary page in $slabel.",
 			   'href' => sprintf( $self->{'templates'}{'image_URL'}, $gene->stable_id, 'core' ),
 		       }
 			 ],
@@ -137,7 +137,7 @@ sub Features {
 	      'LABEL'       => "Image ".$gene_name,
 	      'TYPE'        => 'image-block',
 	      'LINK' => [
-			 { 'text' => "Click here to jump to the $slabel gene summary page.",
+			 { 'text' => "Gene structure.",
 			   'href' => sprintf( $self->{'templates'}{'image2_URL'}, $gene->stable_id, 'core' ),
 		       }
 			 ],
@@ -154,8 +154,7 @@ sub Features {
 	  push @$notes, sprintf ("%s has %d transcripts containing a total of %d exons on the %s strand.", $gene_name, scalar(@{ $gene->get_all_Transcripts }),  scalar(@{ $gene->get_all_Exons }), $gene->strand > 0 ? 'forward' : 'reverse' );
 
 	  if ($gene->can('analysis') && $gene->analysis && $gene->analysis->description) {
-# disable for the time being - need to take care of the html tags
-#	      push @$notes, $gene->analysis->description;
+	      push @$notes, $gene->analysis->description;
 	  }
 
 	  my $s1 = {
@@ -164,10 +163,10 @@ sub Features {
 	      'TYPE'        => 'summary',
 	      'NOTE' => $notes,
 	      'LINK' => [
-			 { 'text' => 'Click here to jump to the gene sequence.',
+			 { 'text' => "View the gene sequence in $slabel.",
 			   'href' => sprintf( $self->{'templates'}{'sequence_URL'}, $gene->stable_id, 'core' ),
 		       },
-			 { 'text' => 'Click here to jump to a zoomable region of the chromosome for this gene.',
+			 { 'text' => "View the chromosome region for this gene in $slabel",
 			   'href' => sprintf( $self->{'templates'}{'location_URL'}, $gene->stable_id, 'core' ),
 		       }
 			 ],
@@ -188,7 +187,7 @@ sub Features {
 		  'TYPE'        => 'summary',
 		  'NOTE' => $notes1,
 		  'LINK' => [
-			     { 'text' => 'Click here for sequence variations such as polymorphisms, along with genotypes and disease associations.',
+			     { 'text' => "View sequence variations such as polymorphisms, along with genotypes and disease associations in $slabel.",
 			       'href' => sprintf( $self->{'templates'}{'varview_URL'}, $gene->stable_id, 'core' ),
 			   }
 			     ],
@@ -227,7 +226,7 @@ sub Features {
 		  'TYPE'        => 'summary',
 		  'NOTE' => $notes2,
 		  'LINK' =>  $hHash->{ortholog} ? [
-			     { 'text' => 'Click to view homology between species determined by a gene tree.',
+			     { 'text' => "View homology between species determined by a gene tree in $slabel.",
 			       'href' => sprintf( $self->{'templates'}{'compara_URL'}, 'Ortholog', $gene->stable_id, 'core' ),
 			   }
 			     ] : [ ],
@@ -244,7 +243,7 @@ sub Features {
 		  'TYPE'        => 'summary',
 		  'NOTE' => $notes3,
 		  'LINK' => $hHash->{paralog} ? [
-			     { 'text' => 'Click to view homology arising from a duplication event, determined by a gene tree.',
+			     { 'text' => "View homology arising from a duplication event, determined by a gene tree in $slabel.",
 			       'href' => sprintf( $self->{'templates'}{'compara_URL'}, 'Paralog', $gene->stable_id, 'core' ),
 			   }
 			     ] : [ ],
@@ -271,7 +270,7 @@ sub Features {
 		  'TYPE'        => 'summary',
 		  'NOTE' => $notes1,
 		  'LINK' => $reg_feats ? [
-			     { 'text' => 'Click to go to gene regulatory elements, such as promoters, transcription binding sites, and enhancers.',
+			     { 'text' => "View the gene regulatory elements, such as promoters, transcription binding sites, and enhancers in $slabel.",
 			       'href' => sprintf( $self->{'templates'}{'regulation_URL'}, $gene->stable_id, 'core' ),
 			   }
 			     ] : [ ],

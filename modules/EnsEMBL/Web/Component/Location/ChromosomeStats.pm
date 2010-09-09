@@ -43,6 +43,13 @@ sub content {
     'Number of finished sequence clones',
     'Total number of sequencing clones',
     'Raw percentage of map covered by sequence clones',
+    'antisense Gene Count',
+    'class_I_RNA Gene Count',
+    'class_II_RNA Gene Count',
+    'RNase_MRP_RNA Gene Count',
+    'RNase_P_RNA Gene Count',
+    'SRP_RNA Gene Count',
+    'tmRNA Gene Count',
   );
   my $html = qq(
 <h3>Chromosome Statistics</h3>

@@ -1033,7 +1033,7 @@ sub add_marker_feature {
   my($keys, $data) = $self->_merge($hashref->{'marker_feature'});
   my $menu = $self->get_node('marker');
   
-  foreach my $key_2 (@$keys) {
+  foreach my $key_2 (@$keys) { 
     $menu->append($self->create_track('marker_' . $key . '_' . $key_2, $data->{$key_2}{'name'}, {
       db          => $key,
       glyphset    => '_marker',
@@ -1304,6 +1304,7 @@ sub add_alignments {
   my ($self, $key, $hashref, $species) = @_;
 
   return unless $self->_check_menus(qw( multiple_align pairwise_tblat pairwise_blastz pairwise_other ));
+  return if $self->species_defs->ENSEMBL_SITETYPE eq 'Pre';
   
   my $alignments = {};
   my $vega       = $self->species_defs->ENSEMBL_SITETYPE eq 'Vega';

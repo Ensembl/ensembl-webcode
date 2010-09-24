@@ -286,11 +286,6 @@ sub _create_RegulatoryFactor {
   }
   
   $id ||= $self->param('id');
-  
-  if ($id =~ /miR/) {
-    my ($transcript_id, $feature_id) = split ':', $id;
-    $id = $feature_id;  
-  } 
 
   my $features = $fg_db->get_ExternalFeatureAdaptor->fetch_all_by_display_label($id) || [];
 

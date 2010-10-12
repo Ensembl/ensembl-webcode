@@ -360,12 +360,13 @@ foreach my $spp (@valid_spp) {
 
   ##--------------------------- OUTPUT STATS TABLE -----------------------------
 
+    my $assembly = ($a_date && ($a_date !~ /blank/)) ? "$a_id, $a_date" : $a_id;
     print STATS qq(<h3 class="boxed">Summary</h3>
 
   <table class="ss tint species-stats">
       <tr class="bg2">
           <td class="data">Assembly:</td>
-          <td class="value">$a_id, $a_date</td>
+          <td class="value">$assembly</td>
       </tr>
       <tr>
           <td class="data">Database version:</td>
@@ -563,8 +564,6 @@ foreach my $spp (@valid_spp) {
 
 
 exit;
-
-
 
 #############################################################################
 

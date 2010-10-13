@@ -8,6 +8,7 @@ use HTML::Entities qw(encode_entities);
 use base qw(EnsEMBL::Web::Object::DAS);
 use Data::Dumper;
 
+my $MAX_LEN = 100;
 
 sub Types {
   my $self = shift;
@@ -96,8 +97,11 @@ sub Features {
 	  push @{$self->{_features}{$gene_id}{'FEATURES'}}, $ef;
 
 	  my $description =  encode_entities( $gene->description() );
-	  $description =~ s/\(.+// if ($description);
 	  $description =~ s/\[.+// if ($description);
+
+	  if (length($description) > $MAX_LEN) {
+	      $description = substr($description, 1, $MAX_LEN) . ' ...';
+	  }
 
 	  my $gene_name = $gene->display_xref ? $gene->display_xref->display_id : $gene->stable_id;
 

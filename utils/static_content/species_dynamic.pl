@@ -386,9 +386,10 @@ foreach my $spp (@valid_spp) {
   $bp = thousandify($bp);
   $gpl = thousandify($gpl);
 
-  push @meta_queries, "insert into meta (meta_key, meta_value) values ('stat.Summary.Assembly', '$a_id, $a_date')";
+  my $assembly = ($a_date && ($a_date !~ /blank/)) ? "$a_id, $a_date" : $a_id;
+  push @meta_queries, "insert into meta (meta_key, meta_value) values ('stat.Summary.Assembly', '$assembly')";
   push @meta_keys, 'stat.Summary.Assembly';  
-  push @meta_vals, "$a_id, $a_date";
+  push @meta_vals, $assembly;
 
   push @meta_queries, "insert into meta (meta_key, meta_value) values ('stat.Summary.Database version', '$db_id')";
   push @meta_keys, 'stat.Summary.Database version';
@@ -571,9 +572,8 @@ foreach my $spp (@valid_spp) {
     }
     else {
 
-       ##--------------------------- DO INTERPRO STATS -----------------------------                                                                                                                                   
+       ##--------------------------- DO INTERPRO STATS -----------------------------                                                                    
        my $ip_tables = do_interpro($db, $spp, undef, undef, $sp_id, '0') unless $NOINTERPRO;
-
        ##--------------------------- OUTPUT STATS TABLE -----------------------------                       
 
        ## PREPARE TO WRITE TO OUTPUT FILE                                                                                                                                                                     

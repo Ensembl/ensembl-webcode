@@ -298,7 +298,9 @@ sub load_user_tracks {
     
     $url_sources{$entry->{'url'}} = {
       source_name => $entry->{'name'} || $entry->{'url'},
-      source_type => 'session'
+      source_type => 'session',
+      format      => $entry->{'format'},
+      style       => $entry->{'style'},
     };
   }
   
@@ -375,7 +377,9 @@ sub load_user_tracks {
         Data retrieved from an external webserver. This data is attached to the %s, and comes from URL: %s', 
         encode_entities($url_sources{$_}{'source_type'}), encode_entities($_)
       ),
-      'url' => $_
+      'url' => $_,
+      'format'  => $url_sources{$_}{'format'},
+      'style'   => $url_sources{$_}{'style'},
     );
   }
   
@@ -447,15 +451,25 @@ sub _add_flat_file_track {
   $menu ||= $self->get_node('user_data');
   return unless $menu;
   
+  my $display   = 'normal';
+  my $renderers = $alignment_renderers;
+  my $strand   = 'b'; 
+      
+  if ($options{'style'} eq 'wiggle' || $options{'style'} eq 'WIG') {
+    $display   = 'tiling';
+    $strand    = 'r';
+    $renderers = [ 'off' => 'Off', 'tiling' => 'Wiggle plot' ];
+  }
+
   my $track = $self->create_track($key, $name, {
-    display     => 'normal',
-    strand      => 'b',
+    display     => $display,
+    strand      => $strand,
     _class      => 'url',
     glyphset    => '_flat_file',
     colourset   => 'classes',
     caption     => $name,
     sub_type    => $sub_type,
-    renderers   => $alignment_renderers,
+    renderers   => $renderers,
     description => $description,
     %options
   });

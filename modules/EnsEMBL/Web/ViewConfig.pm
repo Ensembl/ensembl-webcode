@@ -282,6 +282,9 @@ sub update_from_config_strings {
           
           if ($type eq 'url') {
             $p = uri_unescape($p);
+            my @path = split(/\./, $p);
+            my $ext = $path[-1] eq 'gz' ? $path[-2] : $path[-1];
+            my $format = uc($ext);
             
             # We have to create a URL upload entry in the session
             my $code = md5_hex("$ENV{'ENSEMBL_SPECIES'}:$p");
@@ -292,7 +295,9 @@ sub update_from_config_strings {
               url     => $p,
               species => $ENV{'ENSEMBL_SPECIES'},
               code    => $code, 
-              name    => $n
+              name    => $n,
+              format  => $format,              
+              style   => $format,
             );
             
             $session->add_data(

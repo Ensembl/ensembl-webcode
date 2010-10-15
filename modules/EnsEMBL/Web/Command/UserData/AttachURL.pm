@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use EnsEMBL::Web::Tools::Misc qw(get_url_filesize);
+use EnsEMBL::Web::Root;
 use base qw(EnsEMBL::Web::Command);
 
 sub process {
@@ -11,11 +12,19 @@ sub process {
   my $object = $self->object;
   my $redirect = $object->species_path($object->data_species).'/UserData/';
   my $param = {};
-
   my $name = $object->param('name');
-  unless ($name) {
-    my @path = split('/', $object->param('url'));
-    $name = $path[-1];
+
+  my @path = split '/', $object->param('url');
+  my $filename = $path[-1];
+  $name ||= $filename;
+  ## Try to guess format from file name
+  my $format;
+  my @bits = split /\./, $filename;
+  my $extension = $bits[-1] eq 'gz' ? $bits[-2] : $bits[-1];
+  $extension = uc($extension);
+  my $package = 'EnsEMBL::Web::Text::Feature::'.$extension;
+  if (EnsEMBL::Web::Root::dynamic_use(undef, $package)) {
+    $format = $extension;
   }
 
   if (my $url = $object->param('url')) {
@@ -53,6 +62,8 @@ sub process {
         type      => 'url',
         url       => $url,
         name      => $name,
+        format    => $format,
+        style     => $format,
         species   => $object->data_species,
         filesize  => $feedback->{'filesize'},
       );

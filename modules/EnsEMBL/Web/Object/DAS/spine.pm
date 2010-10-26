@@ -100,7 +100,9 @@ sub Features {
 	  $description =~ s/\[.+// if ($description);
 
 	  if (length($description) > $MAX_LEN) {
-	      $description = substr($description, 1, $MAX_LEN) . ' ...';
+	      $description = substr($description, 0, $MAX_LEN);
+	      my $sindex = index($description, ' ');
+	      $description = substr($description, 0, $sindex). ' ...';
 	  }
 
 	  my $gene_name = $gene->display_xref ? $gene->display_xref->display_id : $gene->stable_id;

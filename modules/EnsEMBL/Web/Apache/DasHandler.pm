@@ -51,7 +51,7 @@ sub handler_das {
     # this a site-wide request - try to figure out the species from the ID
     $das_species = '';
     if ($querystring =~ /segment=([^;]+)\;?(.+)?$/) {
-      my ($s) = Bio::EnsEMBL::Registry->get_species_and_object_type($1);
+      my ($s) = Bio::EnsEMBL::Registry->get_species_and_object_type($1, 'Gene');
       $das_species = $s if $s;
     }
     

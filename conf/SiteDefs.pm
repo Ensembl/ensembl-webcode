@@ -16,7 +16,7 @@ $Text::Wrap::columns = 75;
 use vars qw ( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION
   $APACHE_DIR
   $APACHE_BIN
-	$BIOPERL_DIR
+  $BIOPERL_DIR
   $CGI_POST_MAX
   $ENSEMBL_RELEASE_DATE $ENSEMBL_MIN_SPARE_SERVERS $ENSEMBL_MAX_SPARE_SERVERS $ENSEMBL_START_SERVERS
   $ENSEMBL_HELPDESK_EMAIL
@@ -106,6 +106,8 @@ use vars qw ( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION
   $ENSEMBL_MART_ENABLED
   $ENSEMBL_BLAST_ENABLED
   $ENSEMBL_FLAG_NAMES
+  $SAMTOOLS_DIR
+  $MINI_BIOPERL_161_DIR
 );
 
 use Sys::Hostname::Long;
@@ -155,7 +157,10 @@ $ENSEMBL_SERVERROOT = File::Spec->catpath( $volume, File::Spec->catdir( @clean_d
 $ENSEMBL_SERVERROOT = '.' unless $ENSEMBL_SERVERROOT;
 $APACHE_DIR         = "$ENSEMBL_SERVERROOT/apache2";
 
+$SAMTOOLS_DIR       = "$ENSEMBL_SERVERROOT/samtools";
+
 $BIOPERL_DIR        ||= "$ENSEMBL_SERVERROOT/bioperl-live";
+$MINI_BIOPERL_161_DIR        ||= "$ENSEMBL_SERVERROOT/mini-bioperl-161";
 #warn "$ENSEMBL_SERVERROOT";
 ## Define Plugin directories....
 eval qq(require '$ENSEMBL_SERVERROOT/$CONF_DIR/Plugins.pm');
@@ -500,6 +505,7 @@ $APACHE_BIN ||= "$APACHE_DIR/bin/httpd";
   $ENSEMBL_SERVERROOT.'/ensembl-external/modules',
   $ENSEMBL_SERVERROOT.'/biomart-perl/lib',
   $BIOPERL_DIR,
+  $MINI_BIOPERL_161_DIR,
   $ENSEMBL_SERVERROOT.'/modules',
 );
 

@@ -40,7 +40,7 @@ sub content {
     $html .= ')</p>';
   }
   else {
-    $html = qq('Sorry, there was a problem uploading your file. Please try again.');
+    $html = qq(Sorry, there was a problem uploading your file. Please try again.);
   }
   return $html;
 }

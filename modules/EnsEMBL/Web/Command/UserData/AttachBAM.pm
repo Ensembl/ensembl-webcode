@@ -39,7 +39,7 @@ sub process {
       my ($bam, $index);
       eval {
         $bam = Bio::DB::Bam->open($url);
-        $index = Bio::DB::Bam->index($url);
+        $index = Bio::DB::Bam->index($url,0);
         my $header = $bam->header;
         my $region = $header->target_name->[0];
         my $callback = sub {return 1};
@@ -54,7 +54,7 @@ sub process {
         $session->add_data(
           'type'  => 'message',
           'code'  => 'AttachBAM',
-          'message' => "Unable to open/index remote BAM file: $url",
+          'message' => "Unable to open/index remote BAM file: $url<br>Ensembl can only display sorted, indexed BAM files<br>Ensure you have sorted and indexed your file and that your web server is accessible to the Ensembl site",
           function => '_error'
         );
         $redirect .= 'ManageData';

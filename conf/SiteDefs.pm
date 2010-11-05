@@ -107,6 +107,7 @@ use vars qw ( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION
   $ENSEMBL_BLAST_ENABLED
   $ENSEMBL_FLAG_NAMES
   $SAMTOOLS_DIR
+  $SAMTOOLS_HTTP_PROXY
   $MINI_BIOPERL_161_DIR
 );
 
@@ -157,7 +158,8 @@ $ENSEMBL_SERVERROOT = File::Spec->catpath( $volume, File::Spec->catdir( @clean_d
 $ENSEMBL_SERVERROOT = '.' unless $ENSEMBL_SERVERROOT;
 $APACHE_DIR         = "$ENSEMBL_SERVERROOT/apache2";
 
-$SAMTOOLS_DIR       = "$ENSEMBL_SERVERROOT/samtools";
+$SAMTOOLS_DIR        = "$ENSEMBL_SERVERROOT/samtools";
+$SAMTOOLS_HTTP_PROXY = '';
 
 $BIOPERL_DIR        ||= "$ENSEMBL_SERVERROOT/bioperl-live";
 $MINI_BIOPERL_161_DIR        ||= "$ENSEMBL_SERVERROOT/mini-bioperl-161";
@@ -261,6 +263,7 @@ $ENSEMBL_TMP_URL_CACHE  = '/img-cache';
 $ENSEMBL_BLASTSCRIPT    = undef;
 $ENSEMBL_REGISTRY       = undef;
 $ENSEMBL_PRIVATE_AUTH   = undef;
+
 ####################
 # Environment variables to set using the SetEnv directive
 %ENSEMBL_SETENV =
@@ -636,6 +639,7 @@ $ENSEMBL_TEMPLATE_ROOT = $ENSEMBL_SERVERROOT.'/biomart-perl/conf';
   $ENSEMBL_MAIL_SERVER
   $ENSEMBL_SHORTEST_ALIAS
   $MART_ENSEMBL_LINKS
+  $SAMTOOLS_HTTP_PROXY
 );
 
 ############################
@@ -646,7 +650,7 @@ $ENSEMBL_TEMPLATE_ROOT = $ENSEMBL_SERVERROOT.'/biomart-perl/conf';
   $APACHE_BIN
   $APACHE_DIR
   $CGI_POST_MAX
-	$BIOPERL_DIR
+  $BIOPERL_DIR
   $ENSEMBL_HELPDESK_EMAIL
   $ENSEMBL_MAIL_SERVER
   $OBJECT_TO_SCRIPT
@@ -933,6 +937,7 @@ $ENSEMBL_TEMPLATE_ROOT = $ENSEMBL_SERVERROOT.'/biomart-perl/conf';
     $ENSEMBL_USER
     $ENSEMBL_USER_COOKIE
     $OBJECT_TO_SCRIPT
+    $SAMTOOLS_HTTP_PROXY
   )],
 );
 

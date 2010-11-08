@@ -390,7 +390,12 @@ sub draw_wiggle_points {
   my ($self, $features, $slice, $parameters, $offset, $pix_per_score, $colour, $red_line_offset) = @_;
   my $hrefs = $parameters->{'hrefs'};
   foreach my $f (@$features) { 
-    my $href = $hrefs->{$f->id} || '';
+    my $href = '';
+    ## Have to check for this function first, because conservation scores don't have an ID
+    if ($f->can('id')) {
+      $href = $hrefs->{$f->id};
+    }
+
     my ($START, $END, $score, $min_score);
 
     if (ref($f) eq 'HASH'){ # Data is from a Funcgen result set collection, windowsize > 0

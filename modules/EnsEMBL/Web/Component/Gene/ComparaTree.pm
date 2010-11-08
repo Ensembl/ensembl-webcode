@@ -66,7 +66,29 @@ sub content {
   my @highlights           = $gene && $member ? ($gene->stable_id, $member->genome_db->dbID) : (undef, undef);
   my $hidden_genes_counter = 0;
   my ($hidden_genome_db_ids, $highlight_species, $highlight_genome_db_id, $html);
-  
+
+  $html .= sprintf (qq(
+    <h3>GeneTree %s</h3>
+      <dl class="summary">
+        <dt style="width:15em">Number of genes</dt>
+        <dd>%s</dd>
+      </dl>
+      <dl class="summary">
+        <dt style="width:15em">Number of duplication nodes</dt>
+        <dd>%s</dd>
+      </dl>
+      <dl class="summary">
+        <dt style="width:15em">Number of ambiguous nodes</dt>
+        <dd>%s</dd>
+      </dl>
+      <p>&nbsp;</p>
+    ), 
+    $tree->root->stable_id, 
+    scalar(@$leaves),
+    $self->get_num_nodes_with_tag($tree, "Duplication", 2),
+    $self->get_num_nodes_with_tag($tree, "dubious_duplication", 1),
+  );
+
   if ($highlight_gene) {
     my $highlight_gene_display_label;
     
@@ -277,6 +299,27 @@ sub collapsed_nodes {
   }
   
   return join ',', grep !$expanded_nodes{$_}, keys %collapsed_nodes;
+}
+
+sub get_num_nodes_with_tag {
+  my ($self, $tree, $tag, $value) = @_;
+  my $count = 0;
+
+  if (defined($value)) {
+    foreach my $tnode(@{$tree->get_all_nodes}) {
+      if ($tnode->get_tagvalue($tag) eq $value) {
+        $count++;
+      }
+    }
+  } else {
+    foreach my $tnode(@{$tree->get_all_nodes}) {
+      if ($tnode->get_tagvalue($tag)) {
+        $count++;
+      }
+    }
+  }
+
+  return $count;
 }
 
 sub find_nodes_by_genome_db_ids {

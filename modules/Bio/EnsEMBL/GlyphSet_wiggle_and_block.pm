@@ -91,7 +91,7 @@ sub draw_block_features {
   my ( $self, $features, $colour, $score, $display_summit, $display_pwm) = @_;
   my $length = $self->{'container'}->length;
 
-  my $h = 10;
+  my $h = 8;
   foreach my $f (@$features ) {
     my $start = $f->start; 
     my $end   = $f->end;
@@ -126,29 +126,27 @@ sub draw_block_features {
         }));
       }        
     }
-    if ($midpoint && $display_summit){
+    if ($length <= 20000 && $midpoint && $display_summit){
       $midpoint -= $self->{'container'}->start;
-=cut
-      my $triangle_end   =  $midpoint-1 - 2;
-      my $triangle_start =  $midpoint-1 + 2;
+      my $pix_per_bp = $self->scalex;
+      # Upward pointing triangle
+      my $triangle_end   =  $midpoint - 2/$pix_per_bp;
+      my $triangle_start =  $midpoint + 2/$pix_per_bp;
       $self->push($self->Poly({
-        'points'    => [ $triangle_start, $h+2,
-                         $midpoint-1, $h-1,
-                         $triangle_end, $h+2  ],
+        'points'    => [ $triangle_start, $h+4+$y,
+                         $midpoint, $h+$y,
+                         $triangle_end, $h+4+$y  ],
         'colour'    => $colour,
-        'absolutex' => 1,
         'absolutey' => 1,
       }));
-=cut
-      my $m_colour = $self->{'config'}->colourmap->mix('white', $colour, '0.25');
-      $self->push($self->Rect({
-        'x'         => $midpoint-0.5,
-        'y'         => $y,
-        'height'    => $h,
-        'width'     => 1,
-        'absolutey' => 1,          # in pix rather than bp
-        'colour'    => $m_colour,
-        'class'     => 'group',
+      # Downward pointing triangle
+      $self->push($self->Poly({
+        'points'    => [ $triangle_start, $h-12+$y,
+                         $midpoint,  $h-9+$y,
+                         $triangle_end, $h-12+$y ],
+
+        'colour'    => $colour,
+        'absolutey' => 1,
       }));
     }
   }

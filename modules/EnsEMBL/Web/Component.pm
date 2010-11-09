@@ -419,6 +419,7 @@ sub _matches {
   # in order to preserve the order, we use @links for acces to keys
   while (scalar @links) {
     my $key = $links[0][0];
+    warn ">>> KEY $key";
     my $j   = 0;
     my $text;
     
@@ -647,7 +648,6 @@ sub transcript_table {
       $description .= qq( <span class="small">@{[ $link ]}</span>) if $acc && $acc ne 'content';
     }
     
-    $description = "<p>$description</p>";
   }
   
   my $seq_region_name  = $object->seq_region_name;
@@ -729,7 +729,10 @@ sub transcript_table {
   }
   
   my $html = qq{
-    $description
+    <dl class="summary">
+      <dt>Description</dt>
+      <dd>$description</dd>
+    </dl>
     <dl class="summary">
       <dt>Location</dt>
       <dd>

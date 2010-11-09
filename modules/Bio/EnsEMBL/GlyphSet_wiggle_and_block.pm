@@ -151,7 +151,7 @@ sub draw_block_features {
     }
   }
 
-  $self->_offset( $h+3 );
+  $self->_offset( $h+6 );
   return 1;
 }
 

@@ -1146,21 +1146,11 @@ sub species_display_label {
 
   my ($self, $species, $no_formatting) = @_;
   
-  (my $ss = lc $species) =~ s/_/ /g;
-  
-  my $current_species = $self->production_name();
-  my $sdhash          = $self->SPECIES_DISPLAY_NAME($current_species);
-  
-  return $sdhash->{$ss} if $sdhash->{$ss};
-
-  my $label = $self->species_label($species);
-
-  return $label unless $label =~ /Ancestral/;
-
-  my $site_hash = $self->ENSEMBL_SPECIES_SITE($current_species);
-  my $url_hash  = $self->ENSEMBL_EXTERNAL_URLS($current_species);
-  
-  return $site_hash->{$ss} ? $species : 'Ancestral sequence';
+  if( my $sdhash          = $self->SPECIES_DISPLAY_NAME) {
+      (my $ss = lc $species) =~ s/ /_/g;
+      return $sdhash->{$ss} if $sdhash->{$ss};
+  }
+  return $self->species_label($species);
 }
 
 sub production_name {

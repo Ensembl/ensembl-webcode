@@ -103,6 +103,8 @@ ol li                     { list-style-type: decimal; list-style-image: none; }
 ul li                     { list-style-image: url(/i/bullet_1.gif); }
 ul.checklist li           { list-style-image: url(/i/checkbox.gif); }
 ul li ul li, ul.level2 li { list-style-image: url(/i/bullet_2.gif); }
+ul li ol li               { list-style-image: none; }
+ul li ul, ul li ol, ol li ul { margin-top: 0.5em; }
 
 dt { font-weight: bold; }
 dd { margin-bottom: 1em; }

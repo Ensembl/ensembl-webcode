@@ -157,7 +157,7 @@ sub valid_species {
   
   if (!@valid_species) {
     @valid_species = map @{$self->get_config($_, 'DB_SPECIES')}, @$ENSEMBL_DATASETS;
-    $self->{'_valid_species'} = \@valid_species; # cache the result
+    $self->{'_valid_species'} = [ @valid_species ]; # cache the result
   }
   
   @valid_species = grep $test_species{$_}, @valid_species if %test_species; # Test arg list if required

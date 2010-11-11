@@ -243,7 +243,7 @@ sub render_coverage {
     if ($ppbp < 1 or !$options{show_consensus}) {
       $colour =  $self->my_colour('consensus');
     } else {
-      $colour = $cons ? $self->my_colour(lc($cons->seqname)) : 'background1'
+      $colour = $cons ? $self->my_colour(lc($cons->seqname)) : $self->my_colour('consensus');
     }
     
     # coverage rectangle          

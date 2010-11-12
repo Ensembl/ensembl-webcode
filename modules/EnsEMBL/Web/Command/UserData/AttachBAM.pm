@@ -69,6 +69,8 @@ sub process {
           $self->object->move_to_user('type' => 'bam', 'code' => $data->{'code'});
         }
         $redirect .= 'BAMFeedback';
+        $session->configure_bam_views($data);
+        $session->store; 
       }
     }
   } else {

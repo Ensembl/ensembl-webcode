@@ -8,22 +8,25 @@
 
 <h1>Adding Custom Tracks to Ensembl</h1>
 
-<ol>
+<ul>
 <li><a href="#addtrack">How to add custom tracks</a></li>
-<li><a href="#access">Data access and security</a></li>
 <li><a href="#formats">Supported file formats</a></li>
 <li><a href="#samples">Sample data files</a></li>
-</ol>
+<li><a href="#access">Data access and security</a></li>
+</ul>
 
 <h2 id="addtrack">How to add custom tracks</h2>
 
 <p>Your custom tracks are  managed using the pop-up control panel, accessed through the 'Manage your data' button under the left-hand menu.</p>
 
+<p>You can add a track from any species-specific page, but it will only be displayed on suitable Location views, such as 'Region in Detail'.</p>
+
 <h3>Ways to add tracks to Ensembl</h3>
 <ol>
 <li>Upload a file to our servers (max 5MB), from either your own computer or a location on the web (URL-based data).</li>
 <li>Attach a URL, from which the file will be read each time you visit a page that has the track on</li>
-<li>Attach a DAS (Distributed Annotation System) source, either from your own DAS server or anywhere else on the internet. <a href="/Help/Movie?id=224" class="popup">Watch the tutorial</a>.</li>
+<li>Attach a DAS (Distributed Annotation System) source, either from your own DAS server or anywhere else on the internet.
+<br /><a href="/Help/Movie?id=224" class="popup">Watch the tutorial</a> (YouTube).</li>
 </ol>
 
 <h3>Coordinate Systems</h3>
@@ -51,6 +54,34 @@ at the left of any Location page.</li>
 </p>
 
 
+
+<h2 id="formats">Supported file formats</h2>
+
+<p>Click on a link for documentation on a format and its supported options.</p>
+
+<ul>
+<li><a href="bed.html">BED</a></li>
+<li><a href="bed.html#bedGraph">BedGraph</a></li>
+<li><a href="gff.html">GFF/GTF</a></li>
+<li><a href="psl.html">PSL</a></li>
+<li><a href="wig.html">WIG</a></li>
+</ul>
+
+<h2 id="samples">Sample data files</h2>
+
+<ul>
+<li><strong>BED</strong> - <a href="sample_files/example.bed">BAC end sequences</a>
+  <ul>
+  <li><a href="sample_files/wiggle_ta.bed">BED tiling array</a></li>
+  <li><a href="sample_files/wiggle_cg.bed">BED colour gradient</a></li>
+  <li><a href="sample_files/wiggle_hg.bed">BED histogram</a></li>
+  <li><a href="sample_files/wiggle_plot.bed">BED wiggle plot</a></li>
+  </ul>
+</li>
+<li><strong>GFF</strong> - <a href="sample_files/example.gff">BAC end sequences</a></li>
+<li><strong>PSL</strong> - <a href="sample_files/example.psl">Human INSR gene</a></li>
+</ul>
+
 <h2 id="access">Data access and security</h2>
 
 <h3>Saving tracks</h3>
@@ -63,17 +94,21 @@ Once logged in, you will see a 'Save' link next to your track - click
 on this and the track will be transferred to the database and can be
 accessed on any computer where you are logged into Ensembl.</p>
 
+<p>Remote data is not saved to the database. Only the URL or source
+name is saved to your user account, to allow you to access the file
+easily from any location, without having to reattach it.</p>
+
 <h3 id="DeletingTracks">Deleting tracks</h3>
 
 <p> 
 The track will remain on your display while you navigate around the
-genome. To remove the track, deselect the track in
-the <strong>Configure this page</strong> menu. To remove the data 
-set, click the <strong>Manage your data</strong> link at the left of
-Location. Click <strong>Manage data</strong> at the left of the
-window. The tracks you have currently uploaded and/or attached will
-be listed. Click delete.
+genome. To hide the track, choose the "no display" option (empty box)
+for that track in the <strong>Configure this page</strong> menu.</p>
 
+<p>To remove the data set, click the <strong>Manage your data</strong> 
+link at the left of Location. Click <strong>Manage data</strong> at the left of the
+window. The tracks you have currently uploaded and/or attached will
+be listed. Click delete next to any you wish to remove.
 </p>
 
 <h3 id="Disclaimer">Data Upload Disclaimer</h3>
@@ -98,35 +133,6 @@ privacy.
 If you are concerned about data privacy you should consider setting up
 your own secure DAS server.
 </p>
-
-
-<h2 id="formats">Supported file formats</h2>
-
-<p>Click on a link for documentation on a format and its supported options.</p>
-
-<ul>
-<li><a href="bed.html">BED</a></li>
-<li><a href="bed.html#bedGraph">BedGraph</a></li>
-<li><a href="gff.html">GFF</a></li>
-<li><a href="gtf.html">GTF</a></li>
-<li><a href="psl.html">PSL</a></li>
-<li><a href="wig.html">WIG</a></li>
-</ul>
-
-<h2 id="samples">Sample data files</h2>
-
-<ul>
-<li><strong>BED</strong> - <a href="sample_files/example.bed">BAC end sequences</a>
-  <ul>
-  <li><a href="sample_files/wiggle_ta.bed">BED tiling array</a></li>
-  <li><a href="sample_files/wiggle_cg.bed">BED colour gradient</a></li>
-  <li><a href="sample_files/wiggle_hg.bed">BED histogram</a></li>
-  <li><a href="sample_files/wiggle_plot.bed">BED wiggle plot</a></li>
-  </ul>
-</li>
-<li><strong>GFF</strong> - <a href="sample_files/example.gff">BAC end sequences</a></li>
-<li><strong>PSL</strong> - <a href="sample_files/example.psl">Human INSR gene</a></li>
-</ul>
 
 </body>
 </html>

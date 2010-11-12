@@ -114,11 +114,12 @@ sub _render_hit {
 #  $URL =~ s{markerview\?marker=}{Location/Marker\?m=}; #cope with stuffed Vega Markers (r37 only)
 #  $URL =~ s/Transcript\/Domains\/Genes\?domain=(IPR\d{6}).*/Location\/Genome\?ftype=Domain;id=$1/; #no need to have Transcript IDs on Domain results
 
+
   #Hack for Structural Variations for release 60 
   if ($URL =~/variation_feature_structural/){
     $URL =~s/Location\/Overview/StructuralVariation\/Summary/;
   }
-  
+
   #Factory can't cope with start and stop on location URLs so strip these off
   if ($URL =~ /Location\/View\?r=[A-Za-z]+\d+\./) {
     $URL =~ s{r=}{region=};
@@ -166,6 +167,15 @@ sub _render_hit {
 
   $label =~ s/dataBase/database/;
   $label =~ s/HGNC \(\w+\)/HGNC Symbol/;
+
+  #Hack for Probe featuress for release 60
+  if ($URL =~/ProbeFeature/ ){
+    if ($URL =~/id=\w*\,\w*/){
+      $URL =~s/\,\w*//;
+      $label =~s/span\>\,\w*/span\>/;
+    }
+  }
+
 
   my $a = $URL ? sprintf qq(<a href="%s">%s</a>),CGI::escapeHTML( $URL ),$label : $label;
   return sprintf qq(

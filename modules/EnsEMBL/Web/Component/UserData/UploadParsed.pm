@@ -33,7 +33,7 @@ sub content_ajax {
   my $type = $hub->param('type') || 'upload';
   my $data  = $session->get_data('type' => $type, 'code' => $hub->param('code'));
   
-  my $parser  = new EnsEMBL::Web::Text::FeatureParser($hub->species_defs, $hub->param('r'));
+  my $parser  = new EnsEMBL::Web::Text::FeatureParser($hub->species_defs, $hub->param('r'), $data->{'species'});
   my $html;
   
   if ($data) {
@@ -72,7 +72,7 @@ sub content_ajax {
           }
         }
         else {
-          $html .= sprintf '<p class="space-below">None of the features in your file could be mapped to the %s genome. Please check that you have selected the right species!</p>', $data->{'species'};
+          $html .= sprintf '<p class="space-below">None of the features in your file could be mapped to the %s genome. Please check that you have selected the right species!</p><p class="space-below"><a href="/%s/UserData/DeleteUpload?type=upload;goto=SelectFile;code=%s" class="modal_link">Delete upload and start again</a></p>', $data->{'species'}, $self->hub->species, $self->hub->param('code');
         }
       }
       

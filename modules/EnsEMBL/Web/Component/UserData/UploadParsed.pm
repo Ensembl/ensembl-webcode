@@ -55,20 +55,24 @@ sub content_ajax {
 
       if ($content) {      
         $parser->parse($content, $data->{'format'});
+
+        if ($parser->{'feature_count'}) {      
+          $data->{'format'}  = $parser->format unless $data->{'format'};
+          $data->{'style'}   = $parser->style;
+          $data->{'nearest'} = $parser->nearest;
       
-        $data->{'format'}  = $parser->format unless $data->{'format'};
-        $data->{'style'}   = $parser->style;
-        $data->{'nearest'} = $parser->nearest;
-        warn '>>> STYLE '.$data->{'style'};
+          $session->set_data(%$data);
       
-        $session->set_data(%$data);
+          $html .= sprintf '<p class="space-below"><strong>Total features found</strong>: %s</p>', $parser->feature_count;
       
-        $html .= sprintf '<p class="space-below"><strong>Total features found</strong>: %s</p>', $parser->feature_count;
-      
-        if ($parser->nearest) {
-          $html .= sprintf '<p class="space-below"><strong>Go to %s region with data</strong>: ', $hub->referer->{'params'}{'r'} ? 'nearest' : 'first';
-          $html .= sprintf '<a href="%s/Location/View?r=%s">%s</a></p>', $hub->species_path($data->{'species'}), $parser->nearest, $parser->nearest;
-          $html .= '<p class="space-below">or</p>';
+          if ($parser->nearest) {
+            $html .= sprintf '<p class="space-below"><strong>Go to %s region with data</strong>: ', $hub->referer->{'params'}{'r'} ? 'nearest' : 'first';
+            $html .= sprintf '<a href="%s/Location/View?r=%s">%s</a></p>', $hub->species_path($data->{'species'}), $parser->nearest, $parser->nearest;
+            $html .= '<p class="space-below">or</p>';
+          }
+        }
+        else {
+          $html .= sprintf '<p class="space-below">None of the features in your file could be mapped to the %s genome. Please check that you have selected the right species!</p>', $data->{'species'};
         }
       }
       

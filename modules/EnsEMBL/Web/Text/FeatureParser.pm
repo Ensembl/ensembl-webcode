@@ -9,16 +9,19 @@ no warnings "uninitialized";
 use EnsEMBL::Web::Root;
 use List::MoreUtils;
 use Carp qw(cluck);
+use Data::Dumper;
 
 sub new {
-  my ($class, $species_defs, $location) = @_;
+  my ($class, $species_defs, $location, $data_species) = @_;
+  $data_species ||= $ENV{'ENSEMBL_SPECIES'};
+  warn ">>> SPECIES $data_species";
   my $self = {
   'format'            => '',
   'style'             => '',
   'feature_count'     => 0,
   'current_location'  => $location,
   'nearest'           => undef,
-  'drawn_chrs'        => $species_defs->ENSEMBL_CHROMOSOMES,
+  'drawn_chrs'        => $species_defs->get_config($data_species, 'ENSEMBL_CHROMOSOMES'),
   'valid_coords'      => {},
   'browser_switches'  => {},
   'tracks'            => {},
@@ -27,7 +30,7 @@ sub new {
   '_current_key'      => 'default',
   '_find_nearest'     => {},
   };
-  my $all_chrs = $species_defs->ALL_CHROMOSOMES;
+  my $all_chrs = $species_defs->get_config($data_species, 'ALL_CHROMOSOMES');
   foreach my $chr (@{$self->{'drawn_chrs'}}) {
     $self->{'valid_coords'}{$chr} = $all_chrs->{$chr};  
   }

@@ -15,6 +15,7 @@ use Sanger::Graphics::Glyph::Ellipse;
 use Sanger::Graphics::Glyph::Intron;
 use Sanger::Graphics::Glyph::Line;
 use Sanger::Graphics::Glyph::Poly;
+use Sanger::Graphics::Glyph::Triangle;
 use Sanger::Graphics::Glyph::Rect;
 use Sanger::Graphics::Glyph::Space;
 use Sanger::Graphics::Glyph::Sprite;
@@ -150,6 +151,7 @@ sub Ellipse    { my $self = shift; return new Sanger::Graphics::Glyph::Ellipse( 
 sub Intron     { my $self = shift; return new Sanger::Graphics::Glyph::Intron(     @_ ); }
 sub Line       { my $self = shift; return new Sanger::Graphics::Glyph::Line(       @_ ); }
 sub Poly       { my $self = shift; return new Sanger::Graphics::Glyph::Poly(       @_ ); }
+sub Triangle   { my $self = shift; return new Sanger::Graphics::Glyph::Triangle(   @_ ); }
 sub Rect       { my $self = shift; return new Sanger::Graphics::Glyph::Rect(       @_ ); }
 sub Space      { my $self = shift; return new Sanger::Graphics::Glyph::Space(      @_ ); }
 sub Sprite     { my $self = shift; return new Sanger::Graphics::Glyph::Sprite(     @_ ); }
@@ -1115,7 +1117,7 @@ sub sort_features_by_priority {
 
   my $prioritize = 0;
   while (my ($k, $v) = each (%features)) {
-    if (@$v > 1 && $v->[1]{'priority'}) {
+    if ($v && @$v > 1 && $v->[1]{'priority'}) {
       $prioritize = 1;
     }
   }

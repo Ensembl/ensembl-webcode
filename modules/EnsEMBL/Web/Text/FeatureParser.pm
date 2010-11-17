@@ -14,7 +14,7 @@ use Data::Dumper;
 sub new {
   my ($class, $species_defs, $location, $data_species) = @_;
   $data_species ||= $ENV{'ENSEMBL_SPECIES'};
-  warn ">>> SPECIES $data_species";
+  
   my $self = {
   'format'            => '',
   'style'             => '',

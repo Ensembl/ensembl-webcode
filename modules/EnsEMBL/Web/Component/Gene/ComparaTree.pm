@@ -85,7 +85,7 @@ sub content {
     ), 
     $tree->root->stable_id, 
     scalar(@$leaves),
-    $self->get_num_nodes_with_tag($tree, "Duplication", 2),
+    $self->get_num_nodes_with_tag($tree, 'Duplication', undef, ['dubious_duplication']),
     $self->get_num_nodes_with_tag($tree, "dubious_duplication", 1),
   );
 
@@ -302,20 +302,25 @@ sub collapsed_nodes {
 }
 
 sub get_num_nodes_with_tag {
-  my ($self, $tree, $tag, $value) = @_;
+  my ($self, $tree, $tag, $test_value, $exclusion_tag_array) = @_;
   my $count = 0;
 
-  if (defined($value)) {
-    foreach my $tnode(@{$tree->get_all_nodes}) {
-      if ($tnode->get_tagvalue($tag) eq $value) {
-        $count++;
+  OUTER: foreach my $tnode(@{$tree->get_all_nodes}) {
+    my $tag_value = $tnode->get_tagvalue($tag);
+    #Accept if the test value was not defined but got a value from the node
+    #or if we had a tag value and it was equal to the test
+    if( (! $test_value && $tag_value) || ($test_value && $tag_value eq $test_value) ) {
+      
+      #If we had an exclusion array then check & skip if it found anything
+      if($exclusion_tag_array) {
+        foreach my $exclusion (@{$exclusion_tag_array}) {
+          my $exclusion_value = $tnode->get_tagvalue($exclusion);
+          if($exclusion_value) {
+            next OUTER;
+          }
+        }
       }
-    }
-  } else {
-    foreach my $tnode(@{$tree->get_all_nodes}) {
-      if ($tnode->get_tagvalue($tag)) {
-        $count++;
-      }
+      $count++;
     }
   }
 

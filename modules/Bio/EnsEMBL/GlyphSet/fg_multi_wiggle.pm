@@ -91,8 +91,8 @@ sub draw_blocks {
     $feature_name = $temp[1];  
     my $colour   = $colours->{$feature_name};  
     my $features = $fs_data->{$f_set}; 
-    my $label = $f_set; 
-    unless ($display_label =~/MultiCell/){ $label =~s/\w*\://; } 
+    my $label = $temp[1]; 
+    if ($display_label =~/MultiCell/){ $label = $temp[0] .':'. $temp[1]; } 
     $self->draw_track_name($label, $colour, -108, 0, 'no_offset');
     $self->draw_block_features ($features, $colour, $f_set, 1, 1);
   }

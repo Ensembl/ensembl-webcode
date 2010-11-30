@@ -1,8 +1,8 @@
-# $Id$
-
 package EnsEMBL::Web::Component::UserData::UploadFeedback;
 
 use strict;
+use warnings;
+no warnings "uninitialized";
 
 use base qw(EnsEMBL::Web::Component::UserData);
 
@@ -24,8 +24,13 @@ sub content {
 
   if ($upload) {
     $html = '<p class="space-below">Thank you. Your file uploaded successfully</p><p class="space-below"><strong>File uploaded</strong>: '.$upload->{'name'}.' (';
-    if (my $format = $upload->{'format'}) {
-      $html .= "$format file";
+    if ($upload->{'format'}) {
+      $html .= $upload->{'format'}.' file';
+    }
+    elsif ($hub->param('format')) {
+      $upload->{'format'} = $hub->param('format');
+      $hub->session->set_data(%$upload);
+      $html .= $hub->param('format').' file';
     }
     else {
       $html .= 'Unknown format';

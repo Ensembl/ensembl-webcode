@@ -454,7 +454,7 @@ sub get_data {
             }
             @block_features = @temp_block_features;
           }  
-          $data->{$cell_line}{$type}{'block_features'}{$unique_feature_set_id} = \@block_features if scalar @block_features;
+          $data->{$cell_line}{$type}{'block_features'}{$unique_feature_set_id .':'. $reg_attr_fset->analysis->logic_name } = \@block_features if scalar @block_features;
         } if ($display_style eq 'tiling' || $display_style eq 'tiling_feature') {
           my $reg_attr_dset = $dset_a->fetch_by_product_FeatureSet($reg_attr_fset); 
           my $sset          = $reg_attr_dset->get_displayable_supporting_sets('result');

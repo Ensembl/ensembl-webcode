@@ -426,14 +426,15 @@ sub get_data {
     $reg_object = $self->hub->{'_core_objects'}->{'regulation'};
   }
 
-
+  my $count = 0;
   foreach my $regf_fset (@{$hub->get_adaptor('get_FeatureSetAdaptor', 'funcgen')->fetch_all_by_type('regulatory')}) { 
     my $regf_data_set = $dset_a->fetch_by_product_FeatureSet($regf_fset);
     my $cell_line     = $regf_data_set->cell_type->name;
 
     next unless exists $data->{$cell_line};
 
-    foreach my $reg_attr_fset (@{$regf_data_set->get_supporting_sets}) {   
+    foreach my $reg_attr_fset (@{$regf_data_set->get_supporting_sets}) { 
+      $count++;  
       my $unique_feature_set_id = $reg_attr_fset->cell_type->name . ':' . $reg_attr_fset->feature_type->name; 
       my $name = "opt_cft_$unique_feature_set_id";
       my $type = $reg_attr_fset->is_focus_set ? 'core' : 'other';
@@ -454,7 +455,7 @@ sub get_data {
             }
             @block_features = @temp_block_features;
           }  
-          $data->{$cell_line}{$type}{'block_features'}{$unique_feature_set_id .':'. $reg_attr_fset->analysis->logic_name } = \@block_features if scalar @block_features;
+          $data->{$cell_line}{$type}{'block_features'}{$unique_feature_set_id .':'. $count } = \@block_features if scalar @block_features;
         } if ($display_style eq 'tiling' || $display_style eq 'tiling_feature') {
           my $reg_attr_dset = $dset_a->fetch_by_product_FeatureSet($reg_attr_fset); 
           my $sset          = $reg_attr_dset->get_displayable_supporting_sets('result');

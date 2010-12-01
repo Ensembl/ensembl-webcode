@@ -298,7 +298,7 @@ sub new_image {
   $image_config->set_parameter('text_export', $hub->param('export')) if $formats{$hub->param('export')}{'extn'} eq 'txt';
   
   my $image = new EnsEMBL::Web::Document::Image($hub->species_defs);
-  $image->drawable_container = new Bio::EnsEMBL::DrawableContainer(@_);
+  $image->drawable_container = new Bio::EnsEMBL::DrawableContainer(@_) if $self->html_format;
   $image->{'no_panel_type'} = $image_config->{'no_panel_type'};
   
   return $image;
@@ -310,7 +310,7 @@ sub new_vimage {
   $self->id($_[1]->{'type'}); # $_[1] is image config
   
   my $image = new EnsEMBL::Web::Document::Image($self->hub->species_defs);
-  $image->drawable_container = new Bio::EnsEMBL::VDrawableContainer(@_);
+  $image->drawable_container = new Bio::EnsEMBL::VDrawableContainer(@_) if $self->html_format;
   
   return $image;
 }

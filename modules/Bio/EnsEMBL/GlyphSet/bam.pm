@@ -75,6 +75,10 @@ sub bam_adaptor {
   my $self = shift;
   
   my $url = $self->my_config('url');
+  if ($url =~ /\#\#\#CHR\#\#\#/) {
+      my $region = $self->{'container'}->seq_region_name;
+      $url =~ s/\#\#\#CHR\#\#\#/$region/g;
+  }
   $self->{_cache}->{_bam_adaptor} ||= Bio::EnsEMBL::ExternalData::BAM::BAMAdaptor->new($url);
   
   return $self->{_cache}->{_bam_adaptor};

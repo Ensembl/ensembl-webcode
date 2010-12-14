@@ -27,7 +27,8 @@ sub render_normal {
   # show everything by default
   $options{show_reads} = 1 unless defined $options{show_reads}; # show reads by default 
   $options{show_coverage} = 1 unless defined $options{show_coverage}; # show coverage by default 
-  $options{show_consensus} = $options{show_reads} unless defined $options{show_consensus}; # show consensus if showing reads
+  #$options{show_consensus} = $options{show_reads} unless defined $options{show_consensus}; # show consensus if showing reads
+  $options{show_consensus} = 1 unless defined $options{show_consensus};
   
   # check threshold
   my $slice = $self->{'container'};
@@ -261,7 +262,6 @@ sub render_coverage {
     }));
     
     # consensus text
-    # TODO: nickl - don't calculate the consensus if we aren't showing it! 
     if ($options{show_consensus} and $text_fits and $cons) {
       $self->push($self->Text({
         'x'         => $i,

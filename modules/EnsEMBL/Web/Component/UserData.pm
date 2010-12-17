@@ -28,5 +28,16 @@ sub output_das_text {
   }
 }
 
+sub all_formats {
+  my $self = shift;
+  my @formats = sort {lc $a cmp lc $b} @{$self->object->species_defs->USERDATA_FILE_FORMATS || []};
+  my $format_values = [{'name' => '-- Choose --', 'value' => ''}];
+  foreach my $f (@formats) {
+    push @$format_values, {'name' => $f, 'value' => uc($f)};
+  }
+  return $format_values;
+}
+
+
 1;
 

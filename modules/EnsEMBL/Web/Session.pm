@@ -548,7 +548,10 @@ sub configure_das_views {
       $n = $ic->tree->create_node('das_' . $das->logic_name, \%tmp);
     }
     
-    $n->set_user(%$track_options);
+    foreach (keys %$track_options) {
+      $n->set_user($_, $track_options->{$_});
+    }
+
     $ic->altered = 1;
   }
   

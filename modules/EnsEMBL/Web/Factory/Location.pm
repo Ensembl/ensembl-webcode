@@ -700,11 +700,7 @@ sub _create_from_sub_align_slice {
     $self->param('r', sprintf '%s:%s-%s', $chr, $start, $end);
   }
   
-  $self->delete_param($_) for qw(align_start align_end);
-  
-  my %params = map { $_ => $self->param($_) } $self->param;
-  
-  $self->hub->problem('redirect', $self->_url(\%params));
+  $hub->problem('redirect', $hub->url($hub->multi_params));
 }
 
 sub _create_from_slice {

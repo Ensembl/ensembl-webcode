@@ -14,14 +14,11 @@ Ensembl.Panel.Overlay = Ensembl.Panel.extend({
       panel.hide();
     });
     
-    this.isOldIE = $(document.body).hasClass('ie67');
-    if (this.isOldIE) {
-      $(window).bind('scroll', function () {
-        if (panel.visible) {
-          panel.setPosition();
-        }
-      });
-    }
+    $(window).bind('scroll', function () {
+      if (panel.visible) {
+        panel.setPosition();
+      }
+    });
     
     Ensembl.EventManager.register('windowResize', this, this.pageResize);
   },
@@ -80,7 +77,7 @@ Ensembl.Panel.Overlay = Ensembl.Panel.extend({
       left = this.scrollWidth - this.elementWidth - (this.dimensions.minPad / 2);
     }
     
-    $(this.el).css({position: this.isOldIE ? 'absolute' : 'fixed', top: top, left: left, zIndex: 999999999 });
+    $(this.el).css({ position: 'absolute', top: top, left: left, zIndex: 999999999 });
   },
   
   /**
@@ -89,19 +86,16 @@ Ensembl.Panel.Overlay = Ensembl.Panel.extend({
    */
   setBackground: function () {    
     // hide all selects if we are IE and can not handle selects properly
-    if (this.isOldIE) {
+    if ($.browser.msie) {
       $('select').hide();
       $('select', this.el).show();
-
-      // show overlay on screen
-      this.background.css({
-        width:  [ this.scrollWidth,  this.windowWidth  ].sort(function (a, b) { return b - a; })[0], 
-        height: [ this.scrollHeight, this.windowHeight ].sort(function (a, b) { return b - a; })[0]
-      }).show();
     }
-    else {
-      this.background.css({position: 'fixed'}).show();
-    }
+    
+    // show overlay on screen
+    this.background.css({
+      width:  [ this.scrollWidth,  this.windowWidth  ].sort(function (a, b) { return b - a; })[0], 
+      height: [ this.scrollHeight, this.windowHeight ].sort(function (a, b) { return b - a; })[0]
+    }).show();
   },
   
   /**
@@ -110,7 +104,7 @@ Ensembl.Panel.Overlay = Ensembl.Panel.extend({
    */
   removeBackground: function () {
     // hide all selects if we are IE and can not handle selects properly
-    if (this.isOldIE) {
+    if ($.browser.msie) {
       $('select').show();
     }
     
@@ -131,7 +125,6 @@ Ensembl.Panel.Overlay = Ensembl.Panel.extend({
   },
   
   pageResize: function () {
-    console.log('resized');
     this.storeWindowDimensions();
     
     var dims = this.getDimensions();

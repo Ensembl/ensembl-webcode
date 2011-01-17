@@ -642,7 +642,7 @@ sub _location_from_SeqRegion {
 
 sub _create_from_sub_align_slice {
   my ($self, $slice) = @_;
-  
+  my $hub         = $self->hub; 
   my $compara_db  = $self->database('compara');
   my $align_slice = $compara_db->get_adaptor('AlignSlice')->fetch_by_Slice_MethodLinkSpeciesSet(
     $slice, 

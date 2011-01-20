@@ -1128,8 +1128,10 @@ sub get_go_list {
       $evidence = join ', ', @{$goxref->get_all_linkage_types}; 
 
       foreach my $e (@{$goxref->get_all_linkage_info}) {
-	  my ($id, $db) =  ($e->[1]->display_id, $e->[1]->dbname);
-	  push @$sources, $self->hub->get_ExtURL_link($id, $db, $id);
+	my ($linkage, $xref) = @{$e || []};
+ 	next unless $xref;	
+	my ($id, $db) =  ($xref->display_id, $xref->dbname);
+	push @$sources, $self->hub->get_ExtURL_link($id, $db, $id);
       }
     }
 

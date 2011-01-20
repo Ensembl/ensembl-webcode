@@ -101,10 +101,10 @@ sub content {
   }
 
   return "<p>No ontology terms have been mapped to this entry.</p>"  unless $terms_found;   
-
+  $ontovis->highlighted_subsets(@goslim_subset);
   $ontovis->normal_term_accessions(keys %$go_hash);
   #$ontovis->highlighted_term_accessions(keys %$go_slim_hash);
-  $ontovis->highlighted_subsets(@goslim_subset);
+
   
   $html .= $ontovis->render;  
   

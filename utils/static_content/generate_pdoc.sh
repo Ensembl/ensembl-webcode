@@ -44,7 +44,7 @@ PDOC_LOC="$PERLMOD_LOC/htdocs/info/docs/Pdoc"    # where you want Pdocs created
 HTTP="/info/docs/Pdoc"
 P2WDOC_LOC="/localsw/ensembl_web/pdoc-live"  # Pdoc code location
 P2WDOCER="/localsw/ensembl_web/pdoc-live/scripts/perlmod2www.pl"
-BIOPERL="/localsw/ensembl_web/bioperl-live"
+BIOPERL="/localsw/ensembl_web"
 CSS_URL="/pdoc.css"
 
 #F1=bioperl-live
@@ -72,18 +72,17 @@ cd $PERLMOD_LOC
 echo "Check out ensembl-pipeline, ensembl-analysis ensembl-hive"
 cvs co ensembl-pipeline ensembl-analysis ensembl-hive
 
-#for i in bioperl-live ensembl ensembl-analysis ensembl-compara ensembl-functgenomics ensembl-external ensembl-variation ensembl-hive perl biomart-perl public-plugins ensembl-pipeline
-for i in ensembl ensembl-analysis ensembl-compara ensembl-functgenomics ensembl-external ensembl-variation ensembl-hive perl biomart-perl public-plugins ensembl-pipeline
+for i in bioperl-live ensembl ensembl-analysis ensembl-compara ensembl-functgenomics ensembl-external ensembl-variation ensembl-hive perl biomart-perl public-plugins ensembl-pipeline
 do
   mkdir $PDOC_LOC/$i
   echo "CURRENT MODULE: $i"
   #cp $P2WDOC_LOC/Pdoc/Html/Data/perl.css $PDOC_LOC/$i 
  	echo "#CURRENT MODULE: $i" >> $P2WDOC_LOC/make_html_docs.sh 
-#  if [$i == 'bioperl-live']
-#   then $SOURCE = $BIOPERL.'/'.$i
-#  else
+  if [$i == 'bioperl-live']
+   then SOURCE="$BIOPERL/$i"
+  else
     SOURCE="$PERLMOD_LOC/$i"
-#  fi
+  fi
   if test $i = "ensembl"
    then	echo "$P2WDOCER -skip Collection,chimp,Lite,misc-scripts,docs,t -source $SOURCE -target $PDOC_LOC/$i -raw -webcvs http://cvs.sanger.ac.uk/cgi-bin/viewvc.cgi/$i/?root=ensembl -css_url $CSS_URL -xltable $P2WDOC_LOC/$i.xlinks " >> $P2WDOC_LOC/make_html_docs.sh
  elif test $i = "ensembl-variation"
@@ -127,6 +126,7 @@ cvs -q up
 # cd back into server root directory:
 echo "Change back to server root directory";
 cd $PERLMOD_LOC
+
 
 # generate e! docs:
 echo "Generating e! docs:";

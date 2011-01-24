@@ -70,7 +70,7 @@ sub _create_link {
   my $title = $subtree->{'_title'};
   my $url   = $subtree->{'_path'};
   if ($child) {
-    if ($subtree->{'_show'}) {
+    if ($subtree->{'_show'} eq 'y') {
       if ($path =~ /\.html/) {
         $link = $title;
       }

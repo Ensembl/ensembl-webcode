@@ -214,7 +214,12 @@ sub parse {
           if ($filter->{'chr'}) {
             next unless ($chr eq $filter->{'chr'} || $chr eq 'chr'.$filter->{'chr'}); 
             if ($filter->{'start'} && $filter->{'end'}) {
-              next unless $start >= $filter->{'start'} && $end <= $filter->{'end'};
+              next unless (
+                ($start >= $filter->{'start'} && $end <= $filter->{'end'}) ## feature lies within coordinates
+                || ($start < $filter->{'start'} && $end >= $filter->{'start'}) ## feature overlaps start
+                || ($end > $filter->{'end'} && $start <= $filter->{'end'}) ## feature overlaps end
+  
+              );
             }
           }
 

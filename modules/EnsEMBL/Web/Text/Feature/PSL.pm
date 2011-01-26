@@ -27,7 +27,7 @@ sub new {
 
 sub coords {
   my ($self, $data) = @_;
-  return ($data->[9], $data->[11], $data->[12]);
+  return ($data->[13], $data->[15], $data->[16]);
 }
 
 sub _seqname { my $self = shift; return $self->{'__raw__'}[13]; }

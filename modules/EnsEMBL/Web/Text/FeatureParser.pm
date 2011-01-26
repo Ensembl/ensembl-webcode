@@ -183,9 +183,11 @@ sub parse {
           ## Complex format requiring special parsing (e.g. WIG)
           $columns = $self->parse_row($row);
         }
+        warn "@@@ COLUMNS: ".join('/', @$columns);
         if ($columns && scalar(@$columns)) {   
           my ($chr, $start, $end) = $empty->coords($columns); 
           $chr =~ s/chr//;
+          warn ">>> COORDS $chr: $start - $end";
 
           ## We currently only do this on initial upload (by passing current location)  
           $self->{'_find_nearest'}{'done'} = $self->_find_nearest(
@@ -268,7 +270,7 @@ sub split_into_columns {
       $tabbed = 1;
     }
     else { 
-      @columns = split /\t|\s/, $row; ; 
+      @columns = split /\t|\s+/, $row; ; 
     } 
   }
   else { ## Trying to identify the format
@@ -277,7 +279,7 @@ sub split_into_columns {
       $tabbed = 1;
     }
     else {
-      @columns = split /\s/, $row;
+      @columns = split /\s+/, $row;
     }
   }
   ## Clean up any remaining white space and non-printing characters

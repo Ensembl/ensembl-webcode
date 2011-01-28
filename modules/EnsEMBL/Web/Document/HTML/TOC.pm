@@ -31,7 +31,7 @@ sub render {
     elsif ($dir eq 'docs') {
       $column = 'right';
     }
-    warn "DIR $dir COLUMN $column";
+    
     my $title        = $section->{'_title'} || ucfirst $dir;
     my @second_level = @{$self->create_links($section, ' style="font-weight:bold"')};
     

@@ -59,7 +59,7 @@ print "domain: $domain\n";
 
 print "creating robots.txt\n";
 open ROBOTS, ">", "robots.txt" or die $!;
-print ROBOTS "Sitemap: $domain/sitemaps/sitemap-index.xml\n";
+print ROBOTS "Sitemap: $domain/sitemap-index.xml\n";
 close ROBOTS;
 
 my $COUNTER;

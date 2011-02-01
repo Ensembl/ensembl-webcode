@@ -1387,7 +1387,7 @@ sub dumpGene {
 
     my $gene_locations = $conf->{'dbh'}->selectall_hashref(qq(
       SELECT gsi.stable_id, sr.name as sr_name, g.seq_region_start, g.seq_region_end, g.seq_region_strand, cs.name as sr_type, cs.version
-        FROM gene_stable_id gsi, gene g, seq_region sr, coord_system cs
+        FROM $dbname.gene_stable_id gsi, $dbname.gene g, $dbname.seq_region sr, $dbname.coord_system cs
        WHERE gsi.gene_id = g.gene_id
          AND g.seq_region_id = sr.seq_region_id
          AND sr.coord_system_id = cs.coord_system_id),

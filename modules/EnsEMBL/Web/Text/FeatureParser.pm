@@ -183,11 +183,9 @@ sub parse {
           ## Complex format requiring special parsing (e.g. WIG)
           $columns = $self->parse_row($row);
         }
-        warn "@@@ COLUMNS: ".join('/', @$columns);
         if ($columns && scalar(@$columns)) {   
           my ($chr, $start, $end) = $empty->coords($columns); 
           $chr =~ s/chr//;
-          warn ">>> COORDS $chr: $start - $end";
 
           ## We currently only do this on initial upload (by passing current location)  
           $self->{'_find_nearest'}{'done'} = $self->_find_nearest(

@@ -53,7 +53,7 @@ sub content {
     
     ($caption) = split ':', $alt_clone;
     
-    if ($this_assembly eq 'VEGA') {
+    if ($this_assembly =~ 'VEGA') {
       $link_title = 'Jump to Ensembl';
       $url        = sprintf '%s%s/%s/%s?r=%s', $species_defs->ENSEMBL_EXTERNAL_URLS->{'ENSEMBL'}, $species, 'Location', $action, $alt_clone;
     } else {

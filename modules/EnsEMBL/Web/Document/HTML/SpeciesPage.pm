@@ -43,8 +43,7 @@ sub render {
       };
     }
   }
-  
-
+ 
   my $total = scalar(keys %species);
   my $break = int($total / 3);
   $break++ if $total % 3;
@@ -65,7 +64,7 @@ sub render {
     if ($col == 0 && $i < ($total - 1)) {
      $html .= qq(</tr>\n<tr>);
     }
-    my $j = 1 + $row + $break * $col;
+    my $j = $row + $break * $col;
     my $common = $species[$j];
     next unless $common;
     my $info = $species{$common};

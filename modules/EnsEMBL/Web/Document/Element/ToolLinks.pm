@@ -36,7 +36,7 @@ sub content {
   push @links,   '<a class="constant" href="/tools.html">Tools</a>';
   push @links,   '<a class="constant" href="/downloads.html">Downloads</a>';
   push @links,   '<a class="constant" href="/info/">Help &amp; Documentation</a>';
-  push @links, qq(<a class="constant" href="$blog_url">Blog</a>)                  if $self->blog;
+  push @links,   '<a class="constant" href="'.$self->blog.'">Blog</a>'                  if $self->blog;
   push @links,   '<a class="constant modal_link" href="/Help/Mirrors">Mirrors</a>' if keys %{$hub->species_defs->ENSEMBL_MIRRORS || {}};
 
   my $last  = pop @links;

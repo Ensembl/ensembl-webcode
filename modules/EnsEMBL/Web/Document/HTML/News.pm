@@ -34,7 +34,8 @@ sub render {
       my ($record, $prev_team);;
 
       ## Quick'n'dirty TOC
-      $html .= "<ul>\n";
+      $html .= qq(<h2>Teams</h2>
+                <ul>\n);
       foreach $record (@changes) {
         if ($record->{'team'} ne $prev_team) {
           $html .= sprintf '<li><a href="#team-%s">%s</a></li>', $record->{'team'}, $record->{'team'};

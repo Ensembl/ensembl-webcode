@@ -38,7 +38,7 @@ sub render {
   my $release_date = $self->pretty_date($release->{'date'});
   $html         .= qq{<h2 class="first">What's New in Release $release_id ($release_date)</h2>};
 
-  my $first_production = $hub->species_defs->FIRST_PRODUCTION_RELEASE;
+  my $first_production = $hub->species_defs->get_config('MULTI', 'FIRST_PRODUCTION_RELEASE');
 
   if ($hub->species_defs->multidb->{'DATABASE_PRODUCTION'}{'NAME'}
       && $first_production && $release_id > $first_production) {

@@ -18,7 +18,7 @@ sub render {
 
   my $hub = new EnsEMBL::Web::Hub;
   my $release_id = $hub->param('id') || $hub->species_defs->ENSEMBL_VERSION;
-  my $first_production = $hub->species_defs->FIRST_PRODUCTION_RELEASE;
+  my $first_production = $hub->species_defs->get_config('MULTI', 'FIRST_PRODUCTION_RELEASE');
 
   if ($hub->species_defs->multidb->{'DATABASE_PRODUCTION'}{'NAME'} 
       && $first_production && $release_id > $first_production) {

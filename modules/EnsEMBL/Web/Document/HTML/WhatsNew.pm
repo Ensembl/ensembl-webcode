@@ -18,25 +18,26 @@ sub render {
   my $self         = shift;
   my $hub          = new EnsEMBL::Web::Hub;
   my $species_defs = $hub->species_defs;
+  my $html;
 
-  ## Are we using static news content output from a script?
-  my $file         = '/ssi/whatsnew.html';
-  my $fpath        = $species_defs->ENSEMBL_SERVERROOT . $file;
-  
-  return EnsEMBL::Web::Controller::SSI::template_INCLUDE(undef, $file) if -e $fpath;
-
-  ## Return dynamic content from the ensembl_website database
   my $release_id = $hub->param('id') || $hub->param('release_id') || $hub->species_defs->ENSEMBL_VERSION;
   return unless $release_id;
-
-  my $html;
-  my $news_url     = '/info/website/news/index.html?id='.$release_id;
-  my @items = ();
 
   my $adaptor = new EnsEMBL::Web::DBSQL::WebsiteAdaptor($hub);
   my $release      = $adaptor->fetch_release($release_id);
   my $release_date = $self->pretty_date($release->{'date'});
-  $html         .= qq{<h2 class="first">What's New in Release $release_id ($release_date)</h2>};
+  my $html = qq{<h2 class="first">What's New in Release $release_id ($release_date)</h2>};
+
+  ## Are we using static news content output from a script?
+  my $file         = '/ssi/whatsnew.html';
+  my $include = EnsEMBL::Web::Controller::SSI::template_INCLUDE(undef, $file);
+  if ($include) {
+    return $html.$include;
+  }
+
+  ## Return dynamic content from the ensembl_website database
+  my $news_url     = '/info/website/news/index.html?id='.$release_id;
+  my @items = ();
 
   my $first_production = $hub->species_defs->get_config('MULTI', 'FIRST_PRODUCTION_RELEASE');
 

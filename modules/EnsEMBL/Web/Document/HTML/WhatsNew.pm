@@ -31,7 +31,8 @@ sub render {
   ## Are we using static news content output from a script?
   my $file         = '/ssi/whatsnew.html';
   my $include = EnsEMBL::Web::Controller::SSI::template_INCLUDE(undef, $file);
-  if ($include) {
+  ## Only use static page with current release!
+  if ($release_id == $hub->species_defs->ENSEMBL_VERSION && $include) {
     return $html.$include;
   }
 

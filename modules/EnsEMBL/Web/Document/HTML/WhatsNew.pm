@@ -42,10 +42,11 @@ sub render {
 
   if ($hub->species_defs->multidb->{'DATABASE_PRODUCTION'}{'NAME'}
       && $first_production && $release_id > $first_production) {
-    my $p_adaptor = EnsEMBL::Web::DBSQL::ProductionAdaptor->new($hub);
-    if ($p_adaptor) {
-      @items = @{$p_adaptor->fetch_changelog({'release' => $release_id, order_by => 'priority', limit => 5})};
-    }   
+    ## TODO - implement way of selecting interesting news stories
+    #my $p_adaptor = EnsEMBL::Web::DBSQL::ProductionAdaptor->new($hub);
+    #if ($p_adaptor) {
+    #  @items = @{$p_adaptor->fetch_changelog({'release' => $release_id, order_by => 'priority', limit => 5})};
+    #}   
   }
   elsif ($hub->species_defs->multidb->{'DATABASE_WEBSITE'}{'NAME'}) { 
     @items    = @{$adaptor->fetch_news({ release => $release_id, order_by => 'priority', limit => 5 })};

@@ -24,8 +24,7 @@ sub render {
       && $first_production && $release_id > $first_production) {
     ## get news changes
     my $adaptor = EnsEMBL::Web::DBSQL::ProductionAdaptor->new($hub);
-    my @changes;
-
+    my @changes = ();
     if ($adaptor) {
       @changes = @{$adaptor->fetch_changelog({'release' => $release_id})};
     }

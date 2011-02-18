@@ -25,7 +25,6 @@ sub render {
 
   my $blog_url = $hub->species_defs->ENSEMBL_BLOG_URL;
   my $blog_rss = $hub->species_defs->ENSEMBL_BLOG_RSS;
-  $blog_rss = 'http://www.ensembl.info/?feed=rss2';
   ## Does this feed work best with XML::Atom or XML:RSS? 
   my $rss_type = $blog_rss =~ /atom/ ? 'atom' : 'rss';
 

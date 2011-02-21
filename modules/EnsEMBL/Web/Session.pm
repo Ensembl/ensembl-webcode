@@ -560,7 +560,7 @@ sub configure_das_views {
   my ($self, $das, $image, $track_options) = @_;
   my $hub           = $self->hub;
   my $referer       = $hub->referer;
-     $referer       = {} if $hub->species_defs->valid_species($referer->{'ENSEMBL_SPECIES'});
+     $referer       = {} if !$hub->species_defs->valid_species($referer->{'ENSEMBL_SPECIES'});
   my $type          = $referer->{'ENSEMBL_TYPE'}   || $hub->type;
   my $action        = $referer->{'ENSEMBL_ACTION'} || $hub->action;
   my $view_config   = $hub->get_viewconfig($type, $action);

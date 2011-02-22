@@ -348,7 +348,7 @@ sub _find_nearest {
 
 sub check_format {
   my ($self, $data, $format) = @_;
-
+  my $feature_class = 'EnsEMBL::Web::Text::Feature::'.uc($format);  
   unless ($format) {
     foreach my $row ( split /\n|\r/, $data ) { 
       next unless $row;
@@ -384,6 +384,10 @@ sub check_format {
   if (!$format) {
     return 'Unrecognised format';
   }
+	if (defined &{$feature_class .'::check_format'}){ # If needed, create this function in EnsEMBL::Web::Text::Feature::[format]
+		my $result= $feature_class->check_format($data);
+		if($result){return "Incorrect format:$result";}
+	}
   $self->format($format);
   return undef;
 }

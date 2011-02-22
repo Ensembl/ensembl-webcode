@@ -8,7 +8,6 @@ use base qw(EnsEMBL::Web::Text::Feature);
 
 sub new {
   my( $class, $args ) = @_;
-
   my $extra      = {
     'matches'        => [$args->[0]],
     'miss_matches'   => [$args->[1]],
@@ -24,6 +23,26 @@ sub new {
 
   return bless { '__raw__' => $args, '__extra__' => $extra }, $class;
 }
+
+sub check_format {
+  my ($self, $data) = @_;
+  my @lines = split(/\n/,$data);
+  my $count=0;
+	my $COLUMNS=21;
+	map s/^\s+//,@lines;
+  foreach my $line (@lines){
+    $count++;
+    if ($line !~ /^[0-9]+/){next;}
+    my @fields = split(/\s+/,$line);
+    my $numcols = scalar @fields;
+    if($numcols < $COLUMNS){
+      $line = join(",",@fields);
+      return "Wrong number of columns($numcols/$COLUMNS) in line $count:\n[$line]\n";
+    }
+  }
+  return 0;
+}
+
 
 sub coords {
   my ($self, $data) = @_;
@@ -49,6 +68,12 @@ sub cigar_string {
   my @block_starts  = split /,/,$self->{'__raw__'}[19];
   my @block_lengths = split /,/,$self->{'__raw__'}[18];
   my $end = 0;
+  my ($count_starts,$count_lengths)=(scalar @block_starts,scalar @block_lengths);
+# ENSEMBL-813 defensive coding:
+# Too many loops executed when lengths/starts are not checked
+  if (! $count_starts || ($count_lengths != $count_starts )){
+    return $self->{'_cigar'}="";
+  }
   foreach(0..( $self->{'__raw__'}[17]-1) ) {
     my $start =shift @block_starts;
     my $length = shift @block_lengths;
@@ -57,6 +82,8 @@ sub cigar_string {
     }
     $cigar.= $length.'M';
     $end = $start + $length -1;
+    ($count_starts,$count_lengths)=(scalar @block_starts,scalar @block_lengths);
+    if (! $count_starts || ($count_lengths != $count_starts )){ last; }
   }
   return $self->{'_cigar'}=$cigar;
 }

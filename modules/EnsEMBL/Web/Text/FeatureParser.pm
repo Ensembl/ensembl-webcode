@@ -103,7 +103,6 @@ sub parse {
 
   my $error = $self->check_format($data, $format);
   if ($error) {
-    warn "!!! PARSER ERROR $error";
     return $error;
   }
   else {

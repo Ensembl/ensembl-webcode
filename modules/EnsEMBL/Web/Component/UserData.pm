@@ -20,7 +20,6 @@ sub add_file_format_dropdown {
   my ($self, $form) = @_;
   
   my @formats = sort {lc($a) cmp lc($b)} @{$self->hub->species_defs->USERDATA_FILE_FORMATS || []};
-  warn ">>> FORMATS @formats";
 
   if (scalar @formats > 0) {
     my $values = [{'name' => '-- Choose --', 'value' => ''}];

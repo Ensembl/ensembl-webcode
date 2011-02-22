@@ -32,12 +32,20 @@ sub check_format {
 	map s/^\s+//,@lines;
   foreach my $line (@lines){
     $count++;
-    if ($line !~ /^[0-9]+/){next;}
+		if($line =~ /^\s*$/){next;}
+    if($line !~ /^[0-9]+/){
+			#allow some metadata
+			if($line =~ /browser position/i){next;}
+			if($line =~ /^track\s+/i){next;}
+			else{
+				return "File format incorrect at line $count:\"$line\"\n";
+			}
+		}
     my @fields = split(/\s+/,$line);
     my $numcols = scalar @fields;
     if($numcols < $COLUMNS){
       $line = join(",",@fields);
-      return "Wrong number of columns($numcols/$COLUMNS) in line $count:\n[$line]\n";
+      return "\nWrong number of columns($numcols/$COLUMNS) in line $count:\"$line\"\n";
     }
   }
   return 0;

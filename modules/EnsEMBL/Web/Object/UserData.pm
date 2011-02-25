@@ -657,7 +657,7 @@ sub calculate_consequence_data {
         }
         
         # include failed variations
-        $vfa->db->include_failed_variations(1) if $vfa->db->can('include_failed_variations');
+        $vfa->db->include_failed_variations(1) if defined($vfa->db) && $vfa->db->can('include_failed_variations');
 
         while ( $f = shift @{$features}){
           $file_count++;

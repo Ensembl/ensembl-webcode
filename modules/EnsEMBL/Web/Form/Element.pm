@@ -20,6 +20,7 @@ use strict;
 use constant {
   CSS_CLASS_REQUIRED  => 'required',
   CSS_CLASS_OPTIONAL  => 'optional',
+  CSS_CLASS_SHORTNOTE => 'snote'
 };
 
 sub configure {
@@ -32,6 +33,7 @@ sub configure {
   ##  - wrapper_id      Id attribute for the wrapper div if present (eg. in Checklist)
   ##  - name            Name attribute
   ##  - value           Value attribute for text type field, selected/checked value for checkbox/radio/select -  can be an ArrayRef for multiple values
+  ##  - is_encoded      Flag kept on if the value does not need htmlencoding before being set as value attribute in case of String drived element or NoEdit
   ##  - shortnote       A short text to go just right the text/password/file or select.
   ##  - inline          Flag stating whether checkbox/radio buttons are to be disaplayed in a horizontal line in case of checklist/radiolist
   ##  - size            Size attribute for text input, password input or select.
@@ -42,8 +44,9 @@ sub configure {
   ##    - name          name attribute incase of checkboxes. This will override the default name attribute (the one for the whole list)
   ##    - caption       InnerHTML of the option OR label for checkboxes and radio buttons
   ##    - group         If option needs to go in any <optgroup> in case of <option> or a sub heading in case of checkbox/radio
-  ##    - is_plain_text Flag kept on if html encoding needs to be done to the caption
+  ##    - is_text       Flag kept on if html encoding needs to be done to the caption
   ##  - no_input        Flag to prevent a hidden input automatically being added from NoEdit element
+  ##  - is_html         Flag kept on if the value is HTML (in case of NoEdit only)
   ##  - class           Class attribute (space seperated string for multiple classes) - goes to all the sub elements (inputs, selects, textarea)
   ##  - wrapper_class   Class attribute for the wrapper (if there's any wrapper - eg. in checklist etc)
   ##  - option_class    Class attribute for all the options (in case of a dropdown)

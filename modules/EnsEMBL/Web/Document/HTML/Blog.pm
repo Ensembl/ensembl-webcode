@@ -18,16 +18,16 @@ our $MEMD = EnsEMBL::Web::Cache->new(
 sub render {
   my $self  = shift;
   my $hub = new EnsEMBL::Web::Hub;
-
-  my $rss_url = $hub->species_defs->ENSEMBL_BLOG_RSS;
+  return unless $hub->species_defs;
 
   my $html = '<h3>Latest blog posts</h3>';
-   
-  if ($hub->cookies->{'ENSEMBL_AJAX'}) {
-    $html .= qq(<div class="js_panel ajax" id="blog"><input type="hidden" class="ajax_load" value="/blog.html" /><inpu
-t type="hidden" class="panel_type" value="Content" /></div>);
-  } 
-  else {
+ 
+  my $rss_url = $hub->species_defs->ENSEMBL_BLOG_RSS;
+
+  #if ($hub->cookies->{'ENSEMBL_AJAX'}) {
+  #  $html .= qq(<div class="js_panel ajax" id="blog"><input type="hidden" class="ajax_load" value="/blog.html" /><input #type="hidden" class="panel_type" value="Content" /></div>);
+  #} 
+  #else {
     my $blog_url  = $hub->species_defs->ENSEMBL_BLOG_URL;
     my $items = $MEMD && $MEMD->get('::BLOG') || [];
   
@@ -55,7 +55,7 @@ t type="hidden" class="panel_type" value="Content" /></div>);
     }
   
     $html .= qq(<a href="$blog_url">Go to Ensembl blog &rarr;</a>);
-  }
+  #}
   return $html;
 }
 

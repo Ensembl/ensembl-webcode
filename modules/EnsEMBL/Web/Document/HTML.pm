@@ -89,7 +89,7 @@ sub new_panel {
 
 sub get_rss_feed {
   my ($self, $hub, $rss_url) = @_;
-  if (!$hub || !$rss_url) {
+  if (!$rss_url) {
     return [];
   }
 

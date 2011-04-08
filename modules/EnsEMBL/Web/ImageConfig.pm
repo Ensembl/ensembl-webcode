@@ -331,6 +331,7 @@ sub load_user_tracks {
   # Now we deal with the url sources... again flat file
   foreach my $entry ($session->get_data(type => 'url')) {
     next unless $entry->{'species'} eq $self->{'species'};
+    warn '>>> '.$entry->{'name'}.' '.$entry->{'colour'};
     
     $url_sources{$entry->{'url'}} = {
       source_name => $entry->{'name'} || $entry->{'url'},
@@ -540,7 +541,7 @@ sub _add_bigwig_track {
     ],
     caption     => $source->{'source_name'},
     url         => $source->{'source_url'},
-    colour      => $source->{'source_colour'} || 'red',
+    colour      => $source->{'colour'} || 'red',
     description => sprintf('Data retrieved from a BigWig file on an external webserver. This data is attached to the %s, and comes from URL: %s', encode_entities($source->{'source_type'}), encode_entities($source->{'source_url'})),
   });
 

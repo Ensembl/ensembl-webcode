@@ -514,7 +514,7 @@ sub load_configured_bigwig {
     my $menu   = $self->get_node($internal_bigwig_sources->{$source_name});
     my $source = $menu ? $self->sd_call($source_name) : undef;
 
-    $self->_add_bigwig_track($menu, "bigwig_${source_name}_" . md5_hex("$self->{'species'}:$source->{'url'}"), $source_name, %$source) if $source;
+    $self->_add_bigwig_track($menu, $source) if $source;
   }
 }
 
@@ -561,7 +561,7 @@ sub load_configured_vcf {
       if (my $source  = $self->sd_call($source_name)) {
   # add the track
   my $key = 'vcf_' . $source_name . '_' . md5_hex($self->{'species'} . ':' . $source->{url});
-  $self->_add_vcf_track($menu, $key, $source_name, %{$source});
+  $self->_add_vcf_track($menu, $source);
       }
     }
   }

@@ -88,7 +88,7 @@ sub new_panel {
 }
 
 sub get_rss_feed {
-  my ($self, $hub, $rss_url) = @_;
+  my ($self, $hub, $rss_url, $limit) = @_;
   if (!$rss_url) {
     return [];
   }
@@ -120,7 +120,7 @@ sub get_rss_feed {
         };
         push @$items, $item;
         $count++;
-        last if $count == 3;
+        last if ($limit && $count == $limit);
       }
     }
     elsif ($rss_type eq 'rss' && $self->dynamic_use('XML::RSS')) {
@@ -136,7 +136,7 @@ sub get_rss_feed {
         };
         push @$items, $item;
         $count++;
-        last if $count == 3;
+        last if ($limit && $count == $limit);
       }
     }
     else {

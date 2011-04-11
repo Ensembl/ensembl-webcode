@@ -335,6 +335,7 @@ sub load_user_tracks {
     $url_sources{$entry->{'url'}} = {
       source_name => $entry->{'name'} || $entry->{'url'},
       source_url  => $entry->{'url'},
+      species     => $entry->{'species'},
       source_type => 'session',
       format      => $entry->{'format'},
       style       => $entry->{'style'},
@@ -525,7 +526,7 @@ sub _add_bigwig_track {
   return unless $menu;
 
   my $name = $source->{'source_name'};
-  my $key    = "bigwig_$name" . '_' . md5_hex("$source->{'source_species'}:$source->{'source_url'}");
+  my $key    = "bigwig_$name" . '_' . md5_hex("$source->{'species'}:$source->{'source_url'}");
 
   my $track = $self->create_track($key, $name, {
     display   => 'off',

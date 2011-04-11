@@ -77,6 +77,7 @@ sub content {
 #                      'notes' => 'You can set a fixed maximum or leave this field blank in which case automatic scaling will be done.'
 #                      );
 
+  $form->add_element('type' => 'Hidden', 'name' => 'code', 'value' => $self->hub->param('code'));
   $form->add_element('type' => 'Submit', 'value' => 'Save');
 
   return $form->render;

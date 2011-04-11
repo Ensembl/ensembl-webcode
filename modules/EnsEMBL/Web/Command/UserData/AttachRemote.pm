@@ -98,6 +98,7 @@ sub process {
         $self->object->move_to_user(type => 'url', code => $data->{'code'});
       }
       $param->{'format'} = $format;
+      $param->{'code'} = $data->{'code'};
     }
   } else {
     $redirect .= 'SelectRemote';

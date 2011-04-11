@@ -331,8 +331,10 @@ sub load_user_tracks {
   # Now we deal with the url sources... again flat file
   foreach my $entry ($session->get_data(type => 'url')) {
     next unless $entry->{'species'} eq $self->{'species'};
-    
-    $url_sources{$entry->{'url'}} = {
+  
+    my $key = $entry->{'url'};
+    $key .= '_'.$entry->{'name'} if $entry->{'name'};  
+    $url_sources{$key} = {
       source_name => $entry->{'name'} || $entry->{'url'},
       source_url  => $entry->{'url'},
       species     => $entry->{'species'},

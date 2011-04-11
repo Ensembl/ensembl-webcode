@@ -1074,10 +1074,10 @@ sub bp_to_nearest_unit {
 }
 
 sub get_synteny_matches {
-  my $self = shift;
+  my ($self, $other_species) = @_;
 
   my @data;
-  my $other_species = $self->param('otherspecies') || $self->param('species') || $self->_default_otherspecies;
+  $other_species ||= $self->param('otherspecies') || $self->param('species') || $self->_default_otherspecies;
   my $gene2_adaptor = $self->database('core', $other_species)->get_GeneAdaptor;
   my $localgenes    = $self->get_synteny_local_genes;
   my $offset        = $self->seq_region_start;

@@ -671,7 +671,7 @@ sub configure_vcf_views {
   my $this_vc     = $hub->get_viewconfig($this_type, $this_action, $hub);
   my %this_ics    = $this_vc->image_configs;
 
-  $track_options->{'display'} ||= 'normal';
+  $track_options->{'display'} ||= 'histogram';
 
   my @this_images = grep {
     (!$this_image || $this_image eq $_)  # optional override
@@ -681,9 +681,8 @@ sub configure_vcf_views {
     my $ic = $hub->get_imageconfig($image, $image);
     if ($data->{species} eq $ic->{species}) {
       my $n  = $ic->get_node('vcf_' . $data->{timestamp} . '_' . md5_hex($data->{species} . ':' . $data->{url}));
-
       if ($n) {
-        $n->set_user(%$track_options);
+        $n->set_user($_, $track_options->{$_}) for keys %$track_options;
         $ic->altered = 1;
       }
     }

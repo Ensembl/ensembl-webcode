@@ -563,9 +563,9 @@ sub load_configured_vcf {
     if (my $menu = $self->get_node($menu_name)) {
       # get vcf source config
       if (my $source  = $self->sd_call($source_name)) {
-  # add the track
-  my $key = 'vcf_' . $source_name . '_' . md5_hex($self->{'species'} . ':' . $source->{url});
-  $self->_add_vcf_track($menu, $source);
+        # add the track
+        my $key = 'vcf_' . $source_name . '_' . md5_hex($self->{'species'} . ':' . $source->{url});
+        $self->_add_vcf_track($menu, $source);
       }
     }
   }
@@ -577,12 +577,12 @@ sub _add_vcf_track {
   $menu ||= $self->get_node('user_data');
   return unless $menu;
 
-  my $name = $source->{'source_name'};
-  my $key = 'vcf_' . $name . '_' . md5_hex($self->{'species'} . ':' . $source->{'source_url'});
+  my $time = $source->{'timestamp'};
+  my $key = 'vcf_' . $time . '_' . md5_hex($self->{'species'} . ':' . $source->{'source_url'});
 
-  my $track = $self->create_track($key, $name, {
+  my $track = $self->create_track($key, $source->{'source_name'}, {
       display     => 'off',
-      caption => $name,
+      caption     => $source->{'source_name'},
       glyphset    => 'vcf',
       sources     => undef,
       strand      => 'f',

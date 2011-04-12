@@ -97,7 +97,6 @@ sub check_url_data {
 sub check_bam_data {
   my ($self, $url) = @_;
   my $error = '';
-=pod
   require Bio::DB::Sam;
 
   if ($url =~ /^ftp:\/\//i && !$self->hub->species_defs->ALLOW_FTP_BAM) {
@@ -124,14 +123,12 @@ sub check_bam_data {
         $error = "Unable to open/index remote BAM file: $url<br>Ensembl can only display sorted, indexed BAM files.<br>Please ensure that your web server is accessible to the Ensembl site and that both your .bam and .bai files are present, named consistently, and have the correct file permissions (public readable).";
     }
   }
-=cut
   return $error;
 }
 
 sub check_bigwig_data {
   my ($self, $url) = @_;
   my $error = '';
-=pod
   require Bio::DB::BigFile;
 
   if ($url =~ /^ftp:\/\//i && !$self->hub->species_defs->ALLOW_FTP_BIGWIG) {
@@ -152,14 +149,12 @@ sub check_bigwig_data {
       $error = "Unable to open remote BigWig file: $url<br>Ensure hat your web/ftp server is accessible to the Ensembl site";
     }
   }
-=cut
   return $error;
 }
 
 sub check_vcf_data {
   my ($self, $url) = @_;
   my $error = '';
-=pod
   require Bio::EnsEMBL::ExternalData::VCF::VCFAdaptor;
 
   if ($url =~ /^ftp:\/\//i && !$self->hub->species_defs->ALLOW_FTP_VCF) {
@@ -182,7 +177,6 @@ sub check_vcf_data {
 <br>Ensure you have sorted and indexed your file and that your web server is accessible to the Ensembl site";
     }
   }
-=cut
   return $error;
 }
 

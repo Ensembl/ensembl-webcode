@@ -331,17 +331,18 @@ sub load_user_tracks {
   # Now we deal with the url sources... again flat file
   foreach my $entry ($session->get_data(type => 'url')) {
     next unless $entry->{'species'} eq $self->{'species'};
-  
-    my $key = $entry->{'url'};
-    $key .= '_'.$entry->{'name'} if $entry->{'name'};  
+ 
+    my $time  = $entry->{'timestamp'} || time(); 
+    my $key   = $entry->{'url'}."_$time";
     $url_sources{$key} = {
+      source_type => 'session',
       source_name => $entry->{'name'} || $entry->{'url'},
       source_url  => $entry->{'url'},
       species     => $entry->{'species'},
-      source_type => 'session',
       format      => $entry->{'format'},
       style       => $entry->{'style'},
       colour      => $entry->{'colour'},
+      timestamp   => $time,
     };
   }
   
@@ -476,8 +477,8 @@ sub _add_bam_track {
   $menu ||= $self->get_node('user_data');
   return unless $menu;
 
-  my $name  = $source->{'source_name'};
-  my $key   = 'bam_'.$name.'_' . md5_hex("$self->{'species'}:$source->{'source_url'}");
+  my $time  = $source->{'timestamp'};
+  my $key   = 'bam_'.$time.'_' . md5_hex("$self->{'species'}:$source->{'source_url'}");
 
   my $description = sprintf('
         Data retrieved from a BAM file on an external webserver.  
@@ -486,7 +487,7 @@ sub _add_bam_track {
         encode_entities($source->{'source_type'}), encode_entities($source->{'source_url'})
       );
  
-  my $track = $self->create_track($key, $name, {
+  my $track = $self->create_track($key, $source->{'source_name'}, {
     display   => 'off',
     strand    => 'f',
     _class    => 'bam',
@@ -499,7 +500,7 @@ sub _add_bam_track {
       'unlimited', 'Unlimited', 
       'histogram', 'Coverage only'
     ],
-    caption   => $name,
+    caption   => $source->{'source_name'},
     url       => $source->{'source_url'},
     description => $description,
   });
@@ -527,10 +528,10 @@ sub _add_bigwig_track {
   $menu ||= $self->get_node('user_data');
   return unless $menu;
 
-  my $name = $source->{'source_name'};
-  my $key    = "bigwig_$name" . '_' . md5_hex("$source->{'species'}:$source->{'source_url'}");
+  my $time = $source->{'timestamp'};
+  my $key    = "bigwig_$time" . '_' . md5_hex("$source->{'species'}:$source->{'source_url'}");
 
-  my $track = $self->create_track($key, $name, {
+  my $track = $self->create_track($key, $source->{'source_name'}, {
     display   => 'off',
     strand    => 'f',
     _class    => 'bigwig',

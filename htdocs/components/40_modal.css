@@ -1,0 +1,242 @@
+#modal_bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: [[MH_BORDER]];
+  text-align: center;
+  vertical-align: middle;
+  display: none;
+  z-index: 1000;
+  opacity: 0.25; filter: Alpha(Opacity=25);
+}
+
+#modal_panel {
+  position: fixed;
+  left: auto;
+  top: auto;
+  text-align: left;
+  background-color: [[PANEL_BG]];
+  margin: 0;
+  padding: 0;
+  display: none;
+  z-index: 1001;
+  zoom: 1;
+}
+body.ie6 #modal_bg,
+body.ie6 #modal_panel {
+  position: absolute;
+}
+
+#modal_panel div.modal_title {
+  position: absolute;
+  top: -20px;
+  border: solid [[PANEL_TEXT]];
+  border-width: 0 1px;
+  background-color: [[PANEL_TEXT]];
+  margin: 0;
+  padding: 2px 0 0;
+  color: [[PANEL_BG]];
+  font-weight: bold;
+  clear: both;
+  font-size: 12px;
+  height: 18px;
+   width: 100%;
+}
+body.ie6 #modal_panel div.modal_title {
+  height: 20px;
+}
+
+#modal_panel .ui-resizable-se {
+  width: 14px;
+  height: 14px;
+  right: 2px;
+  bottom: 2px;
+  background: url(/i/resize.png) no-repeat scroll right bottom;
+}
+
+.modal_caption {
+  position: absolute;
+  bottom: 3px;
+  left: 4px;
+}
+
+.modal_content {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  border: solid [[PANEL_TEXT]];
+  border-width: 0 1px 1px;
+}
+.modal_content .panel {
+  margin-left: 16.75em;
+}
+body.ie6 .modal_content .panel {
+  margin-right: 4px;
+}
+.modal_content .no_local_context {
+  margin-left: 0.25em;
+}
+.modal_content .panel h2 {
+  border-bottom: 1px solid [[PANEL_BORDER]];
+}
+.modal_content p.modal_error {
+  color: #c33;
+}
+.modal_content p.modal_a {
+  margin: 10px 0;
+}
+.modal_content p.modal_a a {
+  background-color: [[MH_BG]];
+  color: #fff;
+  border: outset [[MH_BG]] 2px;
+  text-decoration: none;
+  padding: 2px 8px;
+}
+
+.modal_title ul {
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  bottom: 0;
+}
+body.ie6 .modal_title ul {
+  position: relative;
+}
+
+.modal_title li {
+  list-style: none;
+  padding: 1px 6px 2px;
+  background-color: #999;
+  margin: 0 6px;
+  float: left;
+  border-radius: 5px 5px 0 0;
+  -moz-border-radius: 5px 5px 0 0;
+  -webkit-border-radius: 5px 5px 0 0;
+}
+.modal_title li.active {
+  background-color: [[PANEL_BG]];
+  color: [[PAGE_TEXT]];
+}
+.modal_title li a {
+  color: [[PANEL_BG]];
+  padding: 0 8px;
+  text-decoration: none;
+  outline: none;
+}
+body.mac .modal_title li a {
+  position: relative;
+  top: 1px;
+}
+.modal_title li.active a {
+  color: [[PAGE_TEXT]];
+}
+.modal_title .modal_close {
+  display: block;
+  position: absolute;
+  top: -11px;
+  right: -11px;
+  cursor: pointer;
+  margin: 0;
+  background: url(/i/cp_close.png) no-repeat center;
+  height: 22px;
+  width: 22px;
+}
+body.ie6 .modal_title .modal_close {
+  background-image: url(/i/cp_close.gif);
+}
+.ui-draggable .modal_title {
+  cursor: move;
+}
+
+.modal_nav, body.static .modal_nav {
+  width: 16.25em;
+  margin: 0.25em 0.25em 0;
+}
+
+body.ie6 .modal_nav .local_context {
+  width: 100%;
+  overflow: hidden;
+}
+
+.modal_nav .local_context a.disabled {	 
+  color: [[PAGE_TEXT]];	 
+  cursor: text;	 
+}
+
+.modal_nav .local_context dd.active a {
+  outline: 0;
+}
+
+.modal_reload {
+  display: none;
+}
+
+div.multi_selector_list {
+  width: 48%;
+  font-weight: normal;
+  float: left;
+  margin: 0 0.5%;
+}
+div.multi_selector_list ul {
+  padding: 0;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+div.multi_selector_list li {
+  list-style-image: none;
+  list-style-type: none;
+  cursor: pointer;
+  clear: both;
+  height: 22px;
+  padding-left: 10px;
+  position: relative;
+}
+div.multi_selector_list ul.included li {
+  background-color: [[TINT_BG]];
+  color: [[CONTRAST_TEXT]];
+  border: 1px solid [[TINT_BORDER]];
+}
+div.multi_selector_list ul.excluded li {
+  background-color: #eeeeee;
+  color: [[CONTRAST_TEXT]];
+  border: 1px solid [[NEUTRAL_BORDER]];
+}
+div.multi_selector_list ul li span {
+  position: absolute;
+  margin-top: 3px;
+}
+div.multi_selector_list ul li span.switch {
+  height: 22px;
+  width: 22px;
+  margin: 0;
+  right: 0;
+}
+div.multi_selector_list ul.included li span.switch {
+  background-image: url(/i/remove.png);
+}
+div.multi_selector_list ul.excluded li span.switch {
+  background-image: url(/i/add.png);
+}
+div.multi_selector_hint {
+  width: 15em;
+  margin: 0.25em 0.5em;
+  position: absolute;
+  left: 0;
+  border: 1px [[CONTRAST_BORDER]] solid;
+  padding: 4px;
+  background-color: [[CONTRAST_BG]];
+  overflow: hidden;
+}
+div.multi_selector_hint h4 {
+  background-image: url(/i/infoicon.gif);
+  background-repeat: no-repeat;
+  background-position: top left;
+  margin: 0 0 5px 10px;
+  padding-left: 16px;
+}
+div.multi_selector_hint p {
+  padding-left: 10px;
+}

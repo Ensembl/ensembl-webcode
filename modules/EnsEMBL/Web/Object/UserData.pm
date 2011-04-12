@@ -106,9 +106,13 @@ sub check_bam_data {
     # try to open and use the bam file and its index -
     # this checks that the bam and index files are present and correct, 
     # and should also cause the index file to be downloaded and cached in /tmp/ 
-    my ($bam, $index);
+    my ($sam, $bam, $index);
     eval {
-      $bam = Bio::DB::Bam->open($url);
+      # Note the reason this uses Bio::DB::Sam->new rather than Bio::DB::Bam->open is to allow set up
+      # of default cache dir (which happens in Bio::DB:Sam->new)
+      $sam = Bio::DB::Sam->new( -bam => $url);
+      #$bam = Bio::DB::Bam->open($url);
+      $bam = $sam->bam;
       $index = Bio::DB::Bam->index($url,0);
       my $header = $bam->header;
       my $region = $header->target_name->[0];

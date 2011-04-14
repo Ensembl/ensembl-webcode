@@ -143,6 +143,7 @@ sub check_bigwig_data {
     # this checks that the bigwig files is present and correct
     my $bigwig;
     eval {
+      Bio::DB::BigFile->set_udc_defaults;
       $bigwig = Bio::DB::BigFile->bigWigFileOpen($url);
       my $chromosome_list = $bigwig->chromList;
     };

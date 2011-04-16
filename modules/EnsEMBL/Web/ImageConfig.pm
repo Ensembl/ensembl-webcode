@@ -413,7 +413,7 @@ sub load_user_tracks {
           Data retrieved from an external webserver. This data is attached to the %s, and comes from URL: %s',
           encode_entities($url_sources{$url}{'source_type'}), encode_entities($url)
         ),
-        'url'     => $url,
+        'url'     => $url_sources{$url}{'source_url'},
         'format'  => $url_sources{$url}{'format'},
         'style'   => $url_sources{$url}{'style'},
       );

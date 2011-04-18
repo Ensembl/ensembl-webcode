@@ -80,20 +80,20 @@ sub setConfigByName {
 
 sub resetConfigByName {
   my( $self, $session_id, $type, $key ) = @_;
-  return unless( $self->get_db_adaptor && $session_id > 0 );
+  return unless($type && $self->get_db_adaptor && $session_id > 0 );
   $self->get_db_adaptor->do( "delete from session_record where session_id = ? and type = ? and code = ?", {}, $session_id, $type, $key );
 }
 
 sub getConfigsByType {
   my( $self, $session_id, $type ) = @_;
-  return unless( $self->get_db_adaptor && $session_id > 0 );
+  return unless($type && $self->get_db_adaptor && $session_id > 0 );
   my %configs = map {($_->[0]=>$_->[1])} @{$self->get_db_adaptor->selectall_arrayref( "select code, data from session_record where session_id = ? and type = ?", {}, $session_id, $type )||{}};
   return \%configs;
 }
 
 sub getConfigByName {
   my( $self, $session_id, $type, $key ) = @_;
-  return unless( $self->get_db_adaptor && $session_id > 0 );
+  return unless($type && $self->get_db_adaptor && $session_id > 0 );
   my( $value ) = $self->get_db_adaptor->selectrow_array( "select data from session_record where session_id = ? and type = ? and code = ?", {}, $session_id, $type, $key );
   return $value;
 }
@@ -134,7 +134,7 @@ sub getConfig {
 sub resetConfig {
 ### Reset the session configuration with session_id and type as passed
   my( $self, $session_id, $type, $key ) = @_;
-  return unless( $type > 0 && $self->get_db_adaptor && $session_id > 0 );
+  return unless( $type && $self->get_db_adaptor && $session_id > 0 );
   $self->get_db_adaptor->do(
     "delete from session_record
       where session_id = ? and type = ? and code = ?", {},

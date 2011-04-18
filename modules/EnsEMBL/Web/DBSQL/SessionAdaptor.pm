@@ -74,82 +74,71 @@ sub clearCookie {
 sub setConfigByName {
   my( $self, $session_id, $type, $key, $value ) = @_;
   return unless( $self->get_db_adaptor && $session_id > 0 );
-  my( $type_id ) = $self->get_db_adaptor->selectrow_array( "select type_id from type where code = ?", {},  $type );
-  unless( $type_id ) {
-    $self->get_db_adaptor->do( "insert ignore into type set code = ?", {}, $type );
-    ( $type_id ) = $self->get_db_adaptor->selectrow_array( "select type_id from type where code = ?", {}, $type );
-  }
   #warn "========> SETTING CONFIG";
-  return $self->setConfig( $session_id, $type_id, $key, $value );
+  return $self->setConfig( $session_id, $type, $key, $value );
 }
 
 sub resetConfigByName {
   my( $self, $session_id, $type, $key ) = @_;
   return unless( $self->get_db_adaptor && $session_id > 0 );
-  my( $type_id ) = $self->get_db_adaptor->selectrow_array( "select type_id from type where code = ?", {}, $type );
-  return unless $type_id;
-  $self->get_db_adaptor->do( "delete from session_record where session_id = ? and type_id = ? and code = ?", {}, $session_id, $type_id, $key );
+  $self->get_db_adaptor->do( "delete from session_record where session_id = ? and type = ? and code = ?", {}, $session_id, $type, $key );
 }
 
 sub getConfigsByType {
   my( $self, $session_id, $type ) = @_;
   return unless( $self->get_db_adaptor && $session_id > 0 );
-  my( $type_id ) = $self->get_db_adaptor->selectrow_array( "select type_id from type where code = ?", {}, $type );
-  return unless $type_id;
-  my %configs = map {($_->[0]=>$_->[1])} @{$self->get_db_adaptor->selectall_arrayref( "select code, data from session_record where session_id = ? and type_id = ?", {}, $session_id, $type_id )||{}};
+  my %configs = map {($_->[0]=>$_->[1])} @{$self->get_db_adaptor->selectall_arrayref( "select code, data from session_record where session_id = ? and type = ?", {}, $session_id, $type )||{}};
   return \%configs;
 }
 
 sub getConfigByName {
   my( $self, $session_id, $type, $key ) = @_;
   return unless( $self->get_db_adaptor && $session_id > 0 );
-  my( $type_id ) = $self->get_db_adaptor->selectrow_array( "select type_id from type where code = ?", {}, $type );
-  return unless $type_id;
-  my( $value ) = $self->get_db_adaptor->selectrow_array( "select data from session_record where session_id = ? and type_id = ? and code = ?", {}, $session_id, $type_id, $key );
+  my( $value ) = $self->get_db_adaptor->selectrow_array( "select data from session_record where session_id = ? and type = ? and code = ?", {}, $session_id, $type, $key );
   return $value;
 }
 
 sub setConfig {
-### Set the session configuration to the specified value with session_id and type_id as passed
-  my( $self, $session_id, $type_id, $key , $value ) = @_;
+### Set the session configuration to the specified value with session_id and type as passed
+  my( $self, $session_id, $type, $key , $value ) = @_;
   #warn "=======> setConfig: SETTING CONFIG WITH: " . $value;
-  return unless( $session_id && $type_id && $self->get_db_adaptor );
+  return unless( $session_id && $type && $self->get_db_adaptor );
   my $rows = $self->get_db_adaptor->do(
     "insert ignore into session_record
-        set created_at = now(), modified_at = now(), data = ?, session_id = ?, type_id = ?, code = ?",{},
-    $value, $session_id, $type_id, $key
+        set created_at = now(), modified_at = now(), data = ?, session_id = ?, type = ?, code = ?",{},
+    $value, $session_id, $type, $key
   );
   if( $rows && $rows < 1 ) {
     #warn "=======> setConfig: UPDATING ID: " . $session_id;
     $self->get_db_adaptor->do(
       "update session_record set data = ?, modified_at = now()
-        where session_id = ? and type_id = ? and code = ?", {}, 
-      $value, $session_id, $type_id, $key 
+        where session_id = ? and type = ? and code = ?", {}, 
+      $value, $session_id, $type, $key 
     );
   }
   return $session_id;
 }
 
 sub getConfig {
-### Get the session configuration with session_id and type_id as passed
-  my( $self,$session_id,$type_id, $key ) = @_;
-  return unless( $session_id && $type_id && $self->get_db_adaptor );
+### Get the session configuration with session_id and type as passed
+  my( $self,$session_id,$type, $key ) = @_;
+  return unless( $session_id && $type && $self->get_db_adaptor );
   my( $value ) = $self->get_db_adaptor->selectrow_array(
     "select data from session_record
-      where session_id = ? and type_id = ? and code = ?", {},
-    $session_id, $type_id, $key 
+      where session_id = ? and type = ? and code = ?", {},
+    $session_id, $type, $key 
   );
   return $value;
 }
 
 sub resetConfig {
-### Reset the session configuration with session_id and type_id as passed
-  my( $self, $session_id, $type_id, $key ) = @_;
-  return unless( $type_id > 0 && $self->get_db_adaptor && $session_id > 0 );
+### Reset the session configuration with session_id and type as passed
+  my( $self, $session_id, $type, $key ) = @_;
+  return unless( $type > 0 && $self->get_db_adaptor && $session_id > 0 );
   $self->get_db_adaptor->do(
     "delete from session_record
-      where session_id = ? and type_id = ? and code = ?", {},
-    $session_id, $type_id, $key
+      where session_id = ? and type = ? and code = ?", {},
+    $session_id, $type, $key
   );
 }
 

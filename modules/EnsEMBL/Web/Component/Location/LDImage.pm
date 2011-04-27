@@ -54,7 +54,7 @@ sub content {
     my $pop_obj = $object->pop_obj_from_name($pop_name);
     next unless $pop_obj->{$pop_name}; # i.e. skip name if not a valid pop name
    
-    my $image_config_pop = $object->get_imageconfig('ld_population');
+    my $image_config_pop = $object->get_imageconfig('ld_population', $pop_name);
     
     $image_config_pop->set_parameters({ 
       image_width     => $self->image_width ||800,

@@ -387,7 +387,8 @@ sub render_HTML {
   }
   
   $r->content_type('text/html; charset=utf-8') unless $r->content_type;
-  
+ 
+  $content =~ s/[^[:ascii:]]+//g;  # get rid of non-ASCII characters 
   print  $content;
   return $content;
 }

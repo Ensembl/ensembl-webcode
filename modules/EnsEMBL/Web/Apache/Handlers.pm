@@ -68,7 +68,132 @@ sub childInitHandler {
   warn sprintf "Child initialised: %7d %04d-%02d-%02d %02d:%02d:%02d\n", $$, $X[5]+1900, $X[4]+1, $X[3], $X[2], $X[1], $X[0] if $ENSEMBL_DEBUG_FLAGS & $SiteDefs::ENSEMBL_DEBUG_HANDLER_ERRORS;
 }
 
+
 sub redirect_to_nearest_mirror {
+    my $r = shift;
+# warn Dumper $r->headers_in; 
+# Check that host is ENSEMBL_SERVERNAME - if not content is coming from static server, where the redirect cookie will never be set. In this case, don't redirect
+    if (
+        $species_defs->ENSEMBL_MIRRORS
+                 && (   $r->headers_in->{'Host'} eq $species_defs->ENSEMBL_SERVERNAME
+                     || $r->headers_in->{'X-Forwarded-Host'} eq $species_defs->ENSEMBL_SERVERNAME )
+       )        
+    {       
+        my $unparsed_uri = $r->unparsed_uri;
+        my $user_agent   = $r->headers_in->{'User-Agent'};
+        ## Check url
+        if ( $unparsed_uri =~ /redirect=mirror/ ) {
+            my ($referrer) = $unparsed_uri =~ /source=([\w\.-]+)/;
+            
+            ## Display the redirect message (but only if user comes from other mirror)
+            if (   $referrer
+                && $referrer ne $species_defs->ENSEMBL_SERVERNAME
+                && _referrer_is_mirror( $species_defs->ENSEMBL_MIRRORS, $referrer ) )
+            {
+
+                my $back = 'http://' . $referrer . $unparsed_uri;
+                $back =~ s/;?source=$referrer//;
+
+                my $user_message =
+                  qq{You've been redirected to your nearest mirror - } . $species_defs->ENSEMBL_SERVERNAME . "\n";
+                $user_message .= qq{<ul><li>Take me back to <a href="$back">$referrer</a></li></ul>};
+
+                my $cookie = new CGI::Cookie(
+                    -name    => 'user_message',
+                    -value   => uri_escape($user_message),
+                    -expires => '+1m',
+                );
+
+                ## Redirecting to same page, but without redirect params in url
+                $r->err_headers_out->add( 'Set-Cookie' => $cookie );
+
+               $unparsed_uri =~ s/;?source=$referrer//;
+                $unparsed_uri =~ s/;?redirect=mirror//;
+                $unparsed_uri =~ s/\?$//;
+
+                $r->headers_out->set( Location => $species_defs->ENSEMBL_BASE_URL . $unparsed_uri );
+
+                return REDIRECT;
+            }
+
+            my $cookie = new CGI::Cookie(
+                -name    => 'redirect',
+                -value   => 'mirror',
+                -expires => 'Thu, 31-Dec-2037 22:22:22 GMT',    ## End of time :)
+            );
+
+            $r->err_headers_out->add( 'Set-Cookie' => $cookie );
+
+            return DECLINED;
+        }
+        ## Check "don't redirect me" cookie
+        my %cookies = CGI::Cookie->parse( $r->headers_in->{'Cookie'} );
+
+        return DECLINED if $cookies{'redirect'} && $cookies{'redirect'}->value eq 'mirror';
+        if ( $species_defs->ENSEMBL_MIRRORS && keys %{ $species_defs->ENSEMBL_MIRRORS } ) {
+            my $geo_details;
+            my $record;
+            my $geo;
+            my $geocity_dat_file =  $species_defs->GEOCITY_DAT ||  $ENSEMBL_SERVERROOT . '/geocity/GeoLiteCity.dat';
+            my $ip = $r->headers_in->{'X-Forwarded-For'} || $r->connection->remote_ip;
+            if ( -e $geocity_dat_file ) {
+                require Geo::IP;
+                eval {
+                    $geo = Geo::IP->open( $geocity_dat_file, 'GEOIP_MEMORY_CACHE' );
+                    $record = $geo->record_by_addr($ip) if $geo;
+                };
+                warn $@ if $@;
+
+                 $geo_details = [ $record->country_code, $record->region ] if $record;
+            }
+            else {
+                require Geo::IP;
+                warn "** GeoIP city dat file not found at [ $geocity_dat_file ] falling back to country based lookup... Set GEOCITY_DAT location in DEFAULTS.ini **";
+                eval ' 
+                     $geo = new Geo::IP(GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE);
+                    $geo_details = [ $geo->country_code_by_addr($ip), undef ] if $geo;
+                ';
+                warn $@ if $@;
+            }
+            ## Ok, so which country you from
+            if ( $geo_details && $user_agent !~ /Googlebot/ ) {
+
+                my $ip_location = $species_defs->ENSEMBL_MIRRORS->{ $geo_details->[0] }
+                  || $species_defs->ENSEMBL_MIRRORS->{MAIN};
+
+                my $mirror =
+                  ref $ip_location eq 'HASH'
+                  ? $ip_location->{ $geo_details->[1] } || $ip_location->{DEFAULT}
+                  : $ip_location;
+
+                if ($mirror) {
+                    return DECLINED if $mirror eq $species_defs->ENSEMBL_SERVERNAME;
+
+                    ## Deleting cookie for current site
+                    my $cookie = new CGI::Cookie(
+                        -name    => 'redirect',
+                        -value   => '',
+                        -expires => '-1h',
+                    );
+
+                    $unparsed_uri .= $unparsed_uri =~ /\?/ ? ';redirect=mirror' : '?redirect=mirror';
+                    $unparsed_uri .= ';source=' . $species_defs->ENSEMBL_SERVERNAME;
+
+                    $r->err_headers_out->add( 'Set-Cookie' => $cookie );
+                    $r->headers_out->set( Location => "http://$mirror$unparsed_uri" );
+
+                    return REDIRECT;
+                }
+            }
+        }
+    }
+
+    return DECLINED;
+}
+
+
+
+sub old_redirect_to_nearest_mirror {
   my $r = shift;  
   
   # Check that host is ENSEMBL_SERVERNAME - if not content is coming from static server, where the redirect cookie will never be set. In this case, don't redirect
@@ -655,5 +780,12 @@ sub _load_command_linux {
   
   return $VAL + 0;
 }
+
+sub _referrer_is_mirror {
+    my ( $ensembl_mirrors, $referrer ) = @_;
+    map { ref $_ eq 'HASH' ? _referrer_is_mirror( $_, $referrer ) : $referrer eq $_ ? return 'true' : undef }
+      values %$ensembl_mirrors;
+}
+
 
 1;

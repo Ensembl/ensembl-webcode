@@ -44,12 +44,6 @@ sub content {
   my $slice = $object->slice;
   my ($slices) = $self->get_slices($slice, $align_params, $primary_species);
 
-  ## Bacteria hack (nickl) - make slice names all lower case
-  ## The slice names have upper-case first letter and these don't match the alignments or the image configs.
-  ## I don't understand why this works for other eg site and ensembl.
-  $_->{name} = lc($_->{name}) for @$slices;
-  ## /hack
- 
   my @skipped;
   my @missing;
   my @images;

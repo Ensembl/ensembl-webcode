@@ -26,14 +26,14 @@ sub render {
   my $adaptor = new EnsEMBL::Web::DBSQL::WebsiteAdaptor($hub);
   my $release      = $adaptor->fetch_release($release_id);
   my $release_date = $self->pretty_date($release->{'date'});
-  my $html = qq{<h1>What's New in Release $release_id ($release_date)</h1>};
+  my $html = qq{<h2 class="first">What's New in Release $release_id ($release_date)</h2>};
 
   ## Are we using static news content output from a script?
   my $file         = '/ssi/whatsnew.html';
   my $include = EnsEMBL::Web::Controller::SSI::template_INCLUDE(undef, $file);
   if ($include) {
     ## Only use static page with current release!
-    if ($release_id == $hub->species_defs->ENSEMBL_VERSION) {
+    if ($release_id == $hub->species_defs->ENSEMBL_VERSION && $include) {
       $html .= $include;
     }
   }
@@ -88,13 +88,18 @@ sub render {
         ## generate HTML
         $html .= qq{<li><strong><a href="$news_url#news_$item->{'id'}" style="text-decoration:none">$item->{'title'}</a></strong> ($sp_name)</li>\n};
       }
-
       $html .= "</ul>\n";
     }
     else {
       $html .= "<p>No news is currently available for release $release_id.</p>\n";
     }
   }
+  $html .= qq(<p><a href="/info/website/news/">Full details of this release</a></p>);
+
+  if ($species_defs->ENSEMBL_BLOG_URL) {
+    $html .= qq(<p><a href="http://www.ensembl.info/blog/category/releases/ensembl/">More release news on our blog &rarr;</a></p>);
+  }
+
   return $html;
 }
 

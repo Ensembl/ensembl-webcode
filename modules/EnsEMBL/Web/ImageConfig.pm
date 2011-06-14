@@ -1504,7 +1504,7 @@ sub add_alignments {
     next unless $row->{'species'}{$species};
     
     if ($row->{'class'} =~ /pairwise_alignment/) {
-      my ($other_species) = grep { !/^$species|merged|ancestral_sequences$/ } keys %{$row->{'species'}};
+      my ($other_species) = grep { !/^$species$|merged|ancestral_sequences$/ } keys %{$row->{'species'}};
       $other_species ||= $species if $vega && $row->{'species'}->{$species} && scalar keys %{$row->{'species'}} == 2;
       
       my $other_label = $species_defs->species_label($other_species, 'no_formatting');

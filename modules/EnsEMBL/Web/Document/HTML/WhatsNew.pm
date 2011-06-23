@@ -39,7 +39,7 @@ sub render {
   }
   else {
     ## Return dynamic content from the ensembl_website database
-    my $news_url     = '/info/website/news/index.html?id='.$release_id;
+    my $news_url     = '/info/website/news.html?id='.$release_id;
     my @items = ();
 
     my $first_production = $hub->species_defs->get_config('MULTI', 'FIRST_PRODUCTION_RELEASE');
@@ -94,7 +94,7 @@ sub render {
       $html .= "<p>No news is currently available for release $release_id.</p>\n";
     }
   }
-  $html .= qq(<p><a href="/info/website/news/">Full details of this release</a></p>);
+  $html .= qq(<p><a href="/info/website/news.html">Full details of this release</a></p>);
 
   if ($species_defs->ENSEMBL_BLOG_URL) {
     $html .= qq(<p><a href="http://www.ensembl.info/category/releases/">More release news on our blog &rarr;</a></p>);

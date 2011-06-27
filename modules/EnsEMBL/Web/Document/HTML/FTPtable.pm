@@ -3,7 +3,8 @@ package EnsEMBL::Web::Document::HTML::FTPtable;
 ### This module outputs a table of links to the FTP site
 
 use strict;
-use warnings;
+
+use HTML::Entities qw(encode_entities);
 
 use EnsEMBL::Web::RegObj;
 use EnsEMBL::Web::Document::SpreadSheet;
@@ -33,11 +34,11 @@ sub render {
     'bed'     => 'Constrained elements calculated using GERP',
     'extra'   => 'Additional release data stored as flat files rather than MySQL for performance reasons',
   );
-
+  
+  $title{$_} = encode_entities($title{$_}) for keys %title;
 
   my $EMF = $title{'emf'};
   my $BED = $title{'bed'};
-
 
   my $html = qq(
 <h3>Multi-species data</h3>
@@ -77,7 +78,7 @@ sub render {
     { key => 'cdna',    title => 'cDNA (FASTA)',        align => 'center', width => '10%', sort => 'none' },
     { key => 'ncrna',   title => 'ncRNA (FASTA)',       align => 'center', width => '10%', sort => 'none' },
     { key => 'protseq', title => 'Protein sequence (FASTA)',  align => 'center', width => '10%', sort => 'none' },
-    { key => 'embl',    title => 'Annotated sequence (EMBL)',  align => 'center', width => '10%', sort => 'none' },
+    { key => 'embl',    title => 'Annotated sequence (EMBL)', align => 'center', width => '10%', sort => 'none' },
     { key => 'genbank', title => 'Annotated sequence (GenBank)',  align => 'center', width => '10%', sort => 'none' },
     { key => 'genes',   title => 'Gene sets',           align => 'center', width => '10%', sort => 'none' },
     { key => 'mysql',   title => 'Whole databases',     align => 'center', width => '10%', sort => 'none' },

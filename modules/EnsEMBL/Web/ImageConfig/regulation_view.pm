@@ -102,6 +102,9 @@ sub init_top {
 sub init_cell_line {
   my $self = shift;
   $self->get_node($_)->remove for 'contig', 'transcript_core_ensembl';
+  $self->add_tracks('other',
+    [ 'draggable', '', 'draggable', { display => 'normal', strand => 'b', menu => 'no' }]
+  );
 }
 
 sub init_bottom {

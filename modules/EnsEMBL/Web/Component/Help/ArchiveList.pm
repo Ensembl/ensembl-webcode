@@ -169,7 +169,7 @@ sub _output_link {
     $string .= sprintf ' (%s)', $assembly;
   }
   if ($current_genebuild && $previous_genebuild && $current_genebuild ne $previous_genebuild) {
-    $string .= sprintf ' - new genebuild %s', $current_genebuild;
+    $string .= sprintf ' - gene set updated %s', $current_genebuild;
   }
   $string .= '</li>';
   return $string;

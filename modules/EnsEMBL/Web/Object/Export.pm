@@ -601,10 +601,15 @@ sub bed {
   }
   foreach my $type(keys %$types_to_print){
     $params->{$type} = 1;
+    my $backup = $self->{'string'};
     $self->string(sprintf('track name=%s description="%s"',$type,$types_to_print->{$type}));
+    my $length = length $self->{'string'};
     $self->features('bed');
     $params->{$type} = 0;
-    $self->string("");
+    if($length == length $self->{'string'}){$self->{'string'}=$backup;}
+    else{
+      $self->string("");
+    }
   }
   
   #get data from files user uploaded if any and display   

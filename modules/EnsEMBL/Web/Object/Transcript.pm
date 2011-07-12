@@ -565,7 +565,7 @@ sub get_munged_slice {
   
   # compute the width of the slice image within the display
   my $pixel_width =
-    $self->param('image_width') -
+    ($self->param('image_width') || 800) -
     ($self->param('label_width') || 100) -
     ($self->param('margin')      ||   5) * 3;
 

@@ -798,7 +798,15 @@ sub update_from_url {
         my @path = split(/\./, $p);
         my $ext = $path[-1] eq 'gz' ? $path[-2] : $path[-1];
         my $format = uc($ext);
-        
+       
+        my $style = $format;
+        my $remote = grep(/$ext/i, @{$hub->species_defs->USERDATA_REMOTE_FORMATS});
+        ## TODO - make this less hacky!
+        if ($remote || $format eq 'BW' || $format eq 'WIG') {
+          $style = 'wiggle';
+        }
+        $format = 'BIGWIG' if $format eq 'BW';
+ 
         # We have to create a URL upload entry in the session
         my $code = md5_hex("$species:$p");
         my $n    =  $p =~ /\/([^\/]+)\/*$/ ? $1 : 'un-named';
@@ -810,7 +818,7 @@ sub update_from_url {
           code    => $code, 
           name    => $n,
           format  => $format,
-          style   => $format,
+          style   => $style,
         );
         
         $session->add_data(
@@ -823,7 +831,7 @@ sub update_from_url {
         # We then have to create a node in the user_config
         $self->_add_flat_file_track(undef, 'url', "url_$code", $n, 
           sprintf('Data retrieved from an external webserver. This data is attached to the %s, and comes from URL: %s', encode_entities($n), encode_entities($p)),
-          'url' => $p
+          'url' => $p, 'style' => $style
         );
         
         $self->update_track_renderer("url_$code", $renderer);

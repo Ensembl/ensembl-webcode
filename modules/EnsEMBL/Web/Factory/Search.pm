@@ -282,9 +282,12 @@ sub search_FAMILY {
 
 sub search_SEQUENCE {
   my $self = shift;
-  my $species = $self->species;
-  my $species_path = $self->species_path;
+  my $dbh = $self->database('core');
+  return unless $dbh;
   
+  my $species = $self->species;
+  my $species_path = $self->species_path;  
+   
   $self->_fetch_results( 
     [ 'core', 'Sequence',
       "select count(*) from seq_region where name [[COMP]] '[[KEY]]'",
@@ -313,7 +316,7 @@ sub search_SEQUENCE {
   );
 
 
-  my $sa = $self->database('core')->get_SliceAdaptor(); 
+  my $sa = $dbh->get_SliceAdaptor(); 
 
   foreach ( @{$self->{_results}} ) {
     my $KEY =  $_->[2] < 1e6 ? 'contigview' : 'cytoview';

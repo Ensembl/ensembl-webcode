@@ -94,15 +94,15 @@ sub populate_tree {
     ));
 
     $data_menu->append($self->create_node('Location', "Location ($location_text)", [],
-      { availability => 1, url => $location_url, raw => 1 }
+      { availability => $sample_data->{'LOCATION_TEXT'} ? 1 : 0 , url => $location_url, raw => 1 }
     ));
     
     $data_menu->append($self->create_node('Gene', "Gene ($gene_text)", [],
-      { availability => 1, url => $gene_url, raw => 1 }
+      { availability => $sample_data->{'GENE_TEXT'} ? 1 : 0 , url => $gene_url, raw => 1 }
     ));
     
     $data_menu->append( $self->create_node('Transcript', "Transcript ($transcript_text)", [],
-      { availability => 1, url => $transcript_url, raw => 1 }
+      { availability => $sample_data->{'TRANSCRIPT_TEXT'} ? 1 : 0 , url => $transcript_url, raw => 1 }
     ));
     
     if ($sample_data->{'VARIATION_PARAM'}) {

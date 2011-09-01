@@ -11,7 +11,7 @@ sub init {
   
   $self->set_parameters({
     title            => 'Supporting Evidence',
-    label_width      => 100,
+    label_width      => 116,
     opt_empty_tracks => 0,
   });
 

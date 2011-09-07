@@ -25,29 +25,53 @@ sub content {
   my $adaptor = EnsEMBL::Web::DBSQL::WebsiteAdaptor->new($hub);
   my $args;
 
+  my %category_lookup = (
+    'archives'       => 'Archives',  
+    'genes'          => 'Genes',    
+    'assemblies'     => 'Genome assemblies',    
+    'comparative'    => 'Comparative genomics',
+    'regulation'     => 'Regulation',         
+    'variation'      => 'Variation',         
+    'data'           => 'Export, uploads and downloads',  
+    'z_data'         => 'Other data',          
+    'core_api'       => 'Core API',           
+    'compara_api'    => 'Compara API',       
+    'compara'        => 'Compara API',       
+    'variation_api'  => 'Variation API',    
+    'regulation_api' => 'Regulation API',  
+    'web'            => 'Website',
+  );
+
   if ($id) {
     $args->{'id'} = $id;
   }
-  my @faqs = @{$adaptor->fetch_faqs($args)}; 
+  my @faqs = sort {$a->{'category'} cmp $b->{'category'}} @{$adaptor->fetch_faqs($args)}; 
 
   ## Can't do category via SQL any more, as it has been moved into 'data' 
-  my $category = $hub->param('cat');
+  my $single_cat = $hub->param('cat');
 
   if (scalar(@faqs) > 0) {
   
     my $style = 'text-align:right;margin-right:2em';
+    my $category = '';
 
     foreach my $faq (@faqs) {
       next unless $faq;
-      next if $category && $faq->{'category'} ne $category;
+      next if $single_cat && $faq->{'category'} ne $single_cat;
 
-      $html .= sprintf(qq(<h3 id="faq%s">%s</h3>\n<p>%s</p>), $faq->{'id'}, $faq->{'question'}, $faq->{'answer'});
+      unless ($single_cat) {
+        if ($faq->{'category'} && $category ne $faq->{'category'}) {
+          $html .= '<h3>'.$category_lookup{$faq->{'category'}}.'</h3>';
+        }
+      }
+
+      $html .= sprintf(qq(<p class="space-below"><a href="/Help/Faq?id=%s" id="faq%s">%s</a></p>), $faq->{'id'}, $faq->{'id'}, $faq->{'question'});
       if ($hub->param('feedback') && $hub->param('feedback') == $faq->{'id'}) {
         $html .= qq(<div style="$style">Thank you for your feedback</div>);
       } else {
         $html .= $self->help_feedback($style, $faq->{'id'}, return_url => '/Help/Faq', type => 'Faq');
       }
-
+      $category = $faq->{'category'};
     }
 
     if (scalar(@faqs) == 1) {

@@ -61,11 +61,12 @@ sub content {
 
       unless ($single_cat) {
         if ($faq->{'category'} && $category ne $faq->{'category'}) {
-          $html .= '<h3>'.$category_lookup{$faq->{'category'}}.'</h3>';
+          $html .= "</ul>\n\n";
+          $html .= '<h3>'.$category_lookup{$faq->{'category'}}."</h3>\n<ul>\n";
         }
       }
 
-      $html .= sprintf(qq(<p class="space-below"><a href="/Help/Faq?id=%s" id="faq%s">%s</a></p>), $faq->{'id'}, $faq->{'id'}, $faq->{'question'});
+      $html .= sprintf(qq(<li><a href="/Help/Faq?id=%s" id="faq%s">%s</a></li>\n), $faq->{'id'}, $faq->{'id'}, $faq->{'question'});
       if ($hub->param('feedback') && $hub->param('feedback') == $faq->{'id'}) {
         $html .= qq(<div style="$style">Thank you for your feedback</div>);
       } else {
@@ -73,6 +74,7 @@ sub content {
       }
       $category = $faq->{'category'};
     }
+    $html .= '</ul>' if $category;
 
     if (scalar(@faqs) == 1) {
       $html .= qq(<p><a href="/Help/Faq" class="popup">More FAQs</a></p>);

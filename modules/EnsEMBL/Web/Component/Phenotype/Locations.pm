@@ -20,6 +20,7 @@ sub _init {
 
 sub content {
   my $self = shift;
+  ## Accept both parameters for now, to avoid breaking links from elsewhere in code
   my $id   = $self->hub->param('ph') || $self->hub->param('id');
   my $features = {};
 

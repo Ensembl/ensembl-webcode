@@ -55,29 +55,34 @@ sub content {
     my $style = 'text-align:right;margin-right:2em';
     my $category = '';
 
-    foreach my $faq (@faqs) {
-      next unless $faq;
-      next if $single_cat && $faq->{'category'} ne $single_cat;
-
-      unless ($single_cat) {
-        if ($faq->{'category'} && $category ne $faq->{'category'}) {
-          $html .= "</ul>\n\n";
-          $html .= '<h3>'.$category_lookup{$faq->{'category'}}."</h3>\n<ul>\n";
-        }
-      }
-
-      $html .= sprintf(qq(<li><a href="/Help/Faq?id=%s" id="faq%s">%s</a></li>\n), $faq->{'id'}, $faq->{'id'}, $faq->{'question'});
-      if ($hub->param('feedback') && $hub->param('feedback') == $faq->{'id'}) {
-        $html .= qq(<div style="$style">Thank you for your feedback</div>);
-      } else {
-        $html .= $self->help_feedback($style, $faq->{'id'}, return_url => '/Help/Faq', type => 'Faq');
-      }
-      $category = $faq->{'category'};
-    }
-    $html .= '</ul>' if $category;
-
     if (scalar(@faqs) == 1) {
-      $html .= qq(<p><a href="/Help/Faq" class="popup">More FAQs</a></p>);
+
+      $html .= sprintf('<h3>%s</h3><p>%s</p>', $faqs[0]->{'question'}, $faqs[0]->{'answer'});
+
+      $html .= qq(<ul><li><a href="/Help/Faq" class="popup">More FAQs</a></li></ul>);
+    }
+    else {
+      foreach my $faq (@faqs) {
+        next unless $faq;
+        next if $single_cat && $faq->{'category'} ne $single_cat;
+
+        unless ($single_cat) {
+          if ($faq->{'category'} && $category ne $faq->{'category'}) {
+            $html .= "</ul>\n\n";
+            $html .= '<h3>'.$category_lookup{$faq->{'category'}}."</h3>\n<ul>\n";
+          }
+        }
+
+        $html .= sprintf(qq(<li><a href="/Help/Faq?id=%s" id="faq%s">%s</a></li>\n), $faq->{'id'}, $faq->{'id'}, $faq->{'question'});
+        if ($hub->param('feedback') && $hub->param('feedback') == $faq->{'id'}) {
+          $html .= qq(<div style="$style">Thank you for your feedback</div>);
+        } 
+        else {
+          $html .= $self->help_feedback($style, $faq->{'id'}, return_url => '/Help/Faq', type => 'Faq');
+        }
+        $category = $faq->{'category'};
+      }
+      $html .= '</ul>' if $category;
     }
   }
 

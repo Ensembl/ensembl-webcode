@@ -26,7 +26,7 @@ sub createObjects {
   my $db       = $self->param('db') || 'core';
   my $features = {};
   
-  my $id         = $self->param('id');   
+  my $id         = $self->param('ph') || $self->param('id');   
   return $self->problem('fatal', 'No ID', $self->_help) unless $id;
   my $dbc        = $self->hub->database('variation');
 	$dbc->include_failed_variations(1);

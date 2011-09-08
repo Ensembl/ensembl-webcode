@@ -19,26 +19,27 @@ sub _init {
 }
 
 sub content {
-  my $self         = shift;
-  my $hub          = $self->hub;
-  my $species      = $hub->species;
-  my $species_defs = $hub->species_defs;
-  my ($html, $total_features, $mapped_features, $unmapped_features);
+  my $self = shift;
+  my $id   = $self->hub->param('id'); 
   my $features = {};
  
   ## Get features to draw
-  if ($hub->param('id')) {
-    my $object;
-    if (!$self->object || ($self->object && $self->object->isa('EnsEMBL::Web::Object::Location'))) {
-      $object = $self->builder->create_objects('Feature', 'lazy');
-    }
-    else {
-      $object = $self->object;
-    }
+  if ($id) {
+    my $object = $self->builder->create_objects('Feature', 'lazy');
     if ($object && $object->can('convert_to_drawing_parameters')) {
       $features = $object->convert_to_drawing_parameters;
     }
   }
+  my $html = $self->_render_features($id, $features);
+  return $html;
+}
+
+sub _render_features {
+  my ($self, $id, $features) = @_;
+  my $hub          = $self->hub;
+  my $species      = $hub->species;
+  my $species_defs = $hub->species_defs;
+  my ($html, $total_features, $mapped_features, $unmapped_features);
 
   my $chromosomes  = $species_defs->ENSEMBL_CHROMOSOMES || [];
   my %chromosome = map {$_ => 1} @$chromosomes;
@@ -54,8 +55,8 @@ sub content {
     }
   }
 
-  if ($hub->param('id') && $total_features < 1) {
-    my $ids = join(', ', $hub->param('id'));
+  if ($id && $total_features < 1) {
+    my $ids = join(', ', $id);
     return $self->_warning('Not found', sprintf('No mapping of %s found', $ids || 'unknown feature'));
   }
 
@@ -118,7 +119,7 @@ sub content {
         $assoc_name = $hub->param('name');
         unless ($assoc_name) {
           $assoc_name = $xref_type.' ';
-          $assoc_name .= $hub->param('id');
+          $assoc_name .= $id;
           $assoc_name .= " ($xref_name)";
         }
       }

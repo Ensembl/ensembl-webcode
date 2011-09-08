@@ -29,7 +29,7 @@ sub content {
   ## Get features to draw
   if ($hub->param('id')) {
     my $object;
-    if ($self->object->isa('EnsEMBL::Web::Object::Location')) {
+    if (!$self->object || ($self->object && $self->object->isa('EnsEMBL::Web::Object::Location'))) {
       $object = $self->builder->create_objects('Feature', 'lazy');
     }
     else {

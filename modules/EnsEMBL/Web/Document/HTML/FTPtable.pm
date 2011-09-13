@@ -109,7 +109,7 @@ sub render {
     }
     my $vep = '-';
     if ($sp_dir =~/bos_taurus|danio_rerio|homo_sapiens|mus_musculus|rattus_norvegicus/){
-      $vep = sprintf '<a rel="external" title="%s" href="ftp://ftp.ensembl.org/pub/%s/variation/VEP/">VEP</a>', $title{'vep'}, $rel;
+      $vep = sprintf '<a rel="external" title="%s" href="ftp://ftp.ensembl.org/pub/%s/variation/VEP/%s/">VEP</a>', $title{'vep'}, $rel, $sp_dir;
     }
     my $emf   = '-';
     if ($sp_dir =~ /homo_sapiens|mus_musculus|rattus_norvegicus/) {

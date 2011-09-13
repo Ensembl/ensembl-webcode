@@ -81,7 +81,7 @@ sub redirect_to_nearest_mirror {
       my ($referer) = $unparsed_uri =~ /source=([\w\.-]+)/;
       
       ## Display the redirect message (but only if user comes from other mirror)
-      if ($referer && $referer ne $species_defs->ENSEMBL_SERVERNAME && _referrer_is_mirror( $species_defs->ENSEMBL_MIRRORS, $referrer )) {
+      if ($referer && $referer ne $species_defs->ENSEMBL_SERVERNAME && _referrer_is_mirror( $species_defs->ENSEMBL_MIRRORS, $referer )) {
         my $back = 'http://' . $referer . $unparsed_uri;
         $back =~ s/;?source=$referer//;
 

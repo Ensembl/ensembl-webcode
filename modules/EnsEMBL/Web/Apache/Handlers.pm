@@ -81,7 +81,7 @@ sub redirect_to_nearest_mirror {
       my ($referer) = $unparsed_uri =~ /source=([\w\.-]+)/;
       
       ## Display the redirect message (but only if user comes from other mirror)
-      if ($referer && $referer ne $species_defs->ENSEMBL_SERVERNAME && grep { $referer =~ /$_/ } values %{$species_defs->ENSEMBL_MIRRORS}) {
+      if ($referer && $referer ne $species_defs->ENSEMBL_SERVERNAME && _referrer_is_mirror( $species_defs->ENSEMBL_MIRRORS, $referrer )) {
         my $back = 'http://' . $referer . $unparsed_uri;
         $back =~ s/;?source=$referer//;
 
@@ -695,5 +695,13 @@ sub _load_command_linux {
   
   return $VAL + 0;
 }
+
+sub _referrer_is_mirror {
+## Mirror hash is now multi-dimensional, so we have to recurse into it
+    my ( $ensembl_mirrors, $referrer ) = @_;
+    map { ref $_ eq 'HASH' ? _referrer_is_mirror( $_, $referrer ) : $referrer eq $_ ? return 'true' : undef }
+      values %$ensembl_mirrors;
+}
+
 
 1;

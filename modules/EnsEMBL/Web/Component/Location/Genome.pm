@@ -419,7 +419,7 @@ sub _configure_Xref_table {
 
 sub _configure_DnaAlignFeature_table {
   my ($self, $feature_type, $feature_set) = @_;
-  my $info = $self->_configure_ProbeFeature_table($feature_type, $feature_set);
+  my $info = $self->_configure_Xref_table($feature_type, $feature_set);
   ## Override default header
   $info->{'header'} = 'Sequence Feature Information';
   return $info; 
@@ -427,7 +427,7 @@ sub _configure_DnaAlignFeature_table {
 
 sub _configure_ProteinAlignFeature_table {
   my ($self, $feature_type, $feature_set) = @_;
-  my $info = $self->_configure_ProbeFeature_table($feature_type, $feature_set);
+  my $info = $self->_configure_Xref_table($feature_type, $feature_set);
   ## Override default header
   $info->{'header'} = 'Protein Feature Information';
   return $info; 

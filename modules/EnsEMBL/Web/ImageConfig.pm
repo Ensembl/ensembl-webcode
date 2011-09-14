@@ -2034,7 +2034,7 @@ sub add_regulation_builds {
     
     if (scalar @focus_sets && scalar @focus_sets <= scalar @ftypes) {
       # Add Core evidence tracks
-      $reg_feat->append($self->create_track("reg_feats_core_$cell_line", "Core evidence$label", { %options, type => 'core', description => $options{'description'}{'core'} }));
+      $reg_feat->append($self->create_track("reg_feats_core_$cell_line", "Open chromatin & TFBS$label", { %options, type => 'core', description => $options{'description'}{'core'} }));
     } 
 
     if (scalar @ftypes != scalar @focus_sets  && $cell_line ne 'MultiCell') {

@@ -22,7 +22,7 @@ sub content {
   my $file1       = '/ssi/species/'.$species.'_assembly.html';
   my $file2       = '/ssi/species/'.$species.'_annotation.html';
 
-  my $species_name  =~ s/_/ /g;
+  (my $species_name = $species)  =~ s/_/ /g;
   my $name_string   = $common_name =~ /\./ ? "<i>$species_name</i>" : "$common_name (<i>$species_name</i>)";
   my $html = "<h1>$name_string</h1>";
 

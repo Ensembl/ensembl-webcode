@@ -746,6 +746,13 @@ sub _add_file_format_track {
 sub _user_track_settings {
   my ($self, $style) = @_;
   my $renderers      = $self->{'alignment_renderers'};
+  ## "Ungrouped" option not valid for user tracks at the moment
+  ## TODO - can we fix drawing code to allow ungrouped?
+  my $user_renderers;
+  foreach (@$renderers) {
+    push (@$user_renderers, $_) unless $_ =~ /ungrouped/i;
+  }
+  
   my $strand         = 'b'; 
   my $display        = 'normal';
       
@@ -755,7 +762,7 @@ sub _user_track_settings {
     $renderers = [ 'off', 'Off', 'tiling', 'Wiggle plot' ];
   }
   
-  return ($display, $strand, $renderers);
+  return ($display, $strand, $user_renderers);
 }
 
 sub _compare_assemblies {

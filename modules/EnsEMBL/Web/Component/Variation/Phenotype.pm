@@ -98,9 +98,9 @@ sub table_data {
     if ($is_somatic) { 
       my @tumour_info      = split /\:/, $disorder;
       my $tissue           = $tumour_info[1];
-      $tissue              =~ s/^\s+//;
+			$tissue              =~ s/^\s+//;
       my $tissue_formatted = $tissue;
-      my $source_study     = uc($source_name) . '_STUDY';
+      my $source_study     = uc($source_name) . '_STUDY'; 
       $tissue_formatted    =~ s/\s+/\_/g; 
       $external_reference  = $hub->get_ExtURL_link($tissue, $source_study, $tissue_formatted);
     }
@@ -112,7 +112,7 @@ sub table_data {
     
     my $disease;
     $disease  = qq{<b>$disorder</b>} if $disorder =~ /^\w+/;
-    $disease .= qq{<br /><a href="$disease_url">[View on Karyotype]</a>} unless $disease =~ /HGMD/;
+    $disease .= qq{<br /><a href="$disease_url">[View on Karyotype]</a>} unless ($disease =~ /HGMD/ or $disease =~ /COSMIC/);
     
 	
 	

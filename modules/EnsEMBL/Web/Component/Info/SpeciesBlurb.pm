@@ -35,7 +35,7 @@ sub content {
   ## Link to FTP site
   my $ftp_url = 'ftp://ftp.ensembl.org/pub/release-'.$ensembl_version.'/fasta/'.lc($species).'/dna/';
   $html .= qq(<p style="margin-top:1em"><a href=$ftp_url"><img src="/i/helix.gif" alt="" /></a>
-                <a href="$ftp_url">Download the genome sequence</a> (FASTA)</p>);
+                <a href="$ftp_url">Download $common_name genome sequence</a> (FASTA)</p>);
 
   ## Insert dropdown list of old assemblies
   my %archive = %{$hub->species_defs->get_config($species, 'ENSEMBL_ARCHIVES')||{}};

@@ -43,8 +43,6 @@ sub content {
 
   my @old_archives;
   my $previous = $current_assembly;
-  my @A = keys %archive;
-  warn ">>> ARCHIVES @A";
   foreach my $release (reverse sort keys %archive) {
     next if $release == $hub->species_defs->ENSEMBL_VERSION;
     next if $assemblies{$release} eq $previous;

@@ -56,7 +56,7 @@ sub psychic {
   my %sp_hash          = %{$species_defs->ENSEMBL_SPECIES_ALIASES};
   my $dest_site     = $hub->param('site') || $site_type;
   my $index         = $hub->param('idx')  || undef;
-  my $query         = $hub->param('q');
+  my $query         = uri_escape($hub->param('q'));
   my $sp_param      = $hub->param('species');
   my $species       = $sp_param || ($hub->species !~ /^(common|multi)$/i ? $hub->species : undef);
   my ($url, $site);

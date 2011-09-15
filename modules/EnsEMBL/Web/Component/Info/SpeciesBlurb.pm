@@ -22,8 +22,8 @@ sub content {
   my $file1       = '/ssi/species/'.$species.'_assembly.html';
   my $file2       = '/ssi/species/'.$species.'_annotation.html';
 
-  $species        =~ s/_/ /g;
-  my $name_string = $common_name =~ /\./ ? "<i>$species</i>" : "$common_name (<i>$species</i>)";
+  my $species_name  =~ s/_/ /g;
+  my $name_string   = $common_name =~ /\./ ? "<i>$species_name</i>" : "$common_name (<i>$species_name</i>)";
   my $html = "<h1>$name_string</h1>";
 
   my $ensembl_version   = $hub->species_defs->ENSEMBL_VERSION;
@@ -33,7 +33,7 @@ sub content {
   $html .= EnsEMBL::Web::Controller::SSI::template_INCLUDE($self, $file1);
 
   ## Link to FTP site
-  my $ftp_url = 'ftp://ftp.ensembl.org/pub/release-'.$ensembl_version.'/fasta/'.lc($hub->species).'/dna/';
+  my $ftp_url = 'ftp://ftp.ensembl.org/pub/release-'.$ensembl_version.'/fasta/'.lc($species).'/dna/';
   $html .= qq(<p style="margin-top:1em"><a href=$ftp_url"><img src="/i/helix.gif" alt="" /></a>
                 <a href="$ftp_url">Download the genome sequence</a> (FASTA)</p>);
 
@@ -43,6 +43,8 @@ sub content {
 
   my @old_archives;
   my $previous = $current_assembly;
+  my @A = keys %archive;
+  warn ">>> ARCHIVES @A";
   foreach my $release (reverse sort keys %archive) {
     next if $release == $hub->species_defs->ENSEMBL_VERSION;
     next if $assemblies{$release} eq $previous;

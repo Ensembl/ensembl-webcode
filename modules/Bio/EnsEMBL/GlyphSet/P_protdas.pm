@@ -2,465 +2,358 @@ package Bio::EnsEMBL::GlyphSet::P_protdas;
 
 use strict;
 
-use Sanger::Graphics::ColourMap;
-use Sanger::Graphics::Bump;
-use Bio::EnsEMBL::Glyph::Symbol::box; 
-use POSIX; #floor
+no warnings 'uninitialized';
+
+use Bio::EnsEMBL::ExternalData::DAS::Stylesheet;
+use Bio::EnsEMBL::ExternalData::DAS::Feature;
+use HTML::Entities qw(encode_entities decode_entities);
 
 use base qw(Bio::EnsEMBL::GlyphSet);
 
+## Variables defined in UserConfig.pm 
+## 'caption'   -> Track label
+## 'logicname' -> Logic name
+
 sub _init {
   my ($self) = @_;
-
-  my $conf = $self->{'extras'};
-  $self->{'pix_per_bp'}    = $self->{'config'}->transform->{'scalex'};
-  my $prot_len      = $self->{'container'}->length;
-  $conf->{'length'} = $prot_len;
-
-# Check that we have features back and it's not a error message
-  if (my @das_features = @{$conf->{features} || []}) {
-    my $f = $das_features[0];
-    if($f->das_type_id() eq '__ERROR__') {
-      $self->errorTrack( 'Error retrieving '.$self->{'extras'}->{'label'}.' features ('.$f->das_id.')');
-      return -1 ;   # indicates no features drawn because of DAS error
-    }
-  } else {
-    $self->errorTrack( 'No positional '.$conf->{'label'}.' features in this region' );
-    return 0;
-  }
-
-### If we display a genomic source (i.e features are chromosome based) then we need to 
-### map them to the peptide
-  if ($conf->{'source_type'} =~ /^ensembl_location/) {
-    my $transcript = $self->{'container'}->adaptor->db->get_TranscriptAdaptor->fetch_by_translation_stable_id( $self->{'container'}->stable_id );
-    my @features;
-    foreach my $feat (@{$conf->{features}}) {
-      my @coords =  grep { $_->isa('Bio::EnsEMBL::Mapper::Coordinate') } $transcript->genomic2pep($feat->das_segment->start, $feat->das_segment->end, $feat->strand);
-      if (@coords) {
-        my $c = $coords[0];
-        my $end = ($c->end > $prot_len) ? $prot_len : $c->end; 
-        $feat->das_end( $end );
-        my $start = ($c->start < $end) ? $c->start : $end;
-        $feat->das_start($start);
-        push (@features, $feat);
-      }
-    }
-    $conf->{features} = \@features;
-  }
-
-# Styles are returned as an array - we build a hash so it is easier to use ( probably should look into the fetching function ... ;)
-  # hash styles by type
-  my %styles;
-  my $styles  = $conf->{'styles'};
-
-  if( $styles && @$styles && $conf->{'use_style'} ) {
-    my $styleheight = 0;
-    foreach(@$styles) {
-      $styles{$_->{'category'}}{$_->{'type'}} = $_ unless $_->{'zoom'};
-
-      # Set row height ($configuration->{'h'}) from stylesheet
-      # Currently, this uses the greatest height present in the stylesheet
-      # but should really use the greatest height in the current featureset
-
-      if (exists $_->{'attrs'} && exists $_->{'attrs'}{'height'}){
-        my $tmpheight = $_->{'attrs'}{'height'};
-        $tmpheight += abs $_->{'attrs'}{'yoffset'} if $_->{'attrs'}{'yoffset'} ;
-        $styleheight = $tmpheight if $tmpheight > $styleheight;
-      }
-    }
-    $conf->{'h'} = $styleheight if $styleheight;
-    $conf->{'styles'} = \%styles;
-  } else {
-    $conf->{'use_style'} = 0;
-  }
-
-  if (my $chart = $conf->{'score'}){
-    return $self->render_colourgradient( $conf ) if ($chart eq 'c');
-    return $self->render_tilingarray( $conf )   if ($chart eq 's');
-    return $self->render_histogram( $conf )     if ($chart eq 'h');
-  }
-  return $self->render_grouped($conf);
-}
-
-sub gmenu {
-  my ($self, $f) = @_;
-  my $desc = $f->das_feature_label() || $f->das_feature_id;
-  my $zmenu = { 'caption' => $desc };
-  if( my $m = $f->das_feature_id ){ $zmenu->{"03:ID: $m"}     = undef }
-  if( my $m = $f->das_type       ){ $zmenu->{"05:TYPE: $m"}   = undef }
-  if( my $m = $f->das_method     ){ $zmenu->{"10:METHOD: $m"} = undef }
-  my $ids = 15;
-  my $href;
-  foreach my $dlink ($f->das_links) {
-    my $txt = $dlink->{'txt'} || $dlink->{'href'};
-    my $dlabel = sprintf("%02d:LINK: %s", $ids++, $txt);
-    $zmenu->{$dlabel} = $dlink->{'href'};
-    $href =  $dlink->{'href'} if (! $href);
-  }
-  if( my $m = $f->das_note       ) { 
-    if (ref $m eq 'ARRAY') {
-	foreach my $n (@$m) {
-	  $zmenu->{"$ids:NOTE: $n"}   = undef;
-	  $ids++;
-	}
-     } else {
-	$zmenu->{"40:NOTE: $m"}   = undef;
-     }
-  }
-	
-  return $zmenu;
-}
-
-#----------------------------------------------------------------------
-# Returns the order corresponding to this glyphset
-sub managed_name{
-  my $self = shift;
-  return $self->{'extras'}->{'order'} || 0;
-}
-
-
-sub zmenu {
-  my ($self, $f) = @_;
-  my $desc = $f->das_feature_label() || $f->das_feature_id;
-  my $zmenu = { 'caption' => $desc };
-  if( my $m = $f->das_score){ $zmenu->{"20:SCORE: $m"}     = undef }
-  my $ids = 50;
-  my $href;
-  foreach my $dlink ($f->das_links) {
-    my $txt = $dlink->{'txt'} || $dlink->{'href'};
-    my $dlabel = sprintf("%02d:LINK: %s", $ids++, $txt);
-    $zmenu->{$dlabel} = $dlink->{'href'};
-    $href =  $dlink->{'href'} if (! $href);
-  }
-if( my $m = $f->das_note       ) {
-    if (ref $m eq 'ARRAY') {
-        foreach my $n (@$m) {
-          $zmenu->{"$ids:NOTE: $n"}   = undef;
-          $ids++;
-        }
-     } else {
-        $zmenu->{"40:NOTE: $m"}   = undef;
-     }
-  }
-  return $zmenu;
-}
-
-# Function will display DAS features with variable height depending on SCORE attribute
-sub render_histogram {
-  my( $self, $configuration ) = @_;
-
-  my @features = sort { $a->das_start() <=> $b->das_start() } @{$configuration->{'features'} || []};
-  my ($min_score, $max_score) = (sort {$a <=> $b} (map { $_->score } @features))[0,-1];
-  my $style;
-
-  my $row_height = $configuration->{'h'} || 30;
-  my $pix_per_score = ($max_score - $min_score) / $row_height;
-  my $bp_per_pix = 1 / $self->{pix_per_bp};
-
-  $configuration->{h} = $row_height;
-
-  my ($gScore, $gWidth, $fCount, $gStart, $mScore) = (0, 0, 0, 0, $min_score);
-  for (my $i = 0; $i< @features; $i++) {
-    my $f = $features[$i];
-
-    # keep within the window we're drawing
-    my $START = $f->das_start() < 1 ? 1 : $f->das_start();
-    my $END   = $f->das_end()   > $configuration->{'length'}  ? $configuration->{'length'} : $f->das_end();
-    my $width = ($END - $START +1);
-
-    my $score = $f->das_score;
-    $score = $max_score if ($score > $max_score);
-    $score = $min_score if ($score < $min_score);
-
-# Here we "group" features if they are too small and located very close to each other ..
-
-    $gWidth += $width;
-    $gScore += $score;
-    $mScore = $score if ($score > $mScore);
-    $fCount ++;
-    $gStart = $START if ($fCount == 1);
-# If feature is smaller than 1px and next feature is closer than 1px then we merge features ..
-# 1px value depend on the zoom ..
-    if ($gWidth < $bp_per_pix) {
-      my $nf = $features[$i+1];
-      if ($nf) {
-        my $distance = $nf->das_start() - $END;
-        next if ($distance < $bp_per_pix);
-      }
-    }
-    my $height;
-    if (lc($configuration->{'fg_merge'}) eq 'a') { # get the average value
-      $height = ($gScore / $fCount - $min_score) / $pix_per_score;
-     } else { # get the max value
-      $height = ($mScore - $min_score) / $pix_per_score;
-      if ($height < 0) {
-        warn("ERROR: !! $mScore * $min_score * $pix_per_score");
-      }
-    }
-    my ($zmenu );
-    my $Composite = $self->Composite({
-      'y'         => 0,
-      'x'         => $START-1,
-      'absolutey' => 1,
-    });
-
-    if ($fCount > 1) {
-      $zmenu = {
-        'caption'         => $configuration->{'label'},
-      };
-      $zmenu->{"03:$fCount features merged"} = '';
-      $zmenu->{"05:Average SCORE: ".($gScore/$fCount)} = '';
-      $zmenu->{"08:Max SCORE: $mScore"} = '';
-      $zmenu->{"10:START: $gStart"} = '';
-      $zmenu->{"20:END: $END"} = '';
-    } else {
-      $zmenu = $self->zmenu( $f );
-    }
-    $Composite->{'zmenu'} = $zmenu;
-
-    my $y_offset = $row_height - $height;
-    my $style = $self->get_featurestyle($f, $configuration);
-    my $fdata = $self->get_featuredata($f, $configuration, $y_offset);
-
-    my $symbol = Bio::EnsEMBL::Glyph::Symbol::box->new($fdata, $style->{'attrs'});
-    $symbol->{'style'}->{'height'} = $height;
-
-    $Composite->push($symbol->draw);
-    $self->push( $Composite );
-
-    $gWidth = $gScore = $fCount = 0;
-    $mScore = $min_score;
-  } # END loop over features
-
-  return 1;
-}   # END render_histogram
-
-# Function will display DAS features with variable height depending on SCORE attribute
-# Similar to histogram but allows for negative values and will highlight pick values, i.e
-# when 2 or more features are merged due to resolution the highest score will be used to determine the feature height
-# Probably should merge with histogram as they are very similar
-
-sub render_tilingarray{
-  my( $self, $configuration ) = @_;
   
-  my @features = sort { $a->das_score <=> $b->das_score  } @{$configuration->{'features'}};
-  my ($min_score, $max_score) = ($features[0]->das_score || 0, $features[-1]->das_score || 0);
-  my $style;
-
-  my @positive_features = grep { $_->das_score >= 0 } @features;
-  my @negative_features = grep { $_->das_score < 0 } reverse @features;
-
-  my $row_height = $configuration->{'h'} || 30;
-  my $pix_per_score = (abs($max_score) >  abs($min_score) ? abs($max_score) : abs($min_score)) / $row_height;
-  my $bp_per_pix = 1 / $self->{pix_per_bp};
-  $configuration->{h} = $row_height;
-
-  my ($gScore, $gWidth, $fCount, $gStart, $mScore) = (0, 0, 0, 0, $min_score);
-
-# Draw the axis
-
-  $self->push( $self->Line({
-    'x'         => 0,
-    'y'         => $row_height + 1,
-    'width'     => $configuration->{'length'},
-    'height'    => 0,
-    'absolutey' => 1,
-    'colour'    => 'red',
-    'dotted'    => 1,
-  }));
-
-  $self->push( $self->Line({
-    'x'         => 0,
-    'y'         => 0,
-    'width'     => 0,
-    'height'    => $row_height * 2 + 1,
-    'absolutey' => 1,
-    'absolutex' => 1,
-    'colour'    => 'red',
-    'dotted'    => 1,
-  }));
-
-  foreach my $f (@negative_features, @positive_features) {
-    my $START = $f->das_start() < 1 ? 1 : $f->das_start();
-    my $END   = $f->das_end()   > $configuration->{'length'}  ? $configuration->{'length'} : $f->das_end();
-    my $width = ($END - $START +1);
-    my $score = $f->das_score || 0;
-
-    my $Composite = $self->Composite({
-      'y'         => 0,
-      'x'         => $START-1,
-      'absolutey' => 1,
-    });
-
-    my $height = abs($score) / $pix_per_score;
-    my $y_offset =     ($score > 0) ?  $row_height - $height : $row_height+2;
-    $y_offset-- if (! $score);
-
-    my $zmenu = $self->zmenu( $f );
-    $Composite->{'zmenu'} = $zmenu;
-
-    # make clickable box to anchor zmenu
-    $Composite->push( $self->Space({
-      'x'         => $START - 1,
-      'y'         => ($score ? (($score > 0) ? 0 : ($row_height + 2)) : ($row_height + 1)),
-      'width'     => $width,
-      'height'    => $score ? $row_height : 1,
-      'absolutey' => 1
-    }) );
-
-    my $style = $self->get_featurestyle($f, $configuration);
-    my $fdata = $self->get_featuredata($f, $configuration, $y_offset);
-
-    my $symbol = Bio::EnsEMBL::Glyph::Symbol::box->new($fdata, $style->{'attrs'});
-    $symbol->{'style'}->{'height'} = $height;
-
-    $Composite->push($symbol->draw);
-    $self->push( $Composite );
-  } # END loop over features
-
- return 1;
-}   # END render_tilingarray
-
-
-# Function will display DAS features in different colour with depending on SCORE attribute
-sub render_colourgradient {
-  my ($self, $configuration) = @_; 
-
-  my $bp_per_pix = 1 / $self->{pix_per_bp};
-  my @features = sort { $a->das_score <=> $b->das_score } @{$configuration->{'features'} || []};
-  my ($min_value, $max_value) = $configuration->{'fg_data'} eq 'n' ? ($configuration->{'fg_min'}, $configuration->{fg_max}): ($features[0]->das_score || 0, $features[-1]->das_score || 0);
-  my ($min_score, $max_score) = $configuration->{'fg_data'} eq 'n' ? (0, 100): ($min_value, $max_value);
-
-  $configuration->{'fg_grades'} ||= 20;
-
-  my $score_range = $max_value - $min_value;
-  my $score_per_grade =  ($max_score - $min_score)/ $configuration->{'fg_grades'};
-  my $cm = new Sanger::Graphics::ColourMap;
-  my @cg = $cm->build_linear_gradient($configuration->{'fg_grades'}, ['yellow', 'green', 'blue']);
-  my $style;
- 
-# To make sure that the features with lowest and highest scores get displayed
-  push @features, $features[0];
-  push @features, $features[-2];
-
-  my $y_offset =     0;
-
-  my $row_height = $configuration->{'h'} || 20;
-  $configuration->{h} = $row_height;
-
- foreach my $f (@features) {
-    my $START = $f->das_start() < 1 ? 1 : $f->das_start();
-    my $END   = $f->das_end()   > $configuration->{'length'} ? $configuration->{'length'} : $f->das_end();
-    my $width = ($END - $START +1);
-    my $score = $configuration->{'fg_data'} eq 'n' ? ((($f->das_score || 0) - $min_value) * 100 / $score_range) : ($f->das_score || 0);
-
-    if ($score < $min_value) {
-      $score = $min_value;
-    } elsif ($score > $max_value) {
-      $score = $max_value;
-    }
-    my $Composite = $self->Composite({
-      'y'         => 0,
-      'x'         => $START-1,
-      'absolutey' => 1,
-    });
-
-    my $grade = ($score >= $max_score) ? $configuration->{'fg_grades'} - 1 : int(($score - $min_score) / $score_per_grade);
-    $grade = 0 if ($grade < 0);
-    my $col = $cg[$grade];
-
-    my $zmenu = $self->zmenu($f);
-    $Composite->{'zmenu'} = $zmenu;
-
-    # make clickable box to anchor zmenu
-    $Composite->push( $self->Space({
-      'x'         => $START - 1,
-      'y'         => 0,
-      'width'     => $width,
-      'height'    => $row_height,
-      'absolutey' => 1
-    }) );
-
-    my $style = $self->get_featurestyle($f, $configuration);
-    my $fdata = $self->get_featuredata($f, $configuration, $y_offset);
-
-    my $symbol = Bio::EnsEMBL::Glyph::Symbol::box->new($fdata, $style->{'attrs'});
-    $style->{'attrs'}{'colour'} = $col;
-
-    $Composite->push($symbol->draw);
-    $self->push( $Composite );
-  } # END loop over features
-
-  return 1;
-}   # END render_colourgradient
-
-
-# Function will display DAS features grouped by feature id ( which is wrong ! DAS spec demands unique feature id! )
-# Need to talk to das source maintainers first to convience them to update das sources to comply with DAS spec
-
-sub render_grouped {
-  my ($self, $configuration) = @_; 
-  my $Config        = $self->{'config'};
-  my @bitmap        = undef;
-  my $prot_len      = $configuration->{'length'};
-  my $pix_per_bp    = $self->{'pix_per_bp'};
-  my $bitmap_length = floor( $prot_len * $pix_per_bp);
-
-  my $y             = 0;
-  my $h             = $configuration->{'h'} || 4;
-  $configuration->{'h'} = $h;
-
-  my $fhash;
-
+  return if $self->strand < 0; # only run once
+  
+  my $features = $self->features;
+  
   $self->_init_bump;
 
-  foreach my $f (@{$self->{extras}->{features}}) {
-# Create a new composite and put the feature there
-    my $Composite = $self->Composite({
-      'x'     => $f->start,
-      'y'     => $y,
-      'zmenu' => $self->gmenu($f),
-    });
-
-    my $style = $self->get_featurestyle($f, $configuration);
-    my $fdata = $self->get_featuredata($f, $configuration, 0);
-    my $symbol = $self->get_symbol($style, $fdata);
-#    my $symbol = Bio::EnsEMBL::Glyph::Symbol::box->new($fdata, $style->{'attrs'});
-   
-   $Composite->push($symbol->draw);
-
-# Now check that the new feature does not overlap any preceeding features
-# If it does than 'bump' the row, i.e move the composite down to the next row
-
-    my $bump_start = floor($Composite->x() * $pix_per_bp);
-    next if ($bump_start > $bitmap_length);
-    my $bump_end = $bump_start + floor($Composite->width()*$pix_per_bp);
-    my $row = $self->bump_row( $bump_start, $bump_end );
-    );
-    $Composite->y($Composite->y() + $row * ($h + 2) );
-    $self->push($Composite);
-
-# Now to the bit that always was in Ensembl but does not comply with DAS spec, namely grouping features by feature id.
-# need to address the issue to make sure we comply with DAS spec
-# meantime we put a line between features that have same id and reside on the same row in the bitmap
-
-    my $key = join('*', $row,$f->das_feature_id); 
-    if (my $ox = $fhash->{$key}) {
-      my $rect = $self->Rect({
-         'x'         => $ox,
-         'y'         => 2,
-         'width'     => $f->start - $ox,
-         'height'    => 0,
-         'colour'    => $style->{'attrs'}{'colour'},
-         'absolutey' => 1,
+  my $label         = $self->my_config( 'caption' );
+  my $h             = $self->my_config( 'height' ) || 4;
+  my $font_details  = $self->get_text_simple( undef, 'innertext' );
+  my $pix_per_bp    = $self->scalex;
+  
+  my $seq_len = $self->{'seq_len'} = $self->{'container'}->length;
+  my $default_color = 'blue';
+  my $offset = $self->{'container'}->start - 1;
+  
+  
+  foreach my $lname (sort keys %{$features->{'groups'}}) {   
+    foreach my $gkey ( 
+      sort { $features->{'groups'}{$lname}{$a}->{fake} <=> $features->{'groups'}{$lname}{$b}->{fake} } # draw fake groups last
+      sort keys %{$features->{'groups'}{$lname}} 
+    ) {
+      my $group = $features->{'groups'}{$lname}{$gkey};     
+      next unless $group;                                          # No features from this group
+      next if $group->{'end'} < 1 || $group->{'start'} > $seq_len; # All features in group exist outside region
+      
+      my $g_s = $features->{'g_styles'}{$lname}{$group->{'type'}};
+      
+      my $href = undef;
+      my $title = sprintf(
+        '%s; Start: %s; End: %s; Strand: %s%s',
+        $group->{'label'} || $group->{'id'},
+        $group->{'start'} + $offset,
+        $group->{'end'}   + $offset,
+        '+',
+        $group->{'count'} > 1 ? '; Features: ' . $group->{'count'} : ''
+      );
+      
+      if (@{$group->{'links'}||[]}) {
+        $href = $group->{'links'}[0]{'href'};
+      } elsif (@{$group->{'flinks'}||[]}) {
+        $href = $group->{'flinks'}[0]{'href'};
+      }
+      
+      if (@{$group->{'notes'}||[]}) {
+        $title .= join '', map { '; ' . encode_entities(decode_entities($_)) } @{$group->{'notes'}};
+      } elsif (@{$group->{'fnotes'}||[]}) {
+        $title .= join '', map { '; ' . encode_entities(decode_entities($_)) } @{$group->{'fnotes'}};
+      }
+      
+      $title .= '; Type: ' . ($group->{'type_label'} || $group->{'type'}) if $group->{'type'};
+      $title .= '; Id: ' . $group->{'id'} if $group->{'id'}; ### Id attribute MUST BE THE LAST thing in the title tag or z-menus won't work properly
+      
+      
+      # create group container
+      my $Composite = $self->Composite({
+        'x'     => $group->{start},
+        'y'     => 0,
+        'href'  => $href,
+        'title' => $title,
+        'class' => $group->{'class'}
       });
-      $Composite->push($rect);
-    }
+      
+      # draw group connector
+      $Composite->push($self->Rect({
+        'x'         => $group->{start},
+        'y'         => $h/2,
+        'width'     => $group->{end} - $group->{start},
+        'height'    => 0,
+        'colour'    => $g_s->{style}->{fgcolor} || $default_color,
+        'absolutey' => 1,
+      }));
+      
+      # draw features
+      my( @rect );     
+      foreach my $style_key (
+        map  { $_->[2] }
+        sort { $a->[0] <=> $b->[0] || $a->[1] <=> $b->[1] }
+        map  {[
+          $features->{'f_styles'}{$lname}{$_}{'style'}{'zindex'} || 0, # Render in z-index order
+          $features->{'f_styles'}{$lname}{$_}{'use_score'}       || 0, # Render non-"group features" first
+          $_                                                           # What we want the key to be
+        ]}
+        keys %{$group->{'features'}}
+      ) {
+        my $f_s = $features->{'f_styles'}{$lname}{$style_key};
+                
+        # Draw the features in order
+        foreach my $f (sort { $a->start <=> $b->start } @{$group->{'features'}{$style_key}}) {
+       
+          $Composite->push($self->Rect({
+            'x'      => $f->start,
+            'y'      => 0,
+            'width'  => $f->end - $f->start,
+            'height' => $h,
+            'colour' => $f_s->{style}->{bgcolor} || $default_color,
+            'class' => $group->{'class'}
+          }));
+        }
+      }
+      
+      # bump it
+      my $bump_start = int($Composite->x() * $pix_per_bp);
+      my $bump_end   = $bump_start + int( $Composite->width / $pix_per_bp );
+      my $row        = $self->bump_row( $bump_start, $bump_end );
+      $Composite->y( $Composite->y + ( $row * ( 4 + $h + $font_details->{'height'}))) if $row;
 
-    $fhash->{$key} = $f->end;
+      $self->push($Composite);
+    }
   }
 }
 
+## The features sub is a direct copy of Bio::EnsEMBL::GlyphSet::_das::features 
+## with the strand-specific stuff removed. The feature data returned is more 
+## complex than we need for the simple renderer above, but it has been 
+## preserved for future use.
+sub features { 
+  my $self = shift;
+  
+  # Fetch all the das features...
+  unless ($self->cache('das_features')) {
+    # Query by slice:
+    $self->cache('das_features', $self->cache('das_coord')->fetch_Features( $self->{'container'}, 'maxbins' => $self->image_width )||{});
+  }
+  
+  $self->timer_push('Raw fetch of DAS features', undef, 'fetch');  
+  
+  my $data = $self->cache('das_features');
+  my @logic_names = @{$self->my_config('logic_names')};
+  my $res = {};
+
+  my %feature_styles = ();
+  my %group_styles   = ();
+  my $min_score      = 0;
+  my $max_score      = 0;
+  my $max_height     = 0;
+  my %groups         = ();  
+  my %orientations   = ();
+  my @urls           = ();
+  my @errors         = ();
+
+  my $strand_flag = $self->my_config('strand');
+
+  my $c_f = 0;
+  my $c_g = 0;
+  
+  local $Data::Dumper::Indent = 1; 
+  
+  for my $logic_name (@logic_names) {
+    # Pass through errors about the source itself, e.g. unsupported coordinates
+    if (my $source_error = $data->{$logic_name}{'source'}{'error'}) {
+      push @errors, $source_error;
+    }
+
+    my $stylesheet = $data->{$logic_name}{'stylesheet'}{'object'} || Bio::EnsEMBL::ExternalData::DAS::Stylesheet->new;
+    
+    foreach my $segment (keys %{$data->{$logic_name}{'features'}}) {
+      my $f_data = $data->{$logic_name}{'features'}{$segment};
+      
+      push @urls,   $f_data->{'url'};
+      push @errors, $f_data->{'error'};
+      
+      for my $f (@{$f_data->{'objects'}}) {
+        $f->start || $f->end || next; # Skip nonpositional features
+        
+        my $style_key = $f->type_category . "\t" . $f->type_id;
+        
+        unless (exists $feature_styles{$logic_name}{$style_key}) {
+          my $st = $stylesheet->find_feature_glyph($f->type_category, $f->type_id, 'default');
+          
+          $feature_styles{$logic_name}{$style_key} = {
+            'style'     => $st,
+            'use_score' => ($st->{'symbol'} =~ /^(histogram|tiling|lineplot|gradient)/i ? 1 : 0)
+          };
+          
+          $max_height = $st->{'height'} if $st->{'height'} > $max_height;
+        };
+        
+        my $fs = $feature_styles{$logic_name}{$style_key};
+        
+        next if $fs->{'style'}{'symbol'} eq 'hidden';  # STYLE MEANS NOT DRAWN
+        
+        $c_f ++;
+        
+        if ($fs->{'use_score'}) { # These are the score based symbols
+          $min_score = $f->score if $f->score < $min_score;
+          $max_score = $f->score if $f->score > $max_score;
+        }
+        
+#X        # Loop through each group so we can merge this into "group-based clusters"
+#X        my $st = $f->seq_region_strand || 0;
+#X        my $st_x = $strand_flag eq 'r' ? -1
+#X                 : $strand_flag eq 'f' ?  1
+#X                 : $st;
+#X                 
+#X        $orientations{$st_x}++;
+        
+        if (@{$f->groups}) {
+          # Feature has groups so use them
+          foreach (@{$f->groups}) {
+            my $g  = $_->{'group_id'};
+            my $ty = $_->{'group_type'};
+            $group_styles{$logic_name}{$ty} ||= { 'style' => $stylesheet->find_group_glyph($ty, 'default') };
+            
+#X            if (exists $groups{$logic_name}{$g}{$st_x}) {
+#X              my $t = $groups{$logic_name}{$g}{$st_x};
+            if (exists $groups{$logic_name}{$g}) {
+              my $t = $groups{$logic_name}{$g};              
+              push @{ $t->{'features'}{$style_key} }, $f;
+              
+              $t->{'start'} = $f->start if $f->start < $t->{'start'};
+              $t->{'end'}   = $f->end   if $f->end   > $t->{'end'};
+              $t->{'count'}++;
+            } else {
+              $c_g++;
+              
+#X              $groups{$logic_name}{$g}{$st_x} = {
+#X                'strand'   => $st,
+               $groups{$logic_name}{$g} = {
+                'count'    => 1,
+                'type'     => $ty,
+                'id'       => $g,
+                'label'    => $_->{'group_label'},
+                'notes'    => $_->{'note'},
+                'links'    => $_->{'link'},
+                'targets'  => $_->{'target'},
+                'features' => { $style_key => [$f] },
+                'start'    => $f->start,
+                'end'      => $f->end,
+                'class'    => "das group $logic_name"
+              };
+            }
+          }
+        } else { 
+          # Feature doesn't have groups so fake it with the feature id as group id
+          # Do not display any group glyphs for "logical" groups (score-based or unbumped)
+          my $pseudogroup = ($fs->{'use_score'} || $fs->{'style'}{'bump'} eq 'no' || $fs->{'style'}{'bump'} eq '0');
+          my $g     = $pseudogroup ? 'default' : $f->display_id;
+          my $label = $pseudogroup ? ''        : $f->display_label;
+          
+          # But do for "hacked" groups (shared feature IDs). May change this behaviour later as servers really shouldn't do this
+          my $ty = $f->type_id;
+          $group_styles{$logic_name}{$ty} ||= { 'style' => $pseudogroup ? $HIDDEN_GLYPH : $stylesheet->find_group_glyph('default', 'default') };
+          
+#X          if (exists $groups{$logic_name}{$g}{$st_x}) {
+#X            # Ignore all subsequent notes, links and targets, probably should merge arrays somehow
+#X            my $t = $groups{$logic_name}{$g}{$st_x};
+          if (exists $groups{$logic_name}{$g}) {
+            # Ignore all subsequent notes, links and targets, probably should merge arrays somehow
+            my $t = $groups{$logic_name}{$g};
+            
+            push @{$t->{'features'}{$style_key}}, $f;
+            
+            $t->{'start'} = $f->start if $f->start < $t->{'start'};
+            $t->{'end'}   = $f->end   if $f->end   > $t->{'end'};
+            $t->{'count'}++;
+          } else {
+            $c_g++;
+            
+#X            $groups{$logic_name}{$g}{$st_x} = {
+            $groups{$logic_name}{$g} = {  
+              'fake'       => 1,
+#X              'strand'     => $st,
+              'count'      => 1,
+              'type'       => $ty,
+              'type_label' => $f->type_label,
+              'id'         => $g,
+              'label'      => $label,
+              'notes'      => $f->{'note'}, # Push the features notes/links and targets on
+              'links'      => $f->{'link'},
+              'targets'    => $f->{'target'},
+              'features'   => { $style_key => [ $f ] },
+              'start'      => $f->start,
+              'end'        => $f->end,
+              'class'      => sprintf "das %s$logic_name", $pseudogroup ? 'pseudogroup ' : ''
+            };
+          }
+        }
+      }
+    }
+    
+    # If we used a guessed max/min make it significant to two figures
+    if ($max_score == $min_score) {
+      # If we have all "0" data adjust so we have a range
+      $max_score =  0.1;
+      $min_score = -0.1;
+    } else {
+      my $base = 10**POSIX::ceil(log($max_score-$min_score)/log(10))/100;
+      $min_score = POSIX::floor( $min_score / $base ) * $base;
+      $max_score = POSIX::ceil(  $max_score / $base ) * $base;
+    }
+    
+    foreach my $logic_name (keys %feature_styles) {
+      foreach my $style_key (keys %{$feature_styles{$logic_name}}) {
+        my $fs = $feature_styles{$logic_name}{$style_key};
+        
+        if ($fs->{'use_score'}) {
+          $fs->{'style'}{'min'} = $min_score unless exists $fs->{'style'}{'min'};
+          $fs->{'style'}{'max'} = $max_score unless exists $fs->{'style'}{'max'};
+          
+          if ($fs->{'style'}{'min'} == $fs->{'style'}{'max'}) {
+            # Fudge if max == min add .1 to each so we can display it
+            $fs->{'style'}{'max'} = $fs->{'style'}{'max'} + 0.1;
+            $fs->{'style'}{'min'} = $fs->{'style'}{'min'} - 0.1;
+          } elsif ($fs->{'style'}{'min'} > $fs->{'style'}{'max'}) {
+            # Fudge if min > max swap them... only possible in user supplied data
+            ($fs->{'style'}{'max'}, $fs->{'style'}{'min'}) = ($fs->{'style'}{'min'}, $fs->{'style'}{'max'});
+          }
+        }
+      }
+    }
+  }
+  
+  if ($self->species_defs->ENSEMBL_DEBUG_FLAGS & $self->species_defs->ENSEMBL_DEBUG_DRAWING_CODE) {
+    warn "[DAS:@logic_names]\n";
+    
+    if (@urls) {
+      warn join "\n", map( { "  $_" } @urls ), '';
+    } else {
+      warn "  NO DAS feature requests made for this source....\n";
+    }
+  }
+  
+  push @errors, sprintf 'No %s in this region', $self->label->text if $c_f == 0 && $self->{'config'}->get_option('opt_empty_tracks') == 1;
+  
+  return {
+    'f_count'    => $c_f,
+    'g_count'    => $c_g,
+    'merge'      => 1, # Merge all logic names into one track! note different from other systems
+    'groups'     => \%groups,
+    'f_styles'   => \%feature_styles,
+    'g_styles'   => \%group_styles,
+    'errors'     => \@errors,
+    'ss_errors'  => [],
+    'urls'       => \@urls,
+#X    'ori'        => \%orientations,
+    'max_height' => $max_height
+  };
+}
 
 1;
-

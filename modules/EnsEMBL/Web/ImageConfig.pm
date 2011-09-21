@@ -759,7 +759,7 @@ sub _user_track_settings {
   if ($style eq 'wiggle' || $style eq 'WIG') {
     $display   = 'tiling';
     $strand    = 'r';
-    $renderers = [ 'off', 'Off', 'tiling', 'Wiggle plot' ];
+    $user_renderers = [ 'off', 'Off', 'tiling', 'Wiggle plot' ];
   }
   
   return ($display, $strand, $user_renderers);
@@ -839,7 +839,7 @@ sub update_from_url {
           my @path = split(/\./, $p);
           my $ext = $path[-1] eq 'gz' ? $path[-2] : $path[-1];
           while (my ($name, $info) = each (%$all_formats)) {
-            if ($info->{'ext'} =~ /$ext/i) {
+            if ($ext =~ /^$name$/i) {
               $format = $name;
               last;
             }  

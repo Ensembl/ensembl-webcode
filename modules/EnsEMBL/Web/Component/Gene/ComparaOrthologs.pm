@@ -158,7 +158,7 @@ sub content {
       }
       
       $target_links .= sprintf(
-        '<li><a href="%s" class="notext">Gene Tree (image)</a></li>',
+        '<li><a href="%s" class="notext">Gene Tree (image)</a></li></ul>',
         $hub->url({
           type   => 'Gene',
           action => 'Compara_Tree' . ($cdb =~ /pan/ ? '/pan_compara' : ''),

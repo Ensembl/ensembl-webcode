@@ -62,7 +62,7 @@ sub content {
       });
       
       my $links = sprintf (
-        '<a href="%s" class="notext">Multi-location view</a>',
+        '<ul class="compact"><li class="first"><a href="%s" class="notext">Multi-species view</a></li>',
         $hub->url({
           type   => 'Location',
           action => 'Multi',
@@ -80,13 +80,15 @@ sub content {
             function => "Alignment". ($cdb=~/pan/ ? '_pan_compara' : ''),, 
             g1       => $stable_id
         });
-        $links .= sprintf('<br /><a href="%s" class="notext">Alignment (protein)</a>', $align_url);
+        $links .= sprintf '<li><a href="%s" class="notext">Alignment (protein)</a></li>', $align_url;
         $align_url .= ';seq=cDNA';
-        $links .= sprintf('<br /><a href="%s" class="notext">Alignment (cDNA)</a>', $align_url);
+        $links .= sprintf '<li><a href="%s" class="notext">Alignment (cDNA)</a></li>', $align_url;
         
         ($target, $query) = ($paralogue->{'target_perc_id'}, $paralogue->{'query_perc_id'});
         $alignview = 1;
       }
+
+      $links .= '</ul>';
       
       if ($description =~ s/\[\w+:([-\w\/]+)\;\w+:(\w+)\]//g) {
         my ($edb, $acc) = ($1, $2);

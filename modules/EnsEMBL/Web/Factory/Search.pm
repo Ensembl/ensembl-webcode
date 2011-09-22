@@ -39,8 +39,8 @@ sub terms {
   ## deal with quotes and multiple keywords
   foreach my $q (@qs) {
     $q =~ s/\*+$/%/;
-    ## pull out terms with quotes around them
-    my @quoted = $q =~ /(['"][^'"]+['"])/g;
+    ## pull out terms with quotes around them (and drop the quotes whilst we're at it)
+    my @quoted = $q =~ /['"]([^'"]+)['"]/g;
     $q =~ s/(['"][^'"]+['"])//g;
     push @clean_kws, @quoted;
     ## split remaining terms on whitespace
@@ -50,7 +50,7 @@ sub terms {
 
   ## create SQL criteria
   foreach my $kw ( @clean_kws ) {
-    my $seq = $kw =~ /%/ ? 'like' : '=';
+    my $seq = ($kw =~ /%/) ? 'like' : '=';
     push @list, [ $seq, $kw ];
   }
   return @list;
@@ -151,8 +151,8 @@ sub _fetch_results {
           $self->{to_return} -= $count_new;
           ## We don't want to report more results than we're actually returning!
           $count_new = $count_new < $limit ? $count_new : $limit;
+          $self->{'_result_count'} += $count_new;
         }
-        $self->{'_result_count'} += $count_new;
       }
     }
   }

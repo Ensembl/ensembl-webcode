@@ -34,7 +34,10 @@ sub terms {
   my $self = shift;
   my @list = ();
   foreach my $kw ( split /\s+/, join ' ',$self->param('q') ) {
-    my $seq = $kw =~ s/\*+$/%/ ? 'like' : '=';
+    ## escape quotes and replace wildcard * with %
+    $kw =~ s/(['"])/\\$1/g;
+    $kw =~ s/\*+$/%/;
+    my $seq = $kw =~ /%/ ? 'like' : '=';
     push @list, [ $seq, $kw ];
   }
   return @list;
@@ -127,12 +130,15 @@ sub _fetch_results {
     my( $db, $subtype, $count_SQL, $search_SQL ) = @$query;
     
     foreach my $term (@terms ) {
-	my $count_new = $self->count( $db, $count_SQL, $term->[0], $term->[1] );
+	    my $count_new = $self->count( $db, $count_SQL, $term->[0], $term->[1] );
+      warn ">>> FETCHING $subtype = $count_new";
       if( $count_new ) {
         if( $self->{to_return} > 0) {
           my $limit = $self->{to_return} < $count_new ? $self->{to_return} : $count_new; 
           $self->_fetch( $db, $search_SQL, $term->[0], $term->[1], $limit );
           $self->{to_return} -= $count_new;
+          ## We don't want to report more results than we're actually returning!
+          $count_new = $count_new < $limit ? $count_new : $limit;
         }
         $self->{'_result_count'} += $count_new;
       }

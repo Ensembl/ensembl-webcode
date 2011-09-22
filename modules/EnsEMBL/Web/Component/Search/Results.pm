@@ -29,7 +29,8 @@ sub content {
   my $html;
 
   if ($hub->species ne 'Multi' && $hub->param('q')) {
-    $html = "<p><strong>You searched for \'" . $hub->param('q')  . "\'</strong</p>";
+    $html = "<p><strong>You searched for \'" . $hub->param('q')  . "\'</strong></p>";
+    $html .= "<p>Please note that because this site uses a direct MySQL search,  we limit the search to 10 results per category and 30 results total, in order to avoid overloading the database server.";
 
     # Eagle change to order the results differently
     # we can either order the results by our own @order_results array, the species.ini files ( @idxs ), or just by sorting by keys as below. 	

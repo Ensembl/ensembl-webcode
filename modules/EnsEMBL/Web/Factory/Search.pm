@@ -33,10 +33,23 @@ sub createObjects {
 sub terms {
   my $self = shift;
   my @list = ();
-  foreach my $kw ( split /\s+/, join ' ',$self->param('q') ) {
-    ## escape quotes and replace wildcard * with %
-    $kw =~ s/(['"])/\\$1/g;
-    $kw =~ s/\*+$/%/;
+  my @qs = $self->param('q');
+  my @clean_kws;
+
+  ## deal with quotes and multiple keywords
+  foreach my $q (@qs) {
+    $q =~ s/\*+$/%/;
+    ## pull out terms with quotes around them
+    my @quoted = $q =~ /(['"][^'"]+['"])/g;
+    $q =~ s/(['"][^'"]+['"])//g;
+    push @clean_kws, @quoted;
+    ## split remaining terms on whitespace
+    $q =~ s/^\s|\s$//;
+    push @clean_kws, split /\s+/, $q;
+  }
+
+  ## create SQL criteria
+  foreach my $kw ( @clean_kws ) {
     my $seq = $kw =~ /%/ ? 'like' : '=';
     push @list, [ $seq, $kw ];
   }
@@ -131,7 +144,6 @@ sub _fetch_results {
     
     foreach my $term (@terms ) {
 	    my $count_new = $self->count( $db, $count_SQL, $term->[0], $term->[1] );
-      warn ">>> FETCHING $subtype = $count_new";
       if( $count_new ) {
         if( $self->{to_return} > 0) {
           my $limit = $self->{to_return} < $count_new ? $self->{to_return} : $count_new; 

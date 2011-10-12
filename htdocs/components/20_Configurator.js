@@ -759,7 +759,7 @@ Ensembl.Panel.Configurator = Ensembl.Panel.ModalContent.extend({
     var lis       = [];
     var added     = false;
     var noResults = 'show';
-    var div, show, menu, tracks, track, trackName, i, j, match, type;
+    var div, show, menu, tracks, track, trackName, i, j, match, type, subset;
     
     function search(n, li) {
       match = li.children('span.menu_option').text().match(panel.regex);
@@ -768,10 +768,16 @@ Ensembl.Panel.Configurator = Ensembl.Panel.ModalContent.extend({
         if (panel.imageConfig[n]) {
           li.show().parents('li').show();
         } else {
-          menu.append(li).parents('li').show();
+          menu.append(li.show()).parents('li').show();
           panel.imageConfig[n] = { renderer: 'off', favourite: !!panel.favourites[type] && panel.favourites[type][n] };
           panel.externalFavourite(n, li);
-          added = true;
+          added  = true;
+          subset = li[0].className.match(/\s*subset_(\w+)\s*/) || false;
+          
+          li.data('links', [
+            'a.' + type,
+            'a.' + (subset ? subset[1] : type + '-' + menu.parents('.subset').attr('class').replace(/subset|active|first|\s/g, ''))
+          ].join(', '));
         }
         
         show      = true;

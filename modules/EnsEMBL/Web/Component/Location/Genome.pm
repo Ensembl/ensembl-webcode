@@ -22,7 +22,13 @@ sub content {
   my $self = shift;
   my $id   = $self->hub->param('id'); 
   my $features = {};
- 
+
+  #configure two Vega tracks in one
+  my $config = $self->hub->get_imageconfig('Vkaryotype');
+  if ($config->get_node('Vannotation_status_left') & $config->get_node('Vannotation_status_right')) {
+    $config->get_node('Vannotation_status_left')->set('display', $config->get_node('Vannotation_status_right')->get('display'));
+  }
+
   ## Get features to draw
   if ($id) {
     my $object = $self->builder->create_objects('Feature', 'lazy');

@@ -32,6 +32,7 @@ sub content {
 
   #get external sequence and type (DNA or PEP)
   my ($ext_seq, $len) = @{$self->hub->get_ext_seq( $hit_id, $ext_db) || []};
+  $ext_seq = '' unless ($ext_seq =~ /^>/);
 
   if ($len < 0) {
       return qq(<p>$ext_seq</p>);

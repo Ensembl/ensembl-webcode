@@ -882,15 +882,24 @@ sub update_from_url {
       } elsif ($type eq 'das') {
         $p = uri_unescape($p);
         
-        my $logic_name = $session->add_das_from_string($p, $self->{'type'}, { display => $renderer });
-        
-        if ($logic_name) {
+        if (!$hub->species_defs->ENSEMBL_DAS_ENABLED) {
           $session->add_data(
             type     => 'message',
             function => '_info',
             code     => 'das:' . md5_hex($p),
-            message  => sprintf('You have attached a DAS source with DSN: %s %s.', encode_entities($p), $self->get_node("das_$logic_name") ? 'to this display' : 'but it cannot be displayed on the specified image')
-          );
+            message  => 'You have attempted to attach a DAS source, however DAS is currently disabled and your source has not been attached.',
+          );          
+        } else {        
+          my $logic_name = $session->add_das_from_string($p, $self->{'type'}, { display => $renderer });
+        
+          if ($logic_name) {
+            $session->add_data(
+              type     => 'message',
+              function => '_info',
+              code     => 'das:' . md5_hex($p),
+              message  => sprintf('You have attached a DAS source with DSN: %s %s.', encode_entities($p), $self->get_node("das_$logic_name") ? 'to this display' : 'but it cannot be displayed on the specified image')
+            );
+          }
         }
       }
     } else {
@@ -1092,6 +1101,8 @@ sub load_configured_das {
   my $all_menus     = !scalar @_;
   my @adding;
   my %seen;
+
+  return if !$self->hub->species_defs->ENSEMBL_DAS_ENABLED;
   
   foreach my $source (sort { $a->caption cmp $b->caption } values %{$self->species_defs->get_all_das}) {
     next unless $source->is_on($self->{'type'});

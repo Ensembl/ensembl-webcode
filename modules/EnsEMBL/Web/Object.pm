@@ -91,7 +91,8 @@ sub _availability {
   my $hash = { map { ('database:'. lc(substr $_, 9) => 1) } keys %{$self->species_defs->databases} };
   map { my $key =lc(substr($_,9)); $hash->{"database:$key"} = 1} @{$self->species_defs->compara_like_databases || [] };
   $hash->{'logged_in'} = 1 if $self->user;
-  
+  $hash->{'das'} = $self->hub->species_defs->ENSEMBL_DAS_ENABLED;
+ 
   return $hash;
 }
 

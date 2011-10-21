@@ -77,7 +77,7 @@ sub populate_tree {
 
   $self->create_node( 'SelectServer', "Attach DAS",
    [qw(select_server EnsEMBL::Web::Component::UserData::SelectServer)], 
-    { 'availability' => 1 }
+    { 'availability' => 'das' }
   );
   $self->create_node( 'CheckServer', '',
     [], { 'command' => 'EnsEMBL::Web::Command::UserData::CheckServer',

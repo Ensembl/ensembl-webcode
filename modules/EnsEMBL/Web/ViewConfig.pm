@@ -227,20 +227,32 @@ sub update_from_url {
   
   if (scalar @das) {
     my $action = $hub->action;
-    
+
     $hub->action = 'ExternalData'; # Change action so that the source will be added to the ExternalData view config
-    
-    foreach (@das) {
-      my $source     = uri_unescape($_);
-      my $logic_name = $session->add_das_from_string($source);
-      
-      if ($logic_name) {
+
+    if (!$hub->species_defs->ENSEMBL_DAS_ENABLED ){
+      foreach (@das) {
+        my $source     = uri_unescape($_);
         $session->add_data(
           type     => 'message',
           function => '_info',
           code     => 'das:' . md5_hex($source),
-          message  => sprintf('You have attached a DAS source with DSN: %s%s.', encode_entities($source), $self->get($logic_name) ? ', and it has been added to the External Data menu' : '')
+          message  => 'You have attempted to attach a DAS source, however DAS is currently disabled and your source has not been attached',
         );
+      }
+    } else {
+      foreach (@das) {
+        my $source     = uri_unescape($_);
+        my $logic_name = $session->add_das_from_string($source);
+
+        if ($logic_name) {
+          $session->add_data(
+            type     => 'message',
+            function => '_info',
+            code     => 'das:' . md5_hex($source),
+            message  => sprintf('You have attached a DAS source with DSN: %s%s.', encode_entities($source), $self->get($logic_name) ? ', and it has been added to the External Data menu' : '')
+          );
+        }
       }
     }
     

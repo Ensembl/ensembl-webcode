@@ -82,7 +82,7 @@ sub populate_tree {
   # External Data tree, including non-positional DAS sources
   my $external = $self->create_node('ExternalData', 'External Data',
     [qw( external EnsEMBL::Web::Component::Variation::ExternalData )],
-    { 'availability' => 'variation' }
+    { 'availability' => 'das variation' }
   );
   
    $self->create_subnode(

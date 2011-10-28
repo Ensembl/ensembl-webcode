@@ -13,7 +13,6 @@ my $cgi     = new CGI;
 my $file    = $cgi->param('vcf');
 my $pos_param     = $cgi->param('pos');
 my $species = $cgi->param('sp');
-warn "pos_param ". $cgi->param('pos') . " ;  species: $species ";
 
 my ($chr, $s, $e) = $pos_param =~ /(.+?):(\d+?)-(\d+?)(?:%3A|;|$)/;
 
@@ -36,7 +35,6 @@ $table1000->add_columns(
 
 #foreach my $a (@$consensus) {
 #  my $a = $consensus->[0];
-warn "a is ". Dumper($a);
   my $row_count = keys %{$a->{'gtypes'}} ;
   my $pos   = $a->{'POS'};
   my @substit;

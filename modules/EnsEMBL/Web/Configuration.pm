@@ -244,7 +244,7 @@ sub user_populate_tree {
     
     $ext_node->append($self->create_subnode("ExternalData/$_", $source->caption,
       [ 'textdas', "EnsEMBL::Web::Component::${type}::TextDAS" ], {
-        availability => 'das lc $type', 
+        availability => 'das '. lc $type, 
         concise      => $source->caption, 
         caption      => $source->caption, 
         full_caption => $source->label

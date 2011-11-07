@@ -90,7 +90,7 @@ sub _fetch {
   (my $t = $search_SQL ) =~ s/'\[\[KEY\]\]'/$kw/g;
   $t =~ s/\[\[COMP\]\]/$comparator/g;
   $t =~ s/\[\[FULLTEXTKEY\]\]/$full_kw/g;
-  my $res = $dbh->dbc->db_handle->selectall_arrayref( "$t limit $limit" );
+  my $res = $dbh->dbc->db_handle->selectall_arrayref( "$t limit $limit" ) || [];
   return $res;
 }
 

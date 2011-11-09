@@ -1550,6 +1550,7 @@ sub add_prediction_transcripts {
       glyphset    => '_prediction_transcript',
       colourset   => 'prediction',
       colour_key  => lc $_,
+      label_key   => '[display_label]',
       renderers   => [ 'off', 'Off', 'transcript_nolabel', 'No labels', 'transcript_label', 'With labels' ],
       strand      => 'b',
     });

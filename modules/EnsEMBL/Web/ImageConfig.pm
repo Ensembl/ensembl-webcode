@@ -2194,7 +2194,7 @@ sub add_sequence_variations_meta {
       $node = $self->create_track($menu_item->{key}, $menu_item->{long_name}, {
         %options,
         caption     => $menu_item->{long_name},
-        sources     => ($menu_item->{long_name} =~ /all other sources/ ? undef : [ $menu_item->{long_name} ]),
+        sources     => ($menu_item->{long_name} =~ /all other sources/ ? undef : [ $temp_name ]),
         description => ($menu_item->{long_name} =~ /all other sources/ ? "Sequence variants from all sources" : $hashref->{'source'}{'descriptions'}{$temp_name}),
       });
     }

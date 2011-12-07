@@ -366,17 +366,6 @@ foreach my $spp (@valid_spp) {
     $b_coordsys .= "</table>\n";
   }
     
-
-  ##-----------------------List top level coord systems------------------------
-# my $b_regions;
-# my @links;
-# foreach my $slice ({$sa->fetch_all('toplevel',undef,1,0)}){
-#   my $location=sprintf("%s:%d-%d",$slice->seq_region_name,$slice->start,$slice->end);
-#   push(@links,sprintf(qq{<a href="/%s/Location/View?db=core;r=%s">%s</a>},$spp,$location,$location));
-# }
-# $b_regions .= sprintf(qq{%s}, join(" ",sort @links));
-
-
   ##--------------------------- DO INTERPRO STATS -----------------------------
 
     my $ip_tables = do_interpro($db, $spp) unless $NOINTERPRO;

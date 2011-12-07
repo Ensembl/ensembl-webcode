@@ -682,7 +682,9 @@ sub _add_bam_track {
 }
 
 sub _add_bigwig_track {
-  shift->_add_file_format_track(
+  my ($self, %args) = @_;
+  
+  $self->_add_file_format_track(
     format    => 'BigWig', 
     renderers =>  [
       'off',    'Off',
@@ -691,7 +693,7 @@ sub _add_bigwig_track {
     options => {
       external => 'url',
       sub_type => 'bigwig',
-      colour   => $_[2]->{'colour'} || 'red',
+      colour   => $args{'menu'}{'colour'} || 'red',
     },
     @_
   );
@@ -2250,7 +2252,7 @@ sub add_sequence_variations_default {
     next if     $hashref->{'source'}{'somatic'}{$key_2} == 1;
     
     (my $k = $key_2) =~ s/\W/_/g;
-
+    
     $sequence_variation->append($self->create_track("variation_feature_${key}_$k", "$key_2 variations", {
       %options,
       caption     => $key_2,

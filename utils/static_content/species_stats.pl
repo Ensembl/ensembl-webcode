@@ -822,6 +822,7 @@ sub regions_table {
   my ($species,$csname,$regions) = @_;
   my $hide = 1;
   my $table_rows = [];
+  my %table_row_data;
   my $html = "";
   my $num_regions = scalar @$regions;
   foreach my $slice (@$regions){
@@ -834,7 +835,12 @@ sub regions_table {
     if($seqname =~ /(\d+)$/){$seq_order=$1;}
     my $seq_link=sprintf('<span class="hidden">%06d</span><a href="/%s/Location/View?r=%s:%d-%d">%s</a>',$seq_order,$species,$slice->seq_region_name,$start,$end,$seqname);
     my $row_data = {order=>$seq_order, sequence=>$seq_link, length=>$slice->length};
-    push(@{$table_rows},$row_data);
+    $table_row_data{$seq_order}=[] unless $table_row_data{$seq_order};
+    push(@{$table_row_data{$seq_order}},$row_data);
+  # push(@{$table_rows},$row_data);
+  }
+  foreach my $seq_num ( sort {$a <=> $b} keys %table_row_data){
+    push(@$table_rows, @{$table_row_data{$seq_num}});
   }
     
   my $data_table_config = {
@@ -845,7 +851,7 @@ sub regions_table {
   my $table_id=$csname . "_table";
   
   my $table = new EnsEMBL::Web::Document::Table([
-    { key=>'sequence',  sort=>'numeric_hidden', title=>'Sequence', align => 'left',  width=>'45%' },
+    { key=>'sequence',  title=>'Sequence', align => 'left',  width=>'45%' },
     { key=>'length',    sort=>'numeric',    title=>'Length (bp)',   align => 'right', width=>'10%' }, 
     ],
     $table_rows,

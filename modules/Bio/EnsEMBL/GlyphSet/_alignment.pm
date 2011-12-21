@@ -181,7 +181,6 @@ sub render_normal {
 ## Information about the container...
   my $strand = $self->strand;
   my $strand_flag    = $self->my_config('strand');
-  warn ">>> STRAND $strand ($strand_flag)";
 
   my $length = $self->{'container'}->length();
 ## And now about the drawing configuration

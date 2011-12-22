@@ -1098,9 +1098,7 @@ sub dumpGenomicAlignment {
   my $total_af_c;
   foreach my $db ( sort { $b cmp $a } keys %dbs) {
 
-#    warn $db;
-
-    next if ($db eq 'core');
+#    next unless ($db eq 'core');
 
     my $counter    = make_counter(0);
     my $dbname     = $dbs{$db};

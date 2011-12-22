@@ -526,13 +526,13 @@ sub display_xref {
 sub mod_date {
   my $self = shift;
   my $time = $self->gene()->modified_date;
-  return $self->date_format( $time,'%d/%m/%y' ), $self->date_format( $time, '%y/%m/%d' );
+  return $self->date_format( $time,'%d/%m/%y' );
 }
 
 sub created_date {
   my $self = shift;
   my $time = $self->gene()->created_date;
-  return $self->date_format( $time,'%d/%m/%y' ), $self->date_format( $time, '%y/%m/%d' );
+  return $self->date_format( $time,'%d/%m/%y' );
 }
 
 sub get_author_name {

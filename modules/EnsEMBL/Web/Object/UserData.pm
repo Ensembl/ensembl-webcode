@@ -1333,7 +1333,9 @@ sub configure_vep {
   $vep_config{quiet}          = 1;
   $vep_config{check_alleles}  = 1 if $vep_config{check_existing} eq 'allele';
   $vep_config{check_existing} = 1 if defined($vep_config{check_frequency}) && exists $species_dbs{'DATABASE_VARIATION'};
-  
+ 
+  delete $vep_config{format} if $vep_config{format} eq 'id';
+
   return \%vep_config;
 }
 

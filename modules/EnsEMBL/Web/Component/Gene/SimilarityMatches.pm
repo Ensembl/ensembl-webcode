@@ -39,13 +39,16 @@ sub matches_to_html {
     link_text  => ''
   });
 
+  my %options = map {$_ => 1} $hub->get_viewconfig('SimilarityMatches')->options;
+
   foreach (@{$self->object->Obj->get_all_Transcripts}) {
     my $url = sprintf '<a href="%s">%s</a>', $hub->url({ type => 'Transcript', action => 'Summary', function => undef, t => $_->stable_id }), $_->stable_id;
     my $row = { transcriptid => $url };
 
     foreach ($self->get_matches_by_transcript($_, @dbtypes)) {
+
       #switch off rows that should be off
-      next unless defined $hub->param($_->db_display_name) && $hub->param($_->db_display_name) ne 'off';
+      next unless $options{$_->db_display_name} && $hub->param($_->db_display_name) ne 'off';
 
       my %similarity_links = $self->get_similarity_links_hash($_);
       my $ext_db_entry     = $similarity_links{'link'} ? qq{<a href="$similarity_links{'link'}">$similarity_links{'link_text'}</a>}  : $similarity_links{'link_text'};
@@ -129,7 +132,7 @@ sub get_similarity_links_hash {
    next if $externalDB =~ /^flybase/i && $display_id =~ /^CG/; # ditch celera genes from FlyBase
    next if $externalDB eq 'Vega_gene';                         # remove internal links to self and transcripts
    next if $externalDB eq 'Vega_transcript' && $display_id !~ /OTT/; #only show OTT xrefs
-   next if $externalDB eq 'Vega_translation';
+   next if $externalDB eq 'Vega_translation' && $display_id !~ /OTT/; #only show OTT xrefs;
    next if $externalDB eq 'OTTP' && $display_id =~ /^\d+$/;    # don't show vega translation internal IDs   
 
    my $text       = $display_id;

@@ -1443,7 +1443,7 @@ sub add_data_files {
     my $glyphset = $data->{$_}{'format'} || '_alignment';
     $self->generic_add($menu, $key, "data_file_${key}_$_", $data->{$_}, { 
       glyphset => $glyphset, 
-      strand => 'b',
+      strand => 'f',
       renderers   => [
         'off',       'Off', 
         'normal',    'Normal', 

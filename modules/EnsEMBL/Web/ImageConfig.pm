@@ -1444,6 +1444,12 @@ sub add_data_files {
     $self->generic_add($menu, $key, "data_file_${key}_$_", $data->{$_}, { 
       glyphset => $glyphset, 
       strand => 'b',
+      renderers   => [
+        'off',       'Off', 
+        'normal',    'Normal', 
+        'unlimited', 'Unlimited', 
+        'histogram', 'Coverage only'
+      ], 
       })
     ;
   }

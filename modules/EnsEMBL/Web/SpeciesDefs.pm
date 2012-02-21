@@ -703,6 +703,20 @@ sub timer_push {
 
 sub img_url { return $_[0]->ENSEMBL_STATIC_SERVER . ($_[0]->ENSEMBL_IMAGE_ROOT || '/i/'); }
 
+sub has_userdb {
+  my $self = shift;
+  my $dsn = sprintf(
+    'DBI:mysql:database=%s;host=%s;port=%s',
+    $self->ENSEMBL_USERDB_NAME,
+    $self->ENSEMBL_USERDB_HOST,
+    $self->ENSEMBL_USERDB_PORT
+  );
+  if (DBI->connect($dsn, $self->ENSEMBL_USERDB_USER, $self->ENSEMBL_USERDB_PASS)) {
+    return 1;
+  };
+  return 0;
+}
+
 sub marts {
   my $self = shift;
   return exists( $CONF->{'_storage'}{'MULTI'}{'marts'} ) ? $CONF->{'_storage'}{'MULTI'}{'marts'} : undef;

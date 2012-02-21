@@ -128,6 +128,9 @@ sub render {
       my $coll_dir = $dbs->{'DATABASE_FUNCGEN'}{'NAME'};
       $extra = sprintf '<a rel="external" title="%s" href="ftp://ftp.ensembl.org/pub/%s/data_files/%s/">Regulation data files</a>', $title{'extra'}, $rel, $coll_dir;
     }
+    elsif ($sp_dir =~ /pan_troglodytes/) {
+      $extra = sprintf '<a rel="external" title="%s" href="ftp://ftp.ensembl.org/pub/%s/data_files/pan_troglodytes/">RNAseq data files</a>', $title{'extra'}, $rel;
+    }
 
     $table->add_row({
       'species'       => sprintf('<strong><i>%s</i></strong> (%s)', $sp_name, $common),

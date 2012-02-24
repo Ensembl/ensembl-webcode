@@ -220,7 +220,7 @@ sub content {
   
   if ($alignview && keys %orthologue_list) {
     $html .= sprintf(
-      '<p><a href="%s">View sequence alignments of these homologues</a>.</p>', 
+      '<p><a href="%s">View sequence alignments of all orthologues</a>.</p>', 
       $hub->url({ action => 'Compara_Ortholog', function => 'Alignment' . ($cdb =~ /pan/ ? '_pan_compara' : ''), })
     );
   }

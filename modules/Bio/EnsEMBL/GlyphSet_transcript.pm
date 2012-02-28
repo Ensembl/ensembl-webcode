@@ -1298,7 +1298,7 @@ sub get_homologous_gene_ids {
   my $ha     = $compara_db->get_HomologyAdaptor;
   my $method = $species eq $config->{'species'} ? $config->get_parameter('homologue') : undef;
   my @homologues;
-  
+
   foreach my $homology (@{$ha->fetch_all_by_Member_paired_species($qy_member, $species, $method ? [ $method ] : undef)}) {
     my $colour_key = $join_types->{$homology->description};
     
@@ -1331,14 +1331,16 @@ sub get_homologous_peptide_ids_from_gene {
   my $qy_member = $ma->fetch_by_source_stable_id('ENSEMBLGENE', $gene->stable_id);
   return unless defined $qy_member;
   
-  my $ha = $compara_db->get_HomologyAdaptor;
+  my $config = $self->{'config'}; 
+  my $ha     = $compara_db->get_HomologyAdaptor;
+  my $method = $species eq $config->{'species'} ? $config->get_parameter('homologue') : undef;
   my @homologues;
   my @homologue_genes;
   
   my $stable_id = undef;
   my $peptide_id = undef;
   
-  foreach my $homology (@{$ha->fetch_by_Member_paired_species($qy_member, $species)}) {
+  foreach my $homology (@{$ha->fetch_all_by_Member_paired_species($qy_member, $species, $method ? [ $method ] : undef)}) {
     my $colour_key = $join_types->{$homology->description};
     
     next if $colour_key eq 'hidden';

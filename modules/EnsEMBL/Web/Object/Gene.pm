@@ -111,7 +111,8 @@ sub counts {
       $counts->{'operons'} = scalar @{$obj->feature_Slice->get_all_Operons};
     }
     if (my $vdb = $self->database('variation') ) {
-	$counts->{structural_variation} = scalar(@{$obj->slice->get_all_StructuralVariationFeatures}) + scalar(@{$obj->slice->get_all_CopyNumberVariantProbeFeatures});
+      $counts->{structural_variation} = 1;
+#      $counts->{structural_variation} = scalar(@{$obj->slice->get_all_StructuralVariationFeatures}) + scalar(@{$obj->slice->get_all_CopyNumberVariantProbeFeatures});
     }
     my $compara_db = $self->database('compara');
     

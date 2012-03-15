@@ -1265,7 +1265,8 @@ sub _summarise_datahubs {
   };
   my $parser = new Bio::EnsEMBL::ExternalData::DataHub::SourceParser($settings);
 
-  while (my ($name,$url) = each (%$datahub)) {
+  while (my ($name,$config) = each (%$datahub)) {
+    my ($menu, $url) = @$config;
     ## Do we have data for this species?
     my $hub_info = $parser->get_hub_info($url);
     if ($hub_info->{'error'}) {
@@ -1280,26 +1281,23 @@ sub _summarise_datahubs {
       ## Create Ensembl-style tracks from the datahub configuration
       ## TODO - implement track grouping!
       foreach my $dataset (@$datahub_config) {
-          if ($dataset->{'error'}) {
-            warn sprintf('!!! COULD NOT PARSE CONFIG %s: %s', $dataset->{'file'}, $dataset->{'error'});
+        if ($dataset->{'error'}) {
+          warn sprintf('!!! COULD NOT PARSE CONFIG %s: %s', $dataset->{'file'}, $dataset->{'error'});
+        }
+        else {
+          my $options = {
+            'menu_key'      => $menu,
+            'submenu_key'   => $dataset->{'config'}{'track'},
+            'submenu_name'  => $dataset->{'config'}{'shortLabel'},
+            'desc_url'      => $dataset->{'config'}{'description_url'},
+          };
+          if ($dataset->{'config'}{'subsets'}) {
+            foreach my $subset (@{$dataset->{'tracks'}}) {
+              $self->_add_datahub_tracks($subset->{'tracks'}, $options);
+            }
           }
           else {
-            (my $menu_name = $name) =~ s/_/ /;
-            my $options = {
-              'menu_key'      => $name,
-              'menu_name'     => $menu_name,
-              'submenu_key'   => $dataset->{'config'}{'track'},
-              'submenu_name'  => $dataset->{'config'}{'shortLabel'},
-              'desc_url'      => $dataset->{'config'}{'description_url'},
-            };
-            if ($dataset->{'config'}{'subsets'}) {
-              foreach my $subset (@{$dataset->{'tracks'}}) {
-                $self->_add_datahub_tracks($subset->{'tracks'}, $options);
-              }
-            }
-            else {
-              $self->_add_datahub_tracks($dataset->{'tracks'}, $options);
-            }
+            $self->_add_datahub_tracks($dataset->{'tracks'}, $options);
           }
         }
       }

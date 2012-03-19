@@ -1265,12 +1265,11 @@ sub _summarise_datahubs {
   };
   my $parser = new Bio::EnsEMBL::ExternalData::DataHub::SourceParser($settings);
 
-  while (my ($name,$config) = each (%$datahub)) {
-    my ($menu, $url) = @$config;
+  while (my ($key,$url) = each (%$datahub)) {
     ## Do we have data for this species?
     my $hub_info = $parser->get_hub_info($url);
     if ($hub_info->{'error'}) {
-      warn "!!! COULD NOT CONTACT DATAHUB $name: ".$hub_info->{'error'};
+      warn "!!! COULD NOT CONTACT DATAHUB $key: ".$hub_info->{'error'};
     }
     else {
       my $source_list = $hub_info->{$self->tree->{'UCSC_GOLDEN_PATH'}};
@@ -1285,8 +1284,10 @@ sub _summarise_datahubs {
           warn sprintf('!!! COULD NOT PARSE CONFIG %s: %s', $dataset->{'file'}, $dataset->{'error'});
         }
         else {
+          (my $name = $key) =~ s/_/ /g;
           my $options = {
-            'menu_key'      => $menu,
+            'menu_key'      => $key,
+            'menu_name'     => $name,
             'submenu_key'   => $dataset->{'config'}{'track'},
             'submenu_name'  => $dataset->{'config'}{'shortLabel'},
             'desc_url'      => $dataset->{'config'}{'description_url'},

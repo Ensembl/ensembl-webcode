@@ -14,6 +14,7 @@ sub render {
     &copy; $year <a href="http://www.sanger.ac.uk/" class="nowrap">WTSI</a> /
     <a href="http://www.ebi.ac.uk/" style="white-space:nowrap">EBI</a>.
     Ensembl is available to <a href="/info/data/download.html">download for public use</a> - please see the <a href="/info/about/code_licence.html">code licence</a> for details.
+    (<a href="http://www.ensembl.org/info/about/legal/privacy.html" class="constant">Sanger Privacy Policy</a>)
     </p>
     </div></div></div>
     ) 

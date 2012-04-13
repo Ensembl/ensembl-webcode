@@ -363,7 +363,7 @@ sub create_set {
   
   my $dbh = $self->dbh;
   return unless $dbh; ### correct ?
-  $dbh->do('INSERT INTO configuration_details VALUES ("", ?, ?, "y", ?, ?, ?, ?)', {}, map(encode_entities($args{$_}) || '', qw(record_type record_type_id name description)), $self->servername, $self->version);
+  $dbh->do('INSERT INTO configuration_details VALUES ("", ?, ?, "y", ?, ?, ?, ?, ?)', {}, map(encode_entities($args{$_}) || '', qw(record_type record_type_id name description)), $self->servername, $self->site_type, $self->version);
   
   my $set_id = $dbh->last_insert_id(undef, undef, 'configuration_details', 'record_id');
   

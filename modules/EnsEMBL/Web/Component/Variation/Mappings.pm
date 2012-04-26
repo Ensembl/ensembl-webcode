@@ -12,7 +12,7 @@ sub _init {
   $self->ajaxable(1);
   #$self->has_image(1);
 }
-
+### Genes and regulation table on Variation page
 sub content {
   my $self   = shift;
   my $hub    = $self->hub;
@@ -183,9 +183,9 @@ sub content {
       
       # HGVS
       my $hgvs;
-      
+      ### This is not used?? 
       unless ($object->is_somatic_with_different_ref_base) {
-        $hgvs  = $tva->hgvs_coding             if defined $tva->hgvs_coding;
+        $hgvs  = $tva->hgvs_transcript  if defined $tva->hgvs_transcript;
         $hgvs .= '<br />' . $tva->hgvs_protein if defined $tva->hgvs_protein;
       }
 
@@ -443,6 +443,7 @@ sub render_motif_score {
   return qq{<div align="center"><div class="hidden">$sort_score</div><div class="hidden export" style="float: left;">$message</div><div class="$class" title="$message"></div>$score_text</div>};
 }
 
+### Creates additional panel when "show" in extreme right column of 'Genes and Regulation' table is selected
 sub detail_panel {
   my $self     = shift;
   my $object   = $self->object;
@@ -508,7 +509,7 @@ sub detail_panel {
     }
     
     # HGVS
-    my $hgvs_c = $tva->hgvs_coding;
+    my $hgvs_c = $tva->hgvs_transcript;
     if (length($hgvs_c)>60) {
       my $display_hgvs_c = substr($hgvs_c,0,60).'...';
       $display_hgvs_c .= $self->trim_large_string($hgvs_c,'hgvs_c_'.$t_data->{transcriptname});

@@ -169,7 +169,7 @@ sub menus {
     functional          => 'Regulation',
     
     # Encode (data hub)
-    encode              => 'ENCODE data',
+#    encode              => 'ENCODE data',
     
     # Compara
     compara             => 'Comparative genomics',

@@ -415,6 +415,7 @@ sub create_track {
   $details->{'colours'}   ||= $self->species_defs->colour($options->{'colourset'}) if exists $options->{'colourset'};
   $details->{'glyphset'}  ||= $code;
   $details->{'caption'}   ||= $caption;
+  $details->{$_}            =~ s/^\s+// for qw(caption name); # THIS IS A HACK FOR v67. DO NOT MERGE TO HEAD.
 
   return $self->tree->create_node($code, $details);
 }

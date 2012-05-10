@@ -134,7 +134,7 @@ sub required_types_for_species {
     saccharomyces_cerevisiae monodelphis_domestica mus_musculus 
     ornithorhynchus_anatinus pan_troglodytes pongo_pygmaeus 
     rattus_norvegicus sus_scrofa taeniopygia_guttata tetraodon_nigroviridis 
-    pongo_abelii
+    pongo_abelii macaca_mulatta
   )};
   
   # VEP
@@ -154,7 +154,7 @@ sub required_types_for_species {
   
   # BAM
   $required_lookup{'bam'} = { map { $_ => 1 } qw(
-    pan_troglodytes
+    pan_troglodytes sus_scrofa oreochromis_niloticus
   )};
   
   return \%required_lookup;

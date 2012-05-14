@@ -64,8 +64,7 @@ sub render {
     (my $sp_name  = $spp) =~ s/_/ /;
     my $sp_dir    = lc $spp;
     my $sp_var    = lc $spp . '_variation';
-    my $files_dir = $species_defs->get_config(ucfirst $sp_dir, 'databases')->{'DATABASE_FUNCGEN'}{'NAME'};
-    
+
     $table->add_row({
       species => sprintf('<strong><i>%s</i></strong> (%s)', $sp_name, $species_defs->get_config($spp, 'DISPLAY_NAME')),
       dna     => sprintf('<a rel="external" title="%s" href="ftp://ftp.ensembl.org/pub/%s/fasta/%s/dna/">FASTA</a>',   $title{'dna'},     $rel, $sp_dir),
@@ -81,7 +80,7 @@ sub render {
       var3    => $required_lookup->{'var3'}{$sp_dir}    ? sprintf('<a rel="external" title="%s" href="ftp://ftp.ensembl.org/pub/%s/variation/VEP/">VEP</a>',                $title{'vep'},     $rel )    : '-',
       funcgen => $required_lookup->{'funcgen'}{$sp_dir} ? sprintf('<a rel="external" title="%s" href="ftp://ftp.ensembl.org/pub/%s/regulation/%s/">Regulation</a> (GFF)',      $title{'funcgen'}, $rel, $sp_dir)    : '-',
       bam     => $required_lookup->{'bam'}{$sp_dir}     ? sprintf('<a rel="external" title="%s" href="ftp://ftp.ensembl.org/pub/%s/bam/%s/">BAM</a>',                          $title{'bam'},     $rel, $sp_dir)    : '-',
-      files   => $required_lookup->{'files'}{$sp_dir}   ? sprintf('<a rel="external" title="%s" href="ftp://ftp.ensembl.org/pub/%s/data_files/%s/">Regulation data files</a>', $title{'files'},   $rel, $files_dir) : '-',
+      files   => $required_lookup->{'files'}{$sp_dir}   ? sprintf('<a rel="external" title="%s" href="ftp://ftp.ensembl.org/pub/%s/data_files/%s/">Regulation data files</a>', $title{'files'},   $rel, $sp_dir) : '-',
     });
   }
   

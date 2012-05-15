@@ -337,6 +337,8 @@ sub content {
       # get the corresponding regfeat
       my $rf = $rfa->fetch_all_by_Slice($mf->feature_Slice)->[0];
       
+      next unless $rf;
+       
       # create a URL
       my $url = $hub->url({
         type   => 'Regulation',

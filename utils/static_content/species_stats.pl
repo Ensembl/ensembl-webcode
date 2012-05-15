@@ -444,34 +444,22 @@ foreach my $spp (@valid_spp) {
     );
 
     unless ($pre) {
+      my %summary_stats = (
+        'Genebuild by' => $b_id,
+        'Genebuild method'=> $b_method,
+        'Genebuild started' => $b_start,
+        'Genebuild released' => $b_release,
+        'Genebuild last updated/patched' => $b_latest,
+        'Genebuild version' => $b_version
+      );
+      for my $stat_label ( keys %summary_stats ){
+        printf STATS ('<tr class="bg2"> <td class="data">%s</td> <td class="value">%s</td> </tr>',
+          $stat_label,$summary_stats{$stat_label})
+          if $summary_stats{$stat_label};
+      }
+      print STATS qq(</table>);
 
-      print STATS qq(<tr class="bg2">
-          <td class="data">Genebuild by:</td>
-          <td class="value">$b_id</td>
-      </tr>
-      <tr>
-          <td class="data">Genebuild method:</td>
-          <td class="value">$b_method</td>
-      </tr>
-      <tr class="bg2">
-          <td class="data">Genebuild started:</td>
-          <td class="value">$b_start</td>
-      </tr>
-      <tr>
-          <td class="data">Genebuild released:</td>
-          <td class="value">$b_release</td>
-      </tr>
-      <tr class="bg2">
-          <td class="data">Genebuild last updated/patched:</td>
-          <td class="value">$b_latest</td>
-      </tr>
-      <tr>
-        <td class="data">Genebuild version:</td>
-        <td class="value">$b_version</td>
-      </tr>
-  </table>
-  );
- ######################
+######################
 ######################
  
       print STATS qq(

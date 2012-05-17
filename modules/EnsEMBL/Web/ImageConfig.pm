@@ -1461,6 +1461,7 @@ sub add_data_files {
     my $glyphset = $data->{$_}{'format'} || '_alignment';
     $self->generic_add($menu, $key, "data_file_${key}_$_", $data->{$_}, { 
       glyphset => $glyphset, 
+      colourset => $data->{$_}{'colour_key'} || 'feature',
       strand => 'f',
       renderers   => [
         'off',       'Off', 

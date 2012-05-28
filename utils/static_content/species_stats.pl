@@ -666,7 +666,7 @@ sub do_pan_compara_species {
 
     my $fq_path_dir = sprintf( STATS_PATH, $PLUGIN_ROOT);
     &check_dir($fq_path_dir);
-    my $pan_comp_path_html = $fq_path_dir."pan_compara_species.html";
+    my $pan_comp_path_html = $fq_path_dir."stats_pan_compara_species.html";
     open (STAT_P_C, ">$pan_comp_path_html") or die "Cannot write $pan_comp_path_html: $!";
     my $release_version = $SD->SITE_RELEASE_VERSION;
     my $db_id = $SD->ENSEMBL_VERSION;

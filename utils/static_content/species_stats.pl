@@ -23,7 +23,7 @@ use File::Basename qw( dirname );
 use Pod::Usage;
 use Getopt::Long;
 
-use vars qw( $SERVERROOT $PLUGIN_ROOT $SCRIPT_ROOT $DEBUG $FUDGE $NOINTERPRO $NOSUMMARY $help $info @user_spp $allgenetypes $coordsys $list);
+use vars qw( $SERVERROOT $PLUGIN_ROOT $SCRIPT_ROOT $DEBUG $FUDGE $NOINTERPRO $NOSUMMARY $help $info @user_spp $allgenetypes $coordsys $list $ena);
 
 BEGIN{
   &GetOptions( 
@@ -37,6 +37,7 @@ BEGIN{
                'nosummary' => \$NOSUMMARY,
                'plugin_root=s' => \$PLUGIN_ROOT,
                'coordsys' => \$coordsys,
+               'ena' => \$ena
 	     );
 
   pod2usage(-verbose => 2) if $info;

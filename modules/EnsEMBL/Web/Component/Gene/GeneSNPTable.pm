@@ -421,7 +421,7 @@ sub get_hgvs {
   my ($self, $tva) = @_;
   
   my $hgvs;
-  my $hgvs_c = $tva->hgvs_transcript;
+  my $hgvs_c = $tva->hgvs_coding;
   my $hgvs_p = $tva->hgvs_protein;
   
   if ($hgvs_c) {

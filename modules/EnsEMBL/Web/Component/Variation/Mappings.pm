@@ -185,7 +185,7 @@ sub content {
       my $hgvs;
       ### This is not used?? 
       unless ($object->is_somatic_with_different_ref_base) {
-        $hgvs  = $tva->hgvs_transcript  if defined $tva->hgvs_transcript;
+        $hgvs  = $tva->hgvs_coding  if defined $tva->hgvs_coding;
         $hgvs .= '<br />' . $tva->hgvs_protein if defined $tva->hgvs_protein;
       }
 
@@ -511,7 +511,7 @@ sub detail_panel {
     }
     
     # HGVS
-    my $hgvs_c = $tva->hgvs_transcript;
+    my $hgvs_c = $tva->hgvs_coding;
     if (length($hgvs_c)>60) {
       my $display_hgvs_c = substr($hgvs_c,0,60).'...';
       $display_hgvs_c .= $self->trim_large_string($hgvs_c,'hgvs_c_'.$t_data->{transcriptname});

@@ -90,6 +90,8 @@ div.twocol div.twocol-cell { margin: 0 0 4px; }
 .embedded-box { margin:16px 0; padding:8px; }
 .round-box    { -moz-border-radius: 16px; -webkit-border-radius: 16px; border-radius: 16px; }
 
+body.ie6 .plain-box,
+body.ie7 .plain-box { zoom: 100%; }
 
 .centered { text-align:center; margin:0 auto; }
 .float-right, .float-left { width:30%; margin: 0; padding: 16px 16px 0; }

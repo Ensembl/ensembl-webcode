@@ -24,9 +24,10 @@ sub populate_tree {
 #    { 'availability' => 1 },
 #  );
 
-  $self->create_node('Locations', 'Location on Genome',
+  my $phenotype = $self->object->get_phenotype_desc;
+  $self->create_node('Locations', "Locations on genome",
     [qw(locations EnsEMBL::Web::Component::Phenotype::Locations )],
-    { 'availability' => 1 },
+    { 'availability' => 1, 'concise' => "Locations of variants associated with $phenotype" },
   );
 
 }

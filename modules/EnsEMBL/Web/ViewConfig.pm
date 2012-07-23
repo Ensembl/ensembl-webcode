@@ -602,7 +602,7 @@ sub build_imageconfig_menus {
     
     if ($desc) {
       $desc = qq{<div class="desc">$desc</div>};
-      $help = qq{<div class="menu_help"></div>};
+      $help = qq{<div class="sprite info_icon menu_help"></div>};
     } else {
       $help = qq{<div class="empty"></div>};
     }
@@ -622,7 +622,7 @@ sub build_imageconfig_menus {
         $selected<span class="menu_option">$icon$name</span>
         <div class="controls">
           $controls
-          <div class="favourite" title="Favorite this track"></div>
+          <div class="favourite sprite fave_icon" title="Favorite this track"></div>
           $help
         </div>
         $desc

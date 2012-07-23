@@ -19,9 +19,9 @@ body.static div#content { margin-left: 240px; }
 div#content div.panel { background-color:[[PANEL_BG]]; }
 */
 
-a.help-header { color: [[PAGE_HEADER]]; text-decoration: none; background: url(/i/16/swp/info.png) no-repeat 100% 2px; padding-right: 24px; height: 19px; font-size: 19px; line-height: 16px; display: inline-block; }
+a.help-header { color: [[PAGE_HEADER]]; text-decoration: none; background: url(/i/16/swp/info.png) no-repeat 100% 1px; padding-right: 24px; height: 19px; font-size: 19px; line-height: 16px; display: inline-block; }
 body.ie7 a.help-header { line-height: 22px; } 
-a.help-header:hover { background-position: 100% -16px; }
+a.help-header:hover { background-position: 100% -17px; }
 
 .glossary_mouseover { border-bottom:1px dotted #00c; cursor:pointer; }
 .floating_popup { 
@@ -80,18 +80,18 @@ div.twocol div.twocol-cell { margin: 0 0 4px; }
              container boxes
 *************************************/
 
-.plain-box, .tinted-box, .info-box, .round-box
-.alert-box, .embedded-box { [[PANEL_TEXT]]; padding: 16px 16px 0; margin-bottom: 16px;
-                             border-width: 1px; border-style: solid; overflow: hidden; }
-.plain-box    { background-color:[[PANEL_BG]]; border-color: [[PANEL_BORDER]]; }
+.plain-box, .tinted-box,
+.info-box,  .round-box,
+.alert-box, .embedded-box { [[PANEL_TEXT]]; padding: 16px 16px 0; margin-bottom: 16px; border-width: 1px; border-style: solid; overflow: hidden; }
+.plain-box                { background-color:[[PANEL_BG]]; border-color: [[PANEL_BORDER]]; }
+body.ie67 .plain-box      { zoom: 100%; }
+
 .tinted-box   { background-color:[[TINT_BG]]; border-color: [[TINT_BORDER]]; }
 .info-box     { background-color:[[CONTRAST_BG]]; border-color:[[CONTRAST_BORDER]]; }
 .alert-box    { background-color:[[ALERT_BG]]; border-color:[ALERT_BORDER]]; }
 .embedded-box { margin:16px 0; padding:8px; }
 .round-box    { -moz-border-radius: 16px; -webkit-border-radius: 16px; border-radius: 16px; }
 
-body.ie6 .plain-box,
-body.ie7 .plain-box { zoom: 100%; }
 
 .centered { text-align:center; margin:0 auto; }
 .float-right, .float-left { width:30%; margin: 0; padding: 16px 16px 0; }

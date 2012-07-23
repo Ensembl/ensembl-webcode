@@ -43,13 +43,20 @@ div.iexport_menu div a img   { float: none; margin: 0; }
 body.ie67 div.iexport_menu a { margin-top: -16px; }
 
 /* Styles for sprite mouseovers */
-a.icon_link       { text-decoration:none; }
-div.icon          { padding:4px 8px 4px 0; }
-div.sprite        { height:16px; width:16px; margin-top:2px; background: no-repeat top left;}
-div.sprite:hover  { background-position: left bottom; }
+a.icon_link         { text-decoration:none; }
+div.icon            { padding:4px 8px 4px 0; }
+div.sprite,
+div.sprite_disabled { height:16px; width:16px; margin-top:2px; background: no-repeat top left;}
+div.sprite:hover    { background-position: center left; }
+div.sprite_disabled { background-position: bottom left; }
 
-div.infoicon      { background-image: url(/i/16/swp/info.png); }
-div.save          { background-image: url(/i/16/swp/save.png); }
-div.delete        { background-image: url(/i/16/swp/trash.png); }
-div.share         { background-image: url(/i/16/swp/share.png); }
-div.download      { background-image: url(/i/16/swp/download.png); }
+/* Note that these names include the word 'icon' to distinguish them from classes associated with actions */
+div.fave_icon       { background-image: url(/i/16/swp/star.png); }
+div.info_icon       { background-image: url(/i/16/swp/info.png); }
+div.save_icon       { background-image: url(/i/16/swp/save.png); }
+div.delete_icon     { background-image: url(/i/16/swp/trash.png); }
+div.share_icon      { background-image: url(/i/16/swp/share.png); }
+div.download_icon   { background-image: url(/i/16/swp/download.png); }
+div.add_icon        { background-image: url(/i/16/swp/add.png); }
+div.edit_icon       { background-image: url(/i/16/swp/pencil.png); }
+div.use_icon        { background-image: url(/i/16/swp/check.png); }

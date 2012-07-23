@@ -32,8 +32,14 @@ sub content {
   for my $feature_set_info (@$feature_sets_info) {
     (my $evidence_type = encode_entities($feature_set_info->{'evidence_label'})) =~ s/\s/&nbsp;/g;
 
+    my @links;  
+    foreach my $source (@{$feature_set_info->{'source_info'}}){  
+     push @links, $self->source_link($source->[0], $source->[1]);
+    }
+    my $source_link  = join ' ', @links;
+
     $table->add_row({
-      'source'        => $self->source_link($feature_set_info->{'source_label'}, $feature_set_info->{'source_link'} || ''),
+      'source'        => $source_link,
       'project'       => $self->project_link($feature_set_info->{'project_name'}, $feature_set_info->{'project_url'} || ''),
       'evidence_type' => $evidence_type,
       'cell_type'     => $self->cell_type_link($feature_set_info->{'cell_type_name'}, $feature_set_info->{'efo_id'}),
@@ -41,6 +47,7 @@ sub content {
       'gene'          => $self->gene_links($feature_set_info->{'xref_genes'}),
       'motif'         => $self->motif_links($feature_set_info->{'binding_motifs'}),
     });
+
   }
 
   my $total_experiments = $object->total_experiments;

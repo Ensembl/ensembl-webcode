@@ -118,13 +118,13 @@ sub table_row {
   my $img_url      = $self->img_url.'16/';
   my $delete_class = $sharers ? 'modal_confirm' : 'modal_link';
   my $title        = $sharers ? ' title="This data is shared with other users"' : '';
-  my $delete       = sprintf '<a href="%%s" class="%s icon_link"%s><div class="sprite delete" title="Delete">&nbsp;</div></a>', $delete_class, $title, $img_url;
+  my $delete       = sprintf '<a href="%%s" class="%s icon_link"%s><div class="sprite delete_icon" title="Delete">&nbsp;</div></a>', $delete_class, $title, $img_url;
   my $download;
   if ($file->{'prefix'} && $file->{'prefix'} eq 'download') {
     my $format       = $file->{'format'} eq 'report' ? 'txt' : $file->{'format'};
-    $download     = sprintf '<a href="/%s/download?file=%s;prefix=download;format=%s" class="icon_link"><div class="sprite download" title="Download">&nbsp;</div></a>', $hub->species, $file->{'filename'}, $format, $img_url;
+    $download     = sprintf '<a href="/%s/download?file=%s;prefix=download;format=%s" class="icon_link"><div class="sprite download_icon" title="Download">&nbsp;</div></a>', $hub->species, $file->{'filename'}, $format, $img_url;
   }
-  my $share        = qq{<a href="%s" class="modal_link icon_link"><div class="sprite share" title="Share">&nbsp;</div></a>};
+  my $share        = qq{<a href="%s" class="modal_link icon_link"><div class="sprite share_icon" title="Share">&nbsp;</div></a>};
   my $user_record  = ref($file) =~ /Record/;
   my $name         = qq{<div><strong class="val" title="Click here to rename your data">$file->{'name'}</strong>};
   my %url_params   = ( __clear => 1, source => $file->{'url'} ? 'url' : 'upload' );
@@ -133,9 +133,9 @@ sub table_row {
   if ($user_record) {
     $url_params{'id'} = $file->id;
     
-    $save = qq{<div class="icon"><img src="${img_url}dis/save.png" alt="saved" title="Saved data" /></div>};
+    $save = qq{<div class="sprite_disabled save_icon" title="Saved data">&nbsp;</div>};
   } else {
-    my $save_html = qq{<a href="%s" class="modal_link icon_link"><div class="save sprite" title="%s">&nbsp;</div></a>};
+    my $save_html = qq{<a href="%s" class="modal_link icon_link"><div class="sprite save_icon" title="%s">&nbsp;</div></a>};
     my $save_url  = $hub->url({ action => 'ModifyData', function => $file->{'url'} ? 'save_remote' : 'save_upload', code => $file->{'code'}, __clear => 1 });
     
     $url_params{'code'} = $file->{'code'};
@@ -206,12 +206,12 @@ sub table_row_das {
   my ($self, $file, $user_record) = @_;
   my $hub     = $self->hub;
   my $img_url = $self->img_url.'16/';
-  my $link    = qq{<a href="%s" class="modal_link icon_link"><div class="sprite delete" title="%s">&nbsp;</div></a>};
+  my $link    = qq{<a href="%s" class="modal_link icon_link"><div class="sprite delete_icon" title="%s">&nbsp;</div></a>};
   my (%url_params, $save);
   
   if ($user_record) {
     %url_params = ( id => $file->id );
-    $save       = qq{<div class="icon"><img src="${img_url}dis/save.png" alt="saved" title="Saved data" /></div>};
+    $save       = qq{<div class="sprite_disabled save_icon" title="Saved data">&nbsp;</div>};
   } else {
     my $save_url    = $hub->url({ action => 'ModifyData', function => 'save_remote', dsn => $file->logic_name, __clear => 1 });
     my @save_params = $hub->user ? ($save_url, 'Save to account') : ($hub->url({ type => 'Account', action => 'Login', __clear => 1, then => uri_escape($save_url), modal_tab => 'modal_user_data' }), 'Log in to save');

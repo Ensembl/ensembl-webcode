@@ -46,10 +46,9 @@ sub sets_table {
 
   my $configs  = $adaptor->all_configs;
   my $img_url  = $self->img_url;
-  my $icon_url = $img_url . '16/';
   my $editable = qq{<div><div class="heightWrap"><div class="val" title="Click here to edit">%s</div></div><img class="toggle" src="${img_url}closed2.gif" />%s<a href="%s" class="save"></a></div>};
   my $list     = qq{<div><div class="heightWrap"><ul>%s</ul></div><img class="toggle" src="${img_url}closed2.gif" /></div>};
-  my $active   = qq{<a class="edit" href="%s" rel="%s"><img src="${icon_url}dis/save.png" alt="use" title="Use this configuration set" /></a><div class="config_used">Configuration set applied</div>};
+  my $active   = qq{<a class="edit icon_link" href="%s" rel="%s"><div class="sprite use_icon" title="Use this configuration set">&nbsp;</div></a><div class="config_used">Configuration set applied</div>};
   my @rows;
   
   my @columns = (
@@ -79,8 +78,8 @@ sub sets_table {
       desc    => { value => sprintf($editable, $desc,        '<textarea rows="5" name="description" />',          $hub->url({ function => 'edit_details', %params })), class => 'editable wrap' },
       configs => { value => scalar @confs ? sprintf($list, join '', map qq{<li class="$_->[1]">$_->[2]</li>}, sort { $a->[0] cmp $b->[0] } @confs) : 'There are no configurations in this set', class => 'wrap' },
       active  => sprintf($active, $hub->url({ function => 'activate_set', %params }), join ' ', @rel),
-      edit    => sprintf('<a class="edit_record" href="#" rel="%s"><img src="%spencil.png" alt="edit" title="Edit configurations" /></a>', $record_id, $icon_url),
-      delete  => sprintf('<a class="edit" href="%s" rel="%s"><img src="%strash.png" alt="delete" title="Delete" /></a>', $hub->url({ function => 'delete_set', %params }), $record_id, $icon_url),
+      edit    => sprintf('<a class="edit_record icon_link" href="#" rel="%s"><div class="sprite edit_icon" title="Edit configurations">&nbsp;</div></a>', $record_id),
+      delete  => sprintf('<a class="edit icon_link" href="%s" rel="%s"><div class="sprite delete_icon" title="Delete">&nbsp;</div></a>', $hub->url({ function => 'delete_set', %params }), $record_id),
     };
   }
 
@@ -92,7 +91,7 @@ sub records_table {
   my $self    = shift;
   my $hub     = $self->hub;
   my $img_url = $self->img_url;
-  my $add     = '<div><a class="add_to_set" href="#" rel="%s" title="Add to set"></a><input type="hidden" name="record_id" class="update" value="%s" /></div>';
+  my $add     = '<div><a class="icon_link add_to_set" href="#" rel="%s"><div class="add_icon sprite" title="Add to set">&nbsp;</div></a><input type="hidden" name="record_id" class="update" value="%s" /></div>';
   my $wrap    = qq{<div><div class="heightWrap"><div>%s</div></div><img class="toggle" src="${img_url}closed2.gif" /></div>};
   my (%configs, %entries, @rows);
   

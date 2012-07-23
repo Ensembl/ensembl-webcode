@@ -42,11 +42,11 @@ sub content {
     label => $feature_set->display_label
   });
 
-  if ($input_set) { warn $input_set->get_Experiment;
-    my $source_info = $input_set->source_info; warn scalar @$source_info;
+  if ($input_set) { 
+    my $source_info = $input_set->source_info; 
     my $experiment_link = "";
 
-    foreach my $source (@{$source_info}){ warn $source;
+    foreach my $source (@{$source_info}){
       my $source_link = sprintf '<a href="%s">%s</a>', 
       $hub->url({'type' => 'Experiment', 'action' => 'Sources', 'ex' => 'name-'.$feature_set->name}),
       $source->[0];

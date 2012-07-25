@@ -91,7 +91,7 @@ sub records_table {
   my $self    = shift;
   my $hub     = $self->hub;
   my $img_url = $self->img_url;
-  my $add     = '<div><a class="icon_link add_to_set" href="#" rel="%s"><div class="add_icon sprite" title="Add to set">&nbsp;</div></a><input type="hidden" name="record_id" class="update" value="%s" /></div>';
+  my $add     = '<div><a class="add_to_set" href="#" rel="%s" title="Add to set"></a><input type="hidden" name="record_id" class="update" value="%s" /></div>';
   my $wrap    = qq{<div><div class="heightWrap"><div>%s</div></div><img class="toggle" src="${img_url}closed2.gif" /></div>};
   my (%configs, %entries, @rows);
   

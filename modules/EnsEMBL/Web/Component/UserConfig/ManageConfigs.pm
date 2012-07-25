@@ -46,7 +46,7 @@ sub records_table {
     my $img_url  = $self->img_url;
     my $editable = qq{<div><div class="heightWrap"><div class="val" title="Click here to edit">%s</div></div><img class="toggle" src="${img_url}closed2.gif" />%s<a rel="%s" href="%s" class="save"></a></div>};
     my $list     = qq{<div><div class="heightWrap"><ul>%s</ul></div><img class="toggle" src="${img_url}closed2.gif" /></div>};
-    my $active   = qq{<a class="edit icon_link" href="%s" rel="%s"><div class="use" title="Use this configuration">&nbsp;</div></a><div class="config_used">Configuration applied</div>};
+    my $active   = qq{<a class="edit icon_link" href="%s" rel="%s"><div class="sprite use_icon" title="Use this configuration">&nbsp;</div></a><div class="config_used">Configuration applied</div>};
     my (%configs, %rows);
     
     my @columns = (
@@ -125,7 +125,7 @@ sub records_table {
         sets   => { value => scalar @sets   ? sprintf($list, join '', map qq{<li class="$_->[1]">$_->[0]</li>}, @sets)                     : '', class => 'wrap' },
         active => sprintf($active, $hub->url({ function => 'activate', %params }), $configs{$code}{'component'}),
         edit   => sprintf('<a class="edit_record icon_link" href="#" rel="%s"><div class="sprite edit_icon" title="Edit sets">&nbsp;</div></a>', $record_id),
-        delete => sprintf('<a class="edit icon_link" href="%s" rel="%s"><div class="sprite delete" title="Delete">&nbsp;</div></a>', $hub->url({ function => 'delete', %params, link_id => $_->{'link_id'} }), $record_id),
+        delete => sprintf('<a class="edit icon_link" href="%s" rel="%s"><div class="sprite delete_icon" title="Delete">&nbsp;</div></a>', $hub->url({ function => 'delete', %params, link_id => $_->{'link_id'} }), $record_id),
       };
     }
 
@@ -163,7 +163,7 @@ sub sets_table {
   return unless scalar @sets;
   
   my $img_url = $self->img_url;
-  my $add     = '<div><a class="add_to_set" href="#" title="Add to set"></a><input type="hidden" name="set_id" class="update" value="%s" /></div>';
+  my $add     = '<div><a class="add_to_set icon_link" href="#"><div class="sprite use_icon" title="Add to set">&nbsp;</div></a><input type="hidden" name="set_id" class="update" value="%s" /></div>';
   my $wrap    = qq{<div><div class="heightWrap"><div>%s</div></div><img class="toggle" src="${img_url}closed2.gif" /></div>};
   my @rows;
   

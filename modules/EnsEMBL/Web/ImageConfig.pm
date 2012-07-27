@@ -1460,18 +1460,22 @@ sub add_dna_align_features {
       }
       
       my $display = (grep { $data->{$key_2}{'display'} eq $_ } @{$self->{'alignment_renderers'}}) ? $data->{$key_2}{'display'} : 'off'; # needed because the same logic_name can be a gene and an alignment
+      my $glyphset = '_alignment';
+      my $strand = 'b';
 
       if ($data->{$key_2}{'display'} && $data->{$key_2}{'display'} eq 'simple'){
         $display = 'simple';
-        $alignment_renderers = ['off', 'Off', 'simple', 'On'];  
+        $alignment_renderers = ['off', 'Off', 'normal', 'On'];  
+        $glyphset = 'patch_ref_alignment';
+        $strand = 'f';
       }
       $self->generic_add($menu, $key, "dna_align_${key}_$key_2", $data->{$key_2}, {
-        glyphset  => '_alignment',
+        glyphset  => $glyphset,
         sub_type  => lc $k,
         colourset => 'feature',
         display   => $display,
         renderers => $alignment_renderers,
-        strand    => 'b',
+        strand    => $strand,
       });
     }
   }

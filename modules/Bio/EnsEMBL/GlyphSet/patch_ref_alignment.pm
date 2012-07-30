@@ -9,24 +9,29 @@ sub _init {
 
   return $self->render_text if $self->{'text_export'};
 
-  my $container   = $self->{'container'};
-  my $length      = $container->length;
-  my $pix_per_bp  = $self->scalex;
-  my $features    = $self->features;
-  my $join_colour = $self->my_colour(lc $self->{'container'}->assembly_exception_type, 'join'); 
-
-  foreach (0, 8) {
-    $self->push($self->Rect({
-      x         => 0,
-      y         => $_,
-      width     => $length,
-      height    => 0,
-      colour    => $join_colour,
-      absolutey => 1,
-    }));
-  }
+  my $container     = $self->{'container'};
+  my $length        = $self->{'container'}->length;
+  my $pix_per_bp    = $self->scalex;
+  my $features      = $self->features;
+  my $join_colour   = $self->my_colour(lc $self->{'container'}->assembly_exception_type, 'join'); 
 
   if (scalar @$features) {
+    my $patch_start   = $self->{'container'}->get_all_AssemblyExceptionFeatures->[0]->start; 
+    my $patch_end     = $self->{'container'}->get_all_AssemblyExceptionFeatures->[0]->end; 
+    $patch_start      = 1 if $patch_start < 1;
+    my $patch_length  = $patch_end - $patch_start;
+    $patch_length     = $length if $patch_length > $length;
+
+    foreach (0, 8) {
+      $self->push($self->Rect({
+        x         => $patch_start -1,
+        y         => $_,
+        width     => $patch_length,
+        height    => 0,
+        colour    => $join_colour,
+        absolutey => 1,
+      }));
+    }
     $self->init_alignment($features);
   } else {
     $self->errorTrack('No alignments to display') if $self->{'config'}->get_option('opt_empty_tracks') == 1;

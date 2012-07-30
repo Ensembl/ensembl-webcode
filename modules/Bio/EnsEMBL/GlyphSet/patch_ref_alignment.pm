@@ -11,7 +11,6 @@ sub _init {
 
   my $container     = $self->{'container'};
   my $length        = $self->{'container'}->length;
-  my $pix_per_bp    = $self->scalex;
   my $features      = $self->features;
   my $join_colour   = $self->my_colour(lc $self->{'container'}->assembly_exception_type, 'join'); 
 
@@ -19,8 +18,8 @@ sub _init {
     my $patch_start   = $self->{'container'}->get_all_AssemblyExceptionFeatures->[0]->start; 
     my $patch_end     = $self->{'container'}->get_all_AssemblyExceptionFeatures->[0]->end; 
     $patch_start      = 1 if $patch_start < 1;
-    my $patch_length  = $patch_end - $patch_start;
-    $patch_length     = $length if $patch_length > $length;
+    my $patch_length  = $patch_end - $patch_start +1; warn $patch_length; warn $length;
+    $patch_length     = $length if $patch_length > $length; warn $patch_length;
 
     foreach (0, 8) {
       $self->push($self->Rect({
@@ -40,25 +39,18 @@ sub _init {
 
 sub init_alignment {
   my ($self, $features) = @_;
-  my $length               = $self->{'container'}->length;
-  my $pix_per_bp           = $self->scalex;
-  my $threshold_navigation = ($self->my_config('threshold_navigation') || 2e6) * 1001;
-  my $navigation           = $self->my_config('navigation') || 'on';
-  my $show_navigation      = $length < $threshold_navigation && $navigation eq 'on';
-  my $species              = $self->species;
-  my $base_colour          = $self->my_colour(lc $self->{'container'}->assembly_exception_type);
-  my $alt_colour           = $self->{'config'}->colourmap->mix($base_colour, 'white', 0.45);
-  my @colours              =  ([$base_colour, $alt_colour]);
+  my $length            = $self->{'container'}->length;
+  my $base_colour       = $self->my_colour(lc $self->{'container'}->assembly_exception_type);
+  my $alt_colour        = $self->{'config'}->colourmap->mix($base_colour, 'white', 0.45);
+  my @colours           = ($base_colour, $alt_colour);
+  my $i                 = 0;
 
-  # Draw the Contig Tiling Path
   foreach (sort { $a->{'start'} <=> $b->{'start'} } @$features) {
     my $strand = $_->strand;
     my $rend   = $_->{'end'}; 
     my $rstart = $_->{'start'}; 
     my $region = $_->{'name'};
-    my $i      = 0;#$_->get_all_Attributes('hap_contig')->[0]{'value'} ? 1 : 0; # if this is a haplotype contig then need a different pair of colours for the contigs
 
-    # AlignSlice segments can be on different strands - hence need to check if start & end need a swap
     ($rstart, $rend) = ($rend, $rstart) if $rstart > $rend;
     $rstart = 1 if $rstart < 1;
     $rend   = $length if $rend > $length;
@@ -68,13 +60,12 @@ sub init_alignment {
       y         => 0,
       width     => $rend - $rstart + 1,
       height    => 8,
-      colour    => $colours[$i]->[0],
+      colour    => $colours[$i],
       absolutey => 1,
       href      => $self->href($_)
     }));
 
-    push @{$colours[$i]}, shift @{@colours[$i]};
-
+    $i = $i == 0 ? 1 : 0;
   }
 }
 

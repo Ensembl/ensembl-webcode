@@ -41,7 +41,6 @@ sub init {
     variation
     somatic
     functional
-    encode
     multiple_align
     conservation
     pairwise_blastz

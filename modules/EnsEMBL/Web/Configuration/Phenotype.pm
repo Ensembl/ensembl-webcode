@@ -15,6 +15,11 @@ sub set_default_action {
   $self->{'_data'}->{'default'} = 'Locations'; 
 }
 
+sub tree_cache_key {
+  my $self = shift;
+  return join '::', $self->SUPER::tree_cache_key(@_), $self->object->get_phenotype_desc;
+}
+
 sub populate_tree {
   my $self = shift;
   my $hub  = $self->hub;

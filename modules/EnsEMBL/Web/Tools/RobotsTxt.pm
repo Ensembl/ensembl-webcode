@@ -60,7 +60,12 @@ sub create {
       */UserConfig/  */UserData/  */Variation/
     ));
 
+    #old views
     print FH _lines("Disallow",qw(*/*view));
+
+    #other misc views google bot hits
+    print FH _lines("Disallow",qw(/id/));
+    print FH _lines("Disallow",qw(/common/psychic));
 
     foreach my $row (('A'..'Z','a'..'z')){
       next if lc $row eq 's';

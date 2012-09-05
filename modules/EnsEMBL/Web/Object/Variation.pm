@@ -1216,7 +1216,7 @@ sub transcript_variation {
               tv  =>              $tvari_obj,
               vf  =>              $vari_feature,
               hgvs_genomic =>     $tva_obj->hgvs_genomic,
-              hgvs_coding =>      $tva_obj->hgvs_coding,
+              hgvs_transcript =>  $tva_obj->hgvs_transcript,
               hgvs_protein =>     $tva_obj->hgvs_protein,
       });
     }
@@ -1461,7 +1461,7 @@ sub hgvs_url {
   my $max_length  = 40;
   
   # Split the HGVS string into components. We are mainly interested in 1) Reference sequence, 2) Version (optional), 3) Notation type (optional) and 4) The rest of the description 
-  my ($refseq, $version, $type, $description) = $hgvs =~ m/^((?:ENS[A-Z]*[GTP]\d+)|(?:LRG_\d+[^\.]*)|(?:[^\:]+?))(\.\d+)?\:(?:([mrcgp])\.)?(.*)$/;
+  my ($refseq, $version, $type, $description) = $hgvs =~ m/^((?:ENS[A-Z]*[GTP]\d+)|(?:LRG_\d+[^\.]*)|(?:[^\:]+?))(\.\d+)?\:(?:([mrcngp])\.)?(.*)$/;
 
   # Return undef if the HGVS could not be properly parsed (i.e. if the refseq and the description could not be obtained)
   return undef unless $refseq && $description;

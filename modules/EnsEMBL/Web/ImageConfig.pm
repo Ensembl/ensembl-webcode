@@ -169,9 +169,6 @@ sub menus {
     # Regulation
     functional          => 'Regulation',
     
-    # Encode (data hub)
-    encode              => 'ENCODE data',
-    
     # Compara
     compara             => 'Comparative genomics',
     pairwise_blastz     => [ 'BLASTz/LASTz alignments',    'compara' ],

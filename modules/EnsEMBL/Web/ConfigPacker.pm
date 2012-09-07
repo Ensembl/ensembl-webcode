@@ -1265,9 +1265,17 @@ sub _summarise_datahubs {
 
   while (my ($key, $val) = each (%$datahub)) {
     my ($url, $menu) = ref $val eq 'ARRAY' ? @$val : ($val, undef);
+
+    my $base_url = $url;
+    my $hub_file = 'hub.txt';
+
+    if ($url =~ /.txt$/) {
+      $base_url =~ s/(.*\/).*/$1/;
+      ($hub_file = $url) =~ s/.*\/(.*)/$1/;
+    }
   
     ## Do we have data for this species?
-    my $hub_info = $parser->get_hub_info($url);
+    my $hub_info = $parser->get_hub_info($base_url, $hub_file);
     
     if ($hub_info->{'error'}) {
       warn "!!! COULD NOT CONTACT DATAHUB $key: $hub_info->{'error'}";
@@ -1277,7 +1285,7 @@ sub _summarise_datahubs {
       return unless scalar @$source_list;
       
       ## Get tracks from hub
-      my $datahub_config = $parser->parse($url . $self->tree->{'UCSC_GOLDEN_PATH'}, $source_list);
+      my $datahub_config = $parser->parse($base_url . $self->tree->{'UCSC_GOLDEN_PATH'}, $source_list);
       
       ## Create Ensembl-style tracks from the datahub configuration
       ## TODO - implement track grouping!
@@ -1315,15 +1323,37 @@ sub _add_datahub_tracks {
 
   foreach my $track (@{$dataset->{'tracks'}}) {
     my $link = ' <a href="'.$options->{'desc_url'}.'" rel="external">Go to track description on datahub</a>';
-    (my $source_name = $track->{'shortLabel'}) =~ s/_/ /g;
+    # Should really be shortLabel, but Encode is much better using longLabel (duplicate names using shortLabel)
+    (my $source_name = $track->{'longLabel'}) =~ s/_/ /g;
     my $source = {
       'name'          => $track->{'track'},
       'source_name'   => $source_name,
       'description'   => $track->{'longLabel'}.$link,
       'source_url'    => $track->{'bigDataUrl'},
+      'datahub'       => 1,
       %$options
     };
+
+    $source->{'colour'} = $track->{'color'} if (exists($track->{'color'}));
+
     my $type = ref($track->{'type'}) eq 'HASH' ? uc($track->{'type'}{'format'}) : uc($track->{'type'});
+
+    if (exists($track->{'viewLimits'})) {
+      $source->{'viewLimits'} = $track->{'viewLimits'};
+    } elsif (exists($track->{'autoscale'}) && $track->{'autoscale'} eq 'off') {
+      $source->{'viewLimits'} = '0:127';
+    }
+    if (exists($track->{'maxHeightPixels'})) {
+      $source->{'maxHeightPixels'} = $track->{'maxHeightPixels'};
+    } elsif ($type eq 'BIGWIG' || $type eq 'BIGBED') {
+      $source->{'maxHeightPixels'} = '64:32:16';
+    }
+
+    if ($type eq 'BIGWIG') {
+      # To improve browser speed don't display a zmenu for bigwigs 
+      $source->{'no_titles'} = 1;
+    }
+
     $self->tree->{'ENSEMBL_INTERNAL_'.$type.'_SOURCES'}{$track->{'track'}} = $source;
   }
 }
@@ -1636,6 +1666,7 @@ sub _munge_file_formats {
     'bigwig'    => {'ext' => 'bw',  'label' => 'BigWig',    'display' => 'graph', 'indexed' => 1},
     'bigbed'    => {'ext' => 'bb',  'label' => 'BigBed',    'display' => 'graph', 'indexed' => 1},
     'vcf'       => {'ext' => 'vcf', 'label' => 'VCF',       'display' => 'graph', 'indexed' => 1},
+    'datahub'   => {'ext' => 'txt', 'label' => 'TrackHub',  'display' => 'graph', 'indexed' => 1},
   );
 
   ## Munge into something useful to this website

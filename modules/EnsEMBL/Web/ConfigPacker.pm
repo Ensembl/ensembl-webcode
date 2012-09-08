@@ -1328,6 +1328,7 @@ sub _add_datahub_tracks {
     my $source = {
       'name'          => $track->{'track'},
       'source_name'   => $source_name,
+      'caption'       => $track->{'shortLabel'},
       'description'   => $track->{'longLabel'}.$link,
       'source_url'    => $track->{'bigDataUrl'},
       'datahub'       => 1,

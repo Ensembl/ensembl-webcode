@@ -833,7 +833,7 @@ sub transcript_table {
   $table->add_row('Location', $location_html);
 
   my $gene = $object->gene;
-  
+
   if ($gene) {
     my $transcript  = $page_type eq 'transcript' ? $object->stable_id : $hub->param('t');
     my $transcripts = $gene->get_all_Transcripts;
@@ -841,13 +841,25 @@ sub transcript_table {
     my $plural    = 'transcripts';
     my $action      = $hub->action;
     my %biotype_rows;
-    
+
+    my $trans_attribs = {};
+    if ($hub->species_defs->ENSEMBL_SITETYPE eq 'Vega') {
+      foreach my $trans (@$transcripts) {
+        foreach my $attrib_type (qw(CDS_start_NF CDS_end_NF)) {
+          (my $attrib) = @{$trans->get_all_Attributes($attrib_type)};
+          if ($attrib && $attrib->value) {
+            $trans_attribs->{$trans->stable_id}{$attrib_type} = $attrib->value;
+          }
+        }
+      }
+    }
+
     my %url_params = (
       type   => 'Transcript',
       action => $page_type eq 'gene' || $action eq 'ProteinSummary' ? 'Summary' : $action
     );
     
-    if ($count == 1) { 
+    if ($count == 1) {
       $plural =~ s/s$//;
     }
     
@@ -874,29 +886,44 @@ sub transcript_table {
        { key => 'biotype',    sort => 'html',    title => 'Biotype'       },
     );
     
+    push @columns, { key => 'cds_tag', sort => 'html', title => 'CDS incomplete' } if %$trans_attribs;
     push @columns, { key => 'ccds', sort => 'html', title => 'CCDS' } if $species =~ /^Homo|Mus/;
     
     my @rows;
     
     foreach (map { $_->[2] } sort { $a->[0] cmp $b->[0] || $a->[1] cmp $b->[1] } map { [ $_->external_name, $_->stable_id, $_ ] } @$transcripts) {
       my $transcript_length = $_->length;
+      my $tsi               = $_->stable_id;
       my $protein           = 'No protein product';
       my $protein_length    = '-';
       my $ccds              = '-';
-      my $url               = $hub->url({ %url_params, t => $_->stable_id });
-      
+      my $url               = $hub->url({ %url_params, t => $tsi });
+      my $cds_tag           = '-';
       if ($_->translation) {
         $protein = sprintf(
           '<a href="%s">%s</a>',
           $hub->url({
             type   => 'Transcript',
             action => 'ProteinSummary',
-            t      => $_->stable_id
+            t      => $tsi
           }),
           $_->translation->stable_id
         );
         
         $protein_length = $_->translation->length;
+      }
+      if ($trans_attribs->{$tsi}) {
+        if ($trans_attribs->{$tsi}{'CDS_start_NF'}) {
+          if ($trans_attribs->{$tsi}{'CDS_end_NF'}) {
+            $cds_tag = "5' and 3'";
+          }
+          else {
+            $cds_tag = "5'";
+          }
+        }
+        elsif ($trans_attribs->{$tsi}{'CDS_end_NF'}) {
+         $cds_tag = "3'";
+       }
       }
       
       if (my @CCDS = grep { $_->dbname eq 'CCDS' } @{$_->get_all_DBLinks}) {
@@ -909,13 +936,14 @@ sub transcript_table {
       
       my $row = {
         name       => { value => $_->display_xref ? $_->display_xref->display_id : 'Novel', class => 'bold' },
-        transcript => sprintf('<a href="%s">%s</a>', $url, $_->stable_id),
+        transcript => sprintf('<a href="%s">%s</a>', $url, $tsi),
         bp_length  => $transcript_length,
         protein    => $protein,
         aa_length  => $protein_length,
         biotype    => $self->glossary_mouseover(ucfirst $biotype),
         ccds       => $ccds,
-        options    => { class => $count == 1 || $_->stable_id eq $transcript ? 'active' : '' }
+        cds_tag    => $cds_tag,
+        options    => { class => $count == 1 || $tsi eq $transcript ? 'active' : '' }
       };
       
       $biotype = '.' if $biotype eq 'protein coding';

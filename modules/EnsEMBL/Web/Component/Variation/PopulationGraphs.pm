@@ -18,6 +18,8 @@ sub content {
   my $freq_data = $object->freqs;
   
   my $pop_freq = $self->format_frequencies($freq_data);
+  my $graph_width = '118px';
+  
   return '' unless (defined($pop_freq));
   
   my @pop_phase1 = grep{ /phase_1/} keys(%$pop_freq);
@@ -39,7 +41,7 @@ sub content {
     $pop_tree = $self->update_pop_tree($pop_tree,$pop_name,$pop_freq->{$pop_name}{sub_pop}) if (defined($pop_freq->{$pop_name}{sub_pop}));
     
     foreach my $ssid (keys %{$pop_freq->{$pop_name}{freq}}) {
-      foreach my $allele (keys %{$pop_freq->{$pop_name}{freq}{$ssid}}) {
+      foreach my $allele (sort(keys %{$pop_freq->{$pop_name}{freq}{$ssid}})) {
         my $freq = $pop_freq->{$pop_name}{freq}{$ssid}{$allele};
         push (@alleles, $allele) if ((!grep {$allele eq $_} @alleles) && $freq>0);
        }
@@ -49,7 +51,7 @@ sub content {
   my $nb_alleles = scalar(@alleles);
   if ($nb_alleles>2) {
     while ($nb_alleles != 2) {
-      $height += 5;
+      $height += 6;
       $nb_alleles --;
     }
   }
@@ -78,48 +80,20 @@ sub content {
         last;
       }
     }
-    push @inputs, qq{<input type="hidden" class="population" value="[$values]" />};
     
-    if ($short_name =~ /ALL/) {
-      push @graphs, sprintf qq{<div class="pie-chart%s" title="$pop_desc"><span>$short_name</span><div id="graphHolder$graph_id" style="width:118px;height:$height\px;"></div></div>}, $short_name eq 'ALL' ? ' all-population' : '';
+    if ($short_name =~ /ALL/ || $pop_tree->{$short_name}) {
+      push @inputs, qq{<input type="hidden" class="population" value="[$values]" />};
+      push @graphs, sprintf qq{<div class="pie-chart%s" title="$pop_desc"><span>$short_name</span><div id="graphHolder$graph_id" style="width:%s;height:$height\px;"></div></div>}, $short_name eq 'ALL' ? ' all-population' : '', $graph_width;
+      $graph_id ++;
     }
-    elsif ($pop_tree->{$short_name}) {
-      my $show = $self->hub->get_cookie_value("toggle_population_freq_$short_name") eq 'open';
-      push @graphs, sprintf qq{<div class="pie-chart" title="$pop_desc">
-                                 <span>$short_name</span>
-                                 <div id="graphHolder$graph_id" style="width:118px;height:$height\px;"></div>
-                                 <a class="toggle set_cookie %s" href="#" rel="population_freq_$short_name" title="Click to toggle subpopulation frequencies">Sub-populations</a>
-                               </div>
-                               }, $show ? 'open' : 'closed';
-    }
-    else {
-      foreach my $sp (keys(%{$pop_tree})) {
-        if ($pop_tree->{$sp}{$short_name}) {
-          push @{$sub_pops{$sp}}, qq{<div class="pie-chart" title="$pop_desc"><span>$short_name</span><div id="graphHolder$graph_id" style="width:118px;height:$height\px;"></div></div>};
-        }
-      }
-    }
-    
-    $graph_id ++;
   }
   
-  my $html = sprintf q{<h2>1000 Genomes allele frequencies</h2><div><input type="hidden" class="panel_type" value="PopulationGraph" />%s</div><div class="population-genetics-pie">%s</div>},
+  my $html = sprintf q{<h2>1000 Genomes allele frequencies</h2>
+                       <div><input type="hidden" class="panel_type" value="PopulationGraph" />%s</div>
+                       <div class="population-genetics-pie">%s</div>},
     join('', @inputs),
     join('', @graphs)
   ;
-  
-  foreach my $sp (keys(%sub_pops)) {
-    my $sub_html;
-    foreach my $pop (@{$sub_pops{$sp}}) {
-      $sub_html .= $pop;
-    }
-    my $show = $self->hub->get_cookie_value("toggle_population_freq_$sp") eq 'open';
-    $html .= sprintf(q{<div class="population-genetics-pie population_freq_%s"><div class="toggleable" %s><div><p><b>%s sub-populations</b></p></div>%s</div></div>},
-        $sp,
-        $show ? '' : 'style="display:none"',
-        $sp,
-        $sub_html);
-  }
 
   return $html;
 }
@@ -155,7 +129,6 @@ sub format_frequencies {
   }
   return $pop_freq;
 }
-
 
 sub format_number {
   ### Population_genotype_alleles

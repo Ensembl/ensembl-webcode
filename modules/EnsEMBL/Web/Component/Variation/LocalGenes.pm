@@ -74,17 +74,28 @@ sub content {
       my $dxr       = $gene->can('display_xref') ? $gene->display_xref : undef;
       my $gene_name = $dxr->display_id;
       my $text      = $gene_name ? "$gene_name ($stable_id)" : $stable_id;  
-      my $type      = $data->{'LRG'} ? 'LRG' : 'Gene';
-      my $gene_url  = $hub->url({
-                        type   => $type,
-                        action => "Variation_$type/Table",
-                        db     => 'core',
-                        r      => undef,
-                        g      => $stable_id,
-                        v      => $name,
-                        source => $source
-                      });
-      $html .= sprintf('<li><a href="%s">%s</a> (%s)</li>', $gene_url, $text, $data->{'position'});
+
+      my $params = {
+                      db     => 'core',
+                      r      => undef,
+                      v      => $name,
+                      source => $source
+                    };
+
+      
+      if ($data->{'LRG'}) {
+        $params->{'type'}   = 'LRG';
+        $params->{'action'} = 'Variation_LRG/Table';
+        $params->{'lrg'}    = $stable_id;
+      }
+      else {
+        $params->{'type'}   = 'Gene';
+        $params->{'action'} = 'Phenotype';
+        $params->{'g'}      = $stable_id;
+      }
+  
+      my $url = $hub->url($params);
+      $html .= sprintf('<li><a href="%s">%s</a> (%s)</li>', $url, $text, $data->{'position'});
     }
     $html .= '</ul>';
     return $html;

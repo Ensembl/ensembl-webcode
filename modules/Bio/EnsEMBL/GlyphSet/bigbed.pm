@@ -157,6 +157,9 @@ sub href {
 sub features {
   my ($self,$options) = @_;
 
+  my %config_in = map { $_ => $self->my_config($_) } qw(colouredscore style);
+  $options = { %config_in, %$options };
+
   my $format = $self->format;
 
   my $slice = $self->{'container'};
@@ -165,7 +168,7 @@ sub features {
   $_->map($slice) for @$features;
   my $config = {};
 
-  # WORK OUT HOW TO CONFIGURE FEATURES FOR ENDERING
+  # WORK OUT HOW TO CONFIGURE FEATURES FOR RENDERING
   # Explicit: Check if mode is specified on trackline
   my $style = $options->{'style'} || $format->style;
 
@@ -177,11 +180,13 @@ sub features {
   } elsif($style eq 'colour') {
     $config->{'useScore'} = 2;
  
-    # Instead of using default_colour if colour not present, use black
-    #my ($r, $g, $b) =  $self->{'config'}->colourmap->rgb_by_name($self->{'_default_colour'},1);
-    #my $default_rgb_string = "$r,$g,$b";
     my $default_rgb_string = "0,0,0";
-    
+    if($options->{'fallbackcolour'}) {
+      my $colour = $options->{'fallbackcolour'};
+      $colour = $self->{'_default_colour'} if($colour eq 'default');
+      my ($r, $g, $b) =  $self->{'config'}->colourmap->rgb_by_name($colour,1);
+      $default_rgb_string = "$r,$g,$b";
+    }
     foreach (@$features) {
       next if (defined $_->external_data->{'item_colour'} && $_->external_data->{'item_colour'}[0] =~ /^\d+,\d+,\d+$/);
       $_->external_data->{'item_colour'}[0] = $default_rgb_string;

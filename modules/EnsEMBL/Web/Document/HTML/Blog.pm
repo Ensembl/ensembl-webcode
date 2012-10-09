@@ -28,23 +28,26 @@ sub render {
   my $items = [];
 
   if ($MEMD && $MEMD->get('::BLOG')) {
-    my @posts = @{$MEMD->get('::BLOG')};
+    $items = $MEMD->get('::BLOG');
     ## unencode cached content (see below)
-    foreach (@posts) {
-      push @$items, decode('utf8', $_);
+    foreach (@$items) {
+      while (my($k,$v) = each (%$_)) {
+        $_->{$k} = decode('utf8', $k);
+      }
     }
   }
- 
-  unless ($items && @$items && $MEMD) {
+
+  unless ($items && @$items) {
     $items = $self->get_rss_feed($hub, $rss_url, 3);
 
     ## encode items before caching, in case Wordpress has inserted any weird characters
     if ($items && @$items && $MEMD) {
-      my $encoded = [];
       foreach (@$items) {
-        push @$encoded, encode('utf8', $_);
+        while (my($k,$v) = each (%$_)) {
+          $_->{$k} = encode('utf8', $k);
+        }
       }
-      $MEMD->set('::BLOG', $encoded, 3600, qw(STATIC BLOG));
+      $MEMD->set('::BLOG', $items, 3600, qw(STATIC BLOG));
     }
   }
     

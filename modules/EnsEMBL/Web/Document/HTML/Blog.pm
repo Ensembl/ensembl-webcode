@@ -32,7 +32,7 @@ sub render {
     ## unencode cached content (see below)
     foreach (@$items) {
       while (my($k,$v) = each (%$_)) {
-        $_->{$k} = decode('utf8', $k);
+        $_->{$k} = decode('utf8', $v);
       }
     }
   }
@@ -44,7 +44,7 @@ sub render {
     if ($items && @$items && $MEMD) {
       foreach (@$items) {
         while (my($k,$v) = each (%$_)) {
-          $_->{$k} = encode('utf8', $k);
+          $_->{$k} = encode('utf8', $v);
         }
       }
       $MEMD->set('::BLOG', $items, 3600, qw(STATIC BLOG));

@@ -41,6 +41,9 @@ sub content {
 
   $table->add_row('Ensembl version', $object->stable_id.'.'.$object->version);
 
+  my $remarks = ($db eq 'vega') ? $object->retrieve_remarks : $object->retrieve_CDS_mRNA_remarks;
+  
+
   ## add some Vega info
   if ($db eq 'vega') {
     my $class   = $object->transcript_class;
@@ -53,21 +56,21 @@ sub content {
     $table->add_row('Class', qq{<p>$class [<a href="http://vega.sanger.ac.uk/info/about/gene_and_transcript_types.html" target="external" class="constant">Definition</a>]</p>});
     $table->add_row('Version &amp; date', qq{<p>Version $version</p><p>Modified on $m_date (<span class="small">Created on $c_date</span>)<span></p>});
     $table->add_row('Author', "This transcript was annotated by $author");
-
-    if (@$remarks) {
-      my $text;
-
-      foreach my $rem (@$remarks) {
-        next unless $rem;  # ignore remarks with a value of 0
-        $text .= "<p>$rem</p>";
-      }
-
-      $table->add_row('Remarks', $text);
-    }
-  } else { ## type for core genes
+  }
+  else { ## type for core genes
     my $type = $object->transcript_type;
     $table->add_row('Type', $type) if $type;
   }
+
+  if (@$remarks) {
+    my $text;
+    foreach my $rem (@$remarks) {
+      next unless $rem;  # ignore remarks with a value of 0
+      $text .= "<p>$rem</p>";
+    }
+    $table->add_row( ($db eq 'vega') ? 'Remarks' : 'Havana Remarks', $text);
+  }
+
   ## add prediction method
   my $label = ($db eq 'vega' || $species_defs->ENSEMBL_SITETYPE eq 'Vega' ? 'Curation' : 'Prediction') . ' Method';
   my $text  = "No $label defined in database";

@@ -4,10 +4,10 @@ package EnsEMBL::Web::Document::HTML::Blog;
 
 use strict;
 use warnings;
+use utf8;
 
 use EnsEMBL::Web::Hub;
 use EnsEMBL::Web::Cache;
-use Encode qw(encode_utf8 decode_utf8);
 
 use base qw(EnsEMBL::Web::Document::HTML);
 
@@ -29,12 +29,6 @@ sub render {
 
   if ($MEMD && $MEMD->get('::BLOG')) {
     $items = $MEMD->get('::BLOG');
-    ## unencode cached content (see below)
-    foreach (@$items) {
-      while (my($k,$v) = each (%$_)) {
-        $_->{$k} = decode_utf8($v);
-      }
-    }
   }
 
   unless ($items && @$items) {
@@ -43,8 +37,9 @@ sub render {
     ## encode items before caching, in case Wordpress has inserted any weird characters
     if ($items && @$items && $MEMD) {
       foreach (@$items) {
-        while (my($k,$v) = each (%$_)) {
-          $_->{$k} = encode_utf8($v);
+        while (my($k, $v) = each (%$_)) {
+          utf8::encode($v);
+          $_->{$k} = $v;
         }
       }
       $MEMD->set('::BLOG', $items, 3600, qw(STATIC BLOG));

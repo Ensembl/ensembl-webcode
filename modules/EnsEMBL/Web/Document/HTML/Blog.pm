@@ -7,7 +7,7 @@ use warnings;
 
 use EnsEMBL::Web::Hub;
 use EnsEMBL::Web::Cache;
-use Encode qw(encode decode);
+use Encode qw(encode_utf8 decode_utf8);
 
 use base qw(EnsEMBL::Web::Document::HTML);
 
@@ -32,7 +32,7 @@ sub render {
     ## unencode cached content (see below)
     foreach (@$items) {
       while (my($k,$v) = each (%$_)) {
-        $_->{$k} = decode('utf8', $v);
+        $_->{$k} = decode_utf8($v);
       }
     }
   }
@@ -44,7 +44,7 @@ sub render {
     if ($items && @$items && $MEMD) {
       foreach (@$items) {
         while (my($k,$v) = each (%$_)) {
-          $_->{$k} = encode('utf8', $v);
+          $_->{$k} = encode_utf8($v);
         }
       }
       $MEMD->set('::BLOG', $items, 3600, qw(STATIC BLOG));

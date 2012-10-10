@@ -50,7 +50,7 @@ sub populate_tree {
 
   my $index = $self->create_node('Index', '',
     [qw(blurb EnsEMBL::Web::Component::Info::SpeciesBlurb)],
-    { availability => 1 }
+    { availability => 1, title => 'Description' }
   );
  
   $index->append($self->create_subnode('Error', 'Unknown error',

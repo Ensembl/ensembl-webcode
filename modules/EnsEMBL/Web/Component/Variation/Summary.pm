@@ -428,8 +428,10 @@ sub validation_status {
     foreach my $vs (@variation_sets) {
       if ($vs =~ /1000 Genomes/i && !$main_status{'1000 Genomes'}) {
         $main_status{'1000 Genomes'} = 1;
+        $status_count ++;
       } elsif ($vs =~ /hapmap/i && !$main_status{'HapMap'}) {
         $main_status{'HapMap'} = 1;
+        $status_count ++;
       }
     }
   }

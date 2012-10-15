@@ -387,7 +387,7 @@ $OBJECT_TO_SCRIPT = {
 
   Blast               => 'Page',
   Tools               => 'Page',
-  Info                => 'Page',
+  Info                => 'AltPage',
   Search              => 'Page',
   
   Account             => 'Modal',

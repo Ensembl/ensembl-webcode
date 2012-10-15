@@ -34,7 +34,7 @@ sub summary_zmenu {
   # Summarize features
   my ($num,$num_this_strand,$tot_meth,$tot_read) = (0,0,0,0);
   my ($label,@percmeth,@rows);
-  my $maxmult = 2; # show multiple zmenus if this many results or fewer
+  my $maxmult = 0; # show multiple zmenus if this many results or fewer
   $bba->fetch_rows($slice->seq_region_name,$s,$e,sub {
     my @row = @_;
     my $f = Bio::EnsEMBL::Funcgen::DNAMethylationFeature->new( 

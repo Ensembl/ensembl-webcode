@@ -49,16 +49,20 @@ sub populate_tree {
   my %error_messages = EnsEMBL::Web::Constants::ERROR_MESSAGES;
 
   my $index = $self->create_node('Index', '',
-    [qw(blurb EnsEMBL::Web::Component::Info::SpeciesBlurb)],
-    { availability => 1, title => 'Description' }
+    [qw(homepage EnsEMBL::Web::Component::Info::HomePage)],
+    { availability => 1 }
   );
- 
+
   $index->append($self->create_subnode('Error', 'Unknown error',
     [qw(error EnsEMBL::Web::Component::Info::SpeciesBurp)],
     { availability  => 1, no_menu_entry => 1, }
   ));
-  
-  
+
+  $self->create_node('Annotation', '',
+    [qw(blurb EnsEMBL::Web::Component::Info::SpeciesBlurb)],
+    { availability => 1 }
+  );
+
   foreach (keys %error_messages) {
     $index->append($self->create_subnode("Error/$_", "Error $_",
       [qw(error EnsEMBL::Web::Component::Info::SpeciesBurp)],

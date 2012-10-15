@@ -424,6 +424,8 @@ sub validation_status {
     }
   }
   
+  my $status_count = scalar @status_list;
+  
   if (!$main_status{'HapMap'} && !$main_status{'1000 Genomes'}) {
     foreach my $vs (@variation_sets) {
       if ($vs =~ /1000 Genomes/i && !$main_status{'1000 Genomes'}) {
@@ -435,8 +437,6 @@ sub validation_status {
       }
     }
   }
-  
-  my $status_count = scalar @status_list;
   
   return unless $status_count;
   

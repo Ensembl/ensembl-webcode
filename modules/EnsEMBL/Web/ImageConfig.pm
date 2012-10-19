@@ -904,14 +904,15 @@ sub _add_datahub_extras_to_options {
   
   $options->{'viewLimits'}  = $args{'menu'}{'viewLimits'} || $args{'source'}{'viewLimits'} if exists $args{'menu'}{'viewLimits'} || exists $args{'source'}{'viewLimits'};
   $options->{'no_titles'}   = $args{'menu'}{'no_titles'}  || $args{'source'}{'no_titles'}  if exists $args{'menu'}{'no_titles'}  || exists $args{'source'}{'no_titles'};
-  $options->{'label_x'}     = $args{'source'}{'label_x'};
-  $options->{'features'}    = $args{'source'}{'features'};
-  $options->{'menu_key'}    = $args{'source'}{'menu_key'};
-  $options->{'set'}         = $args{'source'}{'submenu_key'};
-  $options->{'header'}      = $args{'source'}{'submenu_name'};
-  $options->{'description'} = $args{'source'}{'description'};
-  $options->{'axes'}        = $args{'source'}{'axes'};
-  $options->{'subset'}      = "$options->{'menu_key'}_$options->{'set'}";
+  # BRANCH ONLY CHANGE - remove matrix config stuff
+  #$options->{'label_x'}     = $args{'source'}{'label_x'};
+  #$options->{'features'}    = $args{'source'}{'features'};
+  #$options->{'menu_key'}    = $args{'source'}{'menu_key'};
+  #$options->{'set'}         = $args{'source'}{'submenu_key'};
+  #$options->{'header'}      = $args{'source'}{'submenu_name'};
+  #$options->{'description'} = $args{'source'}{'description'};
+  #$options->{'axes'}        = $args{'source'}{'axes'};
+  #$options->{'subset'}      = "$options->{'menu_key'}_$options->{'set'}";
   
   return $options; 
 }

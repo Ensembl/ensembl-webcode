@@ -233,13 +233,14 @@ sub get_sortable_tracks { return grep { $_->get('sortable') && $_->get('menu') n
 sub default_track_order {
   my ($self,@tracks) = @_;
 
-  my (@out,%seen);
+  my (@out,%seen,%before,%after);
   foreach my $t (@tracks) {
-    my $ta = $t->get('track_after');
-    $ta->set('track_before',$t) if $ta;
+    next unless my $ta = $t->get('track_after');
+    $before{$ta->id} = $t;
+    $after{$t->id} = $ta;
   }
-  foreach my $t (grep { not $_->get('track_after') } @tracks) {
-    for(my $t2=$t; $t2 and not $seen{$t2} ; $t2=$t2->get('track_before')) {
+  foreach my $t (grep { not $after{$_->id} } @tracks) {
+    for(my $t2=$t; $t2 and not $seen{$t2} ; $t2=$before{$t2->id}) {
       push @out,$t2;
       $seen{$t2} = 1; # %seen is paranoia against infinite loops
     }
@@ -2391,7 +2392,7 @@ sub add_regulation_builds {
       $label = ": $cell_line";
     }
     
-    $reg_feats->append($prev_track = $self->create_track($track_key, "$fg_data{$key_2}{'name'}$label", {
+    $prev_track = $reg_feats->append($self->create_track($track_key, "$fg_data{$key_2}{'name'}$label", {
       db          => $key,
       glyphset    => $type,
       sources     => 'undef',
@@ -2405,7 +2406,7 @@ sub add_regulation_builds {
     }));
     
     if ($fg_data{"seg_$cell_line"}{'key'} eq "seg_$cell_line") {
-      $reg_segs->append($prev_track = $self->create_track("seg_$cell_line", "Reg. Segs: $cell_line", {
+      $prev_track = $reg_segs->append($self->create_track("seg_$cell_line", "Reg. Segs: $cell_line", {
         db          => $key,
         glyphset    => "fg_segmentation_features",
         sources     => 'undef',
@@ -2450,7 +2451,7 @@ sub add_regulation_builds {
       }
       
       # Add Core evidence tracks
-      $core_menu->append($prev_track = $self->create_track("reg_feats_core_$cell_line", "Open chromatin & TFBS$label", {
+      $prev_track = $core_menu->append($self->create_track("reg_feats_core_$cell_line", "Open chromatin & TFBS$label", {
         %options,
         set         => 'core',
         subset      => 'regulatory_features_core',
@@ -2463,7 +2464,7 @@ sub add_regulation_builds {
       $other_menu ||= ($core_menu || $menu)->after($self->create_submenu('regulatory_features_other', 'Histones & polymerases'));
       
       # Add 'Other' evidence tracks
-      $other_menu->append($prev_track = $self->create_track("reg_feats_other_$cell_line", "Histones & Polymerases$label", {
+      $prev_track = $other_menu->append($self->create_track("reg_feats_other_$cell_line", "Histones & Polymerases$label", {
         %options,
         set         => 'other',
         subset      => 'regulatory_features_other',

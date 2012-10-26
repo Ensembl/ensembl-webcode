@@ -1,0 +1,88 @@
+/* SNP sequence markup */   /* Feature colours - MUST BE FIRST */
+.alt_allele { color: red; font-weight: bold }
+
+.orthologues { width: 100% }
+
+/* Feature colours - MUST BE FIRST */
+span.con { background-color: [[SEQ_CONSERVATION]] }
+span.dif { background-color: [[SEQ_DIFFERENCE]] }
+span.res { color: [[SEQ_RESEQEUNCING]] }
+span.end { color: [[SEQ_REGION_CHANGE]]; background-color: [[SEQ_REGION_CHANGE_BG]] }
+
+/* Exon colours */
+span.e0 { color: [[SEQ_EXON0]] }
+span.e1 { color: [[SEQ_EXON1]] }
+span.e2 { color: [[SEQ_EXON2]] }
+span.eu { color: [[SEQ_EXONUTR]] }
+span.ef { color: [[SEQ_EXONFLANK]] }
+span.eo { background-color: [[SEQ_EXONOTHER]] }
+span.eg { color: [[SEQ_EXONGENE]]; font-weight: bold }
+
+/* Codon colours */
+span.c0 { background-color: [[SEQ_CODONC0]] }
+span.c1 { background-color: [[SEQ_CODONC1]] }
+span.cu { background-color: [[SEQ_CODONUTR]] }
+span.co { background-color: [[SEQ_CODON]] }
+
+/* Variation colours */
+span.sn   { background-color: [[SEQ_SNP]] }       /* SNP */
+span.si   { background-color: [[SEQ_SNPINSERT]] } /* Insert */
+span.sd   { background-color: [[SEQ_SNPDELETE]] } /* Delete */
+span.var  { color: [[SEQ_MAIN_SNP]] }             /* Highlight for snp on variation page */
+span.bold { font-weight: bold }
+
+/* Variation colours - Transcripts */
+span.snt { background-color: [[SEQ_SNP_TR]] }           /* SNP */
+span.syn { background-color: [[SEQ_SYN]] }              /* SYN */
+span.snu { background-color: [[SEQ_SNP_TR_UTR]] }       /* SNP in UTR region */
+span.siu { background-color: [[SEQ_SNPINSERT_TR_UTR]] } /* Insert in UTR region */
+span.sdu { background-color: [[SEQ_SNPDELETE_TR_UTR]] } /* Delete in UTR region */
+span.sf  { background-color: [[SEQ_FRAMESHIFT]] }       /* Frameshift */
+span.aa  { color: [[SEQ_AMINOACID]] }                   /* Amino acid */
+
+pre.text_sequence   { margin: 0 0 16px; float: left; }
+pre.exon_sequence   { margin: 0; }
+pre a.sequence_info { text-decoration: none; color: [[PAGE_TEXT]]; }
+div.sequence_key    { margin: 0 0 16px; }
+div.sequence_key ul { margin-top: 16px; }
+
+div.alignment_list p { margin-top: 1em; }
+div.alignment_list a { text-decoration: none; }
+
+/* phenotype swatch */
+
+div.swatch-wrapper     { float: left; text-align: center; }
+div.swatch             { background-color: #999; padding-left: 2px; float: left; }
+div.swatch div         { float: left; width:30px; line-height:20px; height: 20px; text-align:center; margin: 2px 2px 2px 0; color: #fff; }
+div.swatch-legend      { clear: both; padding: 8px 0; }
+div.swatch-legend span { text-decoration: line-through; font-size: 20px; white-space: pre; line-height: 10px; margin: 0px -3px; }
+
+/* pie charts on population genetics */
+
+div.population_genetics_pie                      { overflow: hidden; clear: both; }
+div.population_genetics_pie div.pie_chart_holder { float: left; margin: 0 4px 16px 0; }
+div.population_genetics_pie div.pie_chart        { border: [[PANEL_BORDER]] solid 1px; padding: 0 2px 2px; margin-bottom: 6px; }
+div.population_genetics_pie div.pie_chart h4     { padding: 4px; margin: 0; color: [[PAGE_TEXT]]; }
+div.population_genetics_pie div.all_population   { border-width: 2px; margin-right: 16px; padding-bottom: 0; }
+
+/* Little "allele type" coloured box on structural variation page */
+
+span.structural-variation-allele { float: left; margin: 4px 4px 4px 0; padding: 4px; }
+
+/* Chromosome and synteny images & forms */
+div.synteny_image                                         { float: left; margin-right: 16px; }
+div.synteny_forms                                         { white-space: nowrap; float: left; margin-bottom: 6px; width: 400px; }
+div.synteny_forms form                                    { margin: 0; }
+div.chromosome_image                                      { float:left; margin-right: 16px; }
+div.chromosome_stats                                      { float:left; min-width: 350px; white-space: nowrap; }
+div.synteny_forms    form fieldset label.ff-label,
+div.chromosome_stats form fieldset label.ff-label         { line-height: 22px; }
+div.chromosome_stats form div.form-field div.ff-right     { text-align: right; }
+div.synteny_forms    form div.form-field select.fselect,
+div.chromosome_stats form div.form-field select.fselect   { width: 120px; }
+div.chromosome_stats form .inline input.fbutton           { margin-right: 1px; }
+
+body.ie6 div.synteny_image,
+body.ie6 div.synteny_forms,
+body.ie6 div.chromosome_image,
+body.ie6 div.chromosome_stats                             { float: none; }

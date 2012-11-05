@@ -48,12 +48,12 @@ sub init {
   );
  
   $self->modify_configs(
-   [ 'gene_legend' ],
+   [ 'gene_legend', 'regulatory_features_core', 'regulatory_features_other', 'functional_dna_methylation' ],
    { display => 'off', menu => 'no' }
   );
 
   $self->modify_configs(
-    [ 'variation_feature_variation', 'variation_set_Phenotype-associated variations', 'functional' ],
+    [ 'variation_feature_variation', 'variation_set_Phenotype-associated variations', 'variation_set_Phenotype-associated variations', 'regulatory_features', 'functional_other_regulatory_regions' ],
     { display => 'normal' }
   );  
   
@@ -78,19 +78,6 @@ sub init {
     ['transcript_core_ensembl'],
     { display => 'transcript_label' }
   );
-
-  # Turn off cell line wiggle tracks
-  my @cell_lines = sort keys %{$self->species_defs->databases->{'DATABASE_FUNCGEN'}->{'tables'}{'cell_type'}{'ids'}};
-  
-  foreach my $cell_line (@cell_lines) {
-    $cell_line =~ s/\:\d*//;
-    
-    # Turn off core and supporting evidence track
-    $self->modify_configs(
-      [ "reg_feats_core_$cell_line", "reg_feats_other_$cell_line" ],
-      { display => 'off' }
-    );
-  }
 }
 
 1;

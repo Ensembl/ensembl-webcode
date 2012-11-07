@@ -53,26 +53,33 @@ sub init {
   );
 
   $self->modify_configs(
-    [ 'variation_feature_variation', 'variation_set_Phenotype-associated variations', 'variation_set_Phenotype-associated variations', 'regulatory_features', 'functional_other_regulatory_regions' ],
+    [ 'variation_feature_variation', 'variation_set_Phenotype-associated variations', 'regulatory_features', 'functional_other_regulatory_regions' ],
     { display => 'normal' }
   );  
   
-  # structural variations
+  
+  # Structural variations
   $self->modify_configs(
     ['variation_feature_structural'],
     { display => 'normal', depth => 100 }
   );
   
-  # Somatic structural variations
+  # Somatic mutations
   $self->modify_configs(
     ['somatic_sv_feature'],
     { display => 'normal', depth => 50 }
   );
   
   $self->modify_configs(
-    ['somatic'],
-    { display => 'normal', style => 'box', depth => 100000 }
+    ['somatic_mutation'],
+    { display => 'off', style => 'box', depth => 100000 }
   );
+  
+  $self->modify_configs(
+    ['somatic_mutation_all'],
+    { display => 'normal' }
+  );
+  
   
   $self->modify_configs(
     ['transcript_core_ensembl'],

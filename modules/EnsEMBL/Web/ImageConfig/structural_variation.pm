@@ -52,16 +52,11 @@ sub init {
   );
   
   $self->modify_configs(
-    [ 'variation' ],
+    [ 'variation', 'somatic_mutation' ],
     { display => 'off', style => 'box', depth => 100000 }
   ); 
-  
-  $self->modify_configs(
-    ['somatic_mutation_COSMIC'],
-    { style => 'box', depth => 100000 }
-  );
 
-  # structural variations
+  # Structural variations
   $self->modify_configs(
     ['variation_feature_structural'],
     { display => 'normal', depth => 100 }

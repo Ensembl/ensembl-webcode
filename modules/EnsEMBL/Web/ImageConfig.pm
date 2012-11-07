@@ -692,12 +692,13 @@ sub _add_datahub {
   if ($hub_info->{'error'}) {
     warn "!!! COULD NOT CONTACT DATAHUB $url: $hub_info->{'error'}";
   } else {
-    my $source_list = $hub_info->{$self->hub->species_defs->UCSC_GOLDEN_PATH};
+    my $golden_path = $self->hub->species_defs->get_config($self->species, 'UCSC_GOLDEN_PATH');
+    my $source_list = $hub_info->{$golden_path} || [];
     
     return unless scalar @$source_list;
     
     ## Get tracks from hub
-    my $datahub_config = $parser->parse($base_url . $self->hub->species_defs->UCSC_GOLDEN_PATH, $source_list);
+    my $datahub_config = $parser->parse($base_url . $golden_path, $source_list);
     
     ## Create Ensembl-style tracks from the datahub configuration
     ## TODO - implement track grouping!

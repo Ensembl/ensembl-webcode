@@ -39,38 +39,32 @@ sub init {
   );
 
   $self->load_tracks;
- 
+  
   $self->modify_configs(
     [ 'gene_legend', 'regulatory_features_core', 'regulatory_features_other', 'functional_dna_methylation' ],
     { display => 'off', menu => 'no' }
   );
 
-  # variations
   $self->modify_configs(
-    [ 'variation_legend', 'somatic' ],
-    { display => 'off' }
+    [ 'variation_feature_variation', 'somatic_mutation_all', 'regulatory_features', 'functional_other_regulatory_regions' ],
+    { display => 'normal' }
   );
   
+  # structural variations
   $self->modify_configs(
-    [ 'variation', 'somatic_mutation' ],
-    { display => 'off', style => 'box', depth => 100000 }
-  ); 
-
-  # Structural variations
-  $self->modify_configs(
-    ['variation_feature_structural'],
+    [ 'variation_feature_structural' ],
     { display => 'normal', depth => 100 }
   );
   
   # Somatic structural variations
   $self->modify_configs(
-    ['somatic_sv_feature'],
+    [ 'somatic_sv_feature' ],
     { display => 'normal', depth => 50 }
   );
   
   # CNV probes
   $self->modify_configs(
-    ['variation_feature_cnv'],
+    [ 'variation_feature_cnv' ],
     { display => 'normal', depth => 5 }
   );
   

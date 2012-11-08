@@ -46,7 +46,7 @@ sub chromosome_form {
   my $image_config  = $hub->get_imageconfig($ic);
   my $vwidth        = $image_config->image_height;
   my @chrs          = map { 'caption' => $_, 'value' => $_.':1-1000' }, @{$self->object->species_defs->ENSEMBL_CHROMOSOMES};
-  my $form          = $self->new_form({ id => 'change_chr', action => $hub->url({ __clear => 1 }), method => 'get', class => 'autocenter check', style => $vwidth ? sprintf "width:${vwidth}px" : undef });
+  my $form          = $self->new_form({ id => 'change_chr', action => $hub->url({ __clear => 1 }), method => 'get', class => 'autocenter', style => $vwidth ? sprintf "width:${vwidth}px" : undef });
 
   $form->add_field({
     'label'       => 'Change Chromosome',
@@ -55,7 +55,7 @@ sub chromosome_form {
       'type'        => 'dropdown',
       'name'        => 'r',
       'values'      => \@chrs,
-      'value'       => $object->seq_region_name
+      'value'       => $object->seq_region_name . ':1-1000',
     }, {
       'type'        => 'submit',
       'value'       => 'Go'
@@ -167,11 +167,11 @@ sub get_chr_legend {
   my $image_config   = $hub->get_imageconfig('text_seq_legend');
   $image_config->{'legend'}={'Chromosome Type'=>$legend};
   $image_config->image_width(650);
-  my $image = $self->new_image(new EnsEMBL::Web::Fake({}), $image_config);
+  my $image = $self->new_image(EnsEMBL::Web::Fake->new({}), $image_config);
   $image->set_button('drag',undef);
   return $image->render;
   
-  #return $self->new_image(new EnsEMBL::Web::Fake({}), $image_config)->render;
+  #return $self->new_image(EnsEMBL::Web::Fake->new({}), $image_config)->render;
 }
 
 sub chr_colour_key {

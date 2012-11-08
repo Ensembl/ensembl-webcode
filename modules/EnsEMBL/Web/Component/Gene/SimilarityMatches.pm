@@ -4,7 +4,7 @@ package EnsEMBL::Web::Component::Gene::SimilarityMatches;
 use strict;
 
 use base qw(EnsEMBL::Web::Component::Gene);
-
+use Data::Dumper;
 sub _init {
   my $self = shift;
   $self->cacheable(1);
@@ -70,7 +70,7 @@ sub matches_to_html {
         $existing_display_names{$_->db_display_name} = 1;
       }
     }
-    push @rows, $row;
+    push(@rows, $row) if (1 < keys %$row);
   }
   @columns = sort { $b->{'priority'} <=> $a->{'priority'} || $a->{'title'} cmp $b->{'title'} || $a->{'link_text'} cmp $b->{'link_text'} } @columns;
   #@columns = sort { default_on($a) <=> default_on($b) || $a->{'title'} cmp $b->{'title'}} @columns;

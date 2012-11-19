@@ -1,0 +1,176 @@
+/* BASE CLASSES TO TWEAK DEFAULT BROWSER RENDERING AND STYLE OVERALL SITE */
+
+/*----------------------------------------------------------------------
+  General font sizes and styles...
+----------------------------------------------------------------------*/
+
+body { font-family: Luxi Sans, Helvetica, Arial, Geneva, sans-serif; color: [[PAGE_TEXT]]; background-color: [[PAGE_BG]]; font-size: 80%; padding: 0; margin: 0; border: 0; }
+pre, code, kbd { font-family: Courier New, Courier, monospace; }
+div, p, span, li, dd, dt, th, td, pre, code, kbd { font-size: 1em; }
+
+body.ie6 th, body.ie6 td { font-size: 13px; }
+
+/*----------------------------------------------------------------------
+  Default whitespace settings round features...
+----------------------------------------------------------------------*/
+
+img     { border: 0; }
+form    { border: none; margin: 0 0 16px 0; }
+p       { margin: 0 0 16px; line-height: 16px; padding: 0; }
+ul, ol  { margin: 0 0 16px; line-height: 16px; padding-left: 32px; }
+pre     { margin: 0 0 16px; }
+
+/*----------------------------------------------------------------------
+  Minimum page width
+----------------------------------------------------------------------*/
+
+#min_width_container { position: relative; width: 100%; min-width: 775px; }
+#min_width_holder    { display: block; }
+
+body.ie6 #min_width_container { border-right: 775px solid [[PAGE_BG]]; }
+body.ie6 #min_width_holder    { display: inline-block; position: relative; margin-right: -775px; }
+
+/*----------------------------------------------------------------------
+  General settings
+----------------------------------------------------------------------*/
+
+.hidden  { display: none; }
+.hide    { display: none; } /* need to remove this if we can */
+.page    { text-align: center; padding: 0.25em; }
+.spinner { height: 100px; display: block; border: 16px solid transparent; margin: 0 0 16px; text-align: center; background: url(/i/e-loader.gif) no-repeat bottom center; }
+.pointer { cursor: pointer; }
+body.ie6 .spinner { background-color: [[PAGE_BG]]; border-color: [[PAGE_BG]]; height: 132px; }
+
+/*----------------------------------------------------------------------
+  Manual margin settings - to override any existing margins
+----------------------------------------------------------------------*/
+.top-margin       { margin-top:     16px  !important; }
+.bottom-margin    { margin-bottom:  16px  !important; }
+.left-margin      { margin-left:    16px  !important; }
+.right-margin     { margin-right:   16px  !important; }
+.no-top-margin    { margin-top:     0     !important; }
+.no-bottom-margin { margin-bottom:  0     !important; }
+.no-left-margin   { margin-left:    0     !important; }
+.no-right-margin  { margin-right:   0     !important; }
+.half-margin      { margin-bottom:  8px   !important; }
+
+/*----------------------------------------------------------------------
+  jQuery resizable handles
+----------------------------------------------------------------------*/
+
+.ui-resizable-handle { position: absolute; font-size: 0.1px; display: block;  }
+.ui-resizable-s      { cursor: s-resize;  width: 100%; height: 7px;  left:  0;    bottom: -5px; }
+.ui-resizable-e      { cursor: e-resize;  width: 7px;  height: 100%; right: -5px; top:    0;    }
+.ui-resizable-se     { cursor: se-resize; width: 12px; height: 12px; right: 1px;  bottom: 1px;  }
+
+/*----------------------------------------------------------------------
+  Headings
+----------------------------------------------------------------------*/
+
+h1, h2, h3, h4  { color: [[PAGE_HEADER]]; margin: 0 0 16px; }
+h1              { font-size: 1.5em; }
+h2              { font-size: 1.2em; }
+h3              { font-size: 1.1em; }
+h4              { font-size: 1em;   }
+body.mac h1,
+body.mac h2     { padding-top: 4px; }
+
+.invisible          { font-size: 1px; color: #fff; height: 0; clear: both; overflow: hidden; margin: 0!important; line-height: 0!important; }
+
+/*----------------------------------------------------------------------
+ Links 
+----------------------------------------------------------------------*/
+a               { color: [[PAGE_LINK]];    } /* neutral style for anchor target */
+a:visited       { color: [[PAGE_VISITED]]; }
+a:hover         { color: [[PAGE_HOVER]];   }
+a:active        { color: [[PAGE_HOVER]];   }
+a.button        { background-color: [[TINT_BG]]; border: 1px outset [[TINT_BG]]; padding: 2px; font-weight: bold; text-decoration: none; }
+span.link       { color: [[PAGE_LINK]]; cursor: pointer; text-decoration: underline; }
+a.toggle        { background: url(/i/open2.gif) no-repeat right bottom; text-decoration: none; padding-right: 20px; outline: 0 none; }
+a.toggle.closed { background-image: url(/i/closed2.gif); }
+a.ajax_add      { background: none!important; padding-right: 0; }
+
+/*----------------------------------------------------------------------
+  Tables
+----------------------------------------------------------------------*/
+
+tr     { vertical-align: top; }
+th, td { text-align: left; border: 0; color: [[CONTRAST_TEXT]]; }
+
+/*----------------------------------------------------------------------
+  Lists
+----------------------------------------------------------------------*/
+li         { margin-bottom: 0.5em; }
+li.compact { margin-bottom: 0; }
+
+ol li                        { list-style-type: decimal; list-style-image: none; }
+ul li                        { list-style-image: url(/i/bullet_1.gif); }
+ul.checklist li              { list-style-image: url(/i/checkbox.gif); }
+ul li ul li, ul.level2 li    { list-style-image: url(/i/bullet_2.gif); }
+ul li ol li                  { list-style-image: none; }
+ul li ul, ul li ol, ol li ul { margin-top: 0.5em; }
+dt { font-weight: bold; }
+dd { margin-bottom: 16px; }
+
+/*----------------------------------------------------------------------
+  Errors and info boxes
+----------------------------------------------------------------------*/
+
+div.error,
+div.warning,
+div.info,
+div.hint            { margin: 0 0 16px; }
+
+div.error h3,
+div.warning h3,
+div.info h3,
+div.hint h3         { margin: 0; padding: 4px 8px 2px 24px; background: [[ERROR_BG]] url(/i/16/rev/alert.png) no-repeat 4px center; border-radius: 8px 8px 0 0; -moz-border-radius: 8px 8px 0 0; -webkit-border-radius: 8px 8px 0 0; line-height: 16px; }
+div.error h4,
+div.error h3,
+div.warning h3      { color: [[PAGE_BG]] !important; }
+div.warning h3      { background-color: [[WARNING_BG]]; }
+div.info h3         { background-image: url(/i/16/info.png);  background-color: [[INFO_BG]]; }
+div.hint h3         { background-image: none; padding: 4px 8px 2px; background-color: [[INFO_BG]]; height: 20px; line-height: 20px; }
+
+div.error div,
+div.warning div,
+div.info div,
+div.hint div        { border: 1px solid [[ERROR_BG]]; border-radius: 0 0 8px 8px; -moz-border-radius: 0 0 8px 8px; -webkit-border-radius: 0 0 8px 8px; }
+div.warning div     { border-color: [[WARNING_BG]]; }
+div.info div,
+div.hint div        { border-color: [[INFO_BG]]; }
+
+div.syntax-error    { color: [[PAGE_TEXT]]; background-color: [[PAGE_BG]]; }
+
+.error-pad,
+.message-pad        { padding: 16px 16px 0; }
+
+div.filter-error    { margin: 16px 16px 0; }
+
+/* "close" icon */
+div.hint h3 img { float: right; margin: 0; padding: 0; }
+
+.ajax_error { color: [[ALERT_TEXT]]; background-color: [[ALERT_BG]]; border: solid 1px [[ALERT_TEXT]]; font-weight: bold; margin: 0 0 16px; padding: 16px; }
+
+div.notes    { padding: 16px 16px 8px; margin-bottom: 16px; background-color: [[CONTRAST_BG]]; border: 1px [[CONTRAST_BORDER]] solid; }
+div.notes h4 { background: url(/i/16/info.png) top left no-repeat; height: 16px; line-height: 16px; padding-left: 24px; }
+div.notes p  { margin-bottom: 8px; }
+
+/***********************************************************************
+**
+** Basic printer styles
+**
+***********************************************************************/
+
+.screen_hide_inline, .screen_hide_block { display: none; }
+
+@media print {
+  body, h1, h2, h4                     { color: #000; }
+  .print_hide, .error, .warning, .info { display: none !important; }
+  .screen_hide_inline                  { display: inline; }
+  .screen_hide_block                   { display: block ; }
+}
+
+/* external links have an extra ..... ed line under them... */
+
+a._external_link_ { border-bottom: 1px dotted [[PAGE_LINK]]; }

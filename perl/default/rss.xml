@@ -1,0 +1,87 @@
+#!/usr/local/bin/perl
+
+use strict;
+
+use EnsEMBL::Web::Hub;
+use EnsEMBL::Web::Root;
+use EnsEMBL::Web::DBSQL::WebsiteAdaptor;
+
+my $hub          = new EnsEMBL::Web::Hub;
+my $SD           = $hub->species_defs;
+my $release_id   = $SD->ENSEMBL_VERSION;
+my $species_name = $ENV{'ENSEMBL_SPECIES'};
+my $helpdesk     = $SD->ENSEMBL_HELPDESK_EMAIL;
+my $webmaster    = $SD->ENSEMBL_SERVERADMIN;
+my $url          = $SD->ENSEMBL_BASEURL;
+
+my $adaptor = EnsEMBL::Web::DBSQL::WebsiteAdaptor->new($hub);
+
+my @all_species = $adaptor->fetch_all_species;
+my $species_hash;
+
+foreach my $sp (@all_species) {
+  $species_hash->{$sp->{'name'}} = $sp->{'id'};
+}
+
+my $species      = { reverse %$species_hash };
+my $pars         = { 'release' => $release_id };
+my $species_id   = $species->{$species_name};
+
+$pars->{ 'species' } = $species_id if $species_id;
+
+my $this_species = $species_name || 'common';
+
+my $criteria = {'release' => $release_id};
+if ($species_id) {
+  $criteria->{'species'} = $this_species;
+}
+
+my @news = @{$adaptor->fetch_news($criteria)};
+
+print "Content-type: xml/rss\n\n";
+
+print qq(
+<rss version="2.0">
+  <channel>
+    <language>en</language>
+    <category>Bioinformatics</category>
+    <category>Genomics</category>
+    <category>Genome Browsers</category>
+    <copyright>Copyright 2008 The Ensembl webteam</copyright>
+    <managingEditor>$helpdesk</managingEditor>
+    <webMaster>$webmaster</webMaster>
+    <title>Ensembl release $release_id</title>
+    <link>$url</link>
+    <generator>Ensembl web API</generator>
+    <image>
+      <url>$url/img/e-rss.png</url>
+      <title>Ensembl release $release_id</title>
+      <link>$url</link>
+    </image>
+    <ttl>1440</ttl>
+    <description>
+      Ensembl is a joint project between EMBL - EBI and the Sanger Institute
+      to develop a software system which produces and maintains automatic
+      annotation on selected eukaryotic genomes. Ensembl is primarily
+      funded by the Wellcome Trust. The site provides free access to all
+      the data and software from the Ensembl project. Click on a species
+      name to browse the data.
+    </description>
+    <language>en-gb</language>
+);
+
+foreach my $item ( @news ) {
+  my $C = EnsEMBL::Web::Root::strip_HTML($item->{'content'});
+  printf '
+    <item>
+      <title>%s</title>
+      <description>%s</description>
+      <link>%s/info/website/news/index.html#news_%s</link>
+    </item>',
+    $item->{'title'}, $C, $url, $item->{'id'}; 
+}
+print qq(
+  </channel>
+</rss>);
+
+1;

@@ -1,0 +1,180 @@
+#modal_bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: [[MH_BORDER]];
+  text-align: center;
+  vertical-align: middle;
+  display: none;
+  z-index: 1000;
+  opacity: 0.25; filter: Alpha(Opacity=25);
+}
+
+#modal_panel                  { position: fixed; left: auto; top: auto; text-align: left; background-color: [[PANEL_BG]]; margin: 0; padding: 0; display: none; z-index: 1001; zoom: 1; }
+#modal_panel .ui-resizable-se { width: 14px; height: 14px; right: 2px; bottom: 2px; background: url(/i/resize.png) no-repeat scroll right bottom; }
+#modal_panel div.modal_title  {
+  position: absolute;
+  top: -20px;
+  height: 18px;
+  width: 100%;
+  margin: 0;
+  padding: 2px 0 0;
+  border: solid [[PANEL_TEXT]];
+  border-width: 0 1px;
+  background-color: [[PANEL_TEXT]];
+  color: [[PANEL_BG]];
+  font-weight: bold;
+  clear: both;
+  font-size: 12px;
+}
+
+body.ie6 #modal_bg,
+body.ie6 #modal_panel                 { position: absolute; }
+body.ie6 #modal_panel div.modal_title { height: 20px; }
+
+.modal_reload  { display: none; }
+.modal_caption { position: absolute; bottom: 3px; left: 4px; }
+
+.modal_title ul                    { margin: 0; padding: 0 0 0 6px; position: absolute; bottom: 0; }
+.modal_title li                    { list-style: none; padding: 1px 6px 2px; background-color: #999; margin: 0 6px 0 0; float: left; border-radius: 5px 5px 0 0; -moz-border-radius: 5px 5px 0 0; -webkit-border-radius: 5px 5px 0 0; }
+.modal_title li.active             { background-color: [[PANEL_BG]]; color: [[PAGE_TEXT]]; }
+.modal_title li a                  { color: [[PANEL_BG]]; padding: 0 8px; text-decoration: none; outline: none; }
+.modal_title li.active a           { color: [[PAGE_TEXT]]; }
+.modal_title .modal_close          { position: absolute; top: -11px; right: -11px;  height: 22px; width: 22px; margin: 0; display: block; background: url(/i/cp_close.png) no-repeat center; cursor: pointer; }
+.ui-draggable .modal_title         { cursor: move; }
+
+body.mac .modal_title li a         { position: relative; top: 1px; }
+body.ie6 .modal_title ul           { position: relative; }
+body.ie6 .modal_title .modal_close { background-image: url(/i/cp_close.gif); }
+
+.modal_content                   { position: absolute; height: 100%; width: 100%; overflow: auto; border: solid [[PANEL_TEXT]]; border-width: 0 1px 1px; background-color: [[PANEL_BG]]; }
+.modal_content .panel            { padding: 0; margin: 0; }
+.modal_content .panel .content   { padding: 12px 12px 4px; margin: 0; }
+.modal_content .panel h2         { border-bottom: 1px solid [[PANEL_BORDER]]; padding-bottom: 2px; }
+.modal_content .panel div.error,
+.modal_content .panel div.warning,
+.modal_content .panel div.info,
+.modal_content .panel div.hint   { width: auto!important; }
+.modal_content p.modal_error     { color: #C33; }
+.modal_content p.modal_a         { margin: 10px 0; }
+.modal_content p.modal_a a       { background-color: [[MH_BG]]; color: #FFF; border: outset [[MH_BG]] 2px; text-decoration: none; padding: 2px 8px; }
+.modal_content div.filter-error  { margin: 12px 12px 0; }
+
+.modal_content .config_wrapper                 { overflow: hidden; }
+.modal_content .config_wrapper .panel .content { padding: 12px 12px 0; }
+
+.modal_content .modal_nav                 { width: auto; min-width: 210px; float: left; position: relative; margin: 0 -1px 0 0; border-right: 1px solid [[PANEL_BORDER]]; padding: 0; min-height: 100%; }
+.modal_content .modal_nav .tool_buttons p { margin: 0 2px; }
+.modal_content .modal_nav div.header      { display: none; }
+
+.modal_content .modal_nav ul.local_context                        { width: auto; margin-right: 0; border: 0; padding: 0px; }
+.modal_content .modal_nav ul.local_context ul,
+.modal_content .modal_nav ul.local_context li,
+.modal_content .modal_nav ul.local_context li.last                { background-image: none; }
+.modal_content .modal_nav ul.local_context li                     { cursor: pointer; width: auto; }
+.modal_content .modal_nav ul.local_context li ul                  { padding: 0; }
+.modal_content .modal_nav ul.local_context li a,
+.modal_content .modal_nav ul.local_context li .disabled           { float: left; margin-left: 19px; }
+.modal_content .modal_nav ul.local_context li .disabled           { color: [[PAGE_TEXT]]; cursor: text; }
+.modal_content .modal_nav ul.local_context li img                 { float: left;  margin-top: 1px; } 
+.modal_content .modal_nav ul.local_context li ul                  { clear: both; }
+.modal_content .modal_nav ul.local_context li .count              { float: right; margin: 0 3px 0 10px; color: [[MH_BORDER]]; }
+.modal_content .modal_nav ul.local_context li.active a            { outline: 0; }
+.modal_content .modal_nav ul.local_context li.top_level           { margin: 3px; padding: 0; border: 1px solid #dddfff; line-height: 16px; } /* TODO - add colour to ini file */
+.modal_content .modal_nav ul.local_context li.top_level,
+.modal_content .modal_nav ul.local_context li.top_level ul,
+.modal_content .modal_nav ul.local_context li.top_level li        { background-color: [[TINT_BG]]; }
+.modal_content .modal_nav ul.local_context li.top_level a,        
+.modal_content .modal_nav ul.local_context li.top_level .count    { font-weight: bold; padding: 0px; }
+.modal_content .modal_nav ul.local_context li.top_level li a,
+.modal_content .modal_nav ul.local_context li.top_level li .count { font-weight: normal; padding-bottom: 0; }
+.modal_content .modal_nav ul.local_context li.parent              { padding-bottom: 0; }
+.modal_content .modal_nav ul.local_context li.parent a,
+.modal_content .modal_nav ul.local_context li.parent .disabled    { margin-left: 0; }
+.modal_content .modal_nav ul.local_context li.parent li a,
+.modal_content .modal_nav ul.local_context li.parent li .disabled { margin-left: 7px; }
+.modal_content .modal_nav ul.local_context li.parent li,
+.modal_content .modal_nav ul.local_context li.parent ul           { background-image: url(/i/line.gif); background-repeat: repeat-y; }
+.modal_content .modal_nav ul.local_context li.parent li.last      { background-image: url(/i/last.gif); background-repeat: no-repeat; padding-bottom: 1px; }
+.modal_content .modal_nav ul.local_context li.active              { font-weight: normal; background-color: [[BUTTON_BG]]!important; }
+.modal_content .modal_nav ul.local_context li.active a,
+.modal_content .modal_nav ul.local_context li.active .count       { color: #FFF; }
+.modal_content .modal_nav ul.local_context li.active li a,
+.modal_content .modal_nav ul.local_context li.active li .count    { color: #369; }
+.modal_content .modal_nav ul.local_context li.active li           { background-color: [[TINT_BG]]; }
+
+body.ie7  .modal_content .modal_nav                                    { min-height: 99%; }
+body.ie7  .modal_content .modal_nav ul.local_context li.top_level      { margin: 0 -2px 0 0; }
+body.ie7  .modal_content .modal_nav ul.local_context li.parent         { margin-bottom: 3px; }
+body.ie67 .modal_content .modal_nav                                    { width: 265px; padding: 0 6px 0 3px; }
+body.ie6  .modal_content .modal_nav                                    { border: 0 }
+body.ie6  .modal_content .modal_wrapper                                { margin-left: 268px; }
+body.ie6  .modal_content .panel                                        { margin-right: 4px; }
+body.ie6  .modal_content .modal_nav ul.local_context li img            { margin-left: -3px; } 
+body.ie6  .modal_content .modal_nav .tool_buttons                      { width: 253px; }
+body.ie6  .modal_content .modal_nav .tool_buttons p                    { margin-right: 0; }
+body.ie6  .modal_content .modal_nav ul.local_context li.top_level      { margin: 3px 0 0; }
+body.ie6  .modal_content .modal_nav ul.local_context li.parent li.last { padding-bottom: 0; }
+
+#modal_panel .fixed_width .modal_nav               { width: 220px; float: none; position: absolute; margin: 0; min-height: 100%; }
+#modal_panel .fixed_width .modal_wrapper .panel    { margin-left: 220px; border-left: [[PANEL_BORDER]] solid 1px; }
+#modal_panel .fixed_width .no_local_context .panel { margin-left: 0!important; border-left: 0; }
+
+body.ie6 #modal_panel .fixed_width .modal_wrapper        { margin-left: 0; }
+body.ie6 #modal_panel .fixed_width .modal_wrapper .panel { border-left: 0; }
+body.ie7 #modal_panel .fixed_width .modal_wrapper .panel { margin-left: 229px; }
+
+/* multi selectors */
+
+.modal_content .multi_selector_list                            { width: 48%; font-weight: normal; float: left; margin: 0 0.5%; }
+.modal_content .multi_selector_list ul                         { padding: 0; margin-left: 5px; margin-right: 5px; list-style: none; }
+.modal_content .multi_selector_list li                         { position: relative; height: 22px; padding-left: 10px; list-style-image: none; cursor: pointer; clear: both; }
+.modal_content .multi_selector_list ul.included li             { background-color: [[TINT_BG]]; color: [[CONTRAST_TEXT]]; border: 1px solid [[TINT_BORDER]]; }
+.modal_content .multi_selector_list ul.excluded li             { background-color: #EEE; color: [[CONTRAST_TEXT]]; border: 1px solid [[NEUTRAL_BORDER]]; }
+.modal_content .multi_selector_list ul li span                 { position: absolute; left: 28px; top: 3px; }
+.modal_content .multi_selector_list ul li span.switch          { height: 16px; width: 16px; background-repeat: no-repeat; background-position: top left; left: 6px; }
+.modal_content .multi_selector_list ul.included li span.switch { background-image: url(/i/16/minus-button.png); }
+.modal_content .multi_selector_list ul.excluded li span.switch { background-image: url(/i/16/plus-button.png); }
+
+.modal_content .multi_selector_hint                            { margin: 16px; }
+
+/* config manager */
+
+.modal_content .config_manager h2                             { margin: 0 0 5px 0; }
+.modal_content .config_manager .dataTables_wrapper,
+.modal_content .config_manager table,
+.modal_content .config_manager td > div                       { position: relative; }
+.modal_content .config_manager td div.config_used             { position: absolute; left: 1px; display: none; width: 100%; background: #80CC74; margin-top: -18px; text-align: center; z-index: 100; }
+.modal_content .config_manager td div.heightWrap              { overflow: hidden; height: 16px; line-height: 16px; margin-right: 20px; }
+.modal_content .config_manager td div.heightWrap .val         { height: auto!important; }
+.modal_content .config_manager td div.heightWrap .val.empty   { height: 100%!important; }
+.modal_content .config_manager td div.open                    { overflow: auto; height: auto!important; }
+.modal_content .config_manager td div.open .ellipsis          { display: none; }
+.modal_content .config_manager td img.toggle                  { position: absolute; right: 4px; top: 2px; display: none; }
+.modal_content .config_manager table tbody tr                 { height: 20px; }
+.modal_content .config_manager table tr a.add_to_set          { display: block; width: 16px; height: 16px; background-image: url(/i/16/plus-button.png); position: absolute; right: 0; }
+.modal_content .config_manager table tr.active,
+.modal_content .config_manager table tr.added                 { background-color: #80CC74; }
+.modal_content .config_manager table tr.added a.add_to_set    { background-image: url(/i/16/minus-button.png); }
+.modal_content .config_manager table tr.disabled              { background-color: #AAA; }
+.modal_content .config_manager table tr.disabled *            { color: #666!important; }
+.modal_content .config_manager table tr.disabled a.add_to_set { display: none; }
+.modal_content .config_manager table td ul                    { margin: 0 0 -0.5em 0; padding: 0; list-style: none; }
+.modal_content .config_manager table td ul li                 { padding: 0; list-style-image: none; clear: both; }
+.modal_content .config_manager table td ul li span            { display: block; }
+.modal_content .config_manager table td ul li span.cfg        { float: right; margin-right: 5px; }
+.modal_content .config_manager .edit_set                      { display: none; }
+.modal_content .config_manager .edit_set h4                   { color: [[PAGE_TEXT]]; margin: 10px 0; }
+.modal_content .config_manager .new_set .form-field,
+.modal_content .config_manager .new_set .fnotes               { display: none; }
+.modal_content .config_manager .sets a.toggle                 { background-image: none; text-decoration: underline; }
+.modal_content .config_manager .sets a.create_set             { font-weight: bold; }
+.modal_content .config_manager .sets a.create_set span.cancel { display: none; float: right; text-decoration: underline; cursor: pointer; }
+
+body.ie67 .modal_content .config_manager td div.config_used      { margin-top: -1px; }
+body.ie67 .modal_content .config_manager table td ul li span.cfg { float: none; margin-right: 0; display: inline; }
+body.ie6  .modal_content .config_manager td div.heightWrap       { overflow: auto; height: auto; line-height: auto; margin-right: 0; }
+body.ie6  .modal_content .config_manager td .ellipsis            { display: none; }
+body.ie7  .modal_content .config_manager td img.toggle           { top: 4px; }

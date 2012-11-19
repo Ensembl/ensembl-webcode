@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+
+package martview;
+
+use strict;
+use warnings;
+use CGI;
+
+my $cgi = new CGI;
+my %params = %{ $cgi->Vars };
+
+my $biomart_url = "http://www.ensembl.org/biomart/martview?";
+
+foreach my $key (keys %params) {
+    if ($params{$key}) {
+	$biomart_url .= $key . "=" . $params{$key};
+    }
+}
+
+$cgi->redirect($biomart_url);
+
+1;
+
+ 

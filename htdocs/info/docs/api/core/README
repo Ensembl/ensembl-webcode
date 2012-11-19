@@ -1,0 +1,16 @@
+MySQL Workbench was used to create schema diagrams for the core database.
+In case of schema changes, update the relevant diagram (extension .mwb) and regenerate the diagram pdf.
+
+To regenerate core_schema.html use script sql2html.pl in ensembl/misc-scripts/ with the following options:
+
+-i (sql file name) table.sql
+-o (html file name) 
+-sort_headers 0 (1- sort in alphabetical order)
+-sort_tables 0
+-d (database) Core
+
+Follow instructions in file html_to_append.html to complete the generated HTML and save as core_schema.html. Change the schema version to the current release in the following paragraph:
+<p>
+This document refers to version <strong>64</strong> of the EnsEMBL
+core schema.
+</p>

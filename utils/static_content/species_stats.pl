@@ -23,7 +23,7 @@ use File::Basename qw( dirname );
 use Pod::Usage;
 use Getopt::Long;
 
-use vars qw( $SERVERROOT $PLUGIN_ROOT $SCRIPT_ROOT $DEBUG $FUDGE $NOINTERPRO $NOSUMMARY $help $info @user_spp $allgenetypes $coordsys $list $pan_comp_species $ena);
+use vars qw( $SERVERROOT $PLUGIN_ROOT $SCRIPT_ROOT $DEBUG $FUDGE $NOINTERPRO $NOSUMMARY $help $info @user_spp $allgenetypes $coordsys $list $pan_comp_species);
 
 BEGIN{
   &GetOptions( 
@@ -37,8 +37,7 @@ BEGIN{
                'nosummary' => \$NOSUMMARY,
                'plugin_root=s' => \$PLUGIN_ROOT,
                'coordsys' => \$coordsys,
-               'pan_c_sp' => \$pan_comp_species,
-               'ena' => \$ena
+               'pan_c_sp' => \$pan_comp_species
 	     );
 
   pod2usage(-verbose => 2) if $info;
@@ -158,15 +157,6 @@ foreach my $spp (@valid_spp) {
     warn "[ERROR] $spp "
         ."missing both meta->assembly.name and meta->assembly.default"
         unless( $a_id );
-
-    if ($ena) {
-      # look for long name and accession num
-      my ($long) = @{$meta_container->list_value_by_key('assembly.long_name')};
-      $a_id .= " ($long)" if $long; 
-      my ($acc) = @{$meta_container->list_value_by_key('assembly.accession')};
-      $acc = sprintf('INSDC Assembly <a href="http://www.ebi.ac.uk/ena/data/view/%s">%s</a>', $acc, $acc) if $acc;
-      $a_id .= ", $acc" if $acc; 
-    } 
 
     my $a_date  = $SD->get_config($spp, 'ASSEMBLY_DATE') || '';
     $a_date || warn "[ERROR] $spp missing SpeciesDefs->ASSEMBLY_DATE!";
@@ -676,7 +666,7 @@ sub do_pan_compara_species {
 
     my $fq_path_dir = sprintf( STATS_PATH, $PLUGIN_ROOT);
     &check_dir($fq_path_dir);
-    my $pan_comp_path_html = $fq_path_dir."stats_pan_compara_species.html";
+    my $pan_comp_path_html = $fq_path_dir."pan_compara_species.html";
     open (STAT_P_C, ">$pan_comp_path_html") or die "Cannot write $pan_comp_path_html: $!";
     my $release_version = $SD->SITE_RELEASE_VERSION;
     my $db_id = $SD->ENSEMBL_VERSION;

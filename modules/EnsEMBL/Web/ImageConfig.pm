@@ -1930,7 +1930,6 @@ sub add_alignments {
   my $species_defs = $self->species_defs;
   
   return if $species_defs->ENSEMBL_SITETYPE eq 'Pre';
-  my $static = $species_defs->ENSEMBL_SITETYPE eq 'Vega' ? '/info/data/comparative_analysis.html' : '/info/docs/compara/analyses.html';
   
   my $alignments = {};
   my $self_label = $species_defs->species_label($species, 'no_formatting');
@@ -1961,7 +1960,7 @@ sub add_alignments {
         $description = 'Pairwise alignments';
       }
       
-      $description  = sprintf qq(<a href="$static" class="cp-external">%s</a> between %s and %s), $description, $self_label, $other_label;
+      $description  = sprintf '<a href="/info/docs/compara/analyses.html" class="cp-external">%s</a> between %s and %s', $description, $self_label, $other_label;
       $description .= " $1" if $row->{'name'} =~ /\((on.+)\)/;
       
       $alignments->{$menu_key}{$row->{'id'}} = {

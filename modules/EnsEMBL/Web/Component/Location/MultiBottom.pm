@@ -63,10 +63,10 @@ sub content {
     });
 
     # allows the 'set as primary' sprite to be shown on an single species view
-    if ($image_config->get_parameter('can_set_as_primary')) {
+    if ($image_config->get_parameter('can_set_as_primary') &&  $i != 1) {
       $image_config->set_parameters({
-           compara => 'secondary'
-         });
+        compara => 'secondary'
+      });
     }
     $image_config->get_node('scalebar')->set('caption', $_->{'short_name'});
     $_->{'slice'}->adaptor->db->set_adaptor('compara', $compara_db) if $compara_db;

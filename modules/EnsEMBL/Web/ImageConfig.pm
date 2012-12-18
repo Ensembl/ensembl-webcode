@@ -139,6 +139,7 @@ sub menus {
     marker              => [ 'Markers',               'seq_assembly' ],
     simple              => [ 'Simple features',       'seq_assembly' ],
     ditag               => [ 'Ditag features',        'seq_assembly' ],
+    dna_align_other     => [ 'GRC alignments',        'seq_assembly' ],
     
     # Transcripts/Genes
     gene_transcript     => 'Genes and transcripts',
@@ -157,7 +158,6 @@ sub menus {
     dna_align_est       => [ 'EST alignments',     'mrna_prot' ],
     protein_align       => [ 'Protein alignments', 'mrna_prot' ],
     protein_feature     => [ 'Protein features',   'mrna_prot' ],
-    dna_align_other     => 'Other DNA alignments',
     dna_align_rna       => 'ncRNA',
     
     # Proteins

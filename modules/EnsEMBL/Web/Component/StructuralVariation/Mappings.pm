@@ -141,7 +141,7 @@ sub gene_transcript_table {
         
         my %row = (
           gene      => qq{<a href="$gene_url">$gene_name</a><br/><span class="small" style="white-space:nowrap;">$gene_hgnc</span>},
-          trans     => qq{<nobr><a href="$transcript_url">$trans_name</a> ($strand)</nobr><br/><span class="small" style="white-space:nowrap;">$trans_type</span>},
+          trans     => qq{<a href="$transcript_url">$trans_name</a> ($strand)<br/><span class="small" style="white-space:nowrap;">$trans_type</span>},
           allele    => $allele,
           type      => $type,
           trans_pos => $self->_sort_start_end($tsv->cdna_start,        $tsv->cdna_end),

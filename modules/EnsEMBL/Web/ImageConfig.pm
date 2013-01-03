@@ -864,6 +864,8 @@ sub _add_datahub_tracks {
     $source->{'colour'} = $track->{'color'} if exists $track->{'color'};
 
     my $type = ref $track->{'type'} eq 'HASH' ? uc $track->{'type'}{'format'} : uc $track->{'type'};
+    $type =~ s/^\s*//g;
+    $type =~ s/\s*$//g;
 
     # Graph range - Track Hub default is 0-127
     if (exists($track->{'viewLimits'})) {
@@ -921,6 +923,7 @@ sub load_configured_vcf    { shift->load_file_format('vcf');    }
 
 sub load_file_format {
   my ($self, $format, $sources) = @_;
+
   my $function = "_add_${format}_track";
      $sources  = $self->sd_call(sprintf 'ENSEMBL_INTERNAL_%s_SOURCES', uc $format) || {} unless defined $sources; # get the internal sources from config
   
@@ -1610,8 +1613,9 @@ sub load_configured_das {
 # Attach all das sources from an image config
 sub attach_das {
   my $self      = shift;
+
   my @das_nodes = map { $_->get('glyphset') eq '_das' && $_->get('display') ne 'off' ? @{$_->get('logic_names')||[]} : () } $self->tree->nodes; # Look for all das sources which are configured and turned on
-  
+
   return unless @das_nodes; # Return if no sources to be drawn
   
   my $hub         = $self->hub;

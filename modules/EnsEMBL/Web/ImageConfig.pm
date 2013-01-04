@@ -723,6 +723,7 @@ sub _add_datahub {
       } else {
         my $func = scalar keys %{$dataset->{'config'}{'dimensions'} || {}} ? '_add_datahub_tracks_matrix' : '_add_datahub_tracks';
         
+        
         if ($dataset->{'config'}{'subsets'}) {
           $self->$func($_, $menu_name, $dataset->{'config'}) for @{$dataset->{'tracks'}};
         } else {
@@ -906,14 +907,17 @@ sub _add_datahub_extras_options {
   $args{'options'}{'header'}     = $args{'source'}{'submenu_name'};
   $args{'options'}{'subset'}     = $self->tree->clean_id("$args{'source'}{'menu_key'}_$args{'source'}{'submenu_key'}");
   $args{'options'}{$_}           = $args{'source'}{$_} for qw(label_x features menu_key description info colour axes datahub option_key column_key);
-  
+ 
   if ($args{'source'}{'datahub'} eq 'track') {
     $args{'options'}{'menu'}    = 'datahub_subtrack';
     $args{'options'}{'display'} = 'default';
     unshift @{$args{'renderers'}}, 'default', 'Default';
-  } else {
-    $args{'options'}{'option_key'} = $args{'key'};
   }
+
+  ## THIS BREAKS NON-MATRIX DATAHUBS!
+  ## See DrawableContainer.pm line 98
+  #} else {
+  #  $args{'options'}{'option_key'} = $args{'key'};
 }
 
 sub load_configured_bam    { shift->load_file_format('bam');    }

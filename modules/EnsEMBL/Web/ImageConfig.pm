@@ -974,7 +974,7 @@ sub _add_bam_track {
   my $self = shift;
   my $desc = '
     The read end bars indicate the direction of the read and the colour indicates the type of read pair:
-    Green = both mates mapped to the same chromosome, Blue = second mate was not mapped, Red = second mate mapped to a different chromosome.
+    Green = both mates are part of a proper pair; Blue = either this read is not paired, or its mate was not mapped; Red = this read is not properly paired.
   ';
   
   $self->_add_file_format_track(

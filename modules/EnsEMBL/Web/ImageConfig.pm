@@ -782,7 +782,17 @@ sub _add_datahub_tracks_matrix {
       column_key  => $column_key,
       %options
     };
-    
+   
+    # Alternative rendering order for genome segmentation and similar
+    if ($track->{'visibility'} eq 'squish' || $dataset->{'config'}{'visibility'} eq 'squish') {
+      $source->{'renderers'} = [
+        'off',     'Off',
+        'compact', 'Continuous',
+        'normal',  'Separate',
+        'labels',  'Separate with labels',
+      ];
+    }
+ 
     if (exists $track->{'viewLimits'}) {
       $source->{'viewLimits'} = $track->{'viewLimits'};
     } elsif (exists $track->{'autoscale'} && $track->{'autoscale'} eq 'off') {
@@ -845,7 +855,7 @@ sub _add_datahub_tracks {
     my $source = {
       name        => $track->{'track'},
       source_name => $source_name,
-    # caption     => $track->{'shortLabel'},
+      caption     => $track->{'shortLabel'},
       description => $track->{'longLabel'} . $link,
       source_url  => $track->{'bigDataUrl'},
       datahub     => 1,

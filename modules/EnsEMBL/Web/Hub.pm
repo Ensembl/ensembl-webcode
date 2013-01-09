@@ -408,11 +408,7 @@ sub parse_referer {
      
   my ($url, $query_string) = split /\?/, $uri;
 
-  my $info = {
-    absolute_url => $ENV{'HTTP_REFERER'},
-    uri          => "/$uri",
-    external     => 0,
-  };
+  my $info = {absolute_url => $ENV{'HTTP_REFERER'}};
 
   my @path = split /\//, $url;
   
@@ -420,6 +416,10 @@ sub parse_referer {
 
   if ($ENV{'HTTP_REFERER'} !~ /$servername/i && $ENV{'HTTP_REFERER'} !~ /$server/) {
     $info->{'external'} = 1;
+  }
+  else {
+    $info->{'external'} = 0;
+    $info->{'uri'}      = "/$uri";
   }
 
   my @pairs  = split /[&;]/, $query_string;

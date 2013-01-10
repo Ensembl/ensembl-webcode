@@ -592,7 +592,7 @@ sub build_imageconfig_menus {
         last if $external;
       }
     }
-    
+   
     $menu .= sprintf '<li class="subset subset_%s"><img src="%s16/setting.png" /><a href="#">Configure track options</a></li>', $subset, $img_url if $subset;
     
     if ($display ne 'off') {

@@ -773,6 +773,7 @@ sub _add_datahub_tracks_matrix {
     my $source = {
       name        => "$dataset->{'config'}{'track'}_$track->{'track'}",
       source_name => $source_name,
+      caption     => $track->{'shortLabel'},
       description => $track->{'longLabel'} . $link,
       source_url  => $track->{'bigDataUrl'},
       colour      => exists $track->{'color'} ? $track->{'color'} : undef,
@@ -804,7 +805,7 @@ sub _add_datahub_tracks_matrix {
     } elsif ($type eq 'BIGWIG' || $type eq 'BIGBED') {
       $source->{'maxHeightPixels'} = '64:32:16';
     }
-    
+ 
     $matrix_columns{$type}{$key} ||= {
       name        => $key,
       source_name => $label_x,
@@ -812,6 +813,7 @@ sub _add_datahub_tracks_matrix {
       description => "<p>$info</p><p>Contains the following sub tracks:</p>",
       info        => $info,
       datahub     => 1,
+      renderers   => $source->{'renderers'},
       %options
     };
     

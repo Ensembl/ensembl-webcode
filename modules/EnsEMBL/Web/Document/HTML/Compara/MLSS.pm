@@ -305,7 +305,6 @@ sub fetch_input {
     } else {
       foreach my $param (split ' ', $pairwise_params) {
         my ($p, $v) = split '=', $param;
-        warn ">>> Parameter $p";
         
         if ($p eq 'Q' && $v =~ /^\/nfs/) {
           ## slurp in the matrix file

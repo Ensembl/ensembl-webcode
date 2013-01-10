@@ -574,6 +574,8 @@ foreach my $spp (@valid_spp) {
       print STATS $b_coordsys;
     }
 
+    $db->dbc->db_handle->disconnect; # prevent too many connections
+
     next unless grep $other_stats{$_}, @other_stats_keys;
 
     print STATS qq(
@@ -600,8 +602,6 @@ foreach my $spp (@valid_spp) {
     close(STATS);
   }
   print STDERR "...$spp done.\n";
-
-  $db->dbc->db_handle->disconnect; # prevent too many connections
 
 } # end of species
 

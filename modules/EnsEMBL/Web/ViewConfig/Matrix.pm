@@ -74,7 +74,7 @@ sub set_columns {
     my $label_x   = $data->{'label_x'};
     my $menu      = $tree->clean_id($data->{'menu_key'});
     my $renderers = $node->get('renderers');
-    my %renderers = $renderers;
+    my %renderers = @$renderers;
     my $conf      = $self->{'matrix_config'}{$menu}{$set} ||= {
       menu         => $set,
       track_prefix => $menu,
@@ -83,8 +83,7 @@ sub set_columns {
       description  => $data->{'info'},
       axes         => $data->{'axes'},
     };
-   
- 
+    
     push @{$conf->{'columns'}}, { name => $tree->clean_id(join '_', $conf->{'track_prefix'}, $set, $label_x), x => $label_x, display => $node->get('display'), renderers => $renderers };
     push @{$conf->{'features'}{$label_x}{$_}}, @{$data->{'features'}{$_}} for keys %{$data->{'features'}};
     $conf->{'renderers'}{$_}++ for keys %renderers;
@@ -202,10 +201,6 @@ sub form_matrix {
     $renderer_html .= sprintf $renderer_template[1], $_->[2], $_->[1], $_->[1], $_->[0], '', '', $_->[1] for [ 'off', 'Off', 'off' ], [ 'normal', 'On', 'all_on' ];
   } else {
     my $renderers = $self->deepcopy($conf->{'columns'}[0]{'renderers'});
-    # FIXME - hack to fix alternate renderers for squished tracks
-    if ($renderers->[0] eq 'default') {
-      shift @$renderers; shift @$renderers;
-    }
     $renderer_html .= sprintf $renderer_template[1], $k, $v, $v, $k, '', '', $v while ($k, $v) = splice @$renderers, 0, 2;
   }
   
@@ -260,11 +255,9 @@ sub form_matrix {
             my $menu;
             
             for (my $i = 0; $i < scalar @r; $i += 2) {
-              ## FIXME - there's no default.gif, so line 265 is throwing errors
-              next if ($r[$i] eq 'default');
               $menu .= sprintf $renderer_template[1], $r[$i], $r[$i+1], $r[$i+1], $r[$i] eq 'default' ? $col_renderer : $r[$i], $r[$i] eq $display ? ($tick, ' class="current"') : ('', ''), $r[$i+1];
             }
-           
+            
             $subtracks .= qq{
               <li class="$x_class$li_class track">
                 $renderer_template[0]
@@ -272,7 +265,7 @@ sub form_matrix {
                 $renderer_template[2]
                 <input type="hidden" class="track_name" name="$feature->{'name'}" value="$display" />
                 <img class="menu_option" title="$renderers{$renderer}" alt="$renderers{$renderer}" src="${img_url}render/$renderer.gif" />
-                <span class="menu_option">$feature->{'caption'}</span>
+                <span class="menu_option">$feature->{'source_name'}</span>
               </li>
             };
             
@@ -356,12 +349,7 @@ sub form_matrix {
     (my $x_class  = lc $x) =~ s/[^\w-]/_/g;
     my $display   = $_->{'display'};
     my $name      = $_->{'name'};
-    my $renderers = $_->{'renderers'};
-    # FIXME - hack to fix alternate renderers for squished tracks
-    if ($renderers->[0] eq 'default') {
-      shift @$renderers; shift @$renderers;
-    }
-    my %renderers = @{$renderers};
+    my %renderers = @{$_->{'renderers'}};
     my $menu      = $renderer_template[0];
        $menu     .= sprintf $renderer_template[1], $k, $v, $v, $k, $k eq $display ? ($tick, ' class="current"') : ('', ''), $v while ($k, $v) = splice @{$_->{'renderers'}}, 0, 2;
        $menu     .= $renderer_template[2];

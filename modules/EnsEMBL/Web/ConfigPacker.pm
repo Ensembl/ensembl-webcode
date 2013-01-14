@@ -314,9 +314,8 @@ sub _summarise_core_tables {
          left join external_db using(external_db_id)'
            );
     foreach my $row (@$oref) {
-  push @{$self->db_tree->{'SPECIES_ONTOLOGIES'}}, $row->[0] if ($row->[0]);
+      push @{$self->db_tree->{'SPECIES_ONTOLOGIES'}}, $row->[0] if ($row->[0]);
     }
-
   }
 
 #---------------
@@ -1295,7 +1294,7 @@ sub _summarise_go_db {
   #$self->_summarise_generic( $db_name, $dbh );
   # get the list of the available ontologies
   my $t_aref = $dbh->selectall_arrayref(
-     'select ontology.ontology_id, ontology.name, accession, term.name 
+     'select ontology.ontology_id, ontology.name, accession, term.name
       from ontology 
         join term using (ontology_id)
         left join relation on (term_id=child_term_id) 
@@ -1310,6 +1309,24 @@ sub _summarise_go_db {
     description => $description
     };
   }
+
+  #These GO terms were orphans prior to 70 but due to a change in EFO now have parents.
+  #Add these manually for now and sort properly in 71
+  $self->db_tree->{'ONTOLOGIES'}->{1} = {
+    db          => 'GO',
+    root        => 'GO:0008150',
+    description => 'biological_process',
+  };
+  $self->db_tree->{'ONTOLOGIES'}->{2} = {
+    db          => 'GO',
+    root        => 'GO:0005575',
+    description => 'cellular_component',
+  };
+  $self->db_tree->{'ONTOLOGIES'}->{3} = {
+    db          => 'GO',
+    root        => 'GO:0003674',
+    description => 'molecular_function',
+  };
 
   $dbh->disconnect();
 }

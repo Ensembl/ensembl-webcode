@@ -818,8 +818,8 @@ sub _add_datahub_tracks_matrix {
       label_x     => $label_x,
       description => "<p>$info</p><p>Contains the following sub tracks:</p>",
       info        => $info,
-      datahub     => 1,
-      renderers   => $source->{'renderers'},
+      datahub     => 'column',
+#      renderers   => $source->{'renderers'},
       %options
     };
     
@@ -863,7 +863,7 @@ sub _add_datahub_tracks {
     my $source = {
       name        => $track->{'track'},
       source_name => $source_name,
-      caption     => $track->{'shortLabel'},
+#      caption     => $track->{'shortLabel'},
       description => $track->{'longLabel'} . $link,
       source_url  => $track->{'bigDataUrl'},
       datahub     => 1,
@@ -930,12 +930,9 @@ sub _add_datahub_extras_options {
     $args{'options'}{'menu'}    = 'datahub_subtrack';
     $args{'options'}{'display'} = 'default';
     unshift @{$args{'renderers'}}, 'default', 'Default';
+  } elsif ($args{'source'}{'datahub'} eq 'column') {
+    $args{'options'}{'option_key'} = $args{'key'};
   }
-
-  ## THIS BREAKS NON-MATRIX DATAHUBS!
-  ## See DrawableContainer.pm line 98
-  #} else {
-  #  $args{'options'}{'option_key'} = $args{'key'};
 }
 
 sub load_configured_bam    { shift->load_file_format('bam');    }

@@ -133,7 +133,7 @@ sub file_uploaded {
     <html>
     <head>
       <script type="text/javascript">
-        if (!window.parent.Ensembl.EventManager.trigger('modalOpen', { href: '$url', title: 'File uploaded' })) {
+        if (!window.parent.Ensembl.EventManager.trigger('modalOpen', { href: '$url', title: 'File uploaded', rel: 'modal_user_data' })) {
           window.parent.location = '$url';
         }
       </script>

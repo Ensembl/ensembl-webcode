@@ -106,9 +106,7 @@ sub populate_tree {
       homo_nav EnsEMBL::Web::Component::Location::NavigateHomology
       matches  EnsEMBL::Web::Component::Location::SyntenyMatches
     )],
-    { 'availability' => 'chromosome has_synteny', 
-      'concise' => 'Synteny between '.$hub->species_defs->SPECIES_COMMON_NAME.' chromosome '.$coords[0]
-                    .' and '.$hub->species_defs->get_config($hub->otherspecies, 'SPECIES_COMMON_NAME') }
+    { 'availability' => 'chromosome has_synteny', 'concise' => 'Synteny'}
   ));
   
   my $variation_menu = $self->create_submenu( 'Variation', 'Genetic Variation' );

@@ -920,14 +920,14 @@ sub regions_table {
   my $table_id=$csname . "_table";
   
   my $table = new EnsEMBL::Web::Document::Table([
-    { key=>'sequence',  title=>'Sequence', align => 'left',  width=>'45%' },
-    { key=>'length',    sort=>'numeric',    title=>'Length (bp)',   align => 'right', width=>'10%' }, 
+    { key=>'sequence',  title=>'Sequence', align => 'left',  width=>'auto' },
+    { key=>'length',    sort=>'numeric',    title=>'Length (bp)',   align => 'right', width=>'auto' }, 
     ],
     $table_rows,
     {
       code=>1,
       data_table => 1,
-      width => '400px',
+     #width => 'auto',
       sorting => [ 'sequence asc' ],
       exportable => 0,
       toggleable => 1,

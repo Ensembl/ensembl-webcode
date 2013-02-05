@@ -182,7 +182,7 @@ foreach my $index (@indexes) {
     print LOG "Starting: $index $species\n";
     while ($no_success) {
       $c++;
-      $conf->{'dbh'} = DBI->connect( "dbi:mysql:$core->{'NAME'};host=$core->{'HOST'};port=$core->{'PORT'}", $core->{'USER'}, $core->{'PASS'}, { PrintError => 0, RaiseError => 0} );
+      $conf->{'dbh'} = DBI->connect( "dbi:mysql:$core->{'NAME'};host=$core->{'HOST'};port=$core->{'PORT'}", $core->{'USER'}, $core->{'PASS'}, { PrintError => 1, RaiseError => 0} );
       if ( ! $conf->{'dbh'}) {
         print LOG "WARNING: Unable to get database connection for ".$core->{'NAME'}.", will retry\n";
         $no_success = 0;
@@ -2889,7 +2889,6 @@ sub dumpRegulatoryFeature {
             sr.coord_system_id=cs.coord_system_id and cs.is_current=1
    group by rf.regulatory_feature_id"
   );
-
   foreach my $row ( @$d ) {
     my $desc = qq($row->[4] regulatory feature);
     my $id = $row->[0];

@@ -8,7 +8,7 @@ Ensembl.Panel.UserData = Ensembl.Panel.extend({
     this.base();
     
     this.elLk.activeLink      = this.el.parents('.modal_wrapper').siblings('.modal_nav').find('ul.local_context li.active');
-    this.elLk.form            = this.el.find('form').validate().off('.UserData').on('submit.UserData', function (e) { e.preventDefault(); panel.formSubmit(); });
+    this.elLk.form            = this.el.find('form').validate().off('.UserData').on('submit.UserData', function () { return panel.formSubmit(); });
     this.elLk.requiredInputs  = this.elLk.form.find(':input.required');
     this.elLk.errorMessage    = this.elLk.form.find('label._userdata_upload_error').addClass('invalid');
     this.elLk.actionInputs    = this.elLk.form.find(':input._action').each(function () {
@@ -50,7 +50,10 @@ Ensembl.Panel.UserData = Ensembl.Panel.extend({
   },
   
   formSubmit: function () {
-    if (!this.elLk.requiredInputs.filter(':visible:not([value=""])').length) {
+    var visibleInps = this.elLk.requiredInputs.filter(':visible');
+    
+    // if neither of the multiple inputs have any value
+    if (visibleInps.length > 1 && visibleInps.filter(function () { return !!this.value; }).length === 0) {
       this.elLk.errorMessage.show();
       return false;
     }

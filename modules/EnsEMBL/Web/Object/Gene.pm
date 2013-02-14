@@ -28,39 +28,35 @@ our $MEMD = EnsEMBL::Web::Cache->new;
 sub availability {
   my $self = shift;
   my ($database_synonym) = @_;
-  
+
   if (!$self->{'_availability'}) {
     my $availability = $self->_availability;
     my $obj = $self->Obj;
-    
+
     if ($obj->isa('Bio::EnsEMBL::ArchiveStableId')) {
       $availability->{'history'} = 1;
     } elsif ($obj->isa('Bio::EnsEMBL::Gene')) {
       my $counts      = $self->counts;
       my $rows        = $self->table_info($self->get_db, 'stable_id_event')->{'rows'};
       my $funcgen_res = $self->database('funcgen') ? $self->table_info('funcgen', 'feature_set')->{'rows'} ? 1 : 0 : 0;
-      
-      my $gene_tree_sub = sub {        
+
+      my $gene_tree_sub = sub {
         my $gene_tree = $self->get_GeneTree($database_synonym);
         my $has_gene_tree = $gene_tree ? 1 : 0;
         return $has_gene_tree;
       };
-      
-      my $species_tree_sub = sub {        
-        my $species_tree = $self->get_SpeciesTree($database_synonym);        
-        my $has_species_tree = $species_tree ? 1 : 0;
-        return $has_species_tree;
-      };
-      
+
       $availability->{'history'}       = !!$rows;
       $availability->{'gene'}          = 1;
       $availability->{'core'}          = $self->get_db eq 'core';
       $availability->{'alt_allele'}    = $self->table_info($self->get_db, 'alt_allele')->{'rows'};
       $availability->{'regulation'}    = !!$funcgen_res; 
       $availability->{'family'}        = !!$counts->{families};
-      $availability->{'has_gene_tree'} = $gene_tree_sub->('compara');      
-      $availability->{'has_species_tree'} = $species_tree_sub->('compara');
+      $availability->{'has_species_tree'} = $self->has_species_tree;
+      $availability->{'has_gene_tree'}    = $self->has_gene_tree;
+
       $availability->{"has_$_"}        = $counts->{$_} for qw(transcripts alignments paralogs orthologs similarity_matches operons structural_variation pairwise_alignments);
+
       ## TODO - e63 hack - may need rewriting for subsequent releases
       $availability->{'not_patch'}     = $obj->stable_id =~ /^ASMPATCH/ ? 0 : 1;
 
@@ -88,6 +84,39 @@ sub availability {
   }
 
   return $self->{'_availability'};
+}
+
+sub has_gene_tree {
+  my $self = shift;
+  my $compara_db = $self->database('compara');
+  my $stable_id = $self->Obj->stable_id;
+  my $c = 0;
+  if ($compara_db) {
+    my $compara_dbh = $compara_db->get_MemberAdaptor->dbc->db_handle;
+    ($c) = $compara_dbh->selectrow_array(qq(
+      SELECT COUNT(*)
+        FROM gene_tree_node JOIN member mp
+             USING (member_id) JOIN member mg ON mp.member_id = mg.canonical_member_id
+       WHERE mg.source_name = "ENSEMBLGENE"
+         AND mg.stable_id = '$stable_id'));
+  }
+  return $c;
+}
+
+sub has_species_tree {
+  my $self = shift;
+  my $compara_db = $self->database('compara');
+  my $stable_id = $self->Obj->stable_id;
+  my $c = 0;
+  if ($compara_db) {
+    my $compara_dbh = $compara_db->get_MemberAdaptor->dbc->db_handle;
+    ($c) = $compara_dbh->selectrow_array(qq(
+      SELECT COUNT(*)
+        FROM CAFE_gene_family cgf JOIN gene_tree_root gtr ON(cgf.gene_tree_root_id = gtr.root_id) JOIN gene_tree_node gtn ON(gtr.root_id = gtn.root_id) JOIN member mp
+       USING (member_id) JOIN member mg ON (mp.member_id = mg.canonical_member_id)
+       WHERE mg.source_name = 'ENSEMBLGENE' AND mg.stable_id = '$stable_id'));
+  }
+  return $c;
 }
 
 sub analysis {

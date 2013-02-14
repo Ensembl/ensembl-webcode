@@ -92,7 +92,7 @@ sub has_gene_tree {
   my $stable_id = $self->Obj->stable_id;
   my $c = 0;
   if ($compara_db) {
-    my $compara_dbh = $compara_db->get_MemberAdaptor->dbc->db_handle;
+    my $compara_dbh = $compara_db->db_handle;
     ($c) = $compara_dbh->selectrow_array(qq(
       SELECT COUNT(*)
         FROM gene_tree_node JOIN member mp
@@ -109,7 +109,7 @@ sub has_species_tree {
   my $stable_id = $self->Obj->stable_id;
   my $c = 0;
   if ($compara_db) {
-    my $compara_dbh = $compara_db->get_MemberAdaptor->dbc->db_handle;
+    my $compara_dbh = $compara_db->db_handle;
     ($c) = $compara_dbh->selectrow_array(qq(
       SELECT COUNT(*)
         FROM CAFE_gene_family cgf JOIN gene_tree_root gtr ON(cgf.gene_tree_root_id = gtr.root_id) JOIN gene_tree_node gtn ON(gtr.root_id = gtn.root_id) JOIN member mp

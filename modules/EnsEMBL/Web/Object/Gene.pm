@@ -60,16 +60,11 @@ sub availability {
       ## TODO - e63 hack - may need rewriting for subsequent releases
       $availability->{'not_patch'}     = $obj->stable_id =~ /^ASMPATCH/ ? 0 : 1;
 
-      ## This is a tad hacky - only applies to human right now
-      if ($self->database('variation')) { 
-        my @hgncs = grep {$_->dbname =~ /hgnc/i} @{$obj->get_all_DBEntries||[]};
-        if ($hgncs[0]) {
-          my $hgnc_name = $hgncs[0]->display_id;
-          if ($hgnc_name) {
-            my $vaa = Bio::EnsEMBL::Registry->get_adaptor($self->species, 'variation', 'VariationAnnotation');
-            $availability->{'phenotype'} = $vaa->count_all_by_associated_gene($hgnc_name);
-          }
-        }
+      ## Phenotypes are linked on HGNC names so is fine to do a fast availability call using that for now (e70)
+      ## However need a proper call for e71
+      if ($self->database('variation')) {
+        my $hgncs =  $obj->get_all_DBEntries('hgnc') || [];
+        $availability->{'phenotype'} = @$hgncs ? 1 : 0;
       }
 
       if ($self->database('compara_pan_ensembl')) {

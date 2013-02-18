@@ -14,7 +14,7 @@ use Apache2::Status;
 use Apache2::SizeLimit;
 use Apache2::ServerUtil;
 
-$Apache2::SizeLimit::MAX_PROCESS_SIZE = 1000000; # Kill httpd over 1000Mb
+$Apache2::SizeLimit::MAX_PROCESS_SIZE = 2000000; # Kill httpd over 2000Mb. It should be enough for upload file ~9MB.
 
 use CGI qw(-compile :cgi); # Load CGI.pm and call its compile method to precompile its autoloaded routines
 use DBI;
@@ -37,7 +37,7 @@ my $conf = EnsEMBL::Web::SpeciesDefs->new;
 # The effect of this is that any plugin with an EnsEMBL::Web:: namespace is used to extend that module in the core directory
 # Functions that exist in both the core and the plugin will be overwritten, functions that exist only in the plugin will be added
 require LoadPlugins;
-LoadPlugins::plugin(sub { /\.pm$/ && !/(Root|SpeciesDefs|ConfigPacker|DHTMLmerge|Cache|Constants)\.pm/; });
+LoadPlugins::plugin(sub { /\.pm$/ && !/(Root|SpeciesDefs|ConfigPacker|DHTMLmerge|Cache|Constants|MetaDataBlast)\.pm/; });
 
 if ($conf->ENSEMBL_MART_ENABLED > 0) {
   require 'BioMart/Initializer.pm';
@@ -227,7 +227,7 @@ if (Apache2::ServerUtil::restart_count == 1) { # Only parse the config on first 
   $conf->ENSEMBL_BASE_URL, $conf->ENSEMBL_JSCSS_TYPE, $conf->ENSEMBL_JS_NAME,
   join("\n                     ", grep(/::/, @{$conf->ENSEMBL_PLUGINS || []}), $extra);
   
-  require EnsEMBL::Web::BlastView::MetaDataBlast;
+#  require EnsEMBL::Web::BlastView::MetaDataBlast;
 }
 
 1;

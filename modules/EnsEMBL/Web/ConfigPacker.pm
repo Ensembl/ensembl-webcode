@@ -805,7 +805,7 @@ sub _compare_update_db {
      where sr.seq_region_id = g.seq_region_id
        and g.display_xref_id = x.xref_id
        and x.external_db_id = edb.external_db_id
-  order by g.stable_id
+  order by g.stable_id desc
 ');
   my $core_dbh  = $self->db_connect( 'DATABASE_CORE' );
   my %core_genes;

@@ -14,7 +14,6 @@ use Config;
 $Text::Wrap::columns = 75;
 
 use vars qw ( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION
-  $APACHE_DEFINE
   $APACHE_DIR
   $APACHE_BIN
   $BIOPERL_DIR
@@ -121,9 +120,9 @@ use Sys::Hostname::Long;
 use Exporter();
 @ISA=qw(Exporter);
 
-$VERSION                   = 70;
-$ARCHIVE_VERSION           = 'Jan2013';    # Change this to the archive site for this version
-$ENSEMBL_RELEASE_DATE      = 'January 2013';
+$VERSION                   = 69;
+$ARCHIVE_VERSION           = 'Oct2012';    # Change this to the archive site for this version
+$ENSEMBL_RELEASE_DATE      = 'October 2012';
 
 $ENSEMBL_MIN_SPARE_SERVERS =  5;
 $ENSEMBL_MAX_SPARE_SERVERS = 20;

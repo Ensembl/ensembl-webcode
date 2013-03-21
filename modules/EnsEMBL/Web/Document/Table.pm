@@ -142,7 +142,6 @@ sub render {
     $table_class{$data_table}  = 1 if $data_table =~ /[a-z]/i;
     $table_class{'exportable'} = 1 unless $options->{'exportable'} eq '0';
     $config = $self->data_table_config;
-    warn "config $config";
   }
   
   my $class   = join ' ', keys %table_class;

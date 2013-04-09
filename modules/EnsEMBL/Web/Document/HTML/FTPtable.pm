@@ -62,7 +62,7 @@ sub render {
     { key => 'bam',     title => 'BAM',                          align => 'center', width => '10%', sort => 'html' },
   ];
  
-  ## We want favourite species at the top of the table, 
+  ## We want favourite species at the top of the table,
   ## then everything else alphabetically by common name
   my $all_species = [];
   my %fave_check = map {$_ => 1} @{$hub->get_favourite_species};
@@ -190,7 +190,7 @@ sub required_types_for_species {
   
   # BAM
   $required_lookup{'bam'} = { map { $_ => 1 } qw(
-    canis_familiaris danio_rerio monodelphis_domestica mustela_putorius_furo
+    anolis_carolinensis canis_familiaris danio_rerio gallus_gallus monodelphis_domestica mustela_putorius_furo
     oreochromis_niloticus ornithorhynchus_anatinus pan_troglodytes pelodiscus_sinensis
     pongo_abelii sarcophilus_harrisii sus_scrofa xiphophorus_maculatus homo_sapiens felis_catus
   )};

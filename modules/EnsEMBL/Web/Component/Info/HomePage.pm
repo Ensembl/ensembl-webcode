@@ -265,7 +265,7 @@ sub variation_text {
       <p><a href="/info/docs/variation/" class="nodeco">%sMore about variation in %s</a></p>
       %s',
       
-      $sample_data->{'PHENOTYPE_PARAM'} ? sprintf(
+      $sample_data->{'VARIATION_PARAM'} ? sprintf(
         $self->{'img_link'},
         $hub->url({ type => 'Variation', action => 'Explore', v => $sample_data->{'VARIATION_PARAM'}, __clear => 1 }),
         "Go to variant $sample_data->{'VARIATION_TEXT'}", 'variation', 'Example variant'

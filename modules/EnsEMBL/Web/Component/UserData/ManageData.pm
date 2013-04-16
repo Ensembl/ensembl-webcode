@@ -189,7 +189,7 @@ sub table_row {
     })
   );
   
-  if ($file->{'nearest'} and 0) {
+  if ($file->{'nearest'}) {
     $name .= sprintf(
       '<a href="%s;contigviewbottom=%s">View sample location</a><br />',
       $hub->url({

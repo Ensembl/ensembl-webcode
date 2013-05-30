@@ -6,12 +6,48 @@ use strict;
 
 use base qw(EnsEMBL::Web::Component::TextSequence EnsEMBL::Web::Component::Gene);
 
-sub _init { $_[0]->SUPER::_init(100); }
+sub _init {
+  my $self = shift;
+  my $hub  = $self->hub;
+  
+  $self->cacheable(1);
+  $self->ajaxable(1);
+  
+  $self->{'subslice_length'} = $hub->param('force') || 100 * ($hub->param('display_width') || 60) if $hub;
+}
 
-sub initialize {
-  my ($self, $slice, $start, $end) = @_;
+sub content {
+  my $self   = shift;
+  my $slice  = $self->object->slice; # Object for this section is the slice
+  my $length = $slice->length;
+  my $html;
+  
+  if (!$self->hub->param('t1')) {
+    $html = $self->_info(
+      'No transcripts selected',
+      sprintf(
+        'You must select transcripts using the "Select transcripts" button from menu on the left hand side of this page, or by clicking <a href="%s" class="modal_link" rel="modal_select_transcripts">here</a>.',
+        $self->view_config->extra_tabs->[1]
+      )
+    ); 
+  } elsif ($length >= $self->{'subslice_length'}) {
+    $html .= '<div class="sequence_key"></div>' . $self->chunked_content($length, $self->{'subslice_length'}, { length => $length });
+  } else {
+    $html .= $self->content_sub_slice($slice); # Direct call if the sequence length is short enough
+  }
+  
+  return $html;
+}
+
+sub content_sub_slice {
+  my ($self, $slice) = @_;
   my $hub         = $self->hub;
+  my $start       = $hub->param('subslice_start');
+  my $end         = $hub->param('subslice_end');
+  my $length      = $hub->param('length');
   my @consequence = $hub->param('consequence_filter');
+     $slice     ||= $self->object->slice;
+     $slice       = $slice->sub_Slice($start, $end) if $start && $end;
   
   my $config = {
     display_width   => $hub->param('display_width') || 60,
@@ -42,44 +78,6 @@ sub initialize {
   $self->markup_comparisons($sequence, $markup, $config);
   $self->markup_line_numbers($sequence, $config)       if $config->{'line_numbering'};
   
-  return ($sequence, $config);
-}
-
-sub content {
-  my $self   = shift;
-  my $slice  = $self->object->slice; # Object for this section is the slice
-  my $length = $slice->length;
-  my $html;
-  
-  if (!$self->hub->param('t1')) {
-    $html = $self->_info(
-      'No transcripts selected',
-      sprintf(
-        'You must select transcripts using the "Select transcripts" button from menu on the left hand side of this page, or by clicking <a href="%s" class="modal_link" rel="modal_select_transcripts">here</a>.',
-        $self->view_config->extra_tabs->[1]
-      )
-    ); 
-  } elsif ($length >= $self->{'subslice_length'}) {
-    $html .= '<div class="sequence_key"></div>' . $self->chunked_content($length, $self->{'subslice_length'}, { length => $length });
-  } else {
-    $html .= $self->content_sub_slice($slice); # Direct call if the sequence length is short enough
-  }
-  
-  return $html;
-}
-
-sub content_sub_slice {
-  my ($self, $slice) = @_;
-  my $hub    = $self->hub;
-  my $start  = $hub->param('subslice_start');
-  my $end    = $hub->param('subslice_end');
-  my $length = $hub->param('length');
-  
-  $slice ||= $self->object->slice;
-  $slice   = $slice->sub_Slice($start, $end) if $start && $end;
-  
-  my ($sequence, $config) = $self->initialize($slice, $start, $end);
-  
   if ($end && $end == $length) {
     $config->{'html_template'} = '<pre class="text_sequence">%s</pre>';
   } elsif ($start && $end) {
@@ -89,8 +87,7 @@ sub content_sub_slice {
   }
   
   $config->{'html_template'} .= '<p class="invisible">.</p>';
-  $self->id('');
-  
+    
   return $self->build_sequence($sequence, $config);
 }
 
@@ -124,6 +121,7 @@ sub get_sequence_data {
     my @exons           = @{$transcript->get_all_Exons};
     my @seq             = map {{ letter => $_ }} @gene_seq;
     my $type            = 'exon1';
+    my $type_change     = -1;
     my $mk              = {};
     
     my ($crs, $cre, $transcript_start) = map $_ - $start, $transcript->coding_region_start, $transcript->coding_region_end, $transcript->start;
@@ -133,8 +131,6 @@ sub get_sequence_data {
       $_ = $length - $_ - 1, for $crs, $cre;
       ($crs, $cre) = ($cre, $crs);
     }
-    
-    $crs--;
     
     for my $exon (@exons) {
       my $exon_id = $exon->stable_id;
@@ -166,15 +162,19 @@ sub get_sequence_data {
         }
       }
       
-      if ($exon->phase == -1) {
+      if ($exon->phase == -1 && $exon->end_phase == -1) {
         $type = 'eu';
+      } elsif ($exon->phase == -1) {
+        $type        = 'eu';
+        $type_change = $crs - 1;
       } elsif ($exon->end_phase == -1) {
-        $type = 'exon1';
+        $type        = 'exon1';
+        $type_change = $cre;
       }
       
       for ($s..$e) {
         push @{$mk->{'exons'}{$_}{'type'}}, $type;
-        $type = $type eq 'exon1' ? 'eu' : 'exon1' if $_ == $crs || $_ == $cre;
+        $type = $type eq 'exon1' ? 'eu' : 'exon1' if $_ == $type_change;
         
         $mk->{'exons'}{$_}{'id'} .= ($mk->{'exons'}{$_}{'id'} ? "\n" : '') . $exon_id unless $mk->{'exons'}{$_}{'id'} =~ /$exon_id/;
       }

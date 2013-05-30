@@ -13,8 +13,7 @@ sub summary_zmenu {
   my ($self,$id,$r,$s,$e,$strand,$scalex,$width,$called_from_single) = @_;
 
   # Widen to incldue a few pixels around
-  my $fudge = 8/$scalex;
-  $fudge = 0 if $fudge<1;
+  my $fudge = max(80,8/$scalex);
   
   # Round fudge to 1sf
   my $mult = "1"."0"x(length(int $fudge)-1);
@@ -36,7 +35,7 @@ sub summary_zmenu {
   my ($num,$num_this_strand,$tot_meth,$tot_read) = (0,0,0,0);
   my ($label,@percmeth,@rows);
   my $maxmult = 2; # show multiple zmenus if this many results or fewer
-  $bba->fetch_rows($slice->seq_region_name,$s,$e+1,sub {
+  $bba->fetch_rows($slice->seq_region_name,$s,$e,sub {
     my @row = @_;
     my $f = Bio::EnsEMBL::Funcgen::DNAMethylationFeature->new( 
           -SLICE => $slice, 
@@ -96,8 +95,7 @@ sub single_base_zmenu {
   my ($self,$id,$r,$s,$strand,$scalex,$width) = @_;
   
   # how far off can a user be due to scale? 8px or 1bp.
-  my $fudge = 8/$scalex;
-  $fudge = 0 if $fudge < 1;
+  my $fudge = max(1,8/$scalex);
   
   my $sa = $self->hub->database('core')->get_SliceAdaptor;
   my $slice = $sa->fetch_by_toplevel_location($r);
@@ -138,10 +136,8 @@ sub single_base_zmenu {
   my ($chr,) = split(/:/,$r);
   if($self->{'_sent_caption'}) {
     $self->add_subheader($f->display_label." $chr:$s");
-    $self->add_entry({ type => "Location", label => "$chr:$s" });
   } else {
     $self->caption($f->display_label." $chr:$s");
-    $self->add_entry({ type => "Location", label => "$chr:$s" });
     $self->add_entry({ type => "Context", label => $f->context}); 
     $self->add_entry({ type => "Cell type", label => $f->cell_type->name}); 
     $self->add_entry({ type => "Analysis method", label => $f->analysis->display_label}); 
@@ -187,7 +183,7 @@ sub content {
 
   $r =~ s/:.*$/:$s-$e/;
   # We need to defeat js-added fuzz to see if it was an on-target click.
-  if($e-$s+1<2*$scalex && $s!=$e) { # range within 1px, assume click.
+  if($e-$s+1<2*$scalex) { # range within 1px, assume click.
     # fuzz added is symmetric
     $s = ($s+$e-1)/2;
     $e = $s+1;

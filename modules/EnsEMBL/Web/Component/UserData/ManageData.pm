@@ -168,16 +168,17 @@ sub table_row {
     $url_params{'id'} = $file->id;
     
     $save = $self->_icon({ no_link => 1, class => 'sprite_disabled save_icon', title => 'Saved data' });
-  } elsif ($logins) {
-    my $save_html = $self->_icon({ link_class => 'modal_link',
-                                   class => 'save_icon',
-                                   title => '%s' });
-    
-    my $save_url  = $hub->url({ action => 'ModifyData', function => $file->{'url'} ? 'save_remote' : 'save_upload', code => $file->{'code'}, __clear => 1 });
+  } else {
     
     $url_params{'code'} = $file->{'code'};
     
-    $save = sprintf $save_html, $hub->user ? ($save_url, 'Save to account') : ($hub->url({ type => 'Account', action => 'Login', __clear => 1, then => uri_escape($save_url), modal_tab => 'modal_user_data' }), 'Log in to save');
+    if ($logins) {
+      my $save_html = $self->_icon({ link_class => 'modal_link',
+                                     class => 'save_icon',
+                                     title => '%s' });
+      my $save_url  = $hub->url({ action => 'ModifyData', function => $file->{'url'} ? 'save_remote' : 'save_upload', code => $file->{'code'}, __clear => 1 });     
+      $save = sprintf $save_html, $hub->user ? ($save_url, 'Save to account') : ($hub->url({ type => 'Account', action => 'Login', __clear => 1, then => uri_escape($save_url), modal_tab => 'modal_user_data' }), 'Log in to save');
+    }
   }
   
   $name .= sprintf(

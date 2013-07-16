@@ -208,13 +208,13 @@ if (0) {
 	  }
 
 	  my $cmpdb = $self->database('compara');
-	  my $compara_name = lc($self->species_defs->COMPARA_DB_NAME || 'Ensembl Compara');
+	  my $compara_name = $slabel;
 	  my $olink = 'Ortholog';
 	  my $plink = 'Paralog';
 
 	  if ($slabel =~ /Bacteria/) {
 	      $cmpdb = $self->database('compara_pan_ensembl');
-	      $compara_name = 'pan-taxonomic compara';
+	      $compara_name = 'Ensembl Genomes';
 	      $olink = 'Ortholog/pan_compara';
 	      $plink = 'Paralog/pan_compara';
 

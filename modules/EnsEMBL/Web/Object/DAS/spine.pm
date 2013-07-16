@@ -209,10 +209,15 @@ if (0) {
 
 	  my $cmpdb = $self->database('compara');
 	  my $compara_name = lc($self->species_defs->COMPARA_DB_NAME || 'Ensembl Compara');
+	  my $olink = 'Ortholog';
+	  my $plink = 'Paralog';
 
 	  if ($slabel =~ /Bacteria/) {
 	      $cmpdb = $self->database('compara_pan_ensembl');
 	      $compara_name = 'pan-taxonomic compara';
+	      $olink = 'Ortholog/pan_compara';
+	      $plink = 'Paralog/pan_compara';
+
 	  }
 
 	  if ($cmpdb) {
@@ -245,7 +250,7 @@ if (0) {
 		  'NOTE' => $notes2,
 		  'LINK' =>  $onum ? [
 			     { 'text' => "View homology between species inferred from a gene tree in $slabel.",
-			       'href' => sprintf( $self->{'templates'}{'compara_URL'}, 'Ortholog', $gene->stable_id, 'core' ),
+			       'href' => sprintf( $self->{'templates'}{'compara_URL'}, $olink, $gene->stable_id, 'core' ),
 			   }
 			     ] : [ ],
 	      };
@@ -261,7 +266,7 @@ if (0) {
 		  'NOTE' => $notes3,
 		  'LINK' => $pnum ? [
 			     { 'text' => "View homology arising from a duplication event, inferred from a gene tree in $slabel.",
-			       'href' => sprintf( $self->{'templates'}{'compara_URL'}, 'Paralog', $gene->stable_id, 'core' ),
+			       'href' => sprintf( $self->{'templates'}{'compara_URL'}, $plink, $gene->stable_id, 'core' ),
 			   }
 			     ] : [ ],
 	      };

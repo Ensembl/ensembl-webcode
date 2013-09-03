@@ -259,8 +259,17 @@ sub handler {
   shift @raw_path; # Always empty
 
   ## Simple redirect to VEP
-  if ($raw_path[0] && $raw_path[0] =~ /^VEP$/i) {
-    $r->uri('/info/vep.html');
+  if ($file =~ /\/info\/docs\/variation\/vep\/vep_script.html/) {
+    $r->uri('/info/docs/tools/vep/script/index.html');
+    $r->headers_out->add('Location' => $r->uri);
+    $r->child_terminate;
+      
+    $ENSEMBL_WEB_REGISTRY->timer_push('Handler "REDIRECT"', undef, 'Apache');
+    
+    return HTTP_MOVED_PERMANENTLY;
+  }
+  elsif (($raw_path[0] && $raw_path[0] =~ /^VEP$/i) || $file =~ /\/info\/docs\/variation\/vep\//) {
+    $r->uri('/info/docs/tools/vep/index.html');
     $r->headers_out->add('Location' => $r->uri);
     $r->child_terminate;
       

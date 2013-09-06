@@ -259,17 +259,21 @@ sub handler {
   shift @raw_path; # Always empty
 
   ## Simple redirect to VEP
+  my $redirect = 0;
   if ($file =~ /\/info\/docs\/variation\/vep\/vep_script.html/) {
     $r->uri('/info/docs/tools/vep/script/index.html');
-    $r->headers_out->add('Location' => $r->uri);
-    $r->child_terminate;
-      
-    $ENSEMBL_WEB_REGISTRY->timer_push('Handler "REDIRECT"', undef, 'Apache');
-    
-    return HTTP_MOVED_PERMANENTLY;
+    $redirect = 1;
   }
   elsif (($raw_path[0] && $raw_path[0] =~ /^VEP$/i) || $file =~ /\/info\/docs\/variation\/vep\//) {
     $r->uri('/info/docs/tools/vep/index.html');
+    $redirect = 1;
+  }
+  elsif ($file =~ /\/info\/docs\/(variation|funcgen|compara|genebuild)\//) {
+    $file =~ s/docs/genome/;
+    $r->uri($file);
+    $redirect = 1;
+  }
+  if ($redirect) {
     $r->headers_out->add('Location' => $r->uri);
     $r->child_terminate;
       

@@ -115,6 +115,7 @@ sub init {
     class   => 'fixed_width',
     caption => 'Personal Data',
     url     => $hub->url({
+       species => $hub->species || 'Multi',
        type    => 'UserData',
        action  => 'ManageData',
        time    => time,

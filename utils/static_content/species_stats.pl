@@ -470,7 +470,7 @@ foreach my $spp (@valid_spp) {
       my @coord_systems;
       my $sa = $db_adaptor->get_adaptor('slice');
       my $csa = $db_adaptor->get_adaptor('coordsystem');
-      foreach my $cs (sort {$a->rank <=> $b->rank} @{$csa->fetch_all() || []}){
+      foreach my $cs (sort {$a->rank <=> $b->rank} @{$csa->fetch_all_by_attrib('default_version') || []}){
         next if (grep {$_ eq $cs->name} @hidden);
         push(@coord_systems,$cs);
       }

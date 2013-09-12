@@ -55,10 +55,11 @@ sub create {
     print FH _lines("User-agent","*");
     print FH _lines("Disallow",qw(
       /Multi/  /biomart/  /Account/  /ExternalData/  /UserAnnotation/
-      */Ajax/  */Config/  */blastview/  */Export/  */Experiment/  
-      */Location/  */LRG/  */Phenotype/  */Regulation/  */Search/
+      */Ajax/  */Config/  */blastview/  */Export/  */Experiment/ */Experiment*
+      */Location/  */LRG/  */Phenotype/  */Regulation/  */Search/ */Share
       */UserConfig/  */UserData/  */Variation/
     ));
+
 
     #old views
     print FH _lines("Disallow",qw(*/*view));
@@ -71,6 +72,12 @@ sub create {
       next if lc $row eq 's';
       print FH _lines("Disallow","*/Gene/$row*","*/Transcript/$row*");
     }
+
+    # a bunch of other 
+    foreach my $row (qw(SpeciesTree Similarity SupportingEvidence Sequence_Protein Sequence_cDNA Sequence StructuralVariation_Gene Splice)) {
+      print FH _lines("Disallow","*/Gene/$row/*","*/Transcript/$row/*");
+    }
+
     
     print FH _lines("Sitemap","http://www.ensembl.org/sitemap-index.xml");
   } else {

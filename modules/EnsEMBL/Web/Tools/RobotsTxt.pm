@@ -75,7 +75,7 @@ sub create {
 
     # a bunch of other 
     foreach my $row (qw(SpeciesTree Similarity SupportingEvidence Sequence_Protein Sequence_cDNA Sequence StructuralVariation_Gene Splice)) {
-      print FH _lines("Disallow","*/Gene/$row/*","*/Transcript/$row/*");
+      print FH _lines("Disallow","*/Gene/$row*","*/Transcript/$row*");
     }
 
     

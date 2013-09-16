@@ -50,7 +50,7 @@ sub create {
   if(-e "$server_root/htdocs/sitemaps/sitemap-index.xml") {
     # If we have a sitemap we need a less-restrictive robots.txt, so
     # that the crawler can use the sitemap.
-    warn _box("Creating robots.txt for google sitemap");    
+    warn _box("Creating robots.txt for google sitemap");
 
     print FH _lines("User-agent","*");
     print FH _lines("Disallow",qw(
@@ -105,6 +105,9 @@ sub create {
   # Limit Blekkobot's crawl rate to only one page every 20 seconds.
   print FH _lines("User-agent","Blekkobot");
   print FH _lines("Crawl-delay","20");
+  # stop AhrefsBot indexing us (https://ahrefs.com/robot/)
+  print FH _lines("User-agent","AhrefsBot");
+  print FH _lines("Disallow","/");
   close FH;
   return;
 }

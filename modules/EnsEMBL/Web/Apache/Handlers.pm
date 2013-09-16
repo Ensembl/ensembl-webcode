@@ -268,7 +268,7 @@ sub handler {
     $r->uri('/info/docs/tools/vep/index.html');
     $redirect = 1;
   }
-  elsif ($file =~ /\/info\/docs\/(variation|funcgen|compara|genebuild)\//) {
+  elsif ($file =~ /\/info\/docs\/(variation|funcgen|compara|genebuild|microarray)\//) {
     $file =~ s/docs/genome/;
     $r->uri($file);
     $redirect = 1;

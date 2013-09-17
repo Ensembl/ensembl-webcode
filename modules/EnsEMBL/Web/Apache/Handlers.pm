@@ -354,6 +354,17 @@ sub handler {
     
       return HTTP_MOVED_PERMANENTLY;
     }
+    else {
+      ## In case the given ID is retired, which means no species 
+      ## can be returned by the API call above
+      $r->uri('/');
+      $r->headers_out->add('Location' => $r->uri);
+      $r->child_terminate;
+      
+      $ENSEMBL_WEB_REGISTRY->timer_push('Handler "REDIRECT"', undef, 'Apache');
+    
+      return NOT_FOUND;
+    }
   }
 
   my %lookup = map { $_ => 1 } $species_defs->valid_species;

@@ -73,12 +73,15 @@ sub create {
       print FH _lines("Disallow","*/Gene/$row*","*/Transcript/$row*");
     }
 
-    # a bunch of other 
+    # a bunch of others that are being bypassed
     foreach my $row (qw(SpeciesTree Similarity SupportingEvidence Sequence_Protein Sequence_cDNA Sequence StructuralVariation_Gene Splice)) {
       print FH _lines("Disallow","*/Gene/$row*","*/Transcript/$row*");
     }
 
-    
+    # links from ChEMBL
+    print FH _lines("Disallow","/Gene/Summary");
+    print FH _lines("Disallow"," /Transcript/Summary");
+
     print FH _lines("Sitemap","http://www.ensembl.org/sitemap-index.xml");
   } else {
     # No sitemap, use old, restrictive robots.txt.

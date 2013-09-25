@@ -237,7 +237,6 @@ sub insdc_accession {
   }
   return undef unless $slice;
   my $name = $self->_insdc_synonym($slice,'INSDC');
-  $name = $self->_insdc_synonym($slice,'EMBL') unless $name;
   return undef unless $name;
   return join(':',$slice->coord_system->name,$csv,$name,
                   $slice->start,$slice->end,$slice->strand);

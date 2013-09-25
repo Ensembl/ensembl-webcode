@@ -73,12 +73,9 @@ our %mapping = (
                               { 'type' => 'Variation',           'action' => 'Compara_Alignments',           'initial_release' => 54 },
                               { 'type' => 'Variation',           'action' => 'Explore',                      'initial_release' => 65 },
                               { 'type' => 'Variation',           'action' => 'ExternalData',                 'initial_release' => 57 },
-                              { 'type' => 'Variation',           'action' => 'Citations',                    'initial_release' => 72 },
-                              { 'type' => 'StructuralVariation', 'action' => 'Explore',                      'initial_release' => 62 },
+                              { 'type' => 'StructuralVariation', 'action' => 'Summary',                      'initial_release' => 62 },
                               { 'type' => 'StructuralVariation', 'action' => 'Evidence',                     'initial_release' => 62 },
                               { 'type' => 'StructuralVariation', 'action' => 'Context',                      'initial_release' => 60 },
-                              { 'type' => 'StructuralVariation', 'action' => 'Mappings',                     'initial_release' => 70 },
-                              { 'type' => 'StructuralVariation', 'action' => 'Phenotype',                    'initial_release' => 70 },
                               { 'type' => 'Regulation',          'action' => 'Summary',                      'initial_release' => 56 },
                               { 'type' => 'Regulation',          'action' => 'Cell_line',                    'initial_release' => 58 },
                               { 'type' => 'Regulation',          'action' => 'Evidence',                     'initial_release' => 56 },
@@ -87,9 +84,6 @@ our %mapping = (
                               { 'type' => 'Gene',                'action' => 'Phenotype',                    'initial_release' => 64 },
                               { 'type' => 'Gene',                'action' => 'Compara',                      'initial_release' => 62 },
                               { 'type' => 'Gene',                'action' => 'StructuralVariation_Gene',     'initial_release' => 63 },
-                              { 'type' => 'Gene',                'action' => 'TranscriptComparison',         'initial_release' => 71 },
-                              { 'type' => 'Gene',                'action' => 'Expression',                   'initial_release' => 71 },
-                              { 'type' => 'Gene',                'action' => 'SpeciesTree',                  'initial_release' => 69 },
                               { 'type' => 'Transcript',          'action' => 'Ontology/Image',               'initial_release' => 60 },
                               { 'type' => 'Transcript',          'action' => 'Ontology/Table',               'initial_release' => 60 },
                               { 'type' => 'Transcript',          'action' => 'Variation_Transcript/Table',   'initial_release' => 68 },
@@ -104,11 +98,10 @@ our %mapping = (
                               { 'type' => 'LRG',                 'action' => 'Exons',                        'initial_release' => 62 },
                               { 'type' => 'LRG',                 'action' => 'ProteinSummary',               'initial_release' => 65 },
                               { 'type' => 'Phenotype',           'action' => 'Locations',                    'initial_release' => 64 },
-                              { 'type' => 'Phenotype',           'action' => 'All',                          'initial_release' => 69 },
                               { 'type' => 'Marker',              'action' => 'Details',                      'initial_release' => 59 },
                               { 'type' => 'GeneTree',            'action' => 'Image',                        'initial_release' => 60 },
                               { 'type' => 'Experiment',          'action' => 'Sources',                      'initial_release' => 65 },
-                              { 'type' => 'Search',              'action' => 'New',                          'initial_release' => 63 }],       
+                              { 'type' => 'Search',              'action' => 'New',                          'initial_release' => 63 }],
   # internal views
   'colourmap'             => [{ 'type' => 'Server',              'action' => 'Colourmap',                    'initial_release' => 1  }],
   'status'                => [{ 'type' => 'Server',              'action' => 'Information',                  'initial_release' => 34 }],
@@ -128,14 +121,21 @@ sub get_redirect {
 }
 
 sub get_archive_redirect {
-  my ($type, $action) = @_;
-  my @releases;
+  my ($type, $action, $hub) = @_;
   
-  while (my ($old_view, $new_views) = each %mapping) {
-    push @releases, [ $old_view, $_->{'initial_release'}, $_->{'final_release'}, $_->{'missing_releases'} || [] ] for grep $_->{'type'} eq $type && $_->{'action'} eq $action, @$new_views;
+  my $releases;
+  
+  while (my ($old_view, $new_views) = each (%mapping)) {
+    foreach (@$new_views) {
+      if ($_->{'type'} eq $type && $_->{'action'} eq $action) {
+        my $final_release = $_->{'final_release'} || $hub ? $hub->species_defs->ENSEMBL_VERSION : undef;
+        
+        push @$releases, [ $old_view, $_->{'initial_release'}, $final_release, $_->{'missing_releases'} || [] ];
+      }
+    }
   }
   
-  return \@releases;
+  return $releases;
 }
 
 1;

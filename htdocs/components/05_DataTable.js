@@ -164,9 +164,7 @@ Ensembl.DataTable = {
       
       if (this.name === 'hiddenColumns') {
         $.each(val, function () {
-          if(options.aoColumns[this]) {
-            options.aoColumns[this].bVisible = false;
-          }
+          options.aoColumns[this].bVisible = false;
         });
       } else if ( this.name.indexOf("expopts") == 0) {
         // no-op, this isn't an option for the client side
@@ -198,12 +196,12 @@ Ensembl.DataTable = {
           var input  = $('input', this);
           var tables, visibility, index, textCheck;
           
-          if (!input.prop('disabled')) {
+          if (!input.attr('disabled')) {
             tables     = $.grep(panel.dataTables, function (table) { return !table.is('.no_col_toggle'); });
             visibility = !columns[col].bVisible;
             
             if (panel.elLk.colToggle.length === 1) {
-              input.prop('checked', visibility);
+              input.attr('checked', visibility);
             } else {
               index     = $(this).index();
               textCheck = $(this).parent().text();

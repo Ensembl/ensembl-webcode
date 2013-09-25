@@ -56,7 +56,6 @@ sub process {
             $ddaf->seqname($_->seqname);
             $ddaf->score($_->external_data->{'score'}[0]);
             $ddaf->extra_data($_->external_data);
-            $ddaf->{'gff_attribs'}=$_->attribs;
             
             push @fs, $ddaf;
           }
@@ -102,7 +101,7 @@ sub process {
 
         my $feature_type = $f->extra_data->{'feature_type'}[0];
         my $source       = $f->extra_data->{'source'}[0];
-        my $extra        = $f->{'gff_attribs'};
+        my $extra        = {};
         my $other        = [];
         
         while (my ($k, $v) = each %{$f->extra_data}) {
@@ -111,7 +110,6 @@ sub process {
           push @$other, $k;
           $extra->{$k} = $v->[0];
         }
-        push(@$other,keys %{$f->{'gff_attribs'}});
         
         $exporter->{'config'}{'extra_fields'} = $other;
         $exporter->feature($feature_type, $f, $extra, { source => $source });

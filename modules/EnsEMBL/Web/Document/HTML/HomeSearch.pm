@@ -54,7 +54,6 @@ sub render {
   my $field = $form->add_field($f_params);
 
   # species dropdown
-  my $search_class = "search_species";
   if ($page_species eq 'Multi') {
     my %species      = map { $species_defs->get_config($_, 'DISPLAY_NAME') => $_ } @{$species_defs->ENSEMBL_DATASETS};
     my %common_names = reverse %species;
@@ -72,7 +71,6 @@ sub render {
         map({'value' => $species{$_}, 'caption' => $_}, sort { uc $a cmp uc $b } keys %species)
       ]
     }, 1)->first_child->after('label', {'inner_HTML' => 'for', 'for' => 'q'});
-    $search_class = "search_home";
   }
 
   # search input box & submit button
@@ -84,7 +82,7 @@ sub render {
   my $elements_wrapper = $field->elements->[0];
   $elements_wrapper->append_child('span', {'class' => 'inp-group', 'children' => [ splice @{$elements_wrapper->child_nodes}, 0, 2 ]})->after({'node_name' => 'wbr'}) for (0..1);
 
-  return sprintf '<div id="SpeciesSearch" class="js_panel %s"><input type="hidden" class="panel_type" value="SearchBox" />%s</div>',$search_class, $form->render;
+  return sprintf '<div id="SpeciesSearch" class="js_panel"><input type="hidden" class="panel_type" value="SearchBox" />%s</div>', $form->render;
 }
 
 1;

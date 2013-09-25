@@ -44,6 +44,8 @@ sub content {
   
   $strand = $strand_map{$strand};
   
+  $self->caption($hub->param('label'));
+  
   foreach (keys %{$features->{$logic_name}->{'features'}}) {
     my $objects = $features->{$logic_name}->{'features'}->{$_}->{'objects'};
     
@@ -86,14 +88,6 @@ sub content {
          abs($_->seq_region_end - $hub->param('end'))) * 2 -
         ($_->strand != $hub->param('strand'))
       } @$objects);
-    }
-
-    if (@feat) {
-      $self->caption($hub->param('label'));
-    } elsif ($group_id) {
-      # the group was clicked, but no features are close enough - 
-      # add some dummy content to ensure the group header is still displayed
-      $self->add_entry({});                       
     }
     
     foreach (@feat) {

@@ -8,7 +8,7 @@ use POSIX qw(floor);
 use base qw(Bio::EnsEMBL::GlyphSet);
   
 # Least number of pixels per written number. Feel free to tweak.
-my $min_pix_per_major = 80;
+my $min_pix_per_major = 100;
 
 sub scale {
   my ($from,$to,$max) = @_; 
@@ -20,8 +20,8 @@ sub scale {
   # Split into array of digits
   my @from_d = split(//,"".$from);
   my @to_d = split(//,"".$to);
-  push @from_d,"0" for(@from_d..@to_d-1);
-  push @to_d,"0" for(@to_d..@from_d-1);
+  unshift @from_d,"0" for(@from_d..@to_d-1);
+  unshift @to_d,"0" for(@to_d..@from_d-1);
 
   # How many divisions would there be ($d) if we only kept $i digits?
   my $d; 
@@ -41,7 +41,7 @@ sub scale {
   # Improve things by trying simple multiples of 1<n zeroes>.
   # (eg if 100 will fit will 200, 400, 500).
   if($d*5 <= $max) { $unit /=5; $div = 2; }
-  elsif($d*4 <= $max) { $unit /=4; $skip = 2; }
+  elsif($d*4 <= $max) { $unit /=4; $skip = 2; $div = 1; }
   elsif($d*2 <= $max) { $unit /=2; $skip = 2; }
   $skip = 1 unless $d > 2;
   return [$unit,$div,$unit*$skip];

@@ -102,9 +102,10 @@ sub command{
 
   my( $host, $port, $nib_dir ) = $self->_get_server();
 
+	#"-out=wublast -minScore=0 -minIdentity=0",
   my $command = join( ' ',
 		      $exe,
-		      "-out=wublast -minScore=0 -minIdentity=0",
+		      "-out=wublast",
 		      $host,
 		      $port,
 		      $nib_dir,

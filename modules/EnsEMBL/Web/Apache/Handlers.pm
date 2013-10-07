@@ -259,8 +259,21 @@ sub handler {
   shift @raw_path; # Always empty
 
   ## Simple redirect to VEP
-  if ($raw_path[0] && $raw_path[0] =~ /^VEP$/i) {
-    $r->uri('/info/vep.html');
+  my $redirect = 0;
+  if ($file =~ /\/info\/docs\/variation\/vep\/vep_script.html/) {
+    $r->uri('/info/docs/tools/vep/script/index.html');
+    $redirect = 1;
+  }
+  elsif (($raw_path[0] && $raw_path[0] =~ /^VEP$/i) || $file =~ /\/info\/docs\/variation\/vep\//) {
+    $r->uri('/info/docs/tools/vep/index.html');
+    $redirect = 1;
+  }
+  elsif ($file =~ /\/info\/docs\/(variation|funcgen|compara|genebuild|microarray)/) {
+    $file =~ s/docs/genome/;
+    $r->uri($file);
+    $redirect = 1;
+  }
+  if ($redirect) {
     $r->headers_out->add('Location' => $r->uri);
     $r->child_terminate;
       
@@ -282,11 +295,20 @@ sub handler {
   
   ## Identify the species element, if any
   my ($species, @path_segments);
- 
-  ## Check for stable id URL (/id/ENSG000000nnnnnn)
-  if ($raw_path[0] && $raw_path[0] =~ /^id$/i && $raw_path[1]) {
-    my $stable_id = $raw_path[1];
-    my ($object_type, $db_type, $uri);
+
+  ## Check for stable id URL (/id/ENSG000000nnnnnn) 
+  ## and malformed Gene/Summary URLs from external users
+  if (($raw_path[0] && $raw_path[0] =~ /^id$/i && $raw_path[1])
+    || ($raw_path[0] eq 'Gene' && $querystring =~ /g=/ ))
+  {
+    my ($stable_id, $object_type, $db_type, $uri);
+    if ($raw_path[0] =~ /^id$/i) {
+      $stable_id = $raw_path[1];
+    }
+    else {
+      $querystring =~ /g=(\w+)/;
+      $stable_id = $1;
+    }
     my $unstripped_stable_id = $stable_id;
     if ($stable_id =~ /^ENS/) {
 	    $stable_id =~ s/\.[0-9]+$//; ## Remove versioning for Ensembl ids
@@ -331,6 +353,17 @@ sub handler {
       $ENSEMBL_WEB_REGISTRY->timer_push('Handler "REDIRECT"', undef, 'Apache');
     
       return HTTP_MOVED_PERMANENTLY;
+    }
+    else {
+      ## In case the given ID is retired, which means no species 
+      ## can be returned by the API call above
+      $r->uri('/');
+      $r->headers_out->add('Location' => $r->uri);
+      $r->child_terminate;
+      
+      $ENSEMBL_WEB_REGISTRY->timer_push('Handler "REDIRECT"', undef, 'Apache');
+    
+      return NOT_FOUND;
     }
   }
 

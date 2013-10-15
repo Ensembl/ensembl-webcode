@@ -147,6 +147,7 @@ sub menus {
     simple              => [ 'Simple features',         'seq_assembly' ],
     ditag               => [ 'Ditag features',          'seq_assembly' ],
     dna_align_other     => [ 'GRC alignments',          'seq_assembly' ],
+    dna_align_compara   => [ 'Imported alignments',     'seq_assembly' ],
     
     # Transcripts/Genes
     gene_transcript     => 'Genes and transcripts',
@@ -188,7 +189,6 @@ sub menus {
     pairwise_tblat      => [ 'Translated blat alignments', 'compara' ],
     multiple_align      => [ 'Multiple alignments',        'compara' ],
     conservation        => [ 'Conservation regions',       'compara' ],
-    dna_align_compara   => [ 'Imported alignments',        'compara' ],
     synteny             => 'Synteny',
     
     # Other features

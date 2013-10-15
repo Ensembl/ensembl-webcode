@@ -188,6 +188,7 @@ sub menus {
     pairwise_tblat      => [ 'Translated blat alignments', 'compara' ],
     multiple_align      => [ 'Multiple alignments',        'compara' ],
     conservation        => [ 'Conservation regions',       'compara' ],
+    dna_align_compara   => [ 'Imported alignments',        'compara' ],
     synteny             => 'Synteny',
     
     # Other features
@@ -1794,12 +1795,9 @@ sub add_dna_align_features {
   foreach my $key_2 (@$keys) {
     my $k    = $data->{$key_2}{'type'} || 'other';
     my $menu = ($k =~ /rnaseq|simple/) ? $self->tree->get_node($k) : $self->tree->get_node("dna_align_$k");
-    
     if ($menu) {
       my $alignment_renderers = ['off','Off'];
-      
       $alignment_renderers = [ @{$self->{'alignment_renderers'}} ] unless($data->{$key_2}{'no_default_renderers'});
-            
       if (my @other_renderers = @{$data->{$key_2}{'additional_renderers'} || [] }) {
         my $i = 0;
         while ($i < scalar(@other_renderers)) {
@@ -1808,14 +1806,13 @@ sub add_dna_align_features {
           $i += 2;
         }
       }
-      
       my $display = $data->{$key_2}{'display'} ? $data->{$key_2}{'display'} : 'off';
 #      my $display  =  (grep { $data->{$key_2}{'display'} eq $_ } @$alignment_renderers )             ? $data->{$key_2}{'display'}
 #                    : (grep { $data->{$key_2}{'display'} eq $_ } @{$self->{'alignment_renderers'}} ) ? $data->{$key_2}{'display'}
 #                    : 'off'; # needed because the same logic_name can be a gene and an alignment
       my $glyphset = '_alignment';
       my $strand   = 'b';
-      
+
       if ($key_2 eq 'alt_seq_mapping') {
         $display             = 'simple';
         $alignment_renderers = [ 'off', 'Off', 'normal', 'On' ];  
@@ -1895,7 +1892,6 @@ sub add_genes {
     next unless $menu;
 
     foreach my $key2 (@$keys) {
-
       my $t = $type;
 
       # force genes into a seperate menu if so specified in web_data (ie rna-seq); unless you're on a transcript page that is

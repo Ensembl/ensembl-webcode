@@ -468,7 +468,7 @@ sub modal_form {
   my $params            = {};
   $params->{'action'}   = $params->{'next'} = $action;
   $params->{'current'}  = $hub->action;
-  $params->{$_}         = $options->{$_} for qw(class method wizard label no_back_button no_button buttons_on_top buttons_align skip_validation);
+  $params->{$_}         = $options->{$_} for qw(class method wizard label no_back_button no_button buttons_on_top buttons_align skip_validation enctype);
   $params->{'name'} = $name;
 
   if ($options->{'wizard'}) {

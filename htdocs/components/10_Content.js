@@ -19,6 +19,7 @@ Ensembl.Panel.Content = Ensembl.Panel.extend({
     this.base();
     
     this.xhr = false;
+    this.maxreq = 12; // maximum simultaneous AJAX requests
     
     var fnEls = {
       ajaxLoad:       $('.ajax', this.el),
@@ -66,9 +67,11 @@ Ensembl.Panel.Content = Ensembl.Panel.extend({
   
   ajaxLoad: function () {
     var panel = this;
+    var todo = []; 
+    var i;
     
     $('.navbar', this.el).width(Ensembl.width);
-    
+   
     this.elLk.ajaxLoad.each(function () {
       var el    = $(this);
       var url   = el.find('input.ajax_load').val();
@@ -88,12 +91,32 @@ Ensembl.Panel.Content = Ensembl.Panel.extend({
         data[inp.name] = inp.value;
       });
       
-      panel.getContent(url, $(this), { updateURL: url + ';update_panel=1', updateType: $.isEmptyObject(data) ? 'get' : 'post', updateData: data });
+      todo.push(panel.prepareContent(url, $(this), { updateURL: url + ';update_panel=1', updateType: $.isEmptyObject(data) ? 'get' : 'post', updateData: data }));
+    });
+
+    for(i=0; i<this.maxreq && todo.length; i++) {
+      this.doOneRequest(todo);
+    }
+  },
+ 
+  doOneRequest: function(todo) {
+    var panel = this;
+
+    if(!todo.length) {
+      return;
+    }
+    todo.shift().call(panel,function() {
+      panel.doOneRequest(todo);
     });
   },
   
   getContent: function (url, el, params, newContent) {
-    var node, data;
+    var fn = this.prepareContent(url, el, params, newContent);
+    fn.call(this,function() {}); 
+  },
+ 
+  prepareContent: function (url, el, params, newContent) {
+    var node, data, out;
     
     if (typeof el === 'string') {
       el = $(el, this.el).empty();
@@ -133,7 +156,14 @@ Ensembl.Panel.Content = Ensembl.Panel.extend({
         }
       });
     }
-    
+    return function(complete) {
+      this.doAjax(url, el, data, params, newContent, complete);
+    };
+  }, 
+ 
+  doAjax: function (url, el, data, params, newContent, complete) {
+    var panel = this;
+
     this.xhr = $.ajax({
       url: url,
       data: data,
@@ -152,7 +182,6 @@ Ensembl.Panel.Content = Ensembl.Panel.extend({
         } else {
           el.html('');
         }
-        
         Ensembl.EventManager.trigger('ajaxLoaded');
       },
       error: function (e) {
@@ -163,6 +192,7 @@ Ensembl.Panel.Content = Ensembl.Panel.extend({
       complete: function () {
         el = null;
         this.xhr = false;
+        complete.call(panel);
       }
     });
   },

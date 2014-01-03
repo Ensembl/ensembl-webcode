@@ -105,14 +105,13 @@ Ensembl.Panel.Content = Ensembl.Panel.extend({
     if(!todo.length) {
       return;
     }
-    todo.shift().call(panel,function() {
+    todo.shift().call(panel).always(function() {
       panel.doOneRequest(todo);
     });
   },
   
   getContent: function (url, el, params, newContent) {
-    var fn = this.prepareContent(url, el, params, newContent);
-    fn.call(this,function() {}); 
+    this.prepareContent(url, el, params, newContent).call(this);
   },
  
   prepareContent: function (url, el, params, newContent) {
@@ -156,12 +155,12 @@ Ensembl.Panel.Content = Ensembl.Panel.extend({
         }
       });
     }
-    return function(complete) {
-      this.doAjax(url, el, data, params, newContent, complete);
+    return function() {
+      return this.doAjax(url, el, data, params, newContent);
     };
   }, 
  
-  doAjax: function (url, el, data, params, newContent, complete) {
+  doAjax: function (url, el, data, params, newContent) {
     var panel = this;
 
     this.xhr = $.ajax({
@@ -188,13 +187,13 @@ Ensembl.Panel.Content = Ensembl.Panel.extend({
         if (e.status !== 0) { // e.status === 0 when navigating to a new page while request is still loading
           el.html('<div class="error ajax_error"><h3>Ajax error</h3><div class="error-pad"><p>Sorry, the page request "' + url + '" failed to load.</p></div></div>');
         }
-      },
-      complete: function () {
-        el = null;
-        this.xhr = false;
-        complete.call(panel);
       }
     });
+    this.xhr.always(function() {
+      this.xhr = false;
+      el = null;
+    });
+    return this.xhr;
   },
   
   addContent: function (url, rel) {

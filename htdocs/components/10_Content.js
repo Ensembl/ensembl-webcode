@@ -19,7 +19,7 @@ Ensembl.Panel.Content = Ensembl.Panel.extend({
     this.base();
     
     this.xhr = false;
-    this.maxreq = 12; // maximum simultaneous AJAX requests
+    this.maxparajax = 1; // maximum simultaneous AJAX requests
     
     var fnEls = {
       ajaxLoad:       $('.ajax', this.el),
@@ -94,7 +94,7 @@ Ensembl.Panel.Content = Ensembl.Panel.extend({
       todo.push(panel.prepareContent(url, $(this), { updateURL: url + ';update_panel=1', updateType: $.isEmptyObject(data) ? 'get' : 'post', updateData: data }));
     });
 
-    for(i=0; i<this.maxreq && todo.length; i++) {
+    for(i=0; i<this.maxparajax && todo.length; i++) {
       this.doOneRequest(todo);
     }
   },

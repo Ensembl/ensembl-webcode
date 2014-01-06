@@ -27,6 +27,8 @@ use EnsEMBL::Web::TmpFile::Text;
 
 use base qw(EnsEMBL::Web::Component);
 
+use List::MoreUtils qw(any none);
+
 sub new {
   my $class = shift;
   my $self  = $class->SUPER::new(@_);
@@ -47,6 +49,7 @@ sub _init {
     my $hub = $self->hub;
     $self->{'subslice_length'} = $hub->param('force') || $subslice_length * ($hub->param('display_width') || 60);
   }
+  $self->{'var_styles'}   = $self->hub->species_defs->colour('variation');
 }
 
 # Used by Compara_Alignments, Gene::GeneSeq and Location::SequenceAlignment
@@ -735,23 +738,95 @@ sub markup_line_numbers {
   $config->{'alignment_numbering'} = 1 if $config->{'line_numbering'} eq 'slice' && $config->{'align'};
 }
 
+sub states_equal {
+  my ($self,$a,$b) = @_;
+
+  my %c;
+  $c{$_}++ for keys %$a;
+  $c{$_}++ for keys %$b;
+  return 0 if any { $_ != 2 } values %c;
+  return 0 if any { $a->{$_} ne $b->{$_} } keys %$a;
+  return 1;
+}
+
+sub add_tag {
+  my ($self,$tag,$attrs) = @_;
+
+  return "<$tag ".join(" ",map { qq($_="$attrs->{$_}") } grep { $attrs->{$_} } keys %$attrs).">";
+}
+
+sub mark_state {
+  my ($self,$state,$css,$end) = @_;
+
+  if(!$state or none { $_ } values %$state) { return ""; }
+  if($end) {
+    if($state->{'href'}) { return "</span></a>"; } else { return "</span>"; }
+  } else {
+    my $out = '';
+    my $title = $state->{'title'};
+    if($state->{'href'}) {
+      $out = $self->add_tag("a",{
+        title => $title,
+        href => $state->{'href'},
+        class => "sequence_info",
+      });
+      $title = '';
+    }
+    $out .= $self->add_tag("span",{
+      title => $title,
+      class => $self->add_css($css,$state->{'class'}),
+    });
+    return $out;
+  }
+}
+
+sub add_css {
+  my ($self,$css,$class) = @_;
+
+  my $colourmap;
+  my @out;
+  foreach my $c (split(' ',$class)) {
+    my $style = $self->{'var_styles'}->{$c};
+    $c = "c_$c" unless $c =~ /^[A-Za-z]/; # some "classes" start with numbers
+    push @out,$c;
+    next unless defined $style;
+    next if exists $css->{$c};
+    $colourmap = $self->hub->colourmap unless $colourmap;
+    $css->{$c} = {
+      'background-color' => $colourmap->hex_by_name($style->{'default'}),
+    };
+    $css->{$c}{'color'} = $colourmap->hex_by_name($style->{'label'}) if $style->{'label'};
+  }
+  return join(" ",@out);
+}
+
 sub build_sequence {
   my ($self, $sequence, $config) = @_;
   my $line_numbers   = $config->{'line_numbers'};
   my %class_to_style = %{$self->class_to_style}; # Firefox doesn't copy/paste anything but inline styles, so convert classes to styles
   my $single_line    = scalar @{$sequence->[0]} <= $config->{'display_width'}; # Only one line of sequence to display
   my $s              = 0;
-  my ($html, @output);
-  
+  my ($html, @output); 
+  my $cur_state;
+  my %css;
+
   foreach my $lines (@$sequence) {
     my %current  = ( tag => 'span', class => '', title => '', href => '' );
     my %previous = ( tag => 'span', class => '', title => '', href => '' );
     my %new_line = ( tag => 'span', class => '', title => '', href => '' );
-    my ($row, $pre, $post, $count, $i);
+    my ($row, $pre, $post, $count, $i,$row2);
     
     foreach my $seq (@$lines) {
       my $style;
-      
+
+      my $new_state = { title => $seq->{'title'}, href => $seq->{'href'}, class => $seq->{'class'} };
+      if(!$cur_state or !$self->states_equal($cur_state,$new_state)) {
+        $row2 .= $self->mark_state($cur_state,\%css,1);
+        $row2 .= $self->mark_state($new_state,\%css,0);
+        $cur_state = $new_state;
+      }
+      $row2 .= $seq->{'letter'};
+ 
       $previous{$_}     = $current{$_} for keys %current;
       $current{'title'} = $seq->{'title'}  ? qq{title="$seq->{'title'}"} : '';
       $current{'href'}  = $seq->{'href'}   ? qq{href="$seq->{'href'}"}   : '';;
@@ -830,8 +905,11 @@ sub build_sequence {
           $pre .= '  ';
         }
         
-        push @{$output[$s]}, { line => $row, length => $count, pre => $pre, post => $post };
-        
+        $row2 .= $self->mark_state($cur_state,\%css,1);
+        $cur_state = undef;
+        push @{$output[$s]}, { line => $row2, length => $count, pre => $pre, post => $post };
+        $row2 = '';
+ 
         $new_line{$_} = $current{$_} for keys %current;
         $count        = 0;
         $row          = '';
@@ -839,9 +917,22 @@ sub build_sequence {
         $post         = '';
       }
     }
+    warn "LEFT: ".$self->mark_state($cur_state,\%css,1)."\n";
     
     $s++;
   }
+  use Data::Dumper;
+  warn "CSS: ".Dumper(\%css);
+  my $css.= "<style type='text/css'>";
+  foreach my $sel (keys %css) {
+    $css .= " pre a.$sel, pre span.$sel {";
+    foreach my $k (keys %{$css{$sel}}) {
+      $css .= "$k: $css{$sel}->{$k}; ";
+    }
+    $css .= "}";
+  }
+  $css .= "</style>";
+
 
   my $length = $output[0] ? scalar @{$output[0]} - 1 : 0;
   
@@ -893,7 +984,7 @@ sub build_sequence {
     $config->{'html_template'} .= sprintf '<div class="sequence_key_json hidden">%s</div>', $self->jsonify($partial_key) if $partial_key;
   }
   
-  return $config->{'html_template'} . sprintf '<input type="hidden" class="panel_type" value="TextSequence" name="panel_type_%s" />', $self->id;
+  return $css. $config->{'html_template'} . sprintf '<input type="hidden" class="panel_type" value="TextSequence" name="panel_type_%s" />', $self->id;
 }
 
 # When displaying a very large sequence we can break it up into smaller sections and render each of them much more quickly

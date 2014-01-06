@@ -759,7 +759,6 @@ sub mark_state {
       $out = $self->add_tag("a",{
         title => $title,
         href => $state->{'href'},
-        class => "sequence_info",
       });
       $title = '';
     }
@@ -796,10 +795,19 @@ sub build_sequence {
   my $s              = 0;
   my ($html, @output); 
   my $cur_state;
-  my %css;
+  my (%css,%markup);
 
   foreach my $lines (@$sequence) {
     my ($row, $pre, $post, $count, $i,$row2);
+    
+    if ($config->{'comparison'}) {
+      if (scalar keys %{$config->{'padded_species'}}) {
+        $pre = $config->{'padded_species'}{$config->{'seq_order'}[$s]} || $config->{'display_species'};
+      } else {
+        $pre = $config->{'display_species'};
+      }
+      $pre .= '  ';
+    }
     
     foreach my $seq (@$lines) {
       my $style;
@@ -816,22 +824,12 @@ sub build_sequence {
       $i++;
       
       if ($count == $config->{'display_width'} || $i == scalar @$lines) {
-        if ($config->{'comparison'}) {
-          if (scalar keys %{$config->{'padded_species'}}) {
-            $pre = $config->{'padded_species'}{$config->{'seq_order'}[$s]} || $config->{'display_species'};
-          } else {
-            $pre = $config->{'display_species'};
-          }
-          $pre .= '  ';
-        }
-        
         $row2 .= $self->mark_state($cur_state,\%css,1);
         $cur_state = undef;
         push @{$output[$s]}, { line => $row2, length => $count, pre => $pre, post => $post };
         $row2 = '';
         $count        = 0;
         $row          = '';
-        $pre          = '';
         $post         = '';
       }
     }
@@ -855,7 +853,7 @@ sub build_sequence {
     my $y = 0;
     
     foreach (@output) {
-      my $line = $_->[$x]{'line'};
+      my $line = qq(<span class="tsmain" data-seq-no="$y">).$_->[$x]{'line'}."</span>";
       my $num  = shift @{$line_numbers->{$y}};
       
       if ($config->{'number'}) {

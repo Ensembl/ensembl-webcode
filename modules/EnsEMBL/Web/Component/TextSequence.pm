@@ -29,6 +29,8 @@ use base qw(EnsEMBL::Web::Component);
 
 use List::MoreUtils qw(any none);
 
+use Time::HiRes qw(time);
+
 sub new {
   my $class = shift;
   my $self  = $class->SUPER::new(@_);
@@ -863,24 +865,22 @@ sub build_sequence {
   }
   $css .= "</style>";
 
+  my $A = time();
   use Data::Dumper;
-#  warn "STRETCHES: ".Dumper(\@stretches)."\n";
   foreach my $s (@stretches) {
     foreach my $k (keys %$s) {
       my $t = $s->{$k};
       warn "STRETCH $k\n";
       my $k0 = '';
       foreach my $k (sort keys %$t) {
-        my $common = 0;
-        foreach my $c (split //, substr($k0,0,length $k)) {
-          last if(substr($k,$common,1) ne $c);
-          $common++;
-        }
-        warn "$common // ".substr($k,$common)."\n";
+        ( $k ^ $k0 ) =~ /^(\0+)/; # Longest common prefix
+        my $common = length $1; 
+        warn "$common // ".substr($k,$common).": ".Dumper($t->{$k})."\n";
         $k0 = $k;
       }
     }
   }
+  warn "Prefix coding took ".(time-$A)."s\n";
 
   my $length = $output[0] ? scalar @{$output[0]} - 1 : 0;
   

@@ -777,11 +777,19 @@ sub state_to_string {
 
   $stretches->{$k} ||= {};
   $stretches->{$k}{$v} ||= [];
-  if(@{$stretches->{$k}{$v}} and $stretches->{$k}{$v}[-1][1] == $offset-1) {
-    $stretches->{$k}{$v}[-1][1] = $offset;
-  } else {
-    push @{$stretches->{$k}{$v}},[$offset,$offset];
+  
+  if(@{$stretches->{$k}{$v}}) { # Has an entry
+    if(ref($stretches->{$k}{$v}[-1]) eq 'ARRAY') { # Is an array entry
+      if($stretches->{$k}{$v}[-1][1] == $offset-1) { # Was at last position
+        $stretches->{$k}{$v}[-1][1] = $offset;
+        return;
+      }
+    } elsif($stretches->{$k}{$v}[-1] == $offset-1) { # Not an array entry but at last pos
+      $stretches->{$k}{$v}[-1] = [$offset-1,$offset];
+      return;
+    }
   }
+  push @{$stretches->{$k}{$v}},$offset;
 }
 
 sub add_css {
@@ -867,20 +875,26 @@ sub build_sequence {
 
   my $A = time();
   use Data::Dumper;
+  my @strdata;
   foreach my $s (@stretches) {
-    foreach my $k (keys %$s) {
-      my $t = $s->{$k};
-      warn "STRETCH $k\n";
+    my $str1 = {};
+    push @strdata,$str1;
+    foreach my $sk (keys %$s) {
+      $str1->{$sk} = [];
+      my $t = $s->{$sk};
       my $k0 = '';
       foreach my $k (sort keys %$t) {
         ( $k ^ $k0 ) =~ /^(\0+)/; # Longest common prefix
         my $common = length $1; 
-        warn "$common // ".substr($k,$common).": ".Dumper($t->{$k})."\n";
+        push @{$str1->{$sk}},[$common,substr($k,$common),$t->{$k}];
         $k0 = $k;
       }
     }
   }
+  my $strdata = $self->jsonify(\@strdata);
   warn "Prefix coding took ".(time-$A)."s\n";
+  warn "Prefix size (JSON) ".length($strdata)."b\n";
+  #warn $strdata;
 
   my $length = $output[0] ? scalar @{$output[0]} - 1 : 0;
   

@@ -775,21 +775,14 @@ sub mark_state {
 sub state_to_string {
   my ($self,$stretches,$k,$v,$offset) = @_;
 
+  return unless $v;
   $stretches->{$k} ||= {};
   $stretches->{$k}{$v} ||= [];
-  
-  if(@{$stretches->{$k}{$v}}) { # Has an entry
-    if(ref($stretches->{$k}{$v}[-1]) eq 'ARRAY') { # Is an array entry
-      if($stretches->{$k}{$v}[-1][1] == $offset-1) { # Was at last position
-        $stretches->{$k}{$v}[-1][1] = $offset;
-        return;
-      }
-    } elsif($stretches->{$k}{$v}[-1] == $offset-1) { # Not an array entry but at last pos
-      $stretches->{$k}{$v}[-1] = [$offset-1,$offset];
-      return;
-    }
+  if(@{$stretches->{$k}{$v}} and $stretches->{$k}{$v}[-1][1] == $offset-1) {
+    $stretches->{$k}{$v}[-1][1] = $offset;
+  } else {
+    push @{$stretches->{$k}{$v}},[$offset,$offset];
   }
-  push @{$stretches->{$k}{$v}},$offset;
 }
 
 sub add_css {
@@ -883,11 +876,38 @@ sub build_sequence {
       $str1->{$sk} = [];
       my $t = $s->{$sk};
       my $k0 = '';
+      my $last_common = 0;
       foreach my $k (sort keys %$t) {
         ( $k ^ $k0 ) =~ /^(\0+)/; # Longest common prefix
-        my $common = length $1; 
-        push @{$str1->{$sk}},[$common,substr($k,$common),$t->{$k}];
+        my $common = length $1;
+        my (@starts,@lens);
+        my $prev_start = 0;
+        my $last_len = -1;
+        my $all_lens_zero = 1;
+        foreach my $p (@{$t->{$k}}) {
+          push @starts,$p->[0]-$prev_start;
+          my $len = $p->[1]-$p->[0];
+          if(@lens and ref($lens[-1]) eq "ARRAY" and $lens[-1]->[0] == $len) {
+            $lens[-1]->[1]++;
+          } elsif(@lens and ref($lens[-1]) ne "ARRAY" and $lens[-1] == $len) {
+            $lens[-1] = [$lens[-1],2];
+          } else {
+            push @lens,$len;
+          }
+          $all_lens_zero = 0 if $len;
+          $prev_start = $p->[0];
+        }
+        # Replace single-entry arrays with values
+        my $starts = \@starts;
+        my $lens = \@lens;
+        $starts = $starts[0] if(@starts == 1);
+        $lens = $lens[0] if(@lens == 1);
+        # If lengths all zero, omit them
+        my $entry = [$common-$last_common,"".substr($k,$common),$starts];
+        push @$entry,$lens unless $all_lens_zero;
+        push @{$str1->{$sk}},$entry;
         $k0 = $k;
+        $last_common = $common;
       }
     }
   }

@@ -19,7 +19,7 @@ Ensembl.Panel.Content = Ensembl.Panel.extend({
     this.base();
     
     this.xhr = false;
-    this.maxparajax = 1; // maximum simultaneous AJAX requests
+    this.maxparajax = 2; // maximum simultaneous AJAX requests
     
     var fnEls = {
       ajaxLoad:       $('.ajax', this.el),

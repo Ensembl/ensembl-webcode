@@ -770,6 +770,18 @@ sub mark_state {
   }
 }
 
+sub state_to_string {
+  my ($self,$stretches,$k,$v,$offset) = @_;
+
+  $stretches->{$k} ||= {};
+  $stretches->{$k}{$v} ||= [];
+  if(@{$stretches->{$k}{$v}} and $stretches->{$k}{$v}[-1][1] == $offset-1) {
+    $stretches->{$k}{$v}[-1][1] = $offset;
+  } else {
+    push @{$stretches->{$k}{$v}},[$offset,$offset];
+  }
+}
+
 sub add_css {
   my ($self,$css,$class) = @_;
 
@@ -795,9 +807,11 @@ sub build_sequence {
   my $s              = 0;
   my ($html, @output); 
   my $cur_state;
-  my (%css,%markup);
+  my (%css,@stretches);
 
   foreach my $lines (@$sequence) {
+    $stretches[$s] ||= {};
+
     my ($row, $pre, $post, $count, $i,$row2);
     
     if ($config->{'comparison'}) {
@@ -813,6 +827,9 @@ sub build_sequence {
       my $style;
 
       my $new_state = { title => $seq->{'title'}, href => $seq->{'href'}, class => $seq->{'class'} };
+      foreach my $k (keys %$new_state) {
+        $self->state_to_string($stretches[$s],$k,$new_state->{$k},$i);
+      }
       if(!$cur_state or any { $cur_state->{$_} ne $new_state->{$_} } keys %$cur_state) {
         $row2 .= $self->mark_state($cur_state,\%css,1);
         $row2 .= $self->mark_state($new_state,\%css,0);
@@ -846,6 +863,24 @@ sub build_sequence {
   }
   $css .= "</style>";
 
+  use Data::Dumper;
+#  warn "STRETCHES: ".Dumper(\@stretches)."\n";
+  foreach my $s (@stretches) {
+    foreach my $k (keys %$s) {
+      my $t = $s->{$k};
+      warn "STRETCH $k\n";
+      my $k0 = '';
+      foreach my $k (sort keys %$t) {
+        my $common = 0;
+        foreach my $c (split //, substr($k0,0,length $k)) {
+          last if(substr($k,$common,1) ne $c);
+          $common++;
+        }
+        warn "$common // ".substr($k,$common)."\n";
+        $k0 = $k;
+      }
+    }
+  }
 
   my $length = $output[0] ? scalar @{$output[0]} - 1 : 0;
   

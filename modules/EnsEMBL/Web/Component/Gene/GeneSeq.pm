@@ -22,7 +22,7 @@ use strict;
 
 use base qw(EnsEMBL::Web::Component::TextSequence EnsEMBL::Web::Component::Gene);
 
-sub _init { $_[0]->SUPER::_init(500); }
+sub _init { $_[0]->SUPER::_init(1000); }
 
 sub initialize {
   my ($self, $slice, $start, $end) = @_;

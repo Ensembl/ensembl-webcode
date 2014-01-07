@@ -32,6 +32,7 @@ sub content {
   my @vf      = $hub->param('vf');
   my $lrg     = $hub->param('lrg');
   my $adaptor = $hub->get_adaptor('get_VariationAdaptor', 'variation');
+  my $vfa     = $hub->get_adaptor('get_VariationFeatureAdaptor', 'variation');
   
   if ($lrg && $hub->referer->{'ENSEMBL_TYPE'} eq 'LRG') {
     eval { $self->{'lrg_slice'} = $hub->get_adaptor('get_SliceAdaptor')->fetch_by_region('LRG', $lrg); };
@@ -39,8 +40,15 @@ sub content {
     $self->{'transcript'} = $hub->get_adaptor('get_TranscriptAdaptor')->fetch_by_stable_id($hub->param('_transcript') || $hub->param('t'));
   }
   
-  for (0..$#v) {
-    my $variation_object = $self->new_object('Variation', $adaptor->fetch_by_name($v[$_]), $object->__data);
+  for (0..$#vf) {
+    my $api_vo;
+    if($v[$_]) {
+      $api_vo = $adaptor->fetch_by_name($v[$_]);
+    } else {
+      $api_vo = $vfa->fetch_by_dbID($vf[$_])->variation;
+      $v[$_] = $api_vo->name;
+    } 
+    my $variation_object = $self->new_object('Variation', $api_vo, $object->__data);
     $self->variation_content($variation_object, $v[$_], $vf[$_]);
     $self->new_feature;
   }

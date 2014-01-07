@@ -318,7 +318,6 @@ sub set_variations {
         factorytype => 'Location'
       };
       
-      push @{$markup->{'variations'}{$_}{'href'}{'v'}},  $variation_name;
       push @{$markup->{'variations'}{$_}{'href'}{'vf'}}, $dbID;
       
       $sequence->[$_] = $ambigcode if $config->{'variation_sequence'} && $ambigcode;

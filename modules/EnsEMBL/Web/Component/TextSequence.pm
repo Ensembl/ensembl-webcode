@@ -27,7 +27,8 @@ use EnsEMBL::Web::TmpFile::Text;
 
 use base qw(EnsEMBL::Web::Component);
 
-use List::MoreUtils qw(any none);
+use List::Util qw(min);
+use List::MoreUtils qw(any none first_index);
 
 use Time::HiRes qw(time);
 
@@ -744,6 +745,7 @@ sub markup_line_numbers {
 sub add_tag {
   my ($self,$tag,$attrs) = @_;
 
+  return "";
   return "<$tag ".join(" ",map { qq($_="$attrs->{$_}") } grep { $attrs->{$_} } keys %$attrs).">";
 }
 
@@ -752,6 +754,7 @@ sub mark_state {
 
   if(!$state or none { $_ } values %$state) { return ""; }
   if($end) {
+    return "";
     if($state->{'href'}) { return "</span></a>"; } else { return "</span>"; }
   } else {
     my $out = '';
@@ -768,19 +771,6 @@ sub mark_state {
       class => $self->add_css($css,$state->{'class'}),
     });
     return $out;
-  }
-}
-
-sub state_to_string {
-  my ($self,$stretches,$k,$v,$offset) = @_;
-
-  return unless $v;
-  $stretches->{$k} ||= {};
-  $stretches->{$k}{$v} ||= [];
-  if(@{$stretches->{$k}{$v}} and $stretches->{$k}{$v}[-1][1] == $offset-1) {
-    $stretches->{$k}{$v}[-1][1] = $offset;
-  } else {
-    push @{$stretches->{$k}{$v}},[$offset,$offset];
   }
 }
 
@@ -802,6 +792,74 @@ sub add_css {
   return join(" ",@out);
 }
 
+sub stretchify_init {
+  my ($self) = @_;
+
+  return {
+    statetonum => {},
+    nextstate => 0,
+    stateseq => [],
+    statelist => [], 
+  }; 
+}
+
+sub stretchify_add {
+  my ($self,$s,$state) = @_;
+
+  my $name = $state;
+  $name = $self->jsonify_canonical($name) if ref($name);
+  unless(exists $s->{'statetonum'}{$name}) {
+    $s->{'statetonum'}{$name} = $s->{'nextstate'}++;
+    push @{$s->{'statelist'}},$state;
+  }
+  push @{$s->{'stateseq'}},$s->{'statetonum'}{$name};
+}
+
+sub stretchify_finish {
+  my ($self,$s) = @_;
+
+  # Convert state sequence into stretch string
+  my $stretch = "";
+  my (@recent,$newest);
+  $newest = -1;
+  foreach my $s (@{$s->{'stateseq'}}) {
+    my $rpos = first_index { $_ == $s } @recent;
+    if($rpos == -1) {
+      if($s == $newest+1) {
+        $stretch .= ">";
+      } else {
+        $stretch .= "[$s";
+      }
+      $newest = $s;
+    } else {
+      $stretch .= ("a" .. "z")[$rpos];
+      @recent = grep { $_ != $s } @recent;
+    }
+    unshift @recent,$s;
+    pop @recent if @recent>24; 
+  }
+  local $_ = $stretch;
+  s/\>{10}/A/g;
+  s/\>{5}/B/g;
+  s/A{3}/C/g;
+  s/C{3}/D/g;
+  s/D{3}/E/g;
+  s/E{5}/F/g;
+  s/F{5}/G/g;
+  s/a{10}/Q/g;
+  s/a{5}/R/g;
+  s/a{4}/S/g;
+  s/a{3}/T/g;
+  s/Q{3}/U/g;
+  s/T{3}/V/g;
+  s/U{5}/W/g;
+  s/V{5}/X/g;
+  s/>b/Y/g;
+  s/>>/Z/g;
+
+  return ($s->{'statelist'},$_);
+}
+
 sub build_sequence {
   my ($self, $sequence, $config) = @_;
   my $line_numbers   = $config->{'line_numbers'};
@@ -809,10 +867,9 @@ sub build_sequence {
   my $s              = 0;
   my ($html, @output); 
   my $cur_state;
-  my (%css,@stretches);
+  my (%css,@strout);
 
   foreach my $lines (@$sequence) {
-    $stretches[$s] ||= {};
 
     my ($row, $pre, $post, $count, $i,$row2);
     
@@ -824,14 +881,14 @@ sub build_sequence {
       }
       $pre .= '  ';
     }
-    
+   
+    my $sf = $self->stretchify_init();
     foreach my $seq (@$lines) {
       my $style;
 
       my $new_state = { title => $seq->{'title'}, href => $seq->{'href'}, class => $seq->{'class'} };
-      foreach my $k (keys %$new_state) {
-        $self->state_to_string($stretches[$s],$k,$new_state->{$k},$i);
-      }
+      $self->stretchify_add($sf,$new_state);
+
       if(!$cur_state or any { $cur_state->{$_} ne $new_state->{$_} } keys %$cur_state) {
         $row2 .= $self->mark_state($cur_state,\%css,1);
         $row2 .= $self->mark_state($new_state,\%css,0);
@@ -852,6 +909,44 @@ sub build_sequence {
         $post         = '';
       }
     }
+    $strout[$s] = { keys => {} };
+    my ($states,$main_stretch) = $self->stretchify_finish($sf);
+    $strout[$s]->{'main'} = $main_stretch; 
+    my %state_keys;
+    foreach my $s (@$states) {
+      $state_keys{$_} = 1 for(keys %$s);
+    }
+    foreach my $k (keys %state_keys) {
+      my $kout = {};
+      $strout[$s]->{'keys'}{$k} = $kout; 
+      my $sf2 = $self->stretchify_init();
+      foreach my $s (@$states) {
+        $self->stretchify_add($sf2,$s->{$k});
+      }
+      my ($values,$key_stretch) = $self->stretchify_finish($sf2);
+      $kout->{'main'} = $key_stretch;
+      my @suffixes;
+      my $v0 = '';
+      my $p0 = 0;
+      my $sf3 = $self->stretchify_init();
+      foreach my $v (@$values) {
+        ( $v0 ^ $v ) =~ /^(\0*)/;
+        my $p = length($1);
+        $p = min($p,length($v0),length($v));
+        $p = $p0 if $p>$p0 and $p-$p0<4;
+        $p = 0 if $p < 4;
+        my $suffix = substr($v,$p);
+        $suffix = 0+$suffix if $suffix =~ /^\d{1,8}$/;
+        push @suffixes,$suffix;
+        $self->stretchify_add($sf3,$p);
+        $v0 = $v;
+        $p0 = $p;
+      }
+      my ($lengths,$length_stretch) = $self->stretchify_finish($sf3);
+      $kout->{'lengthstr'} = $length_stretch;
+      $kout->{'lengths'} = $lengths;
+      $kout->{'suffixes'} = \@suffixes;
+    }
     
     $s++;
   }
@@ -865,53 +960,9 @@ sub build_sequence {
   }
   $css .= "</style>";
 
-  my $A = time();
-  use Data::Dumper;
-  my @strdata;
-  foreach my $s (@stretches) {
-    my $str1 = {};
-    push @strdata,$str1;
-    foreach my $sk (keys %$s) {
-      $str1->{$sk} = [];
-      my $t = $s->{$sk};
-      my $k0 = '';
-      my $last_common = 0;
-      foreach my $k (sort keys %$t) {
-        ( $k ^ $k0 ) =~ /^(\0+)/; # Longest common prefix
-        my $common = length $1;
-        my (@starts,@lens);
-        my $prev_start = 0;
-        my $last_len = -1;
-        my $all_lens_zero = 1;
-        foreach my $p (@{$t->{$k}}) {
-          push @starts,$p->[0]-$prev_start;
-          my $len = $p->[1]-$p->[0];
-          if(@lens and ref($lens[-1]) eq "ARRAY" and $lens[-1]->[0] == $len) {
-            $lens[-1]->[1]++;
-          } elsif(@lens and ref($lens[-1]) ne "ARRAY" and $lens[-1] == $len) {
-            $lens[-1] = [$lens[-1],2];
-          } else {
-            push @lens,$len;
-          }
-          $all_lens_zero = 0 if $len;
-          $prev_start = $p->[0];
-        }
-        # Replace single-entry arrays with values
-        my $starts = \@starts;
-        my $lens = \@lens;
-        $starts = $starts[0] if(@starts == 1);
-        $lens = $lens[0] if(@lens == 1);
-        # If lengths all zero, omit them
-        my $entry = [$common-$last_common,"".substr($k,$common),$starts];
-        push @$entry,$lens unless $all_lens_zero;
-        push @{$str1->{$sk}},$entry;
-        $k0 = $k;
-        $last_common = $common;
-      }
-    }
-  }
-  my $strdata = $self->jsonify(\@strdata);
-  warn "Prefix coding took ".(time-$A)."s\n";
+  my $strdata = '<span class="stretch_data hidden">'.$self->jsonify(\@strout)."</span>";
+#  $strdata = '';
+
   warn "Prefix size (JSON) ".length($strdata)."b\n";
   #warn $strdata;
 
@@ -921,7 +972,7 @@ sub build_sequence {
     my $y = 0;
     
     foreach (@output) {
-      my $line = qq(<span class="tsmain" data-seq-no="$y">).$_->[$x]{'line'}."</span>";
+      my $line = qq(<span class="tsmain-$y">).$_->[$x]{'line'}."</span>";
       my $num  = shift @{$line_numbers->{$y}};
       
       if ($config->{'number'}) {
@@ -965,7 +1016,7 @@ sub build_sequence {
     $config->{'html_template'} .= sprintf '<div class="sequence_key_json hidden">%s</div>', $self->jsonify($partial_key) if $partial_key;
   }
   
-  return $css. $config->{'html_template'} . sprintf '<input type="hidden" class="panel_type" value="TextSequence" name="panel_type_%s" />', $self->id;
+  return $css.$strdata. $config->{'html_template'} . sprintf '<input type="hidden" class="panel_type" value="TextSequence" name="panel_type_%s" />', $self->id;
 }
 
 # When displaying a very large sequence we can break it up into smaller sections and render each of them much more quickly

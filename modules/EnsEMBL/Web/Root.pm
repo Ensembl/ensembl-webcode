@@ -517,6 +517,11 @@ sub jsonify {
   return to_json($content);
 }
 
+sub jsonify_canonical {
+  my ($self, $content) = @_;
+  return JSON->new->canonical->encode($content);
+}
+
 sub new_bio_object {
 ## Create a simple wrapper around an API object 
 ## (or a generic wrapper if not implemented)

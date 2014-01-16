@@ -18,26 +18,25 @@ Ensembl.Panel.ZMenu = Ensembl.Panel.extend({
   constructor: function (id, data) {
     this.base(id);
     
-    var area = $(data.area.a);
     var params, n;
     
-    this.drag       = area.hasClass('drag') ? 'drag' : area.hasClass('vdrag') ? 'vdrag' : false;
-    this.align      = area.hasClass('align'); // TODO: implement alignslice menus
-    this.group      = area.hasClass('group') || area.hasClass('pseudogroup');
-    this.coloured   = area.hasClass('coloured');
-    this.href       = area.attr('href');
-    this.title      = area.attr('title') || '';
+    this.drag       = data.feature.classes.drag ? 'drag' : data.feature.classes.vdrag ? 'vdrag' : false;
+    this.align      = data.feature.classes.align; // TODO: implement alignslice menus
+    this.group      = data.feature.classes.group || data.feature.classes.pseudogroup;
+    this.coloured   = data.feature.classes.coloured;
+    this.href       = data.feature.href;
+    this.title      = data.feature.title || '';
     this.das        = false;
     this.event      = data.event;
     this.coords     = data.coords || {};
     this.imageId    = data.imageId;
     this.relatedEl  = data.relatedEl;
-    this.areaCoords = $.extend({}, data.area);
+    this.areaCoords = data.feature;
     this.location   = 0;
     
-    if (area.hasClass('das')) {
-      this.das       = area.hasClass('group') ? 'group' : area.hasClass('pseudogroup') ? 'pseudogroup' : 'feature';
-      this.logicName = area.attr('class').replace(/das/, '').replace(/(pseudo)?group/, '').replace(/ /g, '');
+    if (data.feature.classes.das) {
+      this.das       = data.feature.classes.group ? 'group' : data.feature.classes.pseudogroup ? 'pseudogroup' : 'feature';
+      this.logicName = data.feature['class'].replace(/das/, '').replace(/(pseudo)?group/, '').replace(/ /g, '');
     }
     
     if (this.drag) {
@@ -50,16 +49,12 @@ Ensembl.Panel.ZMenu = Ensembl.Panel.extend({
       this.start       = parseInt(params[5], 10);
       this.end         = parseInt(params[6], 10);
       this.strand      = parseInt(params[7], 10);
-      this.multi       = area.hasClass('multi') ? n : false;
+      this.multi       = data.feature.classes.multi ? n : false;
       
       if (!this.speciesPath.match(/^\//)) {
         this.speciesPath = '/' + this.speciesPath;
       }
     }
-    
-    area = null;
-    
-    delete this.areaCoords.a;
     
     Ensembl.EventManager.register('showExistingZMenu', this, this.showExisting);
   },

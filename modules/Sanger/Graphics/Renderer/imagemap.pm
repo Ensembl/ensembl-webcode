@@ -16,11 +16,6 @@ limitations under the License.
 
 =cut
 
-#########
-# Author:        rmp@sanger.ac.uk
-# Maintainer:    webmaster@sanger.ac.uk
-# Created:       2001
-#
 package Sanger::Graphics::Renderer::imagemap;
 
 use strict;
@@ -28,29 +23,21 @@ use warnings;
 no warnings 'uninitialized';
 
 use HTML::Entities qw(encode_entities);
+use List::Util qw(min max);
 
 use base qw(Sanger::Graphics::Renderer);
-
-our $VERSION = do { my @r = (q$Revision$ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 
 #########
 # imagemaps are basically strings, so initialise the canvas with ""
 # imagemaps also aren't too fussed about width & height boundaries
 #
-sub init_canvas {
-  shift->canvas('');
-}
-
-sub add_canvas_frame {
-  return;
-}
-
-sub render_Ellipse {}
-sub render_Intron  {}
-
+sub init_canvas      { shift->canvas([]); }
+sub add_canvas_frame { return; }
 sub render_Composite { shift->render_Rect(@_); }
 sub render_Space     { shift->render_Rect(@_); }
 sub render_Text      { shift->render_Rect(@_); }
+sub render_Ellipse   {}
+sub render_Intron    {}
 
 sub render_Rect {
   my ($self, $glyph) = @_;
@@ -59,20 +46,7 @@ sub render_Rect {
   
   return unless $attrs;  
   
-  my $x1 = $glyph->{'pixelx'};
-  my $x2 = $glyph->{'pixelx'} + $glyph->{'pixelwidth'};
-  my $y1 = $glyph->{'pixely'};
-  my $y2 = $glyph->{'pixely'} + $glyph->{'pixelheight'};
-
-  $x1 = 0 if $x1 < 0;
-  $x2 = 0 if $x2 < 0;
-  $y1 = 0 if $y1 < 0;
-  $y2 = 0 if $y2 < 0;
-
-  $y2++;
-  $x2++;
-
-  $self->render_area('rect', [ $x1, $y1, $x2, $y2 ], $attrs);
+  $self->render_area({ x => $glyph->{'pixelx'}, y => $glyph->{'pixely'}, w => $glyph->{'pixelwidth'} + 1, h => $glyph->{'pixelheight'} + 1 }, $attrs);
 }
 
 sub render_Circle {
@@ -82,9 +56,9 @@ sub render_Circle {
   return unless $attrs;
 
   my ($x, $y) = $glyph->pixelcentre;
-  my $r = $glyph->{'pixelwidth'}/2;
+  my $r = $glyph->{'pixelwidth'} / 2;
   
-  $self->render_area('circle', [ $x, $y, $r ], $attrs);
+  $self->render_area({ x => $x - $r, y => $y - $r, w => $glyph->{'pixelwidth'} + 1, h => $glyph->{'pixelwidth'} + 1 }, $attrs);
 }
 
 sub render_Poly {
@@ -93,7 +67,17 @@ sub render_Poly {
   
   return unless $attrs;
   
-  $self->render_area('poly', $glyph->pixelpoints, $attrs);
+  my $points = $glyph->pixelpoints;
+  my ($x1, $x2, $y1, $y2) = (9e9, -9e9, 9e9, -9e9);
+  
+  for (my $i = 0; $i < $#$points; $i += 2) {
+    $x1 = min($x1, $points->[$i]);
+    $x2 = max($x2, $points->[$i]);
+    $y1 = min($y1, $points->[$i + 1]);
+    $y2 = max($y2, $points->[$i + 1]);
+  }
+  
+  $self->render_area({ x => $x1, y => $y1, w => $x2 - $x1 + 1, h => $y2 - $y1 + 1 }, $attrs);
 }
 
 sub render_Line {
@@ -102,44 +86,33 @@ sub render_Line {
   
   return unless $attrs;
 
-  my $x1 = $glyph->{'pixelx'} + 0;
-  my $y1 = $glyph->{'pixely'} + 0;
-  my $x2 = $x1 + $glyph->{'pixelwidth'};
-  my $y2 = $y1 + $glyph->{'pixelheight'};
+  my $x1          = $glyph->{'pixelx'};
+  my $y1          = $glyph->{'pixely'};
+  my $x2          = $x1 + $glyph->{'pixelwidth'};
+  my $y2          = $y1 + $glyph->{'pixelheight'};
   my $click_width = exists $glyph->{'clickwidth'} ? $glyph->{'clickwidth'} : 1;
-  my $len = sqrt(($y2-$y1)*($y2-$y1) + ($x2-$x1)*($x2-$x1));
-  my ($u_x, $u_y) = $len > 0 ? (($x2-$x1) * $click_width / $len, ($y2-$y1) * $click_width /$len) : ($click_width, 0);
+  my $len         = sqrt(($y2 - $y1) * ($y2 - $y1) + ($x2 - $x1) * ($x2 - $x1));
+  my ($u_x, $u_y) = $len > 0 ? (($x2 - $x1) * $click_width / $len, ($y2 - $y1) * $click_width / $len) : ($click_width, 0);
+  my $max         = max($u_x, $u_y);
   
-  my $pointslist = [
-    $x2+$u_x, $y2+$u_y,
-    $x2+$u_y, $y2-$u_x,
-    $x1+$u_y, $y1-$u_x,
-    $x1-$u_x, $y1-$u_y,
-    $x1-$u_y, $y1+$u_x,
-    $x2-$u_y, $y2+$u_x,
-    $x2+$u_x, $y2+$u_y
-  ];
-
-  $self->render_area('poly', $pointslist, $attrs);
+  $self->render_area({ x => $x1 - $max, y => $y1 - $max, w => $glyph->{'pixelwidth'} + (2 * $max) + 1, h => $glyph->{'pixelheight'} + (2 * $max) + 1 }, $attrs);
 }
 
 sub render_area {
-  my ($self, $shape, $points, $attrs) = @_;
+  my ($self, $points, $attrs) = @_;
   
-  my $coords = join ',', map int, @$points;
-
-#  Time: 11.303
-#  $self->{'canvas'} = qq{<area shape="$shape" coords="$coords"$attrs />\n$self->{'canvas'}};
-#  Time: 11.040 - slightly faster with '.'s
-#  $self->{canvas} = '<area shape="' . $shape . '" coords="' . $coords. "\"$attrs />\n" . $self->{canvas};
-#  push @{$self->{data}}, '<area shape="' . $shape . '" coords="' . $coords. "\"$attrs />\n";
-  $self->{canvas} .= '<area shape="' . $shape . '" coords="' . $coords. "\"$attrs />\n";
+  push @{$self->{'canvas'}}, [ $points, {
+    %$attrs,
+    l => int($points->{'x'}),
+    r => int($points->{'x'} + $points->{'w'}),
+    t => int($points->{'y'}),
+    b => int($points->{'y'} + $points->{'h'}),
+  }];
 }
 
 sub get_attributes {
   my ($self, $glyph) = @_;
-
-  my %actions = ();
+  my %actions;
   
   foreach (qw(title alt href target class)) {
     my $attr = $glyph->$_;
@@ -155,7 +128,7 @@ sub get_attributes {
   
   return unless $actions{'title'} || $actions{'href'} || $actions{'class'} =~ /label /;
   
-  return join '', map qq{ $_="$actions{$_}"}, keys %actions;
+  return \%actions;
 }
 
 1;

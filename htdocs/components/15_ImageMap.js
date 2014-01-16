@@ -69,8 +69,8 @@ Ensembl.Panel.ImageMap = Ensembl.Panel.Content.extend({
     this.elLk.popupLinks    = $('a.popup',            this.elLk.toolbars);
     
     this.vertical = this.elLk.img.hasClass('vertical');
-    this.multi    = this.elLk.areas.hasClass('multi');
-    this.align    = this.elLk.areas.hasClass('align');
+    this.multi    = this.elLk.img.hasClass('multi');
+    this.align    = this.elLk.img.hasClass('align');
     
     this.makeImageMap();
     this.makeHoverLabels();
@@ -176,51 +176,59 @@ Ensembl.Panel.ImageMap = Ensembl.Panel.Content.extend({
     var panel = this;
     
     var highlight = !!(window.location.pathname.match(/\/Location\//) && !this.vertical);
-    var rect      = [ 'l', 't', 'r', 'b' ];
-    var speciesNumber, c, r, start, end, scale;
+    var feature, cls, speciesNumber, c, r, start, end, scale, i;
     
-    this.elLk.areas.each(function () {
-      c = { a: this };
+    this.params.areas = JSON.parse($('.feature_json', this.el).html());
+    
+    if (this.params.areas) {
+      this.features = new RTree();
       
-      if (this.shape && this.shape.toLowerCase() !== 'rect') {
-        c.c = [];
-        $.each(this.coords.split(/[ ,]/), function () { c.c.push(parseInt(this, 10)); });
-      } else {
-        $.each(this.coords.split(/[ ,]/), function (i) { c[rect[i]] = parseInt(this, 10); });
-      }
+      i = this.params.areas.length;
       
-      panel.areas.push(c);
-      
-      if (this.className.match(/drag/)) {
-        // r = [ '#drag', image number, species number, species name, region, start, end, strand ]
-        r        = c.a.href.split('|');
-        start    = parseInt(r[5], 10);
-        end      = parseInt(r[6], 10);
-        scale    = (end - start + 1) / (this.vertical ? (c.b - c.t) : (c.r - c.l)); // bps per pixel on image
+      while (i--) {
+        feature = this.params.areas[i][1];
+        cls     = (feature['class'] || '').split(' ');
         
-        c.range = { chr: r[4], start: start, end: end, scale: scale, vertical: this.vertical };
+        feature.classes = {};
         
-        panel.draggables.push(c);
-        
-        if (highlight === true) {
-          r = this.href.split('|');
-          speciesNumber = parseInt(r[1], 10) - 1;
+        for (c in cls) {
+          if (cls[c]) {
+            feature.classes[cls[c]] = true;
+          }
           
-          if (panel.multi || !speciesNumber) {
-            if (!panel.highlightRegions[speciesNumber]) {
-              panel.highlightRegions[speciesNumber] = [];
-              panel.speciesCount++;
+          if (cls[c] === 'drag') {
+            // r = [ '#drag', image number, species number, species name, region, start, end, strand ]
+            r     = feature.href.split('|');
+            start = parseInt(r[5], 10);
+            end   = parseInt(r[6], 10);
+            scale = (end - start + 1) / (this.vertical ? (feature.b - feature.t) : (feature.r - feature.l)); // bps per pixel on image
+            
+            feature.range = { chr: r[4], start: start, end: end, scale: scale, vertical: this.vertical };
+            
+            this.draggables.push(feature);
+            
+            if (highlight === true) {
+              speciesNumber = parseInt(r[1], 10) - 1;
+              
+              if (panel.multi || !speciesNumber) {
+                if (!panel.highlightRegions[speciesNumber]) {
+                  panel.highlightRegions[speciesNumber] = [];
+                  panel.speciesCount++;
+                }
+                
+                panel.highlightRegions[speciesNumber].push({ region: feature });
+                panel.imageNumber = parseInt(r[2], 10);
+                
+                Ensembl.images[panel.imageNumber] = Ensembl.images[panel.imageNumber] || {};
+                Ensembl.images[panel.imageNumber][speciesNumber] = [ panel.imageNumber, speciesNumber, parseInt(r[5], 10), parseInt(r[6], 10) ];
+              }
             }
-            
-            panel.highlightRegions[speciesNumber].push({ region: c });
-            panel.imageNumber = parseInt(r[2], 10);
-            
-            Ensembl.images[panel.imageNumber] = Ensembl.images[panel.imageNumber] || {};
-            Ensembl.images[panel.imageNumber][speciesNumber] = [ panel.imageNumber, speciesNumber, parseInt(r[5], 10), parseInt(r[6], 10) ];
           }
         }
+        
+        this.features.insert(this.params.areas[i][0], feature);
       }
-    });
+    }
     
     if (Ensembl.images.total) {
       this.highlightAllImages();
@@ -258,19 +266,19 @@ Ensembl.Panel.ImageMap = Ensembl.Panel.Content.extend({
           return;
         }
         
-        var area  = panel.getArea(panel.getMapCoords(e));
-        var hover = false;
+        var feature = panel.getArea(panel.getMapCoords(e));
+        var hover   = false;
         
-        if (area && area.a && $(area.a).hasClass('nav')) { // Add helptips on navigation controls in multi species view
-          if (tip !== area.a.alt) {
-            tip = area.a.alt;
+        if (feature && feature.classes.nav) { // Add helptips on navigation controls in multi species view
+          if (tip !== feature.alt) {
+            tip = feature.alt;
             
             if (!panel.elLk.navHelptip) {
               panel.elLk.navHelptip = $('<div class="ui-tooltip helptip-bottom"><div class="ui-tooltip-content"></div></div>');
             }
             
             panel.elLk.navHelptip.children().html(tip).end().appendTo('body').position({
-              of: { pageX: panel.imgOffset.left + area.l + 10, pageY: panel.imgOffset.top + area.t - 48, preventDefault: true }, // fake an event
+              of: { pageX: panel.imgOffset.left + feature.l + 10, pageY: panel.imgOffset.top + feature.t - 48, preventDefault: true }, // fake an event
               my: 'center top'
             });
           }
@@ -280,8 +288,8 @@ Ensembl.Panel.ImageMap = Ensembl.Panel.Content.extend({
             panel.elLk.navHelptip.detach().css({ top: 0, left: 0 });
           }
           
-          if (area && area.a && $(area.a).hasClass('label')) {
-            var label = panel.elLk.hoverLabels.filter('.' + area.a.className.replace(/label /, ''));
+          if (feature && feature.classes.label) {
+            var label = panel.elLk.hoverLabels.filter('.' + feature['class'].replace(/label /, ''));
             
             if (!label.hasClass('active')) {
               panel.elLk.hoverLabels.filter('.active').removeClass('active');
@@ -293,8 +301,8 @@ Ensembl.Panel.ImageMap = Ensembl.Panel.Content.extend({
                 var offset = panel.elLk.img.offset();
                 
                 panel.elLk.hoverLabels.filter(':visible').hide().end().filter('.active').css({
-                  left:    area.l + offset.left,
-                  top:     area.t + offset.top,
+                  left:    feature.l + offset.left,
+                  top:     feature.t + offset.top,
                   display: 'block'
                 });
               }, 100);
@@ -633,7 +641,7 @@ Ensembl.Panel.ImageMap = Ensembl.Panel.Content.extend({
       coords.b = this.dragRegion.b;
     }
     
-    this.highlight(coords, 'rubberband', this.dragRegion.a.href.split('|')[3]);
+    this.highlight(coords, 'rubberband', this.dragRegion.href.split('|')[3]);
   },
   
   resize: function (width) {
@@ -642,22 +650,34 @@ Ensembl.Panel.ImageMap = Ensembl.Panel.Content.extend({
   },
   
   makeZMenu: function (e, coords) {
-    var area = coords.r ? this.dragRegion : this.getArea(coords);
+    var feature;
     
-    if (!area || $(area.a).hasClass('label')) {
+    if (coords.r) {
+      feature = this.dragRegion;
+    } else {
+      feature = coords.r ? this.dragRegion : this.features.search({ x: coords.x, y: coords.y, w: 1, h: 1 })
+      
+      if (feature.length > 1) {
+        feature = $.grep(feature, function (f) { return f.classes.drag ? false : f; })[0];
+      } else {
+        feature = feature[0];
+      }
+    }
+    
+    if (!feature || feature.classes.label) {
       return;
     }
     
-    if ($(area.a).hasClass('nav')) {
-      Ensembl.redirect(area.a.href);
+    if (feature.classes.nav) {
+      Ensembl.redirect(feature.href);
       return;
     }
     
-    var id = 'zmenu_' + area.a.coords.replace(/[ ,]/g, '_');
+    var id = [ 'zmenu', feature.t, feature.l, feature.b, feature.r ].join('_');
     var dragArea, range, location, fuzziness;
     
-    if (e.shiftKey || $(area.a).hasClass('das') || $(area.a).hasClass('group')) {
-      dragArea = this.dragRegion || this.getArea(coords, true);
+    if (e.shiftKey || feature.classes.das || feature.classes.group) {
+      dragArea = this.dragRegion || $.grep(this.features.search({ x: coords.x, y: coords.y, w: 1, h: 1 }), function (f) { return f.classes.drag ? f : false; })[0];
       range    = dragArea ? dragArea.range : false;
       
       if (range) {
@@ -674,7 +694,7 @@ Ensembl.Panel.ImageMap = Ensembl.Panel.Content.extend({
       dragArea = null;
     }
     
-    Ensembl.EventManager.trigger('makeZMenu', id, { event: e, coords: coords, area: area, imageId: this.id, relatedEl: area.a.id ? $('.' + area.a.id, this.el) : false });
+    Ensembl.EventManager.trigger('makeZMenu', id, { event: e, coords: coords, feature: feature, imageId: this.id, relatedEl: feature.id ? $('.' + feature.id, this.el) : false });
     
     this.zMenus[id] = 1;
   },
@@ -727,10 +747,6 @@ Ensembl.Panel.ImageMap = Ensembl.Panel.Content.extend({
     
     while (i--) {
       highlight = this.highlightRegions[speciesNumber][i];
-      
-      if (!highlight.region.a) {
-        break;
-      }
       
       // Highlighting base on self. Take start and end from Ensembl core parameters
       if (this.imageNumber === imageNumber) {
@@ -813,47 +829,7 @@ Ensembl.Panel.ImageMap = Ensembl.Panel.Content.extend({
   },
   
   getArea: function (coords, draggables) {
-    var test  = false;
-    var areas = draggables ? this.draggables : this.areas;
-    var c;
-    
-    for (var i = 0; i < areas.length; i++) {
-      c = areas[i];
-      
-      switch (c.a.shape.toLowerCase()) {
-        case 'circle': test = this.inCircle(c.c, coords); break;
-        case 'poly':   test = this.inPoly(c.c, coords); break;
-        default:       test = this.inRect(c, coords); break;
-      }
-      
-      if (test === true) {
-        return $.extend({}, c);
-      }
-    }
-  },
-  
-  inRect: function (c, coords) {
-    return coords.x >= c.l && coords.x <= c.r && coords.y >= c.t && coords.y <= c.b;
-  },
-  
-  inCircle: function (c, coords) {
-    return (coords.x - c[0]) * (coords.x - c[0]) + (coords.y - c[1]) * (coords.y - c[1]) <= c[2] * c[2];
-  },
-
-  inPoly: function (c, coords) {
-    var n = c.length;
-    var t = 0;
-    var x1, x2, y1, y2;
-    
-    for (var i = 0; i < n; i += 2) {
-      x1 = c[i % n] - coords.x;
-      y1 = c[(i + 1) % n] - coords.y;
-      x2 = c[(i + 2) % n] - coords.x;
-      y2 = c[(i + 3) % n] - coords.y;
-      t += Math.atan2(x1*y2 - y1*x2, x1*x2 + y1*y2);
-    }
-    
-    return Math.abs(t/Math.PI/2) > 0.01;
+    return $.grep(this.features.search({ x: coords.x, y: coords.y, w: 1, h: 1 }), function (f) { return f.classes.drag == draggables; })[0]; // NOT f.classes.drag === draggables, because they might not be exactly equal
   },
   
   positionToolbarPopup: function (el, link) {
@@ -864,7 +840,7 @@ Ensembl.Panel.ImageMap = Ensembl.Panel.Content.extend({
   },
   
   getSpecies: function () {
-    var species = $.map(this.draggables, function (el) { return el.a.href.split('|')[3]; });
+    var species = $.map(this.draggables, function (d) { return d.href.split('|')[3]; });
     
     if (species.length) {
       var unique = {};

@@ -20,7 +20,9 @@ package EnsEMBL::Web::Document::Image;
 
 use strict;
 
-use POSIX qw(ceil);
+use HTML::Entities qw(encode_entities);
+use JSON;
+use POSIX          qw(ceil);
 
 use Bio::EnsEMBL::VDrawableContainer;
 
@@ -324,14 +326,10 @@ sub set_button {
 
 # Having a usemap causes drag selecting to become a real pain, so disabled
 sub extra_html {
-  my $self  = shift;
-  my $class =  'imagemap' . ($self->drawable_container->isa('Bio::EnsEMBL::VDrawableContainer') ? ' vertical' : '');
-  my $extra = qq{class="$class"};
-
-#  if ($self->imagemap eq 'yes') {
-#    my $map_name = $self->{'token'};
-#    $extra .= qq{usemap="#$map_name" };
-#  }
+  my $self   = shift;
+  my $config = $self->drawable_container->{'config'};
+  my $class  =  join ' ', 'imagemap', $self->drawable_container->isa('Bio::EnsEMBL::VDrawableContainer') ? 'vertical' : '', $config->get_parameter('multi') ? 'multi' : $config->get_parameter('compara') ? 'align' : '';
+  my $extra  = qq{class="$class"};
   
   return $extra;
 }
@@ -391,20 +389,14 @@ sub render_image_button {
 } 
 
 sub render_image_map {
-  my ($self, $image) = @_;
+  my $self = shift;
 
-  my $imagemap = $self->drawable_container->render('imagemap');
-  my $map_name = $image->token;
-  
-  my $map = qq{
-    <map name="$map_name">
-      $imagemap
-    </map>
-  };
-  
-  $map .= '<input type="hidden" class="panel_type" value="ImageMap" />';
-  
-  return $map;
+  return sprintf('
+    <input type="hidden" class="panel_type" value="ImageMap" />
+    <script class="feature_json" type="text/javascript">%s</script>
+    ',
+    JSON->new->shrink->encode($self->drawable_container->render('imagemap'))
+  );
 }
 
 sub hover_labels {

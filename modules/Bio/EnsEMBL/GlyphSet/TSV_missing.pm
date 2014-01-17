@@ -1,0 +1,30 @@
+package Bio::EnsEMBL::GlyphSet::TSV_missing;
+use strict;
+use Bio::EnsEMBL::GlyphSet;
+our @ISA = qw(Bio::EnsEMBL::GlyphSet);
+
+sub init_label {
+    return;
+}
+
+sub _init {
+  my ($self) = @_;
+  return unless ($self->strand() == -1);
+  my $counts = $self->{'config'}->{'snp_counts'};
+  return unless ref $counts eq 'ARRAY';
+  
+  my $text;
+  if ($counts->[0]==0 ) {
+    $text .= "There are no SNPs within the context selected for this transcript.";
+  } elsif ($counts->[1] ==0 ) {
+    $text .= "The options set in the drop down menu have filtered out all $counts->[0] variations in this region.";
+  } elsif ($counts->[0] == $counts->[1] ) {
+    $text .= "None of the variations are removed by the drop down menu filters";
+  } else {
+    $text .= ($counts->[0]-$counts->[1])." of the $counts->[0] variations in this region have been filtered out by the drop down menu options.";
+  }
+  $self->errorTrack( $text );
+}
+
+1;
+        

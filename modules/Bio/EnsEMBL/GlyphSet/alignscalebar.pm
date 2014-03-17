@@ -202,8 +202,8 @@ sub render_align_bar {
       if ($last_chr ne $s2t) {
         # Different chromosomes
         $colour = 'black';
-        $title = "AlignSlice Break; There is a breakpoint in the alignment between chromosome $last_chr and $s2t";
-        $legend = 'Breakpoint between different chromosomes';
+        $title = "AlignSlice Break; There is a joinpoint in the alignment between chromosome $last_chr and $s2t";
+        $legend = 'Joinpoint between different chromosomes';
       } elsif ($last_s2st ne $s2st) {
         # Same chromosome, different strand (inversion)
         $colour = '3333ff';
@@ -230,8 +230,8 @@ sub render_align_bar {
       } else {
         # Same chromosome, same strand, no gap between the two underlying slices (BreakPoint in another species)
         $colour = 'indianred3';
-        $title = "AlignSlice Break; There is a breakpoint in the alignment on chromosome $s2t";
-        $legend = 'Breakpoint on chromosome';
+        $title = "AlignSlice Break; There is a joinpoint in the alignment on chromosome $s2t";
+        $legend = 'Joinpoint on chromosome';
       }
       
       my $base = $self->strand == 1 ? $h - 3 : $h + 9;

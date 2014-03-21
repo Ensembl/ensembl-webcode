@@ -1109,12 +1109,19 @@ sub transcript_table {
     
     my @rows;
     
+    my %extra_links = (
+      uniprot => { match => "^UniProt", name => "UniProt", order => 0 },
+      refseq => { match => "^RefSeq", name => "RefSeq", order => 1 },
+    );
+    my %any_extras;
     foreach (map { $_->[2] } sort { $a->[0] cmp $b->[0] || $a->[1] cmp $b->[1] } map { [ $_->external_name, $_->stable_id, $_ ] } @$transcripts) {
       my $transcript_length = $_->length;
       my $tsi               = $_->stable_id;
       my $protein           = 'No protein product';
       my $protein_length    = '-';
       my $ccds              = '-';
+      my %extras;
+      my $refseq            = '-';
       my $cds_tag           = '-';
       my $gencode_set       = '-';
       my $url               = $hub->url({ %url_params, t => $tsi });
@@ -1132,11 +1139,26 @@ sub transcript_table {
         
         $protein_length = $_->translation->length;
       }
-      
-      if (my @CCDS = grep { $_->dbname eq 'CCDS' } @{$_->get_all_DBLinks}) {
+
+      my $dblinks = $_->get_all_DBLinks;
+
+      if (my @CCDS = grep { $_->dbname eq 'CCDS' } @$dblinks) {
         my %T = map { $_->primary_id => 1 } @CCDS;
         @CCDS = sort keys %T;
         $ccds = join ', ', map $hub->get_ExtURL_link($_, 'CCDS', $_), @CCDS;
+      }
+      foreach my $k (keys %extra_links) {
+        if(my @links = grep { $_->dbname =~ /$extra_links{$k}->{'match'}/i } @$dblinks) {
+          my %T = map { $_->primary_id => $_->dbname } @links;
+          my $cell = '';
+          my $i = 0;
+          foreach my $u (map $hub->get_ExtURL_link($_,$T{$_},$_), sort keys %T) {
+            $cell .= "$u ";
+            if($i++==1) { $cell .= "<br/>"; $i = 0; }
+          }
+          $any_extras{$k} = 1;
+          $extras{$k} = $cell;
+        }
       }
       if ($trans_attribs->{$tsi}) {
         if ($trans_attribs->{$tsi}{'CDS_start_NF'}) {
@@ -1159,6 +1181,7 @@ sub transcript_table {
        }
       (my $biotype = $_->biotype) =~ s/_/ /g;
 
+      $extras{$_} ||= '-' for(keys %extra_links);
       my $row = {
         name       => { value => $_->display_xref ? $_->display_xref->display_id : 'Novel', class => 'bold' },
         transcript => sprintf('<a href="%s">%s</a>', $url, $tsi),
@@ -1167,6 +1190,7 @@ sub transcript_table {
         aa_length  => $protein_length,
         biotype    => $self->glossary_mouseover(ucfirst $biotype),
         ccds       => $ccds,
+        %extras,
         has_ccds   => $ccds eq '-' ? 0 : 1,
         cds_tag    => $cds_tag,
         gencode_set=> $gencode_set,
@@ -1176,6 +1200,11 @@ sub transcript_table {
       $biotype = '.' if $biotype eq 'protein coding';
       $biotype_rows{$biotype} = [] unless exists $biotype_rows{$biotype};
       push @{$biotype_rows{$biotype}}, $row;
+    }
+    foreach my $k (sort { $extra_links{$a}->{'order'} cmp
+                          $extra_links{$b}->{'order'} } keys %any_extras) {
+      my $x = $extra_links{$k};
+      push @columns, { key => $k, sort => 'html', title => $x->{'name'}};
     }
 
     ## Additionally, sort by CCDS status and length
@@ -1198,13 +1227,24 @@ sub transcript_table {
       )
     );
 
+    my @hidecols;
+    foreach my $id (keys %extra_links) {
+      foreach my $i (0..$#columns) {
+        if($columns[$i]->{'key'} eq $id) {
+          push @hidecols,$i;
+          last;
+        }
+      }
+    }
+
     my $table_2 = $self->new_table(\@columns, \@rows, {
       data_table        => 1,
       data_table_config => { asStripClasses => [ '', '' ], oSearch => { sSearch => '', bRegex => 'false', bSmart => 'false' } },
       toggleable        => 1,
       class             => 'fixed_width' . ($show ? '' : ' hide'),
       id                => 'transcripts_table',
-      exportable        => 0
+      exportable        => 0,
+      hidden_columns    => \@hidecols,
     });
 
     $html = $table->render.$table_2->render;

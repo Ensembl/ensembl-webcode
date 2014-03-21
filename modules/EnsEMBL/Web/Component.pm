@@ -585,6 +585,7 @@ sub new_table {
   $table->export_url = $hub->url unless defined $options->{'exportable'} || $self->{'_table_count'}++;
   $table->filename   = join '-', $self->id, $filename;
   $table->code       = $self->id . '::' . ($options->{'id'} || $self->{'_table_count'});
+  $table->title($options->{'title'}) if $options->{'title'};
   
   return $table;
 }
@@ -671,7 +672,7 @@ sub _matches { ## TODO - tidy this
   $entry =~ s/bio::ensembl:://;
 
   my @rows;
-  my $html = $species_defs->ENSEMBL_SITETYPE eq 'Vega' ? '' : "<p><strong>This $entry corresponds to the following database identifiers:</strong></p>";
+  my $html = '';
 
   # in order to preserve the order, we use @links for acces to keys
   while (scalar @links) {
@@ -690,7 +691,10 @@ sub _matches { ## TODO - tidy this
       }
     }
 
-    push @rows, { dbtype => $key, dbid => $text };
+    if($text =~ m!</div>.*</div>!s) {
+      $text =~ s!</div>! <b class="ellipsis">...</b></div>!;
+    }
+    push @rows, { dbtype => $key, dbid => "<div class='height_wrap img_left'><div class='val'>".$text."</div></div>" };
   }
 
   my $table;
@@ -700,9 +704,9 @@ sub _matches { ## TODO - tidy this
     $table->add_row("$_->{'dbtype'}:", " $_->{'dbid'}") for @rows;    
   } elsif ($output_as_table) { # if flag is on, display datatable, otherwise a simple table
     $table = $self->new_table([
-        { key => 'dbtype', align => 'left', title => 'External database' },
-        { key => 'dbid',   align => 'left', title => 'Database identifier' }
-      ], \@rows, { data_table => 'no_sort no_col_toggle', exportable => 1 }
+        { key => 'dbtype', align => 'left', width => '2u', title => 'External database' },
+        { key => 'dbid',   align => 'left', width => '8u', title => 'Database identifier' }
+      ], \@rows, { data_table => 'no_sort no_col_toggle', exportable => 1, class => 'cellwrap_inside fast_fixed_table', title => "Identifiers corresponding to this gene:" }
     );
   } else {
     $table = $self->dom->create_element('table', {'cellspacing' => '0', 'children' => [
@@ -784,7 +788,7 @@ sub _sort_similarity_links {
       }
     }
     if ($type->isa('Bio::EnsEMBL::IdentityXref')) {
-      $text .= ' <span class="small"> [Target %id: ' . $type->target_identity . '; Query %id: ' . $type->query_identity . ']</span>';
+      $text .= ' [Target %id: ' . $type->target_identity . '; Query %id: ' . $type->query_identity . ']';
       $join_links = 1;
     }
 
@@ -811,7 +815,7 @@ sub _sort_similarity_links {
 
     if ($type->description) {
       (my $D = $type->description) =~ s/^"(.*)"$/$1/;
-      $text .= '<br />' . encode_entities($D);
+      $text .= ' ' .encode_entities($D);
       $join_links = 1;
     }
 

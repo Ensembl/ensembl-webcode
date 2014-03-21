@@ -59,6 +59,10 @@ Ensembl.DataTable = {
         panel.makeEditable(table);
       }
               
+      if (table.attr('title')) {
+        panel.addTitle(settings,table.attr('title'));
+      }
+
       panel.dataTables = panel.dataTables || [];
       panel.dataTables.push(dataTable);
 
@@ -163,7 +167,7 @@ Ensembl.DataTable = {
     }).toArray();
     
     if (length > 10) {
-      options.sDom = '<"dataTables_top"l' + (noToggle ? '' : '<"col_toggle">') + (exportable ? '<"dataTables_export">' : '') + 'f<"invisible">>t<"dataTables_bottom"ip<"invisible">>';
+      options.sDom = '<"dataTables_top"l' + (noToggle ? '' : '<"col_toggle">') + (exportable ? '<"dataTables_export">' : '') + 'f<"table_title"><"invisible">>t<"dataTables_bottom"ip<"invisible">>';
       
       $.each([ 10, 25, 50, 100 ], function () {
         if (this < length) {
@@ -175,7 +179,7 @@ Ensembl.DataTable = {
       menu[0].push(-1);
       menu[1].push('All');
     } else {
-      options.sDom = '<"dataTables_top"' + (noToggle ? '' : '<"col_toggle left">') + (exportable ? '<"dataTables_export">' : '') + '<"dataTables_filter_overlay">f<"invisible">>t';
+      options.sDom = '<"dataTables_top"' + (noToggle ? '' : '<"col_toggle left">') + (exportable ? '<"dataTables_export">' : '') + '<"dataTables_filter_overlay">f<"table_title"><"invisible">>t';
     }
     
     options.aLengthMenu = menu;
@@ -214,7 +218,12 @@ Ensembl.DataTable = {
     
     return options;
   },
-  
+
+  addTitle: function(settings,title) {
+    var $title = $('<div class="table-title"/>').text(title);
+    $('.table_title', settings.nTableWrapper).append($title);
+  },
+
   columnToggle: function (settings) {
     var panel = this;
     

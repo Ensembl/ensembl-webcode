@@ -1,0 +1,10 @@
+table td .height_wrap                     { overflow: hidden; height: 16px; line-height: 16px; padding-right: 20px; position: relative; }
+.height_wrap.img_left .toggle_img { float: left; position: static; }
+.height_wrap .val       { height: auto!important; }
+.height_wrap .val.empty { height: 100%!important; }
+div.height_wrap.open                         { overflow: auto; height: auto!important; }
+div.height_wrap.open .ellipsis               { display: none; }
+table td img.toggle                       { position: absolute; right: 4px; top: 2px; display: none; }
+body.ie6  .height_wrap    { overflow: inherit; height: auto; line-height: auto; margin-right: 0; }
+body.ie6  .ellipsis       { display: none; }
+body.ie7  img.toggle      { top: 4px; }

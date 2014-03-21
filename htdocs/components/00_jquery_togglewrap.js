@@ -60,7 +60,11 @@
         var toggler = el.children('span.toggle_img');
         
         if (!toggler.length) {
-          toggler = $('<span class="toggle_img" />').appendTo(this);
+          if(el.hasClass('img_left')) {
+            toggler = $('<span class="toggle_img" />').prependTo(this);
+          } else {
+            toggler = $('<span class="toggle_img" />').appendTo(this);
+          }
         }
         
         var open  = el.hasClass('open');

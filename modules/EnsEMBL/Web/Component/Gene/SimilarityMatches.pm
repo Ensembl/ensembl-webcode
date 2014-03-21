@@ -33,7 +33,10 @@ sub content {
   my @dbtypes   = qw(MISC LIT);
   my $matches    = $self->_matches('similarity_matches', 'Similarity Matches', 'PRIMARY_DB_SYNONYM', @dbtypes, 'RenderAsTables');
   my $no_matches = qq(<p>No external references assigned to this gene.</p><br />);
-  my $html       = $matches ? $matches : $no_matches;
+  my $html;
+  my $html       = '<div class="jump_right"><a href="#trans_smatch_table">See RefSeq/UniProt/CCDS, etc transcript identifiers &#187;</a></div>';
+  $html         .= $matches ? $matches : $no_matches;
+  $html         .= '<a name="trans_smatch_table"></a>';
   $html         .= $self->matches_to_html(@dbtypes);
   return $html;
 }
@@ -43,7 +46,7 @@ sub matches_to_html {
   my @dbtypes          = @_;
   my $hub            = $self->hub;
   my $count_ext_refs = 0;
-  my $table          = $self->new_table([], [], { data_table => 'no_col_toggle', sorting => [ 'transcriptid asc' ], exportable => 1 });
+  my $table          = $self->new_table([], [], { data_table => 'no_col_toggle', sorting => [ 'transcriptid asc' ], exportable => 1, title => 'Identifiers corresponding to the transcripts of this gene:' });
   my (%existing_display_names, @rows, $html);
 
   my @columns = ({
@@ -68,7 +71,7 @@ sub matches_to_html {
       next unless $options{$_->db_display_name} && $hub->param($_->db_display_name) ne 'off';
 
       my %similarity_links = $self->get_similarity_links_hash($_);
-      my $ext_db_entry     = $similarity_links{'link'} ? qq{<a href="$similarity_links{'link'}">$similarity_links{'link_text'}</a>}  : $similarity_links{'link_text'};
+      my $ext_db_entry     = $similarity_links{'link'} ? qq(<a href="$similarity_links{'link'}">$similarity_links{'link_text'}</a>)  : $similarity_links{'link_text'};
       $row->{$_->db_display_name} .= ' ' if defined $row->{$_->db_display_name};
       $row->{$_->db_display_name} .= $ext_db_entry;
       $count_ext_refs++;
@@ -98,7 +101,6 @@ sub matches_to_html {
   if ($count_ext_refs == 0) {
     $html.= '<p><strong>No (selected) external database contains identifiers which correspond to the transcripts of this gene.</strong></p>';
   } else {
-    $html .= '<p><strong>The following database identifier' . ($count_ext_refs > 1 ? 's' : '') . ' correspond' . ($count_ext_refs > 1 ? '' : 's') . ' to the transcripts of this gene:</strong></p>';
     $html .= $table->render;
   }
 

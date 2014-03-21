@@ -56,6 +56,7 @@ sub code       :lvalue { $_[0]{'code'}        }
 sub format     :lvalue { $_[0]{'format'};     }
 sub export_url :lvalue { $_[0]{'export_url'}; }
 sub filename   :lvalue { $_[0]{'filename'};   }
+sub title { return ($_[0]{'title'}||=$_[1]); }
 
 sub has_rows { return ! !@{$_[0]{'rows'}}; }
 
@@ -210,8 +211,12 @@ sub render {
   $tbody  = "<tbody>$tbody</tbody>" if $tbody;
   $style  = join ';', @$style, "width: $width";
   
+  my @extra_attr;
+  push @extra_attr,["title",$self->title] if $self->title;
+  my $extras = join(' ','',map { "$_->[0]=\"$_->[1]\"" } @extra_attr);
+
   my $table = qq(
-    <table$table_id class="$class" style="$style" cellpadding="$padding" cellspacing="$spacing">
+    <table$table_id class="$class" style="$style" cellpadding="$padding" cellspacing="$spacing"$extras>
       $thead
       $tbody
     </table>

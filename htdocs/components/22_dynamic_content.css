@@ -96,6 +96,8 @@ div.toggleable_table h2 a.toggle { background-position: right 50%; }
 form.data_table_config,
 form.data_table_export { display: none; }
 
+.jump_right { float: right; margin: -24px 4px 4px 0px; }
+.jump_right a { text-decoration: none; }
 
 /***********************************
            helptip stuff

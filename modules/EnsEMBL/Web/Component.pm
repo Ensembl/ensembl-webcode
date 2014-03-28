@@ -123,6 +123,11 @@ sub cacheable {
   return $self->{'cacheable'};
 }
 
+sub mcacheable {
+  # temporary method in e75 only - will be replaced in 76 (hr5)
+  return 1;
+}
+
 sub ajaxable {
   my $self = shift;
   $self->{'ajaxable'} = shift if @_;
@@ -143,7 +148,7 @@ sub has_image {
 
 sub get_content {
   my ($self, $function) = @_;
-  my $cache = $self->ajaxable && !$self->renderer->{'_modal_dialog_'} ? $self->hub->cache : undef;
+  my $cache = $self->mcacheable && $self->ajaxable && !$self->renderer->{'_modal_dialog_'} ? $self->hub->cache : undef;
   my $content;
   
   if ($cache) {
@@ -854,7 +859,7 @@ sub _sort_similarity_links {
       $text .= qq{  [<a href="$k_url">view all locations</a>]} unless $xref_type =~ /^ALT/;
     }
 
-    $text .= '</div>' if $join_links;
+    $text .= '</div>';
 
     my $label = $type->db_display_name || $externalDB;
     $label    = 'LRG' if $externalDB eq 'ENS_LRG_gene'; ## FIXME Yet another LRG hack!
@@ -1596,7 +1601,7 @@ sub species_stats {
     $counts->add_row({
       'name' => "<b>$header</b>",
       'stat' => $stat,
-    });
+    }) if $stat;
   }
 
   $html .= $counts->render;
@@ -1622,7 +1627,7 @@ sub species_stats {
       $alt_counts->add_row({
         'name' => "<b>$header</b>",
         'stat' => $stat,
-      });
+      }) if $stat;
     }
     $html .= $alt_counts->render;
   }
@@ -1639,19 +1644,22 @@ sub species_stats {
     push @$rows, {
       'name' => "<b>$name</b>",
       'stat' => $self->thousandify($stat),
-    };
+    } if $stat;
   }
   ## Variants
-  my @other_stats = (
-    {'name' => 'SNPCount', 'method' => 'get_short_variation_count'},
-    {'name' => 'struct_var', 'method' => 'get_structural_variation_count'}
-  );
-  foreach (@other_stats) {
-    my $method = $_->{'method'};
-    push @$rows, {
-      'name' => '<b>'.$genome_container->get_attrib($_->{'name'})->name().'</b>',
-      'stat' => $self->thousandify($genome_container->$method),
-    };
+  if ($self->hub->database('variation')) {
+    my @other_stats = (
+      {'name' => 'SNPCount', 'method' => 'get_short_variation_count'},
+      {'name' => 'struct_var', 'method' => 'get_structural_variation_count'}
+    );
+    foreach (@other_stats) {
+      my $method = $_->{'method'};
+      my $stat = $self->thousandify($genome_container->$method);
+      push @$rows, {
+        'name' => '<b>'.$genome_container->get_attrib($_->{'name'})->name().'</b>',
+        'stat' => $stat,
+      } if $stat;
+    }
   }
   if (scalar(@$rows)) {
     $html .= '<h3>Other</h3>';

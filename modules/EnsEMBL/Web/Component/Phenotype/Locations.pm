@@ -44,6 +44,11 @@ sub content {
     my $object = $self->object;
     if ($object && $object->can('convert_to_drawing_parameters')) {
       $features = $object->convert_to_drawing_parameters;
+
+      # If too many data to display
+      foreach my $obj_type (keys(%$features)) {
+        return $self->_warning("Sorry there are too many to display", $features->{$obj_type}->[0][0]{'warning_msg'}) if ($features->{$obj_type}->[0][0]{'warning_msg'});
+      }
     }
   }
   my $html = $self->_render_features(\@id, $features);

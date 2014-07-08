@@ -183,7 +183,7 @@ sub show_warnings {
   my $alert;
   return '' unless defined $warnings;
   foreach (@$warnings) {
-    $alert .= $self->warning_panel(%$_);
+    $alert .= $self->warning_panel(ucfirst($_->{title}), $_->{message});
   }
   return $alert;
 }

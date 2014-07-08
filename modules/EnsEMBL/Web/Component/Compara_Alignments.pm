@@ -53,7 +53,6 @@ sub content {
                     'align' => $align_param, 
                     'species' => $self->object->species,
                   });
-  return $alert_box if $alert_box;
 
   #target_species and target_slice_name_range may not be defined so split separately
   #target_species but not target_slice_name_range is defined for pairwise compact alignments. 
@@ -71,7 +70,7 @@ sub content {
   my ($error, $warnings) = $self->object->check_for_align_in_database($align, $species, $cdb);
   return $error if $error;
   
-  my $html;
+  my $html = $alert_box;
   
   if ($type eq 'Gene') {
     my $location = $object->Obj; # Use this instead of $slice because the $slice region includes flanking

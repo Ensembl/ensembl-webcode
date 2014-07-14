@@ -630,14 +630,17 @@ sub check_for_align_problems {
   my $html;
 
   my ($error, $warnings) = $self->object->check_for_align_in_database($args->{align}, $args->{species}, $args->{cdb});
-  push @$warnings, $self->object->check_for_missing_species($args);
+  my $info_missing = $self->object->check_for_missing_species($args);
  
   if ($error) {
-    $html .= $self->error_panel($error->{title}, $error->{message});
+    $html .= $self->error_panel(ucfirst $error->{title}, $error->{message});
   }
   foreach (@$warnings) {
     next unless $_->{message};
-    $html .= $self->warning_panel($_->{title}, $_->{message});
+    $html .= $self->warning_panel(ucfirst $_->{title}, $_->{message});
+  }
+  if ($info_missing) {
+    $html .= $self->info_panel(ucfirst $info_missing->{title}, $info_missing->{message});
   }
 
   return $html;

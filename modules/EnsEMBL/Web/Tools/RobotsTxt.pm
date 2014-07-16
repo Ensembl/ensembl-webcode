@@ -101,6 +101,9 @@ sub create {
   print FH _lines("User-agent","AhrefsBot");
   print FH _lines("Disallow","/");
 
+  print FH _lines("User-agent","360Spider");
+  print FH _lines("Disallow","/");
+
   if(-e "$server_root/htdocs/sitemaps/sitemap-index.xml") {
     # If we have a sitemap let google know about it.
     warn _box("Creating robots.txt for google sitemap");

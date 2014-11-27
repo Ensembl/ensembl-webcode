@@ -46,6 +46,7 @@ sub render {
   my $html;
 
   my $release_id = $hub->param('id') || $hub->param('release_id') || $hub->species_defs->ENSEMBL_VERSION;
+
   return unless $release_id;
 
   my $adaptor = EnsEMBL::Web::DBSQL::ArchiveAdaptor->new($hub);
@@ -134,14 +135,15 @@ sub render {
     $html .= '</p>';
   }
 
-  my $twitter_user = $species_defs->ENSEMBL_TWITTER_ACCOUNT;
-  my $widget_id    = $species_defs->TWITTER_FEED_WIDGET_ID;
-  if ($twitter_user && $widget_id) {
+  if ($species_defs->ENSEMBL_SITETYPE ne 'Archive') {
+    my $twitter_user = $species_defs->ENSEMBL_TWITTER_ACCOUNT;
+    my $widget_id    = $species_defs->TWITTER_FEED_WIDGET_ID;
+    if ($twitter_user && $widget_id) {
     $html .= sprintf(qq(<a class="twitter-timeline" href="https://twitter.com/%s" height="400" data-widget-id="%s">Recent tweets from @%s</a>
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>), 
                 $twitter_user, $widget_id, $twitter_user);
+    }
   }
-
   return $html;
 }
 

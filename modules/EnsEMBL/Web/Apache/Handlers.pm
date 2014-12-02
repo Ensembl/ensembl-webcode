@@ -289,6 +289,12 @@ sub handler {
     $r->uri('/info/docs/tools/vep/index.html');
     $redirect = 1;
   }
+  ## Redirect moved documentation
+  if ($file =~ /\/info\/docs\/genebuild/) {
+    $file =~ s/docs/genome/;
+    $r->uri($file);
+    $redirect = 1;
+  }
 
   if ($redirect) {
     $r->headers_out->add('Location' => $r->uri);

@@ -1,6 +1,7 @@
+
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -36,14 +37,42 @@ sub content {
   my $vf                 = $hub->param('vf');
   my $variation_features = $variation->get_all_VariationFeatures;
   my ($feature_slice)    = map { $_->dbID == $vf ? $_->feature_Slice : () } @$variation_features; # get slice for variation feature
+  my $avail              = $object->availability;  
 
-  my $info_box;
+  my ($info_box);
   if ($variation->failed_description || (scalar keys %{$object->variation_feature_mapping} > 1)) { 
     ## warn if variation has been failed
     $info_box = $self->multiple_locations($feature_slice, $variation->failed_description); 
   }
+  
+  my $transcript_url  = $hub->url({ action => "Variation", action => "Mappings",    vf => $vf });
+  my $genotype_url    = $hub->url({ action => "Variation", action => "Individual",  vf => $vf });
+  my $phenotype_url   = $hub->url({ action => "Variation", action => "Phenotype",   vf => $vf });
+  my $citation_url    = $hub->url({ action => "Variation", action => "Citations",   vf => $vf });
+ 
+  my @str_array;
+  push @str_array, sprintf('is associated with <a href="%s">%s %s</a>', 
+                      $transcript_url, 
+                      $avail->{has_transcripts}, 
+                      $avail->{has_transcripts} eq "1" ? "gene" : "genes"
+                  ) if($avail->{has_transcripts});
+  push @str_array, sprintf('<a href="%s">%s individual %s</a>', 
+                      $genotype_url, 
+                      $avail->{has_individuals}, 
+                      $avail->{has_individuals} eq "1" ? "genotype" : "genotypes" 
+                  )if($avail->{has_individuals});
+  push @str_array, sprintf('<a href="%s">%s %s</a>', 
+                      $phenotype_url, 
+                      $avail->{has_ega}, 
+                      $avail->{has_ega} eq "1" ? "phenotype" : "phenotypes"
+                  ) if($avail->{has_ega});  
+  push @str_array, sprintf('is mentioned in <a href="%s">%s %s', 
+                      $citation_url, 
+                      $avail->{has_citation}, 
+                      $avail->{has_citation} eq "1" ? "citation" : "citations" 
+                  ) if($avail->{has_citation});
 
-  my $summary_table = $self->new_twocol(
+  my $summary_table = $self->new_twocol(    
     $self->variation_source,
     $self->alleles($feature_slice),
     $self->location,
@@ -54,7 +83,8 @@ sub content {
     $self->clinical_significance,
     $self->synonyms,
     $self->hgvs,
-    $self->sets
+    $self->sets,
+    ['Summary', sprintf('This variant %s.', $self->join_with_and(@str_array))]
   );
 
   return sprintf qq{<div class="summary_panel">$info_box%s</div>}, $summary_table->render;

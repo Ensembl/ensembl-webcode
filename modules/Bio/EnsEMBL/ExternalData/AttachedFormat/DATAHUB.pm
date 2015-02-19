@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,15 +25,12 @@ no warnings 'uninitialized';
 use Bio::EnsEMBL::ExternalData::DataHub::SourceParser;
 
 use base qw(Bio::EnsEMBL::ExternalData::AttachedFormat);
-use EnsEMBL::Web::Tools::RemoteURL qw(chase_redirects);
+use EnsEMBL::Web::File::Utils::URL qw(chase_redirects);
 
 sub new {
   my $self = shift->SUPER::new(@_);
   
-  $self->{'datahub_adaptor'} = Bio::EnsEMBL::ExternalData::DataHub::SourceParser->new({ 
-    timeout => 10,
-    proxy   => $self->{'hub'}->species_defs->ENSEMBL_WWW_PROXY,
-  });
+  $self->{'datahub_adaptor'} = Bio::EnsEMBL::ExternalData::DataHub::SourceParser->new('hub' => $self->{'hub'});
   
   return $self;
 }
@@ -48,7 +45,7 @@ sub check_data {
   my $url  = $self->{'url'};
   my $error;
   
-  $url = $self->chase_redirects($url);
+  $url = chase_redirects($url, {'hub' => $self->{'hub'}});
   if (ref($url) eq 'HASH') {
     return ($url->{'error'});
   }

@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ package EnsEMBL::Web::Utils::UserData;
 
 use LWP::UserAgent;
 use HTTP::Headers;
-use EnsEMBL::Web::Root;
+use EnsEMBL::Root;
 use EnsEMBL::Web::RegObj;
 use EnsEMBL::Web::CompressionSupport;
 
@@ -58,7 +58,7 @@ sub build_tracks_from_file {
   ## Parse it and build into lightweight hash "features"
   if ($args->{'file'}) {
     my $class = 'EnsEMBL::Web::IOWrapper::'.uc($args->{'format'});
-    if (EnsEMBL::Web::Root::dynamic_use(undef, $class)) {
+    if (EnsEMBL::Root::dynamic_use($class)) {
       my $path = $species_defs->ENSEMBL_TMP_DIR.'/user_upload/'.$args->{'file'};
       my $wrapper = $class->new($path);
       ## Loop through file

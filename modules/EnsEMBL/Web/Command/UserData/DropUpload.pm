@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,10 +18,12 @@ limitations under the License.
 
 package EnsEMBL::Web::Command::UserData::DropUpload;
 
+### Called by JavaScript only - see method dropFileUpload in 15_ImageMap.js
+
 use strict;
 
 use EnsEMBL::Web::Text::FeatureParser;
-use EnsEMBL::Web::TmpFile::Text;
+use EnsEMBL::Web::File::User;
 
 use base qw(EnsEMBL::Web::Command::UserData);
 
@@ -51,11 +53,12 @@ sub process {
 
     return if $size > 10; # Uncompressed file is too big.
     
-    my $content = EnsEMBL::Web::TmpFile::Text->new(filename => $data->{'filename'}, extension => $data->{'extension'})->retrieve;
+    my $file = EnsEMBL::Web::File::User->new(hub => $hub, file => $data->{'file'}, extension => $data->{'extension'});
+    my $result = $file->read;    
+
+    return unless $result->{'content'};
     
-    return unless $content;
-    
-    $parser->parse($content, $data->{'format'});
+    $parser->parse($result->{'content'}, $data->{'format'});
     
     my $nearest = $parser->nearest;
     

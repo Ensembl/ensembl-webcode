@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ package EnsEMBL::Web::Object::DataExport;
 
 use EnsEMBL::Web::Controller;
 use EnsEMBL::Web::Builder;
-use EnsEMBL::Web::File;
+use EnsEMBL::Web::File::User;
 
 use strict;
 use warnings;
@@ -80,9 +80,10 @@ sub handle_download {
   my $hub = $self->hub;
 
   my $filename    = $hub->param('filename');
-  my $path        = $hub->param('path');
   my $format      = $hub->param('format');
+  my $path        = $hub->param('file');
   my $compression = $hub->param('compression');
+  my $path        = $hub->param('file');
   
   ## Strip double dots to prevent downloading of files outside tmp directory
   $path =~ s/\.\.//g;
@@ -96,25 +97,33 @@ sub handle_download {
         'zip'   => 'application/zip',
   );
   my $mime_type = $mime_types{$compression} || $mime_types{$format} || 'text/plain';
-  my $compress = $compression ? 1 : 0;
 
-  my %params = (hub => $hub, path => $path);
-  if ($compress) {
-    $params{'compress'} = $compress;
-    $params{'get_compressed'} = 1;
+  my %params = (hub => $hub, file => $path);
+  my $file = EnsEMBL::Web::File::User->new(%params);
+  my $error;
+
+  if ($file->exists) {
+    my $result = $file->fetch;
+    my $content = $result->{'content'};
+    if ($content) {
+
+      $r->headers_out->add('Content-Type'         => $mime_type);
+      $r->headers_out->add('Content-Length'       => length $content);
+      $r->headers_out->add('Content-Disposition'  => sprintf 'attachment; filename=%s', $filename);
+
+      print $content;
+    }
+    else {
+      $error = $result->{'error'};
+    }
   }
-  my $tmpfile = EnsEMBL::Web::File->new(%params);
-
-  if ($tmpfile->exists) {
-    my $content = $tmpfile->fetch;
-
-    $r->headers_out->add('Content-Type'         => $mime_type);
-    $r->headers_out->add('Content-Length'       => length $content);
-    $r->headers_out->add('Content-Disposition'  => sprintf 'attachment; filename=%s', $filename);
-
-    print $content;
+  else { 
+    $error =  ["Sorry, could not find download file $filename."]; 
   }
-  else { warn ">>> PATH NOT RECOGNISED"; }
+
+  if ($error) {
+    warn ">>> DOWNLOAD ERROR: @$error";
+  }
 }
 
 sub expand_slice {

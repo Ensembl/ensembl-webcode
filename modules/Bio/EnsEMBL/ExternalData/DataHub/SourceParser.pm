@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -36,13 +36,17 @@ Anne Parker <ap5@sanger.ac.uk>
 package Bio::EnsEMBL::ExternalData::DataHub::SourceParser;
 
 use strict;
-use vars qw(@EXPORT_OK);
-use base qw(Exporter);
 
-use HTTP::Tiny; 
-use LWP::UserAgent;
+use Digest::MD5 qw(md5_hex);
 
+use EnsEMBL::Web::File::Utils::URL qw(read_file);
 use EnsEMBL::Web::Tree;
+
+## Force refresh of hub files
+our $headers = {
+                'Cache-Control'     => 'no-cache',
+                'If-Modified-Since' => 'Thu, 1 Jan 1970 00:00:00 GMT',
+                };
 
 =head1 METHODS
 
@@ -59,28 +63,24 @@ use EnsEMBL::Web::Tree;
 =cut
 
 sub new {
-### We have to use two different modules to ensure
-### support for http, https and ftp
-  my ($class, $settings) = @_;
+  my ($class, %args) = @_;
 
-  ## HTTP(S)
-  my %args = ('timeout' => $settings->{'timeout'});
-  if ($settings->{'proxy'}) {
-    $args{'http_proxy'}   = $settings->{'proxy'};
-    $args{'https_proxy'}  = $settings->{'proxy'};
-  }
-
-  my $http = HTTP::Tiny->new(%args);
-
-  ## FTP
-  my $ua = LWP::UserAgent->new;
-  $ua->timeout($settings->{'timeout'});
-  $ua->proxy('http', $settings->{'proxy'}) if $settings->{'proxy'};
-
-  my $self = { http => $http, ua => $ua };
+  my $self = \%args;
   bless $self, $class;
 
   return $self;
+}
+
+sub web_hub {
+## Gets EnsEMBL::Web::Hub (not to be confused with track hub!)
+  my $self = shift;
+  return $self->{'hub'};
+}
+
+sub url {
+  my ($self, $url) = @_;
+  $self->{'url'} = $url if $url;
+  return $self->{'url'};
 }
 
 =head2 get_hub_info
@@ -98,6 +98,18 @@ sub new {
 
 sub get_hub_info {
   my ($self, $url, $assembly_lookup) = @_;
+
+  $self->url($url);
+
+  my $cache = $self->web_hub ? $self->web_hub->cache : undef;
+  my $cache_key = 'trackhub_'.md5_hex($url);
+  my $hub_info;
+
+  if ($cache) {
+    $hub_info = $cache->get($cache_key);
+    return $hub_info if $hub_info;
+  }
+
   my @split_url = split '/', $url;
   my $hub_file;
   
@@ -108,39 +120,33 @@ sub get_hub_info {
     $hub_file = 'hub.txt';
     $url      =~ s|/$||;
   }
- 
-  my $ua    = $self->{'ua'};
-  my $http  = $self->{'http'};
-  my ($response, $content);
+  my $file_args = {'hub' => $self->{'hub'}, 'nice' => 1, 'headers' => $headers}; 
 
-  if ($url =~ /^ftp/) {
-    $response = $ua->get("$url/$hub_file");
-    return { error => [$response->status_line] } unless $response->is_success;
-    $content = $response->content;
+  my $response = read_file("$url/$hub_file", $file_args);
+  my $content;
+ 
+  if ($response->{'error'}) {
+    return $response;
   }
-  else { 
-    $response = $http->get("$url/$hub_file");
-    return { error => [$self->_http_error($response)] } unless $response->{'success'};
+  else {
     $content = $response->{'content'};
   }
   my %hub_details;
-  
+
   ## Get file name for file with genome info
   foreach (split /\n/, $content) {
+    $_ =~ s/\s+$//;
     my @line = split /\s/, $_, 2;
     $hub_details{$line[0]} = $line[1];
   }
   return { error => ['No genomesFile found'] } unless $hub_details{'genomesFile'};
  
   ## Now get genomes file and parse 
-  if ($url =~ /^ftp/) {
-    $response = $ua->get("$url/$hub_details{'genomesFile'}"); 
-    return { error => ['genomesFile: ' . $response->status_line] } unless $response->is_success;
-    $content = $response->content;
+  $response = read_file("$url/$hub_details{'genomesFile'}", $file_args); 
+  if ($response->{'error'}) {
+    return $response;
   }
   else {
-    $response = $http->get("$url/$hub_details{'genomesFile'}");
-    return { error => ['genomesFile: ' . $self->_http_error($response)] } unless $response->{'success'};
     $content = $response->{'content'};
   }
 
@@ -174,23 +180,16 @@ sub get_hub_info {
      ## Parse list of config files
       foreach my $genome (keys %ok_genomes) {
       $file = $genome_info{$genome};
-  
-      if ($url =~ /^ftp/) {
-        $response = $ua->get("$url/$file");
-        if (!$response->is_success) {
-          push @errors, "$genome ($url/$file): " . $response->status_line;
-          next;
-        }
-        $content = $response->content;
+ 
+      $response = read_file("$url/$file", $file_args); 
+
+      if ($response->{'error'}) {
+        push @errors, "$genome ($url/$file): ".@{$response->{'error'}};
       }
       else {
-        $response = $http->get("$url/$file");
-        if (!$response->{'success'}) {
-          push @errors, "$genome ($url/$file): " . $self->_http_error($response);
-          next;
-        }
         $content = $response->{'content'};
       }
+
       my @track_list;
       $content =~ s/\r//g;
     
@@ -203,7 +202,7 @@ sub get_hub_info {
         s/^include //;
         push @track_list, "$url/$_";
       }
-    
+
       if (scalar @track_list) {
         ## replace trackDb file location with list of track files
         $genome_info{$genome} = \@track_list;
@@ -216,7 +215,16 @@ sub get_hub_info {
     push @errors, "This track hub does not contain any genomes compatible with this website";
   }
 
-  return scalar @errors ? { error => \@errors } : { details => \%hub_details, genomes => \%genome_info };
+  if (scalar @errors) {
+    return { error => \@errors };
+  }
+  else {
+    my $hub_info = { details => \%hub_details, genomes => \%genome_info };
+    if ($cache) {
+      $cache->set($cache_key, $hub_info, 60*60*24*7, 'TRACKHUBS');
+    }
+    return $hub_info;
+  }
 }
 
 =head2 parse
@@ -235,42 +243,53 @@ sub get_hub_info {
 
 sub parse {
   my ($self, $files) = @_;
-  
-  if (!$files && !scalar @$files) {
-    warn 'No datahub URL specified!';
+ 
+  ## Get the hub URL and check the cache 
+  my $url = shift || $self->url;
+  if (!$url) {
+    warn 'No URL specified!';
     return;
   }
-  
-  my $http  = $self->{'http'};
-  my $ua    = $self->{'ua'};
 
+  my $cache = $self->web_hub ? $self->web_hub->cache : undef;
+  my $cache_key = 'trackhub_'.md5_hex($url);
+  my $hub_info;
+
+  if ($cache) {
+    $hub_info = $cache->get($cache_key);
+    return $hub_info->{'tree'} if $hub_info;
+  }
+
+  ## Nothing cached, so parse the files
+  if (!$files && !scalar @$files) {
+    warn 'No datahub files specified!';
+    return;
+  }
+ 
   my $tree = EnsEMBL::Web::Tree->new;
   my $response;
   
   ## Get all the text files in the hub directory
   foreach (@$files) {
-    if ($_ =~ /^ftp/) {
-      $response = $ua->get($_);
+    $response = read_file($_, {'hub' => $self->{'hub'}, 'nice' => 1, 'headers' => $headers});
 
-      if ($response->is_success) {
-        $self->parse_file_content($tree, $response->content =~ s/\r//gr, $_);
-      } else {
-        $tree->append($tree->create_node("error_$_", { error => $response->status_line, file => $_ }));
-      }
-    }
-    else {
-      $response = $http->get($_);
-    
-      if ($response->{'success'}) {
-        $self->parse_file_content($tree, $response->{'content'} =~ s/\r//gr, $_);
-      } else {
-        $tree->append($tree->create_node("error_$_", { error => $self->_http_error($response), file => $_ }));
-      }
+    if ($response->{'error'}) {
+      $tree->append($tree->create_node("error_$_", { error => @{$response->{'error'}}, file => $_ }));
+    } else {
+      $self->parse_file_content($tree, $response->{'content'} =~ s/\r//gr, $_);
     }
   }
   
+  ## Update cache
+  if ($hub_info) {
+    $hub_info->{'tree'} = $tree;
+    $cache->set($cache_key, $hub_info, 60*60*24*7, 'TRACKHUBS');
+  }
+
   return $tree;
 }
+
+####### HELPER METHODS ######
 
 sub parse_file_content {
   my ($self, $tree, $content, $file) = @_;
@@ -278,7 +297,13 @@ sub parse_file_content {
   my $url      = $file =~ s|^(.+)/.+|$1|r; # URL relative to the file (up until the last slash before the file name)
   my @contents = split /track /, $content;
   shift @contents;
-  
+ 
+  ## Some hubs don't set the track type, so...
+  my %format_lookup = (
+                      'bb' => 'bigBed',
+                      'bw' => 'bigWig',
+                      );
+ 
   foreach (@contents) {
     my @lines = split /\n/;
     my (@track, $multi_line);
@@ -303,7 +328,7 @@ sub parse_file_content {
     next unless defined $id;
     
     $id = 'Unnamed' if $id eq '';
-    
+   
     foreach (@track) {
       my ($key, $value) = split /\s+/, $_, 2;
       
@@ -384,12 +409,19 @@ sub parse_file_content {
     }
     
     # filthy hack to support superTrack setting being used as parent, because hubs are incorrect.
-    $tracks{$id}{'parent'} = delete $tracks{$id}{'superTrack'} if $tracks{$id}{'superTrack'} && $tracks{$id}{'superTrack'} ne 'on' && !$tracks{$id}{'parent'};
-    
+    $tracks{$id}{'parent'} = delete $tracks{$id}{'superTrack'} if $tracks{$id}{'superTrack'} && $tracks{$id}{'superTrack'} !~ /^on/ && !$tracks{$id}{'parent'};
+
+
     # any track which doesn't have any of these is definitely invalid
     if ($tracks{$id}{'type'} || $tracks{$id}{'shortLabel'} || $tracks{$id}{'longLabel'}) {
       $tracks{$id}{'track'}           = $id;
       $tracks{$id}{'description_url'} = "$url/$id.html" unless $tracks{$id}{'parent'};
+      
+      unless ($tracks{$id}{'type'}) {
+        ## Set type based on file extension
+        my @path = split(/\./, $tracks{$id}{'bigDataUrl'});
+        $tracks{$id}{'type'} = $format_lookup{$path[-1]};
+      }
       
       if ($tracks{$id}{'dimensions'}) {
         # filthy last-character-of-string hack to support dimensions in the same way as UCSC
@@ -490,12 +522,6 @@ sub sort_tree {
   }
   
   $self->sort_tree($_) for @children;
-}
-
-sub _http_error {
-### Helper subroutine for formatting error messages from HTTP::Tiny
-  my ($self, $response) = @_;
-  return $response->{'status'}.': '.$response->{'reason'};
 }
 
 1;

@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ use List::Util qw(min max);
 use Bio::EnsEMBL::ExternalData::AttachedFormat::BIGBED;
 use Bio::EnsEMBL::ExternalData::BigFile::BigBedAdaptor;
 
+use EnsEMBL::Web::File::Utils::URL;
 use EnsEMBL::Web::Text::Feature::BED;
 
 use base qw(EnsEMBL::Draw::GlyphSet::_alignment EnsEMBL::Draw::GlyphSet_wiggle_and_block);
@@ -46,8 +47,31 @@ sub bigbed_adaptor {
   my ($self,$in) = @_;
 
   $self->{'_cache'}->{'_bigbed_adaptor'} = $in if defined $in;
-  my $url = $self->my_config('url');
-  return $self->{'_cache'}->{'_bigbed_adaptor'} ||= Bio::EnsEMBL::ExternalData::BigFile::BigBedAdaptor->new($url);
+ 
+  my $error;
+  unless ($self->{'_cache'}->{'_bigbed_adaptor'}) { 
+    ## Check file is available before trying to load it 
+    ## (Bio::DB::BigFile does not catch C exceptions)
+    my $headers = EnsEMBL::Web::File::Utils::URL::get_headers($self->my_config('url'), {
+                                                                    'hub' => $self->{'config'}->hub, 
+                                                                    'no_exception' => 1
+                                                            });
+    if ($headers) {
+      if ($headers->{'Content-Type'} !~ 'text/html') { ## Not being redirected to a webpage, so chance it!
+        my $ad = Bio::EnsEMBL::ExternalData::BigFile::BigBedAdaptor->new($self->my_config('url'));
+        $error = "Broken bigbed file" unless $ad->check;
+        $self->{'_cache'}->{'_bigbed_adaptor'} = $ad;
+      }
+      else {
+        $error = "File at URL ".$self->my_config('url')." does not appear to be of type BigBed; returned MIME type ".$headers->{'Content-Type'};
+      }
+    }
+    else {
+      $error = "No HTTP headers returned by URL ".$self->my_config('url');
+    }
+  }
+  $self->errorTrack("Could not retrieve file from trackhub") if $error;
+  return $self->{'_cache'}->{'_bigbed_adaptor'};
 }
 
 sub format {
@@ -99,7 +123,9 @@ sub wiggle_features {
   return $self->{'_cache'}->{'wiggle_features'} if exists $self->{'_cache'}->{'wiggle_features'};
  
   my $slice = $self->{'container'}; 
-  my $features = $self->bigbed_adaptor->fetch_features($slice->seq_region_name,$slice->start,$slice->end);
+  my $adaptor = $self->bigbed_adaptor;
+  return [] unless $adaptor;
+  my $features = $adaptor->fetch_features($slice->seq_region_name,$slice->start,$slice->end);
   $_->map($slice) for @$features;
 
   my $flip = ($slice->strand == -1) ? ($slice->length + 1) : undef;
@@ -151,6 +177,7 @@ sub features {
   $options = { %config_in, %{$options || {}} };
 
   my $bba       = $options->{'adaptor'} || $self->bigbed_adaptor;
+  return [] unless $bba;
   my $format    = $self->format;
   my $slice     = $self->{'container'};
   my $features  = $bba->fetch_features($slice->seq_region_name, $slice->start, $slice->end + 1);

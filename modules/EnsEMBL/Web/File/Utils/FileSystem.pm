@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -133,7 +133,7 @@ sub copy_dir_contents {
         }
 
       } else {
-        throw exception('FileSystemException', "An error occoured while copying $source_dir/$content: $!") unless copy("$source_dir/$content", "$dest_dir/$content");
+        throw exception('FileSystemException', "An error occurred while copying $source_dir/$content: $!") unless copy("$source_dir/$content", "$dest_dir/$content");
         push @$contents, "$dest_dir/$content";
       }
     } catch {
@@ -164,7 +164,7 @@ sub copy_files {
     push @copied, $files->{$_};
     unless (copy($_, $files->{$_})) {
       unlink @copied; #rollback
-      throw exception('FileSystemException', "An error occoured while copying $_: $!") unless $params->{'no_exception'};
+      throw exception('FileSystemException', "An error occurred while copying $_: $!") unless $params->{'no_exception'};
       return;
     }
   }
@@ -177,6 +177,7 @@ sub list_dir_contents {
   ## @param Hashref with keys
   ##  - hidden : if on, will return hidden files too (off by default)
   ##  - no_exception :  if set true will not throw an exception if there's any problem
+  ##  - recursive: flag if on, will get all the files recursively going through each sub folder
   ## @return Arrayref of files/dir, undef if dir not existing
   my ($dir, $params) = @_;
 
@@ -185,7 +186,7 @@ sub list_dir_contents {
   my $dh    = DirHandle->new($dir);
 
   if (!$dh) {
-    throw exception('FileSystemException', "An error occoured while reading the directory $dir: $!") unless $params->{'no_exception'};
+    throw exception('FileSystemException', "An error occurred while reading the directory $dir: $!") unless $params->{'no_exception'};
     return undef;
   }
 
@@ -193,6 +194,10 @@ sub list_dir_contents {
 
     next if !$params->{'hidden'} && $content =~ /^\.+/;
     push @$ls, $content;
+
+    if ($params->{'recursive'} && -d "$dir/$content" && $content !~ /^\.+$/) {
+      push @$ls, map {"$content/$_"} @{list_dir_contents("$dir/$content", $params)};
+    }
   }
 
   $dh->close;

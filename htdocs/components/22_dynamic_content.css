@@ -1,5 +1,5 @@
 /*
- * Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+ * Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,10 @@ body.ie6  a.help-header span.sprite { width: 18px; font-size: 14px; }
 p#bottompad{margin:0;border:0;padding:0;clear:both;height:1px;overflow:hidden}
 
 /* Variation "icons" */
-div.icon-holder { width: 650px; }
-img.portal  { height: 96px; width: 96px; margin: 0 16px 16px 0; padding:8px; border-width:1px; border-style:solid; border-color:#ccc; border-radius:16px; -moz-border-radius: 16px; -webkit-border-radius: 16px; }
+div.icon-holder       { width: 650px; }
+img.portal            { height: 96px; width: 96px; margin: 0 16px 16px 0; padding:8px; border-width:1px; border-style:solid; border-color:#ccc; border-radius:16px; -moz-border-radius: 16px; -webkit-border-radius: 16px; }
+span.counts           { position:absolute; top:-8px; right:14px; background-color:#667aa6; color:#FFF; padding:2px 6px; border-radius:5px; box-shadow:2px 2px 2px #AAA }
+div.icon-container    { float:left; position:relative; }
 
 /************************************
              table stuff
@@ -97,7 +99,6 @@ div.reorder_species ul li          { cursor: n-resize; }
 body.mac div.reorder_species ul li { cursor: ns-resize; }
 
 div.toggleable_table             { clear: both; }
-div.toggleable_table h2          { float: left; }
 div.toggleable_table h2 a.toggle { background-position: right 50%; }
 
 form.data_table_config,

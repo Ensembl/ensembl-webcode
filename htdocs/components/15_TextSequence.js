@@ -1,5 +1,5 @@
 /*
- * Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+ * Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,6 +100,6 @@ Ensembl.Panel.TextSequence = Ensembl.Panel.Content.extend({
   },
   
   makeZMenu: function (e, el) {
-    Ensembl.EventManager.trigger('makeZMenu', el.data('menuId'), { event: e, area: { a: el } });
+    Ensembl.EventManager.trigger('makeZMenu', el.data('menuId'), { event: e, area: { link: el } });
   }
 });

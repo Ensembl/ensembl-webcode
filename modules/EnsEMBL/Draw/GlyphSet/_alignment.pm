@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -188,7 +188,8 @@ sub render_normal {
      $depth           = 0 if $strand_bump || $self->my_config('nobump');
   ## User setting overrides everything else
   my $default_depth   = $depth;
-  my $user_depth = $self->{'config'}->hub->param($self->type);
+  my $user_depth      = $self->my_config('userdepth');
+  
      $depth           = $user_depth if $user_depth and !$explicit_zero;
   my $gap             = $h < 2 ? 1 : 2;   
   my $strand          = $self->strand;
@@ -244,7 +245,7 @@ sub render_normal {
     $depth = 0 unless $overlap;
   }
 
-  my ($track_height,$on_screen,$off_screen,$on_other_strand) = (0,0,0,0);
+  my ($track_height,$total,$on_screen,$off_screen,$on_other_strand) = (0,0,0,0,0);
 
   foreach my $feature_key (@sorted) {
     ## Fix for userdata with per-track config
@@ -282,7 +283,12 @@ sub render_normal {
       
       push @{$id{$fgroup_name}}, [ $s, $e, $f, int($s * $pix_per_bp), int($e * $pix_per_bp), $db_name ];
     }
-    
+    my %idl;
+    foreach my $k (keys %id) {
+      $idl{$k} = $strand * ( max(map { $_->[1] } @{$id{$k}}) -
+                             min(map { $_->[0] } @{$id{$k}}));
+    }
+
     next unless keys %id;
     
     my $colour_key     = $self->colour_key($feature_key);
@@ -311,7 +317,7 @@ sub render_normal {
     
     my $greyscale_max = $config && exists $config->{'greyscale_max'} && $config->{'greyscale_max'} > 0 ? $config->{'greyscale_max'} : 1000;
     
-    foreach my $i (sort { $id{$a}[0][3] <=> $id{$b}[0][3] || $id{$b}[-1][4] <=> $id{$a}[-1][4] } keys %id) {
+    foreach my $i (sort { $idl{$a} <=> $idl{$b} } keys %id) {
       my @feat       = @{$id{$i}};
       my $db_name    = $feat[0][5];
       my $feat_from  = max(min(map { $_->[0] } @feat),1);
@@ -321,6 +327,7 @@ sub render_normal {
          $bump_end   = max($bump_end, $bump_start + 1 + [ $self->get_text_width(0, $self->feature_label($feat[0][2], $db_name), '', ptsize => $fontsize, font => $fontname) ]->[2]) if $self->{'show_labels'};
       my $x          = -1e8;
       my $row        = 0;
+      $total++;
       
       if ($depth > 0) {
         $row = $self->bump_row($bump_start, $bump_end);
@@ -428,7 +435,17 @@ sub render_normal {
       }
       
       if ($composite ne $self) {
-        if ($h > 1) {
+        if ($self->my_config('has_blocks')) {
+          $composite->unshift($self->Intron({
+            x         => $composite->{'x'},
+            y         => $composite->{'y'},
+            width     => $composite->{'width'},
+            height    => $h,
+            colour    => $join_colour,
+            absolutey => 1,
+          }));
+        }
+        elsif ($h > 1) {
           $composite->bordercolour($feature_colour) if $join;
         } else {
           $composite->unshift($self->Rect({
@@ -480,9 +497,10 @@ sub render_normal {
     }
     $y_offset -= $strand * ($self->_max_bump_row * ($h + $gap + $label_h) + 6);
   }
+
   if ($off_screen) {
     my $default = $depth == $default_depth ? 'by default' : '';
-    my $text = "Showing $on_screen of $off_screen features, due to track being limited to $depth rows $default - click to show more";
+    my $text = "Showing $on_screen of $total features, due to track being limited to $depth rows $default - click to show more";
     my $y = $track_height + $fontsize * 2 + 10;
     my $href = $self->_url({'action' => 'ExpandTrack', 'goto' => $self->{'config'}->hub->action, 'count' => $on_screen+$off_screen, 'default' => $default_depth}); 
     $self->push($self->Text({

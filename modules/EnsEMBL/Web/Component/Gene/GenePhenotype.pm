@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -125,15 +125,15 @@ sub gene_phenotypes {
 	    $html .= $self->new_table([
         { key => 'phenotype', align => 'left', title => 'Phenotype' },
         { key => 'source',    align => 'left', title => 'Source'    },
+        { key => 'locations', align => 'left', title => 'Genomic Locations' },
         { key => 'strain',    align => 'left', title => 'Strain'    },
         { key => 'allele',    align => 'left', title => 'Allele'    },
-        { key => 'locations', align => 'left', title => 'Locations' },
       ], \@rows, { data_table => 'no_sort no_col_toggle', exportable => 1 })->render;
     } else {  
       $html .= $self->new_table([ 
         { key => 'phenotype', align => 'left', title => 'Phenotype'     },
         { key => 'source',    align => 'left', title => 'Source'        },
-        { key => 'locations', align => 'left', title => 'Locations'     },
+        { key => 'locations', align => 'left', title => 'Genomic locations'     },
       ], \@rows, { data_table => 'no_sort no_col_toggle', exportable => 1 })->render;
     }
   }

@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ package EnsEMBL::Web::Text::FeatureParser;
 use strict;
 use warnings;
 no warnings "uninitialized";
-use EnsEMBL::Web::Root;
+use EnsEMBL::Root;
 use List::MoreUtils;
 use Carp qw(cluck);
 use Data::Dumper;
@@ -143,7 +143,7 @@ sub parse {
 
     ## Some complex formats need extra parsing capabilities
     my $sub_package = __PACKAGE__."::$format";
-    if (EnsEMBL::Web::Root::dynamic_use(undef, $sub_package)) {
+    if (EnsEMBL::Root::dynamic_use(undef, $sub_package)) {
       bless $self, $sub_package;
     }
     ## Create an empty feature that gives us access to feature info
@@ -399,7 +399,7 @@ sub check_format {
   }
 
   ## Sanity check - can we actually parse this?
-  if ($format && !(EnsEMBL::Web::Root::dynamic_use(undef, 'EnsEMBL::Web::Text::Feature::'.uc($format))) ) {
+  if ($format && !(EnsEMBL::Root::dynamic_use(undef, 'EnsEMBL::Web::Text::Feature::'.uc($format))) ) {
     return 'Unsupported format';
   }
   if (!$format) {

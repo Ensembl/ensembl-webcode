@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -71,6 +71,13 @@ sub bigbed_open {
   return $self->{_cache}->{_bigbed_handle};
 }
 
+sub check {
+  my $self = shift;
+
+  my $bb = $self->bigbed_open;
+  return defined $bb;
+}
+
 sub _parse_as {
   my ($self,$in) = @_;
 
@@ -94,6 +101,7 @@ sub autosql {
 
   unless($self->{'_cache'}->{'_as'}) {
     my $bb = $self->bigbed_open;
+    return {} unless $bb;
     my $as = $self->_parse_as($bb->bigBedAs);
     $self->{'_cache'}->{'_as'} = $as;
   }
@@ -263,7 +271,7 @@ sub fetch_rows  {
   my ($self, $chr_id, $start, $end, $dowhat) = @_;
 
   my $bb = $self->bigbed_open;
-  warn "Failed to open BigBed file" . $self->url unless $bb;
+  warn "Failed to open BigBed file " . $self->url."\n" unless $bb;
   return [] unless $bb;
   
   #  Maybe need to add 'chr' 

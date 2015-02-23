@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ package EnsEMBL::Web::Object::Transcript;
 
 use strict;
 
-use Bio::EnsEMBL::Utils::TranscriptAlleles qw(get_all_ConsequenceType);
 use Bio::EnsEMBL::Variation::Utils::Sequence qw(ambiguity_code variation_class);
 
 use EnsEMBL::Web::Cache;
@@ -657,8 +656,9 @@ sub getAllelesConsequencesOnSlice {
   my $valids = $self->valids;  
 
   # Get all features on slice
-  my $allele_features = $sample_slice->get_all_AlleleFeatures_Slice(1) || []; 
-  return ([], []) unless @$allele_features;
+  ## Don't assume that a sample ID taken from CGI input is actually present in this species!
+  my $allele_features = eval {$sample_slice->get_all_AlleleFeatures_Slice(1) || []}; 
+  return ([], []) if $@ || !@$allele_features;
 
   my @filtered_af =
     sort { $a->[2]->start <=> $b->[2]->start }

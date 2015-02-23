@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ use warnings;
 no warnings qw(uninitialized);
 
 use Bio::EnsEMBL::ExternalData::DAS::SourceParser;
-use Bio::EnsEMBL::ExternalData::DataHub::SourceParser;
 
 use base qw(EnsEMBL::Web::ConfigPacker_base);
 
@@ -340,17 +339,14 @@ sub _summarise_core_tables {
 # * Assemblies...
 # This is a bit ugly, because there's no easy way to sort the assemblies via MySQL
   $t_aref = $dbh->selectall_arrayref(
-    'select version, attrib, rank from coord_system where version is not null' 
+    'select version, attrib from coord_system where version is not null order by rank' 
   );
   my (%default, %not_default);
   foreach my $row (@$t_aref) {
     my $version = $row->[0];
     my $attrib  = $row->[1];
-    my $rank    = $row->[2];
     if ($attrib =~ /default_version/) {
-      if ($rank == 1) {    
-        $self->db_tree->{'ASSEMBLY_VERSION'} = $version;
-      }
+      $self->db_tree->{'ASSEMBLY_VERSION'} ||= $version; # get top ranked default_version
       $default{$version}++;
     }
     else {
@@ -586,17 +582,19 @@ sub _summarise_variation_db {
   $self->db_details($db_name)->{'tables'}{'variation_set'}{'descriptions'} = \%set_descriptions;
   
 #--------- Add in phenotype information
-  my $pf_aref = $dbh->selectall_arrayref(qq{
-    SELECT pf.type, GROUP_CONCAT(DISTINCT s.name), count(pf.phenotype_feature_id)
-    FROM phenotype_feature pf, source s
-    WHERE pf.source_id=s.source_id AND pf.is_significant=1 AND pf.type!='SupportingStructuralVariation'
-    GROUP BY pf.type
-  });
-  
-  for(@$pf_aref) {
-    $self->db_details($db_name)->{'tables'}{'phenotypes'}{'rows'} += $_->[2];
-    $self->db_details($db_name)->{'tables'}{'phenotypes'}{'types'}{$_->[0]}{'count'} = $_->[2];
-    $self->db_details($db_name)->{'tables'}{'phenotypes'}{'types'}{$_->[0]}{'sources'} = $_->[1];
+  if ($code !~ /variation_private/i) {
+    my $pf_aref = $dbh->selectall_arrayref(qq{
+      SELECT pf.type, GROUP_CONCAT(DISTINCT s.name), count(pf.phenotype_feature_id)
+      FROM phenotype_feature pf, source s
+      WHERE pf.source_id=s.source_id AND pf.is_significant=1 AND pf.type!='SupportingStructuralVariation'
+      GROUP BY pf.type
+    });
+
+    for(@$pf_aref) {
+      $self->db_details($db_name)->{'tables'}{'phenotypes'}{'rows'} += $_->[2];
+      $self->db_details($db_name)->{'tables'}{'phenotypes'}{'types'}{$_->[0]}{'count'} = $_->[2];
+      $self->db_details($db_name)->{'tables'}{'phenotypes'}{'types'}{$_->[0]}{'sources'} = $_->[1];
+    }
   }
 
 #--------- Add in somatic mutation information
@@ -1453,79 +1451,60 @@ sub _summarise_go_db {
 
 sub _summarise_dasregistry {
   my $self = shift;
-  
-  # Registry parsing is lazy so re-use the parser between species'
-  my $das_reg = $self->tree->{'DAS_REGISTRY_URL'} || ( warn "No DAS_REGISTRY_URL in config tree" && return );
-  
-  my @reg_sources = @{ $self->_parse_das_server($das_reg) };
-  # Fetch the sources for the current species
-  my %reg_logic = map { $_->logic_name => $_ } @reg_sources;
-  my %reg_url   = map { $_->full_url   => $_ } @reg_sources;
-  
-  # The ENSEMBL_INTERNAL_DAS_SOURCES section is a list of enabled DAS sources
-  # Then there is a section for each DAS source containing the config
-  $self->tree->{'ENSEMBL_INTERNAL_DAS_SOURCES'}     ||= {};
-  $self->das_tree->{'ENSEMBL_INTERNAL_DAS_CONFIGS'} ||= {};
-  while (my ($key, $val) 
-         = each %{ $self->tree->{'ENSEMBL_INTERNAL_DAS_SOURCES'} }) {
+
+  $self->tree->{'ENSEMBL_INTERNAL_DAS_SOURCES'}     ||= {}; # List of all enabled DAS sources acc to ini files
+  $self->das_tree->{'ENSEMBL_INTERNAL_DAS_CONFIGS'} ||= {}; # Section for each DAS source containing the config to be populated now
+
+  while (my ($key, $val) = each %{ $self->tree->{'ENSEMBL_INTERNAL_DAS_SOURCES'} }) {
 
     # Skip disabled sources
     $val || next;
+
     # Start with an empty config
     my $cfg = $self->tree->{$key};
-    if (!defined $cfg || !ref($cfg)) {
-      $cfg = {};
-    }
-    
-    $cfg->{'logic_name'}      = $key;
-    $cfg->{'category'}        = $val;
-    $cfg->{'homepage'}      ||= $cfg->{'authority'};
+       $cfg = {} unless defined $cfg && ref $cfg; 
 
-    # Make sure 'coords' is an array
-    if( $cfg->{'coords'} && !ref $cfg->{'coords'} ) {
-      $cfg->{'coords'} = [ $cfg->{'coords'} ];
-    }
-    
-    # Check if the source is registered
-    my $src = $reg_logic{$key};
+    $cfg->{'logic_name'}    = $key;
+    $cfg->{'category'}      = $val;
+    $cfg->{'homepage'}    ||= $cfg->{'authority'};
+    $cfg->{'coords'}        = [ $cfg->{'coords'} ] if $cfg->{'coords'} && !ref $cfg->{'coords'}; # Make sure 'coords' is an array
 
-    # Try the actual server URL if it's provided but the registry URI isn't
-    if (!$src && $cfg->{'url'} && $cfg->{'dsn'}) {
+    my $src;
+
+    # Try the server URL if it's provided
+    if ($cfg->{'url'} && $cfg->{'dsn'}) {
+
       my $full_url = $cfg->{'url'} . '/' . $cfg->{'dsn'};
-      $src = $reg_url{$full_url};
-      # Try parsing from the server itself
-      if (!$src) {
-        eval {
-          my %server_url = map {$_->full_url => $_} @{ $self->_parse_das_server($full_url) };
-          $src = $server_url{$full_url};
-        };
-        if ($@) {
-          warn "DAS source $key might not work - not in registry and server is down";
-        }
+
+      eval {
+        my %server_url = map {$_->full_url => $_} @{ $self->_parse_das_server($full_url) };
+        $src = $server_url{$full_url};
+      };
+
+      if ($@) {
+        warn "Skipping DAS source $key - unable to reach source at $full_url";
+        next;
       }
+
+      if (!$src) {
+        warn "Skipping DAS source $key - unable to parse source at $full_url";
+        next;
+      }
+
+    } else {
+      warn "Skipping DAS source $key - unable to find 'url' or 'dsn' property in the INI file";
+      next;
     }
 
-    # Doesn't have to be in the registry... unfortunately
-    # But if it is, fill in the blanks
-    if ($src) {
-      $cfg->{'label'}       ||= $src->label;
-      $cfg->{'description'} ||= $src->description;
-      $cfg->{'maintainer'}  ||= $src->maintainer;
-      $cfg->{'homepage'}    ||= $src->homepage;
-      $cfg->{'url'}         ||= $src->url;
-      $cfg->{'dsn'}         ||= $src->dsn;
-      $cfg->{'coords'}      ||= [map { $_->to_string } @{ $src->coord_systems }];
-    }
-    
-    if (!$cfg->{'url'}) {
-      warn "Skipping DAS source $key - unable to find 'url' property (tried looking in registry and INI)";
-      next;
-    }
-    if (!$cfg->{'dsn'}) {
-      warn "Skipping DAS source $key - unable to find 'dsn' property (tried looking in registry and INI)";
-      next;
-    }
-    
+    # fill in any extra info obtained from the das server (data from ini files takes precedence)
+    $cfg->{'label'}       ||= $src->label;
+    $cfg->{'description'} ||= $src->description;
+    $cfg->{'maintainer'}  ||= $src->maintainer;
+    $cfg->{'homepage'}    ||= $src->homepage;
+    $cfg->{'url'}         ||= $src->url;
+    $cfg->{'dsn'}         ||= $src->dsn;
+    $cfg->{'coords'}      ||= [map { $_->to_string } @{ $src->coord_systems }];
+
     # Add the final config hash to the das packed tree
     $self->das_tree->{'ENSEMBL_INTERNAL_DAS_CONFIGS'}{$key} = $cfg;
   }

@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package EnsEMBL::Web::Component::DataExport::Results;
 use strict;
 use warnings;
 
-use EnsEMBL::Web::File;
+use EnsEMBL::Web::File::User;
 
 use base qw(EnsEMBL::Web::Component::DataExport);
 
@@ -38,18 +38,19 @@ sub content {
 
   my $filename    = $hub->param('filename');
   my $format      = $hub->param('format');
-  my $path        = $hub->param('path');
-  my $compression = $hub->param('compression');
+  my $path        = $hub->param('file');
   my $html;
 
-  $html .= sprintf(
-            '<h2>Download</h2><a href="/Download/DataExport?filename=%s;format=%s;path=%s;compression=%s">Download your %s file</a>', 
-              $filename, lc($format), $path, $compression, $format,
-            );
+  $html .= sprintf '<h2>Download</h2><a href="%s">Download your %s file</a>', $hub->url('Download', {
+    'action'      => '',
+    'function'    => '',
+    'filename'    => $filename,
+    'file'        => $path,
+    'compression' => ''
+  }), $format;
 
   ## Hidden form taking you back to the beginning
-  my $form_url  = sprintf('/%s/DataExport/%s', $hub->species, $hub->param('export_action'));
-  my $form      = $self->new_form({'id' => 'export', 'action' => $form_url, 'method' => 'post'});
+  my $form      = $self->new_form({'id' => 'export', 'action' => $hub->url({'action' => $hub->param('export_action')}), 'method' => 'post'});
   my $fieldset  = $form->add_fieldset;
 
   foreach ($hub->param) {
@@ -88,14 +89,19 @@ sub content {
 
   $html .= $form->render;
 
-  unless ($format eq 'RTF' || $compression) {
-    my $file = EnsEMBL::Web::File->new(hub => $hub, path => $path);
-    if ($file) {
+  my $file = EnsEMBL::Web::File::User->new(hub => $hub, file => $path);
+  if ($file) {
+    my $read = $file->read;
+    if ($read->{'content'}) {
       $html .= '<h2 style="margin-top:1em">File preview</h2><div class="code"><pre style="color:#333">';
-      $html .= $file->read;
-      $html .= '</pre></div>';
+      $html .= $read->{'content'};
+      $html .= '</pre>';
     }
   }
+  else {
+    $html = "<p>Could not fetch file preview</p>";
+  }
+  $html .= '</div>';
 
   return $html;
 }

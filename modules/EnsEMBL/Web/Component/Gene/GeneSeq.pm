@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -79,10 +79,10 @@ sub content {
   my $html      = '';
 
   if ($length >= $self->{'subslice_length'}) {
-    $html .= '<div class="adornment-key"></div>';
+    $html .= '<div class="_adornment_key adornment-key"></div>';
     $html .= $self->chunked_content($length, $self->{'subslice_length'}, { length => $length, name => $slice->name });
   } else {
-    $html .= '<div class="adornment-key"></div>';
+    $html .= '<div class="_adornment_key adornment-key"></div>';
     $html .= $self->content_sub_slice($slice); # Direct call if the sequence length is short enough
   }
   

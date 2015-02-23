@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ use CGI;
 use URI::Escape qw(uri_escape uri_unescape);
 use HTML::Entities qw(encode_entities);
 
-use EnsEMBL::Draw::ColourMap;
+use EnsEMBL::Draw::Utils::ColourMap;
 
 use EnsEMBL::Web::Cache;
 use EnsEMBL::Web::Cookie;
@@ -48,7 +48,7 @@ use EnsEMBL::Web::RegObj;
 use EnsEMBL::Web::Session;
 use EnsEMBL::Web::SpeciesDefs;
 use EnsEMBL::Web::Text::FeatureParser;
-use EnsEMBL::Web::TmpFile::Text;
+use EnsEMBL::Web::File::User;
 use EnsEMBL::Web::ViewConfig;
 use EnsEMBL::Web::Tools::Misc qw(get_url_content);
 
@@ -131,7 +131,7 @@ sub config_adaptor { return $_[0]{'_config_adaptor'} ||= EnsEMBL::Web::DBSQL::Co
 
 sub timer_push        { return ref $_[0]->timer eq 'EnsEMBL::Web::Timer' ? shift->timer->push(@_) : undef;    }
 sub referer           { return $_[0]{'referer'}   ||= $_[0]->parse_referer;                                  }
-sub colourmap         { return $_[0]{'colourmap'} ||= EnsEMBL::Draw::ColourMap->new($_[0]->species_defs);      }
+sub colourmap         { return $_[0]{'colourmap'} ||= EnsEMBL::Draw::Utils::ColourMap->new($_[0]->species_defs);      }
 sub is_ajax_request   { return $_[0]{'is_ajax'}   //= $_[0]{'_apache_handle'}->headers_in->{'X-Requested-With'} eq 'XMLHttpRequest'; }
 
 sub species_path      { return shift->species_defs->species_path(@_);       }
@@ -620,7 +620,7 @@ sub get_ExtURL_link {
 
 sub get_ext_seq {
   ## Uses PFETCH etc to get description and sequence of an external record
-  ## @param Extrenal DB type (has to match ENSEMBL_EXTERNAL_DATABASES variable in SiteDefs)
+  ## @param External DB type (has to match ENSEMBL_EXTERNAL_DATABASES variable in SiteDefs)
   ## @param Hashref with keys to be passed to get_sequence method of the required indexer (see EnsEMBL::Web::ExtIndex subclasses)
   ## @return Hashref (or possibly a list of similar hashrefs for multiple sequences) with keys:
   ##  - id        Stable ID of the object
@@ -803,25 +803,41 @@ sub get_data_from_session {
   my $species  = $self->param('species') || $self->species;
   my $tempdata = $self->session->get_data(type => $type, code => $code);
   my $name     = $tempdata->{'name'};
-  my ($content, $format);
 
   # NB this used to be new EnsEMBL::Web... etc but this does not work with the
   # FeatureParser module for some reason, so have to use FeatureParser->new()
   my $parser = EnsEMBL::Web::Text::FeatureParser->new($self->species_defs, undef, $species);
-  
+ 
+  my %file_params = (
+                      'hub' => $self,
+                    );
+ 
+  ## Build in some backwards compatiblity with old file paths
   if ($type eq 'url') {
-    my $response = EnsEMBL::Web::Tools::Misc::get_url_content($tempdata->{'url'});
-       $content  = $response->{'content'};
-  } else {
-    my $file    = EnsEMBL::Web::TmpFile::Text->new(filename => $tempdata->{'filename'});
-       $content = $file->retrieve;
-    
-    return {} unless $content;
+    $file_params{'input_drivers'} = ['URL'];
+    $file_params{'file'} = $tempdata->{'file'} || $tempdata->{'url'};
   }
-   
-  $parser->parse($content, $tempdata->{'format'});
+  else {
+    $file_params{'file'} = $tempdata->{'file'};
+    unless ($file_params{'file'}) {
+      $file_params{'file'} = join('/', $tempdata->{'prefix'}, $tempdata->{'filename'});
+    }
+  }
 
-  return { parser => $parser, name => $name };
+  my $file = EnsEMBL::Web::File::User->new(%file_params);
+  my $result = $file->read;
+  if ($result->{'error'}) {
+    ## TODO - do something useful with the error!
+    warn ">>> ERROR READING FILE: ".$result->{'error'};
+    return {};
+  }
+  else {
+    my $content = $result->{'content'};
+
+    $parser->parse($content, $tempdata->{'format'});
+
+    return { parser => $parser, name => $name };
+  }
 }
 
 sub get_favourite_species {

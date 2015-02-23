@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ package EnsEMBL::Draw::GlyphSet::restrict;
 ### STATUS : Unknown - doesn't seem to be in use
 
 use strict;
+
+use EnsEMBL::Draw::Utils::Bump;
 
 use base qw(EnsEMBL::Draw::GlyphSet);
 
@@ -249,7 +251,7 @@ sub _init {
        $bump_start--; 
        $bump_start = 0 if $bump_start < 0;
        $bump_end   = $bitmap_length if $bump_end > $bitmap_length;
-    my $row = & Sanger::Graphics::Bump::bump_row(
+    my $row = & EnsEMBL::Draw::Utils::Bump::bump_row(
        $bump_start,  $bump_end,  $bitmap_length,  \@bitmap
     );
     push @glyphs, [ $Composite, $row ];

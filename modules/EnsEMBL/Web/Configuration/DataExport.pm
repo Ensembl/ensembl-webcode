@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -49,6 +49,9 @@ sub populate_tree {
   $self->create_node('Family', 'Ensembl protein Family', ['family', 'EnsEMBL::Web::Component::DataExport::Family']);
   $self->create_node('GeneTree', 'Gene Tree', ['genetree', 'EnsEMBL::Web::Component::DataExport::GeneTree']);
   $self->create_node('SpeciesTree', 'Species Tree', ['species_tree', 'EnsEMBL::Web::Component::DataExport::SpeciesTree']);
+
+  ## Preview
+  $self->create_node('Results', 'Alignment', ['results', 'EnsEMBL::Web::Component::DataExport::Results']);
 
   ## External alignments
   $self->create_node('Emboss', 'Alignment', ['emboss', 'EnsEMBL::Web::Component::DataExport::Emboss']);

@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -416,10 +416,7 @@ sub get_slice_table {
 
     $species_padding = length $species if $return_padding && length $species > $species_padding;
 
-    $table_rows .= qq{
-    <tr>
-      <th>$species &rsaquo;</th>
-      <td>};
+    $table_rows .= sprintf '<tr><th>%s&nbsp;&rsaquo;</th><td>', $species =~ s/\s/&nbsp;/r;
 
     foreach my $slice (@{$_->{'underlying_slices'}}) {
       next if $slice->seq_region_name eq 'GAP';
@@ -440,9 +437,7 @@ sub get_slice_table {
       }
     }
 
-    $table_rows .= qq{
-      </td>
-    </tr>};
+    $table_rows .= '</td></tr>';
   }
   
   $region_padding++ if $region_padding;

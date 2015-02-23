@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -96,29 +96,30 @@ sub render_content {
 }
 
 sub stats_table {
-  my ($self, $gene_name) = @_;  
-  my $hub        = $self->hub;
-  my $pf_adaptor = $self->hub->database('variation')->get_PhenotypeFeatureAdaptor;
+  my ($self, $gene_name) = @_;
+  my $hub           = $self->hub;
+  my $species_defs  = $hub->species_defs;
+  my $pf_adaptor    = $self->hub->database('variation')->get_PhenotypeFeatureAdaptor;
   my ($total_counts, %phenotypes, @va_ids);
-  
+
   my $columns = [
-    { key => 'count',   title => 'Number of variants', sort => 'numeric_hidden', width => '10%', align => 'right'  },   
-    { key => 'view',    title => 'Show/hide details', sort => 'none',           width => '10%',  align => 'center' },
-    { key => 'phen',    title => 'Phenotype',          sort => 'string',         width => '38%' },
+    { key => 'phen',    title => 'Phenotype', sort => 'string', width => '38%'  },
+    { key => 'source',  title => 'Source(s)', sort => 'string', width => '11%'  },
+    $species_defs->ENSEMBL_CHROMOSOMES
+    ? { key => 'loc',   title => 'Genomic locations', sort => 'none',   width => '13%'  }
+    : (),
+    $species_defs->ENSEMBL_MART_ENABLED
+    ? { key => 'mart',  title => 'Biomart',   sort => 'none',   width => '13%'  }
+    : (),
+    { key => 'count',   title => 'Number of variants',  sort => 'numeric_hidden', width => '10%',   align => 'right'  },
+    { key => 'view',    title => 'Show/hide details',   sort => 'none',           width => '10%',   align => 'center' }
   ];
-  if ($hub->species_defs->ENSEMBL_CHROMOSOMES) {
-    push @$columns, { key => 'loc',   title => 'Locations',   sort => 'none', width => '13%'};
-  }
-  if ($hub->species_defs->ENSEMBL_MART_ENABLED) {
-    push @$columns, { key => 'mart',   title => 'Biomart',    sort => 'none',  width => '13%'};
-  }
-  push @$columns,  { key => 'source',  title => 'Source(s)',  sort => 'string', width => '11%'};
-  
+
   foreach my $pf ($gene_name ? @{$pf_adaptor->fetch_all_by_associated_gene($gene_name)} : ()) {
     next unless $pf->type eq 'Variation';
     my $var_name   = $pf->object->name;  
     my $phe        = $pf->phenotype->description;
-    my $phe_source = $pf->source;
+    my $phe_source = $pf->source_name;
    
     $phenotypes{$phe} ||= { id => $pf->{'_phenotype_id'} , name => $pf->{'_phenotype_name'}};
     push @{$phenotypes{$phe}{'count'}},  $var_name   unless grep $var_name   eq $_, @{$phenotypes{$phe}{'count'}};
@@ -256,7 +257,7 @@ sub variation_table {
     }
       
     # List the phenotype sources for the variation
-    my $phe_source = $pf->source;
+    my $phe_source = $pf->source_name;
     my $ref_source = $pf->external_reference;
     
     $list_phe{$var_name}{$pf->phenotype->description} = 1 if ($all_flag == 1);

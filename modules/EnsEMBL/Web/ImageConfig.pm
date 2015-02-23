@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ use JSON qw(from_json);
 use URI::Escape qw(uri_unescape);
 
 use Bio::EnsEMBL::ExternalData::DAS::Coordinator;
+use Bio::EnsEMBL::ExternalData::DataHub::SourceParser;
 
 use Sanger::Graphics::TextHelper;
 
@@ -312,8 +313,7 @@ sub glyphset_configs {
           push @default_order, $track;
         }
       } else {
-        my $clone = $self->tree->create_node($track->id . '_tmp'); # Id is replaced in the for loop below
-        $clone->{$_} = $_ eq 'data' ? { %{$track->{'data'}} } : $track->{$_} for keys %$track; # Make a new hash for data, so that drawing_strand can differ
+        my $clone = $self->_clone_track($track);
         
         $clone->set('drawing_strand', 'f');
         $track->set('drawing_strand', 'r');
@@ -677,7 +677,7 @@ sub load_user_tracks {
         glyphset    => '_flat_file',
         colourset   => 'classes',
         sub_type    => 'tmp',
-        file        => $entry->{'filename'},
+        file        => $entry->{'file'},
         format      => $entry->{'format'},
         caption     => $entry->{'name'},
         renderers   => $renderers,
@@ -797,7 +797,7 @@ sub _add_datahub {
 
   return ($menu_name, {}) if $self->{'_attached_datahubs'}{$url};
 
-  my $parser   = Bio::EnsEMBL::ExternalData::DataHub::SourceParser->new({ timeout => 10, proxy => $self->hub->species_defs->ENSEMBL_WWW_PROXY });
+  my $parser   = Bio::EnsEMBL::ExternalData::DataHub::SourceParser->new('hub' => $self->hub);
   my $hub_info = $parser->get_hub_info($url, $self->species_defs->assembly_lookup); ## Do we have data for this species?
   
   if ($hub_info->{'error'}) {
@@ -816,20 +816,8 @@ sub _add_datahub {
     if (scalar @$source_list) {
       ## Get tracks from hub
       my $datahub = $parser->parse($source_list);
-    
-      foreach my $node (@{$datahub->child_nodes}) {
-        my $data = $node->data;
-      
-        if ($data->{'error'}) {
-          warn "!!! COULD NOT PARSE CONFIG $data->{'file'}: $data->{'error'}";
-        } elsif (!$node->has_child_nodes) {
-          # No inheritance structure - assumes that the top level in the hub contains only tracks
-          $self->_add_datahub_node($node->parent_node, $menu, $menu_name);
-          last;
-        } else {
-          $self->_add_datahub_node($node, $menu, $menu_name);
-        }
-      }
+  
+      $self->_add_datahub_node($datahub, $menu, $menu_name);
 
       $self->{'_attached_datahubs'}{$url} = 1;
     }
@@ -843,30 +831,49 @@ sub _add_datahub {
 sub _add_datahub_node {
   my ($self, $node, $menu, $name) = @_;
   
-  if ($node->has_child_nodes && $node->first_child->has_child_nodes) {
-    $self->_add_datahub_node($_, $menu, $name) for @{$node->child_nodes};
-  } else {
-    my $config = {};
-    my $n      = $node;
-    
-    do {
-      my $data = $n->data;
+  my (@next_level, @childless);
+  if ($node->has_child_nodes) {
+    foreach my $child (@{$node->child_nodes}) {
+      if ($child->has_child_nodes) {
+        push @next_level, $child;
+      }
+      else {
+        push @childless, $child;
+      }
+    }
+  }
+
+  if (scalar(@next_level)) {
+    $self->_add_datahub_node($_, $menu, $name) for @next_level;
+  } 
+
+  if (scalar(@childless)) {
+    my $n       = $node;
+    my $data    = $n->data;
+    my $config  = {};
+    unless ($data->{'superTrack'} && $data->{'superTrack'} =~ /^on/) {
+      $config->{$_} = $data->{$_} for keys %$data;
+    }
+
+    while ($n = $n->parent_node) {
+      $data = $n->data;
+      last if $data->{'superTrack'} && $data->{'superTrack'} =~ /^on/;
       $config->{$_} ||= $data->{$_} for keys %$data;
-    } while $n = $n->parent_node;
+    };
     
-    $self->_add_datahub_tracks($node, $config, $menu, $name);
+    $self->_add_datahub_tracks($node, \@childless, $config, $menu, $name);
   }
 }
 
 sub _add_datahub_tracks {
-  my ($self, $parent, $config, $menu, $name) = @_;
+  my ($self, $parent, $children, $config, $menu, $name) = @_;
   my $hub    = $self->hub;
   my $data   = $parent->data;
   my $matrix = $config->{'dimensions'}{'x'} && $config->{'dimensions'}{'y'};
   my $link   = $config->{'description_url'} ? qq(<br /><a href="$config->{'description_url'}" rel="external">Go to track description on trackhub</a>) : '';
   my $info   = $config->{'longLabel'} . $link;
   my %tracks;
-  
+ 
   my %options = (
     menu_key     => $name,
     menu_name    => $name,
@@ -874,7 +881,7 @@ sub _add_datahub_tracks {
     submenu_name => $data->{'shortLabel'},
     datahub      => 1,
   );
-  
+
   if ($matrix) {
     $options{'matrix_url'} = $hub->url('Config', { action => 'Matrix', function => $hub->action, partial => 1, menu => $options{'submenu_key'} });
     
@@ -910,7 +917,7 @@ sub _add_datahub_tracks {
   
   $self->alphabetise_tracks($submenu, $menu);
   
-  foreach (@{$parent->child_nodes}) {
+  foreach (@{$children||[]}) {
     my $track        = $_->data;
     my $type         = ref $track->{'type'} eq 'HASH' ? uc $track->{'type'}{'format'} : uc $track->{'type'};
     my $squish       = $track->{'visibility'} eq 'squish' || $config->{'visibility'} eq 'squish'; # FIXME: make it inherit correctly
@@ -1087,7 +1094,8 @@ sub load_file_format {
         $self->_add_datahub($source->{'source_name'}, $source->{'url'}, undef, $menu);
       }
       else { 
-        $self->$function(key => $source_name, menu => $menu, source => $source, description => $source->{'description'}, internal => $internal, view => $view);
+        my $is_internal = $source->{'source_url'} ? 0 : $internal;
+        $self->$function(key => $source_name, menu => $menu, source => $source, description => $source->{'description'}, internal => $is_internal, view => $view);
       }
     }
   }
@@ -1317,9 +1325,15 @@ sub update_from_input {
     foreach my $p ($input->param) {
       my $val = $input->param($p);
       
-      if ($val =~ /favourite_(on|off)/) {
+      if ($p eq 'track') {
+        my $node = $self->get_node($val);
+        $node->set_user('userdepth', $input->param('depth')) if $node;
+        $self->altered($val);
+      }
+      elsif ($val =~ /favourite_(on|off)/) {
         $favourites{$p} = { favourite => $1 eq 'on' ? 1 : 0 };
-      } else {
+      } 
+      elsif ($p ne 'depth') {
         $self->update_track_renderer($p, $val);
       }
     }
@@ -1357,7 +1371,7 @@ sub update_from_url {
         $renderer = 'normal';
       }
     }
-    
+   
     if ($key =~ /^(\w+)[\.:](.*)$/) {
       my ($type, $p) = ($1, $2);
       
@@ -2096,13 +2110,12 @@ sub add_data_files {
   
   foreach (@$keys) {
     my $glyphset = $data->{$_}{'format'} || '_alignment';
-    $glyphset = 'bam_and_bigwig' if $glyphset eq 'bam';
 
     my $renderers;
-    if ($glyphset eq 'bam_and_bigwig') {
+    if ($glyphset eq 'bamcov') {
       $renderers = [
                     'off',       'Off',
-                    'tiling', 'Coverage (BigWig)',
+                    'tiling',    'Coverage (BigWig)',
                     'normal',    'Normal',
                     'unlimited', 'Unlimited',
                     ];
@@ -3042,7 +3055,7 @@ sub add_sequence_variations_meta {
      $regexp_suffix_caption =~ s/\(/\\\(/;
      $regexp_suffix_caption =~ s/\)/\\\)/;
 
-  foreach my $menu_item (sort {$a->{type} cmp $b->{type} || $a->{parent} cmp $b->{parent}} @{$hashref->{'menu'}}) {
+  foreach my $menu_item (sort {$a->{type} cmp $b->{type} || $a->{parent} cmp $b->{parent} || $a->{'long_name'} !~ /all /i cmp $b->{'long_name'} !~ /all /i} @{$hashref->{'menu'}}) {
     next if $menu_item->{'type'} =~  /^sv_/; # exclude structural variant items
     
     my $node;
@@ -3179,7 +3192,7 @@ sub add_phenotypes {
   return unless $hashref->{'phenotypes'}{'rows'} > 0;
   
   my $p_menu = $self->get_node('phenotype');
-  
+
   unless($p_menu) {
     my $menu = $self->get_node('variation');
     return unless $menu;
@@ -3201,7 +3214,7 @@ sub add_phenotypes {
     strand     => 'r',
     renderers  => [ 'off', 'Off', 'gene_nolabel', 'Expanded', 'compact', 'Compact' ],
   );
-  
+
   $pf_menu->append($self->create_track('phenotype_all', 'Phenotype annotations (all types)', {
     %options,
     caption => 'Phenotypes',
@@ -3219,7 +3232,7 @@ sub add_phenotypes {
       description => 'Phenotype annotations on '.$type.'s (from '.$pf_sources.')',
     }));
   }
-  
+
   $p_menu->append($pf_menu);
 }
 
@@ -3230,6 +3243,7 @@ sub add_structural_variations {
   
   return unless $menu && scalar(keys(%{$hashref->{'structural_variation'}{'counts'}})) > 0;
   my $prefix_caption      = 'SV - ';
+  my $suffix              = '(structural variants)';
   my $sv_menu             = $self->create_submenu('structural_variation', 'Structural variants');
   my $structural_variants = $self->create_submenu('structural_variants',  'Structural variants');
   my $desc                = 'The colours correspond to the structural variant classes.';
@@ -3266,10 +3280,10 @@ sub add_structural_variations {
     max_size    => 1e6 - 1,
   }));
 
-  foreach my $key_2 (sort keys %{$hashref->{'structural_variation'}{'cnv_probes'}{'counts'} || {}}) {   
+  foreach my $key_2 (sort keys %{$hashref->{'structural_variation'}{'counts'} || {}}) {
     ## FIXME - Nasty hack to get variation tracks correctly configured
     next if ($key_2 =~ /(DECIPHER|LOVD)/);
-    $structural_variants->append($self->create_track("variation_feature_structural_$key_2", "$key_2 structural variations", {
+    $structural_variants->append($self->create_track("variation_feature_structural_$key_2", "$key_2 $suffix", {
       %options,
       db          => 'variation',
       caption     => $prefix_caption.$key_2,
@@ -3278,11 +3292,27 @@ sub add_structural_variations {
     }));
   }
 
+  # DECIPHER and LOVD structural variants (Human)
+  foreach my $menu_item (grep {$_->{'type'} eq 'sv_private'} @{$hashref->{'menu'} || []}) {
+
+    my $node_name = "$menu_item->{'long_name'} $suffix";
+    my $caption   = "$prefix_caption$menu_item->{'long_name'}";
+
+    my $name = $menu_item->{'key'};
+    $structural_variants->append($self->create_track("variation_feature_structural_$name", "$node_name", {
+      %options,
+      db          => 'variation_private',
+      caption     => $prefix_caption.$name,
+      source      => $name,
+      description => $hashref->{'source'}{'descriptions'}{$name},
+    }));
+  }
+
   # Structural variation sets and studies
   foreach my $menu_item (sort {$a->{type} cmp $b->{type} || $a->{long_name} cmp $b->{long_name}} @{$hashref->{'menu'} || []}) {
-    next if $menu_item->{'type'} !~ /^sv_/;
+    next if $menu_item->{'type'} !~ /^sv_/ || $menu_item->{'type'} eq 'sv_private';
 
-    my $node_name = "$menu_item->{'long_name'} (structural variants)";
+    my $node_name = "$menu_item->{'long_name'} $suffix";
     my $caption   = "$prefix_caption$menu_item->{'long_name'}";
        $caption   =~ s/1000 Genomes/1KG/;
 
@@ -3313,16 +3343,6 @@ sub add_structural_variations {
         study       => [ $name ],
         study_name  => $name,
         description => 'DGVa study: '.$hashref->{'structural_variation'}{'study'}{'descriptions'}{$name},
-      }));
-    }
-    elsif ($menu_item->{'type'} eq 'sv_private') { # For DECIPHER and LOVD structural variants
-      my $name = $menu_item->{'key'};
-      $structural_variants->append($self->create_track("variation_feature_structural_$name", "$node_name", {
-        %options,
-        db          => 'variation_private',
-        caption     => $prefix_caption.$name,
-        source      => $name,
-        description => $hashref->{'source'}{'descriptions'}{$name},
       }));
     }
   }
@@ -3433,7 +3453,7 @@ sub add_somatic_mutations {
     
     $somatic->append($self->create_track("somatic_mutation_$key_2", "$key_2 somatic mutations (all)", {
       %options,
-      caption     => $prefix_caption."$key_2 somatic mutations (all)",
+      caption     => $prefix_caption."$key_2 somatic mutations",
       source      => $key_2,
       description => "All somatic variants from $key_2"
     }));
@@ -3564,6 +3584,16 @@ sub share {
   delete $user_settings->{'track_order'}{$_} for grep $_ ne $species, keys %{$user_settings->{'track_order'}};
   
   return $user_settings;
+}
+
+sub _clone_track {
+  my ($self, $track, $id) = @_;
+
+  my $clone       = $self->tree->create_node;
+  $clone->{$_}    = $_ eq 'data' ? { %{$track->{'data'}} } : $track->{$_} for keys %$track; # Make a new hash for data, so keys can differ
+  $clone->{'id'}  = $id if $id;
+
+  return $clone;
 }
 
 1;

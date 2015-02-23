@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ use List::Util qw(min max);
 use Bio::EnsEMBL::Analysis;
 use Bio::EnsEMBL::ExternalData::BigFile::BigWigAdaptor;
 
+use EnsEMBL::Web::File::Utils::URL;
+
 use base qw(EnsEMBL::Draw::GlyphSet::_alignment EnsEMBL::Draw::GlyphSet_wiggle_and_block);
 
 sub href_bgd       { return $_[0]->_url({ action => 'UserData' }); }
@@ -36,8 +38,30 @@ sub bigwig_adaptor {
   my $self = shift;
 
   my $url = $self->my_config('url');
+  my $error;
   if ($url) { ## remote bigwig file
-    $self->{_cache}->{_bigwig_adaptor} ||= Bio::EnsEMBL::ExternalData::BigFile::BigWigAdaptor->new($url);
+    unless ($self->{'_cache'}->{'_bigwig_adaptor'}) {
+      ## Check file is available before trying to load it 
+      ## (Bio::DB::BigFile does not catch C exceptions)
+      my $headers = EnsEMBL::Web::File::Utils::URL::get_headers($url, {
+                                                                    'hub' => $self->{'config'}->hub, 
+                                                                    'no_exception' => 1
+                                                            });
+      if ($headers) {
+        if ($headers->{'Content-Type'} !~ 'text/html') { ## Not being redirected to a webpage, so chance it!
+          my $ad = Bio::EnsEMBL::ExternalData::BigFile::BigWigAdaptor->new($url);
+          $error = "Bad BigWIG data" unless $ad->check;
+          $self->{'_cache'}->{'_bigwig_adaptor'} = $ad;
+        }
+        else {
+          $error = "File at URL $url does not appear to be of type BigWig; returned MIME type ".$headers->{'Content-Type'};
+        }
+      }
+      else {
+        $error = "No HTTP headers returned by URL $url";
+      }
+    }
+    $self->errorTrack('Could not retrieve file from trackhub') if $error;
   }
   else { ## local bigwig file
     my $config    = $self->{'config'};
@@ -48,14 +72,9 @@ sub bigwig_adaptor {
       my $dfa = $dba->get_DataFileAdaptor();
       $dfa->global_base_path($hub->species_defs->DATAFILE_BASE_PATH);
       my ($logic_name) = @{$self->my_config('logic_names')||[]};
-      my $datafiles = $dfa->fetch_all_by_logic_name($logic_name);
-      ## Alter datafile objects to point to bigwig files instead of bam files
-      foreach (@$datafiles) {
-        $_->file_type('BIGWIG');
-      }
-      my ($df) = @{$datafiles};
+      my ($df) = @{$dfa->fetch_all_by_logic_name($logic_name)||[]};
 
-      $self->{_cache}->{_bigwig_adaptor} ||= $df->get_ExternalAdaptor();
+      $self->{_cache}->{_bigwig_adaptor} ||= $df->get_ExternalAdaptor(undef, 'BIGWIG');
     }
   }
   return $self->{_cache}->{_bigwig_adaptor};
@@ -152,7 +171,9 @@ sub wiggle_features {
   
   if (!$self->{'_cache'}{'wiggle_features'}) {
     my $slice     = $self->{'container'};
-    my $summary   = $self->bigwig_adaptor->fetch_extended_summary_array($slice->seq_region_name, $slice->start, $slice->end, $bins, $has_chrs);
+    my $adaptor   = $self->bigwig_adaptor;
+    return [] unless $adaptor;
+    my $summary   = $adaptor->fetch_extended_summary_array($slice->seq_region_name, $slice->start, $slice->end, $bins, $has_chrs);
     my $bin_width = $slice->length / $bins;
     my $flip      = $slice->strand == -1 ? $slice->length + 1 : undef;
     my @features;

@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ use File::Basename qw(fileparse);
 use File::Spec;
 use File::stat qw(stat);
 
-use EnsEMBL::Web::Tools::RemoteURL qw(chase_redirects);
+use EnsEMBL::Web::File::Utils::URL qw(chase_redirects);
 
 use base qw(Bio::EnsEMBL::ExternalData::AttachedFormat);
 
@@ -37,7 +37,7 @@ sub check_data {
   my $error = '';
   require Bio::DB::Sam;
 
-  $url = $self->chase_redirects($url);
+  $url = chase_redirects($url, {'hub' => $self->{'hub'}});
 
   if ($url =~ /^ftp:\/\//i && !$self->{'hub'}->species_defs->ALLOW_FTP_BAM) {
     $error = "The bam file could not be added - FTP is not supported, please use HTTP.";

@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ sub new {
   my $parser;
   my $parser_formats = EnsEMBL::Web::Constants::PARSER_FORMATS;
   my $parser_class = 'Bio::EnsEMBL::IO::Parser::'.$parser_formats->{lc($args->{'format'})}{'class'};
-  if (EnsEMBL::Web::Root::dynamic_use(undef, $parser_class)) {
+  if (EnsEMBL::Root::dynamic_use($parser_class)) {
     $parser = $parser_class->open($path);
   }
 

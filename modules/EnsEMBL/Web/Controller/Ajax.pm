@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -254,7 +254,7 @@ sub data_table_config {
   my %data;
   
   $data{'sorting'}        = "[$sorting]" if length $sorting;
-  $data{'hidden_columns'} = "[$hidden]"  if length $hidden;
+  $data{'hidden_columns'} = "[$hidden]";
   
   $session->purge_data(%args);
   $session->set_data(%args, %data) if scalar keys %data;

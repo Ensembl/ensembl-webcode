@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,9 +20,11 @@ package EnsEMBL::Web::ImageConfig::Vertical;
 
 use strict;
 
+use List::Util qw(sum);
+
+use Bio::EnsEMBL::ExternalData::BigFile::BigWigAdaptor;
 use EnsEMBL::Web::Text::FeatureParser;
-use EnsEMBL::Web::TmpFile::Text;
-use EnsEMBL::Web::Tools::Misc;
+use EnsEMBL::Web::File::User;
 
 use base qw(EnsEMBL::Web::ImageConfig);
 
@@ -40,12 +42,13 @@ sub load_user_tracks {
   
   my $width              = $self->get_parameter('all_chromosomes') eq 'yes' ? 10 : 60;
   my %remote_formats     = map { lc $_ => 1 } @{$self->hub->species_defs->multi_val('REMOTE_FILE_FORMATS')||[]};
-  my (undef, $renderers) = $self->_user_track_settings;
   
   foreach ($menu->nodes) {
-    if ($remote_formats{lc $_->get('format')}) {
+    my $format = $_->get('format');
+    if ($remote_formats{lc $format} && lc $format ne 'bigwig') {
       $_->remove;
     } else {
+      my (undef, $renderers) = $self->_user_track_settings($format);
       $_->set('renderers', $renderers);
       $_->set('glyphset',  'Vuserdata');
       $_->set('colourset', 'densities');
@@ -57,17 +60,26 @@ sub load_user_tracks {
 }
 
 sub _user_track_settings {
-  return ('b', [
-    'off',                'Off',
-    'highlight_lharrow',  'Arrow on lefthand side',
-    'highlight_rharrow',  'Arrow on righthand side',
-    'highlight_bowtie',   'Arrows on both sides',
-    'highlight_wideline', 'Line',
-    'highlight_widebox',  'Box',
+  my ($self, $format) = @_;
+
+  my $renderers = [
     'density_line',       'Density plot - line graph',
     'density_bar',        'Density plot - filled bar chart',
     'density_outline',    'Density plot - outline bar chart',
-  ]);
+                  ];
+
+  unless (lc $format eq 'bigwig') {
+    unshift @$renderers, (
+      'highlight_lharrow',  'Arrow on lefthand side',
+      'highlight_rharrow',  'Arrow on righthand side',
+      'highlight_bowtie',   'Arrows on both sides',
+      'highlight_wideline', 'Line',
+      'highlight_widebox',  'Box',
+    );
+  }
+
+  unshift @$renderers, ('off', 'Off');
+  return ('b', $renderers);
 }
 
 sub load_user_track_data {
@@ -91,35 +103,44 @@ sub load_user_track_data {
     my $max_value;
     
     unshift @$colour, 'black' if $display eq 'density_graph'; 
-    
+   
     if ($logic_name) {
       $feature_adaptor ||= $hub->get_adaptor('get_DnaAlignFeatureAdaptor', 'userdata');
       $slice_adaptor   ||= $hub->get_adaptor('get_SliceAdaptor');
       
       ($data{$track->id}, $max_value) = $self->get_dna_align_features($logic_name, $feature_adaptor, $slice_adaptor, $bins, $bin_size, $chromosomes, $colour->[0]);
-    } else {
-      if ($parser) {
-        $parser->reset;
-      } else {
-        $parser = EnsEMBL::Web::Text::FeatureParser->new($species_defs);
-        $parser->no_of_bins($bins);
-        $parser->bin_size($bin_size);
-        $parser->filter($chromosomes->[0]) if scalar @$chromosomes == 1;
+    } 
+    else {
+      if (lc $track->get('format') eq 'bigwig') {
+        my $track_data = $track->{'data'};
+        my $short_name = $track_data->{'caption'};
+        $short_name = substr($short_name, 0, 17).'...' if length($short_name) > 20;
+        $track->set('label', $short_name);
+
+        my $adaptor = Bio::EnsEMBL::ExternalData::BigFile::BigWigAdaptor->new($track_data->{'url'}); 
+        ($data{$track->id}, $max_value) = $self->get_bigwig_features($adaptor, $track_data->{'name'}, $chromosomes, $bins, $bin_size, $track_data->{'colour'}); 
       }
+      else {
+        if ($parser) {
+          $parser->reset;
+        } else {
+          $parser = EnsEMBL::Web::Text::FeatureParser->new($species_defs);
+          $parser->no_of_bins($bins);
+          $parser->bin_size($bin_size);
+          $parser->filter($chromosomes->[0]) if scalar @$chromosomes == 1;
+        }
       
-      ($data{$track->id}, $max_value) = $self->get_parsed_features($track, $parser, $bins, $colour);
+        ( $data{$track->id}, $max_value) = $self->get_parsed_features($track, $parser, $bins, $colour);
+      }
     }
     
     $max = $max_value if $max_value > $max;
   }
   
   if ($max) {
-    my $scale = $track_width / $max;
-    
     foreach my $id (keys %data) {
       foreach my $chr (keys %{$data{$id}}) {
         foreach my $track_data (values %{$data{$id}{$chr}}) {
-          $_ *= $scale for @{$track_data->{'scores'} || []};
           $self->get_node($id)->set('colour', $track_data->{'colour'});
         }
       }
@@ -167,12 +188,14 @@ sub get_dna_align_features {
 
 sub get_parsed_features {
   my ($self, $track, $parser, $bins, $colours) = @_;
-  my $url     = $track->get('url');
-  my $content = $url ? EnsEMBL::Web::Tools::Misc::get_url_content($url)->{'content'} : EnsEMBL::Web::TmpFile::Text->new(filename => $track->get('file'))->retrieve;
+  my $file_path = $track->get('url') || $track->get('file');
+  my %args = ('hub' => $self->hub, 'file' => $file_path);
+  my $file = EnsEMBL::Web::File::User->new(%args);
+  my $result = $file->read;
   
-  return undef unless $content;
+  return undef unless $result->{'content'};
   
-  $parser->parse($content, $track->get('format'));
+  $parser->parse($result->{'content'}, $track->get('format'));
   
   my $max_values = $parser->max_values;
   my $sort       = 0;
@@ -198,6 +221,23 @@ sub get_parsed_features {
   return (\%data, $max);
 }
 
+sub get_bigwig_features {
+  my ($self, $adaptor, $name, $chromosomes, $bins, $bin_size, $colour) = @_;
+  my $data;  
+  $name ||= 'BigWig';
+
+  my ($raw_data, $max) = $adaptor->fetch_scores_by_chromosome($chromosomes, $bins, $bin_size);
+
+  while (my($chr, $scores) = each(%$raw_data)) {
+    $data->{$chr}{$name} = { 
+                            'scores' => $scores,
+                            'colour' => $colour,
+                            'sort'   => 0,
+                          };
+  }
+  return ($data, $max);
+}
+
 sub create_user_features {
   my $self   = shift;
   my $hub    = $self->hub;
@@ -214,7 +254,6 @@ sub create_user_features {
     if ($parser) {
       while (my ($type, $track) = each %{$parser->get_all_tracks}) {
         my @rows;
-        
         foreach my $feature (@{$track->{'features'}}) {
           push @rows, {
             chr     => $feature->seqname || $feature->slice->name,

@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -79,28 +79,28 @@ sub build_tracks {
     $T->{'style'}     = $info->{'display'} || $display;
     $T->{'histogram'} = $info->{'histogram'} || $histogram;
     $T->{'width'}     = $width;
-    $T->{'scores'}    = $scores;
     $T->{'colour'}    = $info->{'colour'};
     $T->{'max_data'}  = $max_data;
     $T->{'max_len'}   = $max_len;
     $T->{'bin_size'}  = $bin_size;
     $T->{'v_offset'}  = $v_offset;
 
+    my $scaled_scores = [];
     foreach(@$scores) { 
-		  $chr_min_data = $_ if ($_<$chr_min_data || $chr_min_data eq undef); 
-		  $chr_max_data = $_ if $_>$chr_max_data; 
+      ## Use real values for max/min labels
+		  $chr_min_data = $_ if ($_ < $chr_min_data || $chr_min_data eq undef); 
+		  $chr_max_data = $_ if $_ > $chr_max_data;
+      ## Scale data for actual display
+      my $max = $chr_max_data || 1; 
+      push @$scaled_scores, $_/$max * $width;
 	  }
+    $T->{'scores'} = $scaled_scores;
     push @settings, $T;
   }
   
   ## Add max/min lines if required
   if ($display eq '_line' && $track_config->get('maxmin') && scalar @settings) {
-    my $label2        = $track_config->get( 'labels' );
-    $self->label2( $self->Text({
-       'text'      => 'Min:'.$chr_min_data.' Max:'.$chr_max_data,
-       'font'      => 'Tiny',
-       'absolutey' => 1,
-    }) ); 
+    $self->label2('Min:'.$chr_min_data.' Max:'.$chr_max_data); 
     $self->push( $self->Space( {
       'x' => 1, 'width' => 3, 'height' => $width, 'y' => 0, 'absolutey'=>1 
     } ));

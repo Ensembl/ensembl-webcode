@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,17 +16,11 @@ limitations under the License.
 
 =cut
 
-package EnsEMBL::Draw::GlyphSet::bam_and_bigwig;
+## This glyph doesn't need to do anything - it's only needed so that the
+## renderer knows what to do with the object's parameters
 
-### Module for drawing data in either BAM or BigWig format 
-### (initially only for internal data sources where we can
-### guarantee there is a BigWig file)
-
-### At the moment this module doesn't actually do anything 
-### apart from enabling a track to inherit from both bam and bigwig!
-
+package EnsEMBL::Draw::Glyph::Sprite;
 use strict;
-use base qw(EnsEMBL::Draw::GlyphSet::bam EnsEMBL::Draw::GlyphSet::bigwig);
-
+use base qw(EnsEMBL::Draw::Glyph);
 
 1;

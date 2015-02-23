@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -414,7 +414,7 @@ sub save_config {
 }
 
 sub _use {
-  ### Wrapper for EnsEMBL::Web::Root::dynamic_use.
+  ### Wrapper for EnsEMBL::Root::dynamic_use.
   ### Returns either a newly created module or the error detailing why the new function failed.
   ### Skips "Can't locate" errors - these come from trying to use non-existant modules in plugin directories and can be safely ignored.
   

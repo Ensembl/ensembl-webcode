@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ no warnings 'uninitialized';
 
 use Text::ParseWords;
 
-use EnsEMBL::Web::Tools::Misc qw(get_url_filesize);
+use EnsEMBL::Web::File::Utils::URL qw(get_filesize);
 
 sub new {
   my ($proto,$hub,$format,$url,$trackline) = @_;
@@ -53,7 +53,7 @@ sub check_data {
   $url = "http://$url" unless $url =~ /^http|^ftp/;
 
   ## Check file size
-  my $feedback = get_url_filesize($url);
+  my $feedback = get_filesize($url, {'hub' => $self->{'hub'}});
 
   if ($feedback->{'error'}) {
     if ($feedback->{'error'} eq 'timeout') {

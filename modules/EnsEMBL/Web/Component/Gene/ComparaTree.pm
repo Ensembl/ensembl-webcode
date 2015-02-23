@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -528,8 +528,7 @@ sub get_export_data {
   my $gene  = $hub->core_object('gene');
 
   if ($type && $type eq 'genetree') {
-    my $object = $hub->core_object('gene');
-    return $object->get_GeneTree($cdb, 1);
+    return $gene->get_GeneTree($cdb, 1);
   }
   else {
     my ($member, $tree) = $self->get_details($cdb, $gene);

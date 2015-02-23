@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ sub update_configuration_from_url {
     $input->delete('share_ref');
     $new_url = 1;
   }
-  
+  $hub->get_viewconfig(@{$components[$_]})->update_from_input($r, $_ == $#components) for 0..$#components;
   $new_url += $hub->get_viewconfig(@{$components[$_]})->update_from_url($r, $_ == $#components) for 0..$#components; # This should push a message onto the message queue
   
   if ($new_url) {

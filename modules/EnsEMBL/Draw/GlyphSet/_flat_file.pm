@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,8 +26,7 @@ use strict;
 use List::Util qw(reduce);
 
 use EnsEMBL::Web::Text::FeatureParser;
-use EnsEMBL::Web::TmpFile::Text;
-use EnsEMBL::Web::Tools::Misc;
+use EnsEMBL::Web::File::User;
 use Bio::EnsEMBL::Variation::Utils::Constants;
 
 use base qw(EnsEMBL::Draw::GlyphSet::_alignment EnsEMBL::Draw::GlyphSet_wiggle_and_block);
@@ -83,25 +82,32 @@ sub features {
   if ($sub_type eq 'single_feature') {
     $parser->parse($self->my_config('data'), $self->my_config('format'));
   }
-  elsif ($sub_type eq 'url') {
-    my $response = EnsEMBL::Web::Tools::Misc::get_url_content($self->my_config('url'));
+  else {
+    my %args = ('hub' => $self->{'config'}->hub);
+
+    if ($sub_type eq 'url') {
+      $args{'file'} = $self->my_config('url');
+      $args{'input_drivers'} = ['URL']; 
+    }
+    else {
+      $args{'file'} = $self->my_config('file');
+      if ($args{'file'} !~ /\//) { ## TmpFile upload
+        $args{'prefix'} = 'user_upload';
+      }
+    }
+
+    my $file = EnsEMBL::Web::File::User->new(%args);
+
+    return $self->errorTrack(sprintf 'The file %s could not be found', $self->my_config('caption')) if !$file->exists;
+
+    my $response = $file->read;
 
     if (my $data = $response->{'content'}) {
       $parser->parse($data, $self->my_config('format'));
     } else {
       warn "!!! $response->{'error'}";
     }
-  } else {
-    my $file = EnsEMBL::Web::TmpFile::Text->new(filename => $self->my_config('file'));
-
-    return $self->errorTrack(sprintf 'The file %s could not be found', $self->my_config('caption')) if !$file->exists;
-
-    my $data = $file->retrieve;
-
-    return [] unless $data;
-
-    $parser->parse($data, $self->my_config('format'));
-  }
+  } 
 
   ## Now we translate all the features to their rightful co-ordinates
   while (my ($key, $T) = each (%{$parser->{'tracks'}})) {
@@ -109,6 +115,14 @@ sub features {
  
     ## Set track depth a bit higher if there are lots of user features
     $T->{'config'}{'dep'} = scalar @{$T->{'features'}} > 20 ? 20 : scalar @{$T->{'features'}};
+
+    ## Quick'n'dirty BED hack
+    foreach (@{$T->{'features'}}) {
+      if ($_->can('external_data') && $_->external_data && $_->external_data->{'BlockCount'}) {
+        $self->{'my_config'}->set('has_blocks', 1);
+        last;
+      }
+    }
 
     ### ensure the display of the VEP features using colours corresponding to their consequence
     if ($self->my_config('format') eq 'VEP_OUTPUT') {

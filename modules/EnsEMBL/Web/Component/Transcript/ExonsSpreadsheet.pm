@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -148,7 +148,7 @@ sub content {
     { data_table => 'no_sort', exportable => 1 }
   );
 
-  return sprintf '<div class="adornment-key"></div><div class="adornment-load">'.$table->render."</div>";
+  return sprintf '<div class="_adornment_key adornment-key"></div><div class="adornment-load">'.$table->render."</div>";
 }
 
 sub export_options { return {'action' => 'ExonSeq'}; }
@@ -400,7 +400,7 @@ sub add_line_numbers {
 
 sub build_sequence {
   my ($self, $sequence, $config) = @_;
-  $config->{'html_template'} = '<pre class="exon_sequence">%s</pre>';
+  $config->{'html_template'} = '<pre class="text_sequence exon_sequence">%s</pre>';
   return $self->SUPER::build_sequence([ $sequence ], $config,1);
 }
 

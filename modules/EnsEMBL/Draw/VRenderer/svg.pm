@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ limitations under the License.
 package EnsEMBL::Draw::VRenderer::svg;
 
 ### Renders vertical ideograms in SVG format
-### Modeled on Sanger::Graphics::Renderer::svg
+### Modeled on EnsEMBL::Draw::Renderer::svg
 ### Note that owing to the way the rounded ends of chromosomes are 
 ### currently drawn for bitmaps (i.e. as a series of rectangles),
 ### this module has major shortcomings in its ability to render images

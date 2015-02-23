@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -252,7 +252,7 @@ sub get_alt_allele_link {
   if ($reference) {
     ## Link to Alt Allele page, since there could be several
     $alt_link = sprintf('View <a href="%s">alleles</a> of this gene on alternate assemblies',
-                                  $hub->url({'action' => 'Alleles'}));
+                                  $hub->url({'type' => 'Gene','action' => 'Alleles'}));
   }
   else {
     ## Link to reference gene

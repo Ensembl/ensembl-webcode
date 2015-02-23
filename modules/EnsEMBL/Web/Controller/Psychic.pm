@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,8 +28,6 @@ use CGI;
 use URI::Escape qw(uri_escape);
 
 use EnsEMBL::Web::Hub;
-
-#use Data::Dumper;
 
 use base qw(EnsEMBL::Web::Controller);
 
@@ -130,6 +128,17 @@ sub psychic {
 
   ## If we have a species and a location can we jump directly to that page ?
   if ($species || $query_species ) {
+
+    if ($query =~ /^rs\d+$/) {
+
+      return $hub->redirect($site.$hub->url({
+        'species'   => $species || $query_species,
+        'type'      => 'Variation',
+        'action'    => 'Explore',
+        'v'         => $query
+      }));
+    }
+
     my $real_chrs = $hub->species_defs->ENSEMBL_CHROMOSOMES;
     my $jump_query = $query;
     if ($query_species) {
@@ -225,11 +234,7 @@ sub psychic {
   }
 
   if (!$flag) {
-    $url = 
-      $query =~ /^BLA_\w+$/               ? $self->escaped_url('/Multi/blastview/%s', $query) :                                                                 ## Blast ticket
-      $query =~ /^\s*([ACGT]{40,})\s*$/i  ? $self->escaped_url('/Multi/blastview?species=%s;_query_sequence=%s;query=dna;database=dna', $species, $1) :         ## BLAST seq search
-      $query =~ /^\s*([A-Z]{40,})\s*$/i   ? $self->escaped_url('/Multi/blastview?species=%s;_query_sequence=%s;query=peptide;database=peptide', $species, $1) : ## BLAST seq search
-      $self->escaped_url(($species eq 'ALL' || !$species ? '/Multi' : $species_path) . "/$script?species=%s;idx=%s;q=%s", $species || 'all', $index, $query);    # everything else!
+    $url = $self->escaped_url(($species eq 'ALL' || !$species ? '/Multi' : $species_path) . "/$script?species=%s;idx=%s;q=%s", $species || 'all', $index, $query);
   }
 
   # Hack to get facets through to search. Psychic will be rewritten soon

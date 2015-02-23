@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -46,6 +46,12 @@ sub bigwig_open {
   return $self->{_cache}->{_bigwig_handle};
 }
 
+sub check {
+  my $self = shift;
+
+  my $bw = $self->bigwig_open;
+  return defined $bw;
+}
 
 # UCSC prepend 'chr' on human chr ids. These are in some of the BigWig
 # files. This method returns a possibly modified chr_id after
@@ -90,6 +96,63 @@ sub fetch_extended_summary_array {
   }
   
   return $summary_e;
+}
+
+sub fetch_scores_by_chromosome {
+### Get data across a single chromosome or the whole genome
+### @param chromosomes ArrayRef - usually just one chromosome (undef if whole karyotype is wanted)
+### @param bins Integer - number of bins to divide data into
+### @param bin_size Integer - default size of bin in base pairs 
+  my ($self, $chromosomes, $bins, $bin_size) = @_;
+  my (%data, $max);
+  return ({}, undef) unless $self->check;
+
+  my $bw = $self->bigwig_open;
+  if ($bw) {
+    ## If we're on a single-chromosome page, we want to filter the BigWig data
+    my %chr_check;
+    foreach (@{$chromosomes||[]}) {
+      $chr_check{$_} = 1;
+      ## Also convert our chromosome names into UCSC equivalents
+      my $chr_name = 'chr'.$_;
+      $chr_name = 'chrM' if $chr_name eq 'chrMT';
+      $chr_check{$chr_name} = 1;
+    }
+    my $chrs = $bw->chromList;
+    my $chr = $chrs->head;
+    while ($chr) {
+      if (!$chromosomes || $chr_check{$chr->name}) {
+        my @scores;
+        my $start = 0;
+        my ($end, $previous_start, $previous_end);
+
+        for (my $i = 0; $i < $bins; $i++) {
+          last if $previous_end == $chr->size;
+          $start  = $previous_end + 1;
+          $end    = $start + $bin_size;
+          $end    = $chr->size if $end > $chr->size;
+
+          my $summary = $bw->bigWigSingleSummary($chr->name, $start, $end, 'bbiSumMean');
+          push @scores, sprintf('%.2f', $summary);
+
+          ## Get the maximum via each bin rather than for the entire dataset, 
+          ## so we can scale nicely on single-chromosome pages
+          my $bin_max = sprintf('%.2f', $bw->bigWigSingleSummary($chr->name, $start, $end, 'bbiSumMax'));
+          $max = $bin_max if $max < $bin_max;
+
+          $previous_start = $start;
+          $previous_end   = $end;
+        }
+        ## Translate chromosome name back from its UCSC equivalent
+        (my $chr_name = $chr->name) =~ s/chr//;
+        $chr_name = 'MT' if $chr_name eq 'M';
+        $data{$chr_name} = \@scores;
+
+      }
+      $chr = $chr->next;
+    }
+  }
+  return (\%data, $max);
 }
 
 1;

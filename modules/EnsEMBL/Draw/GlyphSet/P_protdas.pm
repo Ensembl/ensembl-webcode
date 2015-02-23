@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,9 +23,7 @@ package EnsEMBL::Draw::GlyphSet::P_protdas;
 
 use strict;
 
-use Sanger::Graphics::ColourMap;
-use Sanger::Graphics::Bump;
-#use Bio::EnsEMBL::Glyph::Symbol::box; 
+use EnsEMBL::Draw::Utils::ColourMap;
 use POSIX; #floor
 
 use base qw(EnsEMBL::Draw::GlyphSet);
@@ -356,7 +354,7 @@ sub render_colourgradient {
 
   my $score_range = $max_value - $min_value;
   my $score_per_grade =  ($max_score - $min_score)/ $configuration->{'fg_grades'};
-  my $cm = Sanger::Graphics::ColourMap->new;
+  my $cm = EnsEMBL::Draw::Utils::ColourMap->new;
   my @cg = $cm->build_linear_gradient($configuration->{'fg_grades'}, ['yellow', 'green', 'blue']);
   my $style;
  

@@ -1,6 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ package EnsEMBL::Draw::DrawableContainer;
 
 use strict;
 
-use Sanger::Graphics::Glyph::Rect;
+use EnsEMBL::Draw::Glyph::Rect;
 
-use base qw(Sanger::Graphics::Root);
+use base qw(EnsEMBL::Root);
 
 use JSON qw(to_json);
 
@@ -274,7 +274,7 @@ sub new {
 
         if ($bgcolour_flag && $glyphset->_colour_background) {
           ## colour the area behind this strip
-          my $background = Sanger::Graphics::Glyph::Rect->new({
+          my $background = EnsEMBL::Draw::Glyph::Rect->new({
             x             => -$label_width - $padding - $margin * 3/2,
             y             => $gminy - $padding,
             z             => -100,
@@ -425,16 +425,17 @@ sub timer_push {
 ## render does clever drawing things
 
 sub render {
-  my ($self, $type) = @_;
+  my ($self, $type, $boxes) = @_;
   
   ## build the name/type of render object we want
-  my $renderer_type = qq(Sanger::Graphics::Renderer::$type);
+  my $renderer_type = qq(EnsEMBL::Draw::Renderer::$type);
   $self->dynamic_use( $renderer_type );
   ## big, shiny, rendering 'GO' button
   my $renderer = $renderer_type->new(
     $self->{'config'},
     $self->{'__extra_block_spacing__'},
-    $self->{'glyphsets'}
+    $self->{'glyphsets'},
+    $boxes
   );
   my $canvas = $renderer->canvas();
   $self->timer_push("DrawableContainer->render ending $type",1);
@@ -459,12 +460,3 @@ sub storage {
 }
 1;
 
-=head1 RELATED MODULES
-
-See also: Sanger::Graphics::GlyphSet Sanger::Graphics::Glyph
-
-=head1 AUTHOR - Roger Pettett
-
-Email - rmp@sanger.ac.uk
-
-=cut

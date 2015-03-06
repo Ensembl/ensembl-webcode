@@ -68,6 +68,7 @@ sub transcript_table {
   my $table       = $self->new_twocol;
   my $page_type   = ref($self) =~ /::Gene\b/ ? 'gene' : 'transcript';
   my $description = $object->gene_description;
+  $description =~ s/\s*\{ECO:.*?\}//g;
      $description = '' if $description eq 'No description';
   my $show        = $hub->get_cookie_value('toggle_transcripts_table') eq 'open';
   my $button      = sprintf('<a rel="transcripts_table" class="button toggle no_img _slide_toggle set_cookie %s" href="#" title="Click to toggle the transcript table">

@@ -33,6 +33,7 @@ sub content {
   my $translation = $transcript->translation;
   my $gene        = $object->gene;
   my $gene_desc   = $gene ? $object->gene_description =~ s/No description//r =~ s/\[.+\]\s*$//r : '';
+  $gene_desc      =~ s/\s*\{ECO:.*?\}//g;
   my @xref        = $object->display_xref;
   my @click       = $self->click_location;
   

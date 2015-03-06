@@ -43,6 +43,7 @@ sub _content {
   my $object      = $self->object;
   my @xref        = $object->display_xref;
   my $gene_desc   = $object->gene_description =~ s/No description//r =~ s/\[.+\]\s*$//r;
+  $gene_desc      =~ s/\s*\{ECO:.*?\}//g;
   
   $self->caption($xref[0] ? "$xref[3]: $xref[0]" : 'Novel transcript');
   

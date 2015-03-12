@@ -95,7 +95,7 @@ sub handler {
 
     if (-e $file) {
       ## Send 2MB+ files without caching them
-      return $r->sendfile($file) if -s $file > 2*1024*1024;
+      return $r->sendfile($file) if -s $file > 3*1024*1024;
       
       {
         local $/ = undef;

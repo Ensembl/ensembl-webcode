@@ -156,7 +156,9 @@ sub initialize {
 sub type { return $_[0]->{'type'}; }
 
 sub menus {
-  return $_[0]->{'menus'} ||= {
+  my $self = shift;
+  my $dna_align_title = $self->species =~ /Mus_|Homo/ ? 'GRC Alignments' : 'Other alignments';
+  return $self->{'menus'} ||= {
     # Sequence
     seq_assembly        => 'Sequence and assembly',
     sequence            => [ 'Sequence',                'seq_assembly' ],
@@ -165,7 +167,7 @@ sub menus {
     marker              => [ 'Markers',                 'seq_assembly' ],
     simple              => [ 'Simple features',         'seq_assembly' ],
     ditag               => [ 'Ditag features',          'seq_assembly' ],
-    dna_align_other     => [ 'GRC alignments',          'seq_assembly' ],
+    dna_align_other     => [ $dna_align_title,          'seq_assembly' ],
     dna_align_compara   => [ 'Imported alignments',     'seq_assembly' ],
     
     # Transcripts/Genes

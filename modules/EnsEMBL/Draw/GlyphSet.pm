@@ -44,6 +44,7 @@ use Sanger::Graphics::Glyph::Sprite;
 use Sanger::Graphics::Glyph::Text;
 
 use Bio::EnsEMBL::Registry;
+use Bio::EnsEMBL::DnaDnaAlignFeature;
 
 use EnsEMBL::Web::Tools::RandomString qw(random_string);
 

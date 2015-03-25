@@ -388,8 +388,8 @@ Ensembl.Panel.ImageMap = Ensembl.Panel.Content.extend({
           );
         }
 
-        if (panel.labelRight < this.a.coords[2] + 5) {
-          panel.labelRight = this.a.coords[2] + 5;
+        if (panel.labelRight < this.a.coords[2] + 3) {
+          panel.labelRight = this.a.coords[2] + 3;
         }
 
         hoverLabel = null;

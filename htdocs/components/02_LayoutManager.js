@@ -144,9 +144,8 @@ Ensembl.LayoutManager.extend({
       'popstate.ensembl'  : $.proxy(this.popState, this)
     });
 
-    if (!this.showCookieMessage()) {
-      this.handleMirrorRedirect();
-    }
+    this.showCookieMessage();
+    this.handleMirrorRedirect();
   },
   
   reloadPage: function (args, url) {
@@ -293,20 +292,20 @@ Ensembl.LayoutManager.extend({
   },
 
   showCookieMessage: function() {
-    var manager = this;
     var cookiesAccepted = Ensembl.cookie.get('cookies_ok');
 
     if (!cookiesAccepted) {
       $(['<div class="cookie-message hidden">',
-        '<p>We use cookies to enhance the usability of our website. If you continue, we\'ll assume that you are happy to receive all cookies.<button>Don\'t show this again</button></p>',
-        '<p>Further details about our privacy and cookie policy can be found <a href="/info/about/legal/privacy.html">here</a></p>',
+        '<div></div>',
+        '<p>We use cookies to enhance the usability of our website. If you continue, we\'ll assume that you are happy to receive all cookies.</p>',
+        '<p><button>Don\'t show this again</button></p>',
+        '<p>Further details about our privacy and cookie policy can be found <a href="/info/about/legal/privacy.html">here</a>.</p>',
         '</div>'
       ].join(''))
-        .prependTo(document.body).slideDown().find('button').on('click', function (e) {
+        .appendTo(document.body).show().find('button,div').on('click', function (e) {
           Ensembl.cookie.set('cookies_ok', 'yes');
-          $(this).parents('div').first().slideUp();
-          manager.handleMirrorRedirect();
-      });
+          $(this).parents('div').first().fadeOut(200);
+      }).filter('div').helptip({content:"Don't show this again"});
       return true;
     }
 

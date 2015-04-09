@@ -59,7 +59,7 @@ sub check_data {
       $error .= "<p>$_.</p>" for ref $datahub->{'error'} eq 'ARRAY' ? @{$datahub->{'error'}} : $datahub->{'error'};
     }
     my @assemblies = keys %{$datahub->{'genomes'}||{}};
-    return ($error, { name => $datahub->{'details'}{'shortLabel'}, assemblies => \@assemblies});  
+    return ($url, $error, { name => $datahub->{'details'}{'shortLabel'}, assemblies => \@assemblies});  
   }
 }
 

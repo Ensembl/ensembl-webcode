@@ -91,7 +91,7 @@ sub build_tracks {
 		  $chr_min_data = $_ if ($_ < $chr_min_data || $chr_min_data eq undef); 
 		  $chr_max_data = $_ if $_ > $chr_max_data;
       ## Scale data for actual display
-      my $max = $chr_max_data || 1; 
+      my $max = $max_data || $chr_max_data || 1; 
       push @$scaled_scores, $_/$max * $width;
 	  }
     $T->{'scores'} = $scaled_scores;

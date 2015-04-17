@@ -149,7 +149,7 @@ sub _line {
   my $old_y = undef;
   for(my $x = $T->{'v_offset'} - $T->{'bin_size'}; $x < $T->{'max_len'}; $x += $T->{'bin_size'}) {
     my $datum = shift @data;
-    my $scale = $T->{'max_data'} ? $T->{'width'} / $T->{'max_data'} : $T->{'width'};
+    my $scale = $self->_set_scale($T);
     my $new_y = $datum * $scale;
    
     if(defined $old_y) {
@@ -177,7 +177,8 @@ sub _histogram {
   my $old_y;
   for(my $x = $T->{'v_offset'}; $x < $T->{'max_len'}; $x += $T->{'bin_size'}) {
     my $datum = shift @data;
-    my $new_y = $datum / $T->{'max_data'} * $T->{'width'};
+    my $scale = $self->_set_scale($T);
+    my $new_y = $datum * $scale;
 
     if(defined $old_y) {
       $self->push( $self->Rect({
@@ -191,6 +192,11 @@ sub _histogram {
     }
     $old_y = $new_y;
   }
+}
+
+sub _set_scale {
+  my ($self, $T) = @_;
+  return $T->{'max_data'} ? $T->{'width'} / $T->{'max_data'} : $T->{'width'};
 }
 
 1;

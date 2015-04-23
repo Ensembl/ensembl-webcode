@@ -377,8 +377,6 @@ sub fasta {
           $self->string($fasta) while $fasta = substr $_->[1], 0, 60, '';
         }
       }
-      
-      $self->string('');
     }
   }
 

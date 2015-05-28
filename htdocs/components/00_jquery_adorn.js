@@ -230,8 +230,8 @@
             style += "background-color: " + ev['default'] + ";";
           }
           if (ev['title']) {
-            title  += ' title="' + ev['title'] + '"';
-            lclass += ' _ht';
+            title += ' title="' + ev['title'] + '"';
+            style += 'cursor:help;';
           }
           if(ev.label) { style += "color: " + ev.label + ";"; }
           if(ev.extra_css) { style += ev.extra_css; }
@@ -254,7 +254,7 @@
     var html = '';
     if(key) { html += '<dl>' + key +'</dl>'; }
     if(messages) { html += '<ul>' + messages + '</ul>'; }
-    $key.html(html).toggle(!!html);
+    $key.html(html).toggle(!!html).find('span[title]').helptip();
   }
 
   function _do_adorn(outer,fixups,data) {

@@ -813,9 +813,10 @@ sub _add_datahub {
 
     my $menu     = $existing_menu || $self->tree->append_child($self->create_submenu($menu_name, $menu_name, { external => 1, datahub_menu => 1 }));
 
+    my $assembly_default = $self->hub->species_defs->get_config($self->species, 'ASSEMBLY_VERSION');
     my $assembly = $self->hub->species_defs->get_config($self->species, 'UCSC_GOLDEN_PATH')
-                        || $self->hub->species_defs->get_config($self->species, 'ASSEMBLY_VERSION');
-    my $node = $hub_info->{'genomes'}{$assembly}{'tree'};
+                        || $assembly_default;
+    my $node = $hub_info->{'genomes'}{$assembly}{'tree'} || $hub_info->{'genomes'}{$assembly_default}{'tree'};
    
     if ($node) {
       $self->_add_datahub_node($node, $menu, $menu_name);

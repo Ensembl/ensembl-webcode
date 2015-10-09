@@ -298,7 +298,7 @@ sub content {
 
   my $image = $self->new_image($tree, $image_config, \@highlights);
   
-  return $html if $self->_export_image($image, 'no_text');
+  return if $self->_export_image($image, 'no_text');
 
   my $image_id = $gene ? $gene->stable_id : $tree_stable_id;
   my $li_tmpl  = '<li><a href="%s">%s</a></li>';
@@ -418,6 +418,7 @@ sub collapsed_nodes {
     while (@nodes_to_check) {
       my $internal_node = shift @nodes_to_check;
       next if $internal_node->is_leaf;
+      next unless $internal_node->species_tree_node;
       my $taxon = $internal_node->species_tree_node->taxon;
       my $this_rank = $taxon->rank;
       if ($this_rank eq 'no rank') {

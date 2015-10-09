@@ -69,12 +69,12 @@ Ensembl.Panel.ImageMap = Ensembl.Panel.Content.extend({
     this.elLk.map           = $('.json_imagemap',     this.elLk.container);
     var data                = this.loadJSON(this.elLk.map.html());
     this.elLk.areas         = data.out;
-    this.elLk.exportMenu    = $('.iexport_menu',      this.elLk.container).appendTo('body').css('left', this.el.offset().left).attr('rel', this.id);
     this.elLk.resizeMenu    = $('.image_resize_menu', this.elLk.container).appendTo('body').css('left', this.el.offset().left).attr('rel', this.id);
     this.elLk.img           = $('img.imagemap',       this.elLk.container);
     this.elLk.hoverLabels   = $('.hover_label',       this.elLk.container);
     this.elLk.boundaries    = $('.boundaries',        this.elLk.container);
     this.elLk.toolbars      = $('.image_toolbar',     this.elLk.container);
+    this.elLk.exportButton  = this.elLk.toolbars.find('.export');
     this.elLk.popupLinks    = $('a.popup',            this.elLk.toolbars);
 
     this.vertical = this.elLk.img.hasClass('vertical');
@@ -113,7 +113,6 @@ Ensembl.Panel.ImageMap = Ensembl.Panel.Content.extend({
     }
     
     $('a',         this.elLk.toolbars).helptip({ track: false });
-    $('a.iexport', this.elLk.toolbars).data('popup', this.elLk.exportMenu);
     $('a.resize',  this.elLk.toolbars).data('popup', this.elLk.resizeMenu);
     
     this.elLk.popupLinks.on('click', function () {
@@ -242,7 +241,7 @@ Ensembl.Panel.ImageMap = Ensembl.Panel.Content.extend({
     // If the panel contains an ajax loaded sub-panel, this function will be reached before ImageMap.init has been completed.
     // Make sure that this doesn't cause an error.
     if (this.imageConfig) {
-      this.elLk.exportMenu.add(this.elLk.labelLayers).add(this.elLk.hoverLayers).add(this.elLk.resizeMenu).remove();
+      this.elLk.labelLayers.add(this.elLk.hoverLayers).add(this.elLk.resizeMenu).remove();
 
       this.removeZMenus();
       this.removeShare();
@@ -1147,7 +1146,7 @@ Ensembl.Panel.ImageMap = Ensembl.Panel.Content.extend({
       // Highlight unless it's the bottom image on the page
       if (this.params.highlight) {
         this.boxCoords[speciesNumber] = coords;
-        this.updateExportMenu();
+        this.updateExportButton();
         this.highlight(coords, 'redbox2', speciesNumber, i);
       }
     }
@@ -1345,7 +1344,7 @@ Ensembl.Panel.ImageMap = Ensembl.Panel.Content.extend({
     if (r === false) {
       this.elLk.markedLocation.hide();
       this.elLk.markerButton.removeClass('selected').trigger('refreshTip').show();
-      this.updateExportMenu();
+      this.updateExportButton();
       return;
     }
 
@@ -1382,20 +1381,20 @@ Ensembl.Panel.ImageMap = Ensembl.Panel.Content.extend({
       }
     }
 
-    this.updateExportMenu();
+    this.updateExportButton();
   },
 
-  updateExportMenu: function() {
-    var extra = this.getExportMenuExtra();
+  updateExportButton: function() {
+    var extra = this.getExtraExportParam();
 
     extra = $.isEmptyObject(extra) ? false : encodeURIComponent(JSON.stringify(extra));
 
-    this.elLk.exportMenu.find('a').attr('href', function() {
+    this.elLk.exportButton.attr('href', function() {
       return Ensembl.updateURL({extra: extra}, this.href);
     });
   },
 
-  getExportMenuExtra: function () {
+  getExtraExportParam: function () {
     var extra = {};
 
     if (!$.isEmptyObject(this.boxCoords)) {

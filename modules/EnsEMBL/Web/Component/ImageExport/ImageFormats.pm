@@ -57,7 +57,8 @@ sub content {
   ## Hidden fields needed for redirection to image output
   $fieldset->add_hidden({'name' => 'data_type', 'value' => $hub->param('data_type')});
   $fieldset->add_hidden({'name' => 'component', 'value' => $hub->param('component')});
-
+  $fieldset->add_hidden({'name' => 'cdb',       'value' => $hub->param('cdb')});
+  
   my $radio_info  = EnsEMBL::Web::Constants::IMAGE_EXPORT_PRESETS;
   my $formats     = [];
 

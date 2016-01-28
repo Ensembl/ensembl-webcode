@@ -2701,7 +2701,7 @@ sub add_decorations {
       glyphset      => 'annotation_status',
       height        => 2,
       display       => 'normal',
-      strand        => 'x',
+      strand        => 'f',
       label_strand  => 'r',
       short_labels  => 0,
       depth         => 0,

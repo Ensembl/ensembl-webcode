@@ -72,7 +72,7 @@ sub create_glyphs {
 
   ## Strand settings
   foreach my $subtrack (@$data) {
-
+    my $subtrack_offset = $subtrack->{'metadata'}{'y'} || 0;
     ## Draw title over track
     if ($track_config->get('show_subtitle')) {
       $self->draw_subtitle($subtrack->{'metadata'}, $total_height);
@@ -95,8 +95,8 @@ sub create_glyphs {
       ## but doesn't need to have both. However we do set join and label colours,
       ## because other configuration options determine whether they are used
       if (!$feature->{'bordercolour'}) {
-        $feature->{'colour'} ||= $track_config->get('default_colour') || 'black';
-      } 
+        $feature->{'colour'} ||= $track_config->get('default_colour') || $subtrack->{'metadata'}{'colour'} || 'black';
+      }
       $feature->{'join_colour'}   ||= $feature->{'colour'} || $feature->{'bordercolour'};
       $feature->{'label_colour'}  ||= $feature->{'colour'} || $feature->{'bordercolour'};
 
@@ -109,7 +109,7 @@ sub create_glyphs {
       next if $feature_row < 0; ## Bumping code returns -1 if there's a problem 
 
       ## Work out where to place the feature
-      my $feature_height  = $track_config->get('height') || $text_info->{'height'};
+      my $feature_height  = $subtrack->{'metadata'}{'feature_height'} || $track_config->get('height') || $text_info->{'height'};
       $label_height    = $show_label ? $text_info->{'height'} : 0;
 
       my $feature_width   = $feature->{'end'} - $feature->{'start'};
@@ -130,8 +130,8 @@ sub create_glyphs {
 
       my $labels_height   = $label_row * $label_height;
       my $add_labels      = (!$bumped || $bumped eq 'labels_only') ? 0 : $labels_height;
-      my $y               = $y_start + ($feature_row * ($feature_height + $vspacing)) + $add_labels;
-      $total_height       = $feature_height + $vspacing + $add_labels;
+      my $y               = $y_start + ($feature_row * ($feature_height + $vspacing)) + $add_labels + $subtrack_offset;
+      $total_height       = $feature_height + $vspacing + $add_labels + $subtrack_offset;
       $total_height       = $y if $y > $total_height; 
 
       my $position  = {

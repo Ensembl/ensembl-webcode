@@ -34,6 +34,7 @@ sub render_compact {
   warn ">>> RENDERING PEAKS";
   $self->{'my_config'}->set('drawing_style', ['Feature::Peaks']);
   $self->{'my_config'}->set('height', 8);
+  $self->{'my_config'}->set('hide_subtitle',1);
   $self->_render_aggregate;
 }
 
@@ -42,6 +43,7 @@ sub render_signal {
   warn ">>> RENDERING SIGNAL";
   $self->{'my_config'}->set('drawing_style', ['Graph']);
   $self->{'my_config'}->set('height', 60);
+  $self->{'my_config'}->set('hide_subtitle',1);
   $self->_render_aggregate;
 }
 
@@ -50,6 +52,7 @@ sub render_signal_feature {
   warn ">>> RENDERING PEAKS WITH SIGNAL";
   $self->{'my_config'}->set('drawing_style', ['Feature::Peaks', 'Graph']);
   $self->{'my_config'}->set('height', 60);
+  $self->{'my_config'}->set('hide_subtitle',1);
   $self->_render_aggregate;
 }
 
@@ -67,6 +70,17 @@ sub data_by_cell_line {
     $config->{'data_by_cell_line'} = $data;
   }
   return $cell_line ? ($data->{$cell_line}||{}) : $data;
+}
+
+sub _colour_legend {
+  my ($self,$data) = @_;
+
+  my %out;
+  foreach my $s (@$data) {
+    next unless $s->{'metadata'}{'sublabel'};
+    $out{$s->{'metadata'}{'sublabel'}} = $s->{'metadata'}{'colour'};
+  }
+  return \%out;
 }
 
 sub draw_aggregate {
@@ -92,6 +106,7 @@ sub draw_aggregate {
   my $set     = $self->my_config('set');
   my %config  = %{$self->track_style_config};
 
+  my $top = 0;
   foreach (@{$self->{'my_config'}->get('drawing_style')||[]}) {
     my $style_class = 'EnsEMBL::Draw::Style::'.$_;
     my $any_on = scalar keys %{$data->{'on'}};
@@ -105,12 +120,42 @@ sub draw_aggregate {
                     ? sprintf '%s/%s features turned on', map scalar keys %{$data->{$set}{$_} || {}}, qw(on available) 
                     : '';
 
-          my $style = EnsEMBL::Draw::Style::Extra::Header->new(\%config);
-          $style->draw_margin_subhead($label, $tracks_on);
-          $self->push(@{$style->glyphs||[]});
-  
+          my $label_style = EnsEMBL::Draw::Style::Extra::Header->new(\%config);
+ 
           ## Only add the extra zmenu stuff if we're not drawing a wiggle
           $subset = $self->get_blocks($data->{$set}{'block_features'}, $args);
+          $label_style->draw_margin_subhead($label, $tracks_on);
+          $label_style->draw_margin_sublabels($subset);
+          my $colour_legend = $self->_colour_legend($subset);
+          my $hub = $self->{'config'}->hub;
+          my $cell_type_url = $hub->url('Component', {
+            action   => 'Web',
+            function    => 'CellTypeSelector/ajax',
+            image_config => $self->{'config'}->type,
+          });
+          my $evidence_url = $hub->url('Component', {
+            action => 'Web',
+            function => 'EvidenceSelector/ajax',
+            image_config => $self->{'config'}->type,
+          });
+          $label_style->draw_sublegend({
+            label => "Legend & more",
+            title => $label,
+            colour_legend => $colour_legend,
+            sublegend_links => [
+              {
+                text => 'Select other cell types',
+                href => $cell_type_url,
+                class => 'modal_link',
+              },{
+                text => 'Select evidence to show',
+                href => $evidence_url,
+                class => 'modal_link',
+              },
+            ],
+          });
+          $top = $subset->[-1]{'metadata'}{'y'} + $subset->[-1]{'metadata'}{'height'} if @$subset;
+          $self->push(@{$label_style->glyphs||[]});
         }
         else {
           $self->display_error_message($cell_line, $set, 'peaks') if $any_on;
@@ -119,6 +164,7 @@ sub draw_aggregate {
       else {
         if ($data->{$set}{'wiggle_features'}) {
           $subset = $self->get_wiggle($data->{$set}{'wiggle_features'}, $args);
+          $_->{'metadata'}{'y'} = $top for @$subset;
         }
         else {
           $self->display_error_message($cell_line, $set, 'wiggle') if $any_on;
@@ -129,38 +175,6 @@ sub draw_aggregate {
     }
   }
 
-=pod
-  ## Add extra zmenu in label column
-  my $hub = $self->{'config'}->hub;
-  my $cell_type_url = $hub->url('Component', {
-    action   => 'Web',
-    function    => 'CellTypeSelector/ajax',
-    image_config => $self->{'config'}->type,
-  });
-  my $evidence_url = $hub->url('Component', {
-    action => 'Web',
-    function => 'EvidenceSelector/ajax',
-    image_config => $self->{'config'}->type,
-  });
-  my @zmenu_links = (
-    {
-      text => 'Select other cell types',
-      href => $cell_type_url,
-      class => 'modal_link',
-    },{
-      text => 'Select evidence to show',
-      href => $evidence_url,
-      class => 'modal_link',
-    },
-  );
-
-  my $zmenu_extra_content = [ map {
-      qq(<a href="$_->{'href'}" class="$_->{'class'}">$_->{'text'}</a>)
-  } @zmenu_links ];
-
-  $self->_add_sublegend(undef, "More","Links", $zmenu_extra_content, $self->_offset+2);
-=cut
-
   ## This is clunky, but it's the only way we can make the new code
   ## work in a nice backwards-compatible way right now!
   ## Get label position, which is set in Style::Graph
@@ -170,14 +184,30 @@ sub draw_aggregate {
   return 0;
 }
 
+sub _block_zmenu {
+  my ($self,$f) = @_;
+
+  my $offset = $self->{'container'}->strand>0 ? $self->{'container'}->start - 1 : $self->{'container'}->end + 1;
+
+  return $self->_url({
+    action => 'FeatureEvidence',
+    fdb    => 'funcgen',
+    pos    => sprintf('%s:%s-%s', $f->slice->seq_region_name, $offset + $f->start, $f->end + $offset),
+    fs     => $f->feature_set->name,
+    ps     => $f->summit || 'undetermined',
+    act    => $self->{'config'}->hub->action,
+    evidence => !$self->{'will_draw_wiggle'},
+  });
+}
+
 sub get_blocks {
   my ($self, $dataset, $args) = @_;
 
-  my $data = {'metadata' => {},
-              'features' => [],
-              };
-
+  my @data;
   foreach my $f_set (sort { $a cmp $b } keys %$dataset) {
+    my $data = {'metadata' => {},
+                'features' => [],
+                };
     my @temp          = split /:/, $f_set;
     pop @temp;
     my $feature_name  = pop @temp;
@@ -189,7 +219,6 @@ sub get_blocks {
 
     my $features      = $dataset->{$f_set};
     foreach my $f (@$features) {
-
       ## Create motif features
       my $structure = [];
       my @loci = @{$f->get_underlying_structure};
@@ -205,19 +234,39 @@ sub get_blocks {
                   end       => $f->end,
                   midpoint  => $f->summit,
                   structure => $structure, 
-                  colour    => $colour,
                   label     => $label,
+                  href      => $self->_block_zmenu($f),
                   };
       push @{$data->{'features'}}, $hash; 
     }
+    $data->{'metadata'}{'sublabel'} = $label;
+    $data->{'metadata'}{'colour'} = $colour;
+    $data->{'metadata'}{'feature_height'} = 8;
+    push @data,$data;
   }
 
-  return [$data];
+  return \@data;
 }
 
 sub get_wiggle {
-  my ($self, $dataset) = @_;
+  my ($self,$dataset,$args) = @_;
 
+  my $bins = $self->bins;
+  my @data;
+  foreach my $f_set (sort { $a cmp $b } keys %$dataset) {
+    my $url = $dataset->{$f_set};
+    my $data = $self->get_data($bins,$url);
+    push @data,{
+      metadata => $data->[0]{'metadata'},
+      features => $data->[0]{'features'}{1},
+    };
+    my @temp          = split /:/, $f_set;
+    pop @temp;
+    my $feature_name  = pop @temp;
+    my $colour        = $args->{'colours'}{$feature_name};
+    $data[-1]->{'metadata'}{'colour'} = $colour;
+  }
+  return \@data;
 }
 
 sub get_colours {

@@ -59,11 +59,23 @@ sub create_glyphs {
   my $data            = $self->data;
   my $track_config    = $self->track_config;
 
+  # Merge metadata of subtracks
+  # dan -> anne : presumably, sometimes merging is wrong and we want
+  # multiple graphs, so this will need a conditional revert when we've
+  # worked out the right conditional. This is the correct behaviour for
+  # regulation, though, which is the most prominent exmaple of multiple
+  # wiggles.
+  my $metadata = $data->[0]{'metadata'};
+  $metadata->{'max_score'} =
+    max(map { $_->{'metadata'}{'max_score'} } @$data);
+  $metadata->{'min_score'} =
+    min(map { $_->{'metadata'}{'min_score'} } @$data);
+
+  my $graph_conf = $self->draw_graph_base($metadata);
   foreach my $subtrack (@$data) {
     my $metadata = $subtrack->{'metadata'} || {};
 
     ## Draw any axes, track labels, etc
-    my $graph_conf = $self->draw_graph_base($metadata);
 
     my $features = $subtrack->{'features'};
 
@@ -90,7 +102,7 @@ sub create_glyphs {
     }
 
     $self->draw_wiggle($plot_conf, $features);
-    $self->draw_hidden_bg($track_config->get('height'));
+    $self->draw_hidden_bgd($track_config->get('height'));
   }
 
   return @{$self->glyphs||[]};
@@ -102,15 +114,26 @@ sub create_glyphs {
 
 sub draw_wiggle {
   my ($self, $c, $features) = @_;
-  return unless $features && $features->[0];
 
-  my $slice_length  = $self->{'container'}->length;
-  $features         = [ sort { $a->{'start'} <=> $b->{'start'} } @$features ];
+  return unless $features && @$features;
+
+  my $slice_length  = $self->image_config->container_width;
+  if(ref($features->[0]) eq 'HASH') {
+    $features = [ sort { $a->{'start'} <=> $b->{'start'} } @$features ];
+  }
   my ($previous_x,$previous_y);
-
+  my $plain_x = 0;
   for (my $i = 0; $i < @$features; $i++) {
     my $f = $features->[$i];
-
+    unless(ref($f) eq 'HASH') {
+      # Plain old value
+      $f = {
+        start => $plain_x,
+        end => $plain_x+$c->{'unit'},
+        score => $f,
+      };
+      $plain_x += $c->{'unit'};
+    }
     my ($current_x,$current_score);
     $current_x     = ($f->{'end'} + $f->{'start'}) / 2;
     next unless $current_x <= $slice_length;
@@ -178,6 +201,7 @@ sub set_colour {
   my $cutoff = $c->{'alt_colour_cutoff'} || 0;
   my $colour = ($c->{'alt_colour'} && $f->{'score'} < $cutoff)
                   ? $c->{'alt_colour'} : $f->{'colour'};
+  $colour ||= $c->{'colour'};
   $colour ||= 'black';
   return $colour;
 }

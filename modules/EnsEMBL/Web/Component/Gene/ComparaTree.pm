@@ -319,7 +319,19 @@ sub content {
   else {
     $gene_name = $tree_stable_id;
   }
-  $image->{'export_params'} = [['gene_name', $gene_name],['align', 'tree'], ['cdb', $cdb]];
+
+  ## Parameters to pass into export form
+  $image->{'export_params'} = [['gene_name', $gene_name],['align', 'tree']];
+  my @extra_params = qw(g1 anc cdb collapse);
+  foreach (@extra_params) {
+    push @{$image->{'export_params'}}, [$_, $hub->param($_)];
+  }
+  foreach ($hub->param) {
+    if (/^group/) {
+      push @{$image->{'export_params'}}, [$_, $hub->param($_)];
+    }
+  }
+
   $image->{'data_export'}   = 'GeneTree';
   $image->{'remove_reset'}  = 1;
 

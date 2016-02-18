@@ -35,30 +35,39 @@ sub draw_margin_subhead {
 ### Draws a subheader in the lefthand margin, e.g. regulatory features
   my ($self, $text, $tracks_on) = @_;
 
-  $self->_draw_track_name($text, 'black', -118, undef);
+  my $height = $self->_draw_name($text, 'black', -118, undef);
   if ($tracks_on) {
-    $self->_draw_track_name($tracks_on, 'grey40', -118, 0);
+    $height += $self->_draw_name($tracks_on, 'grey40', -118, 0);
   } else {
-    $self->_draw_space_glyph;
+    $height += $self->_draw_space_glyph;
   }
+  return $height;
 }
 
 sub draw_margin_sublabels {
-  my ($self,$track) = @_;
+  my ($self, $track) = @_;
 
   foreach my $s (@$track) {
-    $s->{'metadata'}{'y'} = $self->_offset;
-    $self->_draw_track_name($s->{'metadata'}{'sublabel'}||'',$s->{'metadata'}{'colour'},-118,0);
-    $s->{'metadata'}{'height'} = $self->_offset - $s->{'metadata'}{'y'};
+    $self->_draw_name($s->{'metadata'}{'sublabel'}, $s->{'metadata'}{'colour'}, -118);
   }
 }
 
-sub _draw_track_name {
+sub draw_sublegend {
+  my ($self,$args) = @_;
+
+  my $zmenu = $self->_sublegend_zmenu($args);
+  $self->_draw_sublegend_box($args,$zmenu);
+}
+
+sub _draw_name {
   ### Draws the name of the predicted features track
   ### @param arrayref of Feature objects
   ### @param colour of the track
   ### @return 1
   my ($self, $name, $colour, $x_offset, $y_offset, $no_offset) = @_;
+  $name ||= '';
+  $colour ||= 'black';
+
   my $x  = $x_offset || 1;
   my $y  = $self->_offset;
   $y    += $y_offset if $y_offset;
@@ -73,7 +82,9 @@ sub _draw_track_name {
     last if ($res_analysis[2] < -$x_offset);
     $name = substr($name, 0, -1);
   }
-
+  my $text_height  = $res_analysis[3];
+  
+  ## Fix colour
   if ($colour) {
     $colour = $self->make_readable($colour);
   }
@@ -84,10 +95,10 @@ sub _draw_track_name {
   push @{$self->glyphs}, $self->Text({
                                       x         => $x,
                                       y         => $y,
-                                      height    => $res_analysis[3],
+                                      height    => $text_height,
                                       width     => $res_analysis[2],
                                       halign    => 'left',
-                                      valign    => 'bottom',
+                                      valign    => 'middle',
                                       text      => $name,
                                       colour    => $colour,
                                       absolutey => 1,
@@ -95,9 +106,12 @@ sub _draw_track_name {
                                       %font_details,
                                     });
 
-  $self->_offset($res_analysis[3]) unless $no_offset;
+  ## Make sure this label is the same overall height as the feature
+  my $feature_height = $self->track_config->get('real_feature_height') || 0;
+  my $offset = $feature_height > $text_height ? $feature_height : $text_height;
+  $self->_offset($offset) unless $no_offset;
 
-  return 1;
+  return $offset;
 }
 
 sub _draw_space_glyph {
@@ -118,6 +132,7 @@ sub _draw_space_glyph {
                                       });
 
   $self->_offset($space);
+  return $space;
 }
 
 sub _sublegend_zmenu_text {
@@ -186,13 +201,6 @@ sub _draw_sublegend_box {
     absolutey => 1,
   });
   return $height;
-}
-
-sub draw_sublegend {
-  my ($self,$args) = @_;
-
-  my $zmenu = $self->_sublegend_zmenu($args);
-  $self->_draw_sublegend_box($args,$zmenu);
 }
 
 sub _offset {

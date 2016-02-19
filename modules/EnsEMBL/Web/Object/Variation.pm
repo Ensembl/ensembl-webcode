@@ -19,21 +19,21 @@ limitations under the License.
 package EnsEMBL::Web::Object::Variation;
 
 ### NAME: EnsEMBL::Web::Object::Variation
-### Wrapper around a Bio::EnsEMBL::Variation 
-### or EnsEMBL::Web::VariationFeature object  
+### Wrapper around a Bio::EnsEMBL::Variation
+### or EnsEMBL::Web::VariationFeature object
 
-### PLUGGABLE: Yes, using Proxy::Object 
+### PLUGGABLE: Yes, using Proxy::Object
 
 ### STATUS: At Risk
 ### Contains a lot of functionality not directly related to
-### manipulation of the underlying API object 
+### manipulation of the underlying API object
 
 ### DESCRIPTION
 
 # FIXME Are these actually used anywhere???
 # Is there a reason they come before 'use strict'?
 use Bio::EnsEMBL::Variation::Utils::Sequence qw(ambiguity_code variation_class);
-use Bio::EnsEMBL::Utils::Eprof qw(eprof_start eprof_end eprof_dump); 
+use Bio::EnsEMBL::Utils::Eprof qw(eprof_start eprof_end eprof_dump);
 
 use strict;
 use warnings;
@@ -41,23 +41,23 @@ no warnings "uninitialized";
 
 use EnsEMBL::Web::Cache;
 use HTML::Entities qw(encode_entities);
-
+use EnsEMBL::Web::REST;
 use base qw(EnsEMBL::Web::Object);
 
 our $MEMD = EnsEMBL::Web::Cache->new;
 
 sub availability {
   my $self = shift;
-  
+
   if (!$self->{'_availability'}) {
     my $availability = $self->_availability;
     my $obj = $self->Obj;
-    
+
     if ($obj->isa('Bio::EnsEMBL::Variation::Variation')) {
       my $counts = $self->counts;
-      
+
       $availability->{'variation'} = 1;
-      
+
       $availability->{"has_$_"} = $counts->{$_} for qw(transcripts regfeats features populations population_freqs samples ega citation locations);
       if($self->param('vf')){
         ## only show these if a mapping available
@@ -66,10 +66,10 @@ sub availability {
       $availability->{'is_somatic'}  = $obj->has_somatic_source;
       $availability->{'not_somatic'} = !$obj->has_somatic_source;
     }
-    
+
     $self->{'_availability'} = $availability;
   }
-  
+
   return $self->{'_availability'};
 }
 
@@ -167,19 +167,19 @@ sub count_samples {
   my $self = shift;
   my $dbh  = $self->database('variation')->get_VariationAdaptor->dbc->db_handle;
   my $var  = $self->Obj;
-  
+
   # somatic variations don't have genotypes currently
   return 0 if $var->has_somatic_source;
-  
+
   my $gts = $var->get_all_SampleGenotypes();
-  
+
   return defined($gts) ? scalar @$gts : 0;
 }
 
 # uncomment when including export data for variation
 # sub can_export {
 #   my $self = shift;
-#   
+#
 #   return $self->action =~ /^Export$/ ? 0 : $self->availability->{'variation'};
 # }
 
@@ -187,7 +187,7 @@ sub count_ldpops {
   my $self = shift;
   my $pa  = $self->database('variation')->get_PopulationAdaptor;
   my $count = scalar @{$pa->fetch_all_LD_Populations};
-  
+
   return ($count > 0 ? $count : undef);
 }
 
@@ -199,17 +199,17 @@ sub count_citations{
 
 sub short_caption {
   my $self = shift;
-  
+
   my $type = $self->Obj->is_somatic ? 'Somatic mutation' : 'Variant';
   my $short_type = $self->Obj->is_somatic ? 'S. mut' : 'Var';
-  return $type.' displays' unless shift eq 'global';   
-  
-  my $label = $self->name;  
+  return $type.' displays' unless shift eq 'global';
+
+  my $label = $self->name;
   return length $label > 30 ? "$short_type: $label" : "$type: $label";
 }
 
 sub caption {
- my $self = shift; 
+ my $self = shift;
  my $caption = [$self->name, uc $self->vari_class];
  return $caption;
 }
@@ -224,7 +224,7 @@ sub not_unique_location {
     my $html;
     if ($count < 1) {
       $html = "<p>This feature has not been mapped.<p>";
-    } elsif ($count > 1) { 
+    } elsif ($count > 1) {
       $html = "<p>You must select a location from the panel above to see this information</p>";
     }
     return  $html;
@@ -247,7 +247,7 @@ sub location_string {
 sub var_location {
   ### Variation_location
   ### Example    : my $location = $self->location_string;
-  ### Description: Gets chr:start-end for the SNP 
+  ### Description: Gets chr:start-end for the SNP
   ### Returns string: chr:start-end
 
   my ($self, $unique) = @_;
@@ -259,7 +259,7 @@ sub _seq_region_ {
 
   ### Variation_location
   ### Args        : $unique
-  ###               if $unique=1 -> returns undef if there are more than one 
+  ###               if $unique=1 -> returns undef if there are more than one
   ###               variation features returned)
   ###               if $unique is 0 or undef, it returns the data for the first
   ###               mapping postion
@@ -293,30 +293,30 @@ sub _seq_region_ {
 
 sub seq_region_name    {
 
-  ### Variation_location 
-  ### a
-
-  my( $sr,$st) = $_[0]->_seq_region_; return $sr; 
-}
-sub seq_region_start   {
-  ### Variation_location 
-  ### a
-  my( $sr,$st) = $_[0]->_seq_region_; return $st; 
-}
-sub seq_region_end     {
-  ### Variation_location 
-  ### a
-  my( $sr,$st) = $_[0]->_seq_region_; return $st; 
-}
-sub seq_region_strand  {
-  ### Variation_location 
-  ### a
-  return 1; 
-}
-sub seq_region_type    { 
   ### Variation_location
   ### a
-  my($sr,$st,$type) = $_[0]->_seq_region_; return $type; 
+
+  my( $sr,$st) = $_[0]->_seq_region_; return $sr;
+}
+sub seq_region_start   {
+  ### Variation_location
+  ### a
+  my( $sr,$st) = $_[0]->_seq_region_; return $st;
+}
+sub seq_region_end     {
+  ### Variation_location
+  ### a
+  my( $sr,$st) = $_[0]->_seq_region_; return $st;
+}
+sub seq_region_strand  {
+  ### Variation_location
+  ### a
+  return 1;
+}
+sub seq_region_type    {
+  ### Variation_location
+  ### a
+  my($sr,$st,$type) = $_[0]->_seq_region_; return $type;
 }
 
 sub seq_region_data {
@@ -324,13 +324,13 @@ sub seq_region_data {
   ### Variation_location
   ### Args       : none
   ### Example    : my ($seq_region, $start, $type) = $object->seq_region_data;
-  ### Description: Only returns sequence region, start and coordinate system name 
+  ### Description: Only returns sequence region, start and coordinate system name
   ###              if this Variation Object maps to one Variation Feature obj
   ### Returns $seq_region, $start, $seq_type, $error(optional) which specifies
   ### 'no' if no mapping or 'multiple' if has several hits
   ### If there is an error, the first 3 args returned are undef
 
-  my($sr,$st,$type, $error) = $_[0]->_seq_region_(1); 
+  my($sr,$st,$type, $error) = $_[0]->_seq_region_(1);
   return ($sr, $st, $type, $error);
 }
 
@@ -396,11 +396,11 @@ sub get_genes {
   ### Example    : my @genes = @ {$obj->get_genes};
   ### Returns arrayref of Bio::EnsEMBL::Gene objects
 
-  $_[0]->vari->get_all_Genes; 
+  $_[0]->vari->get_all_Genes;
 }
 
 
-sub source_version { 
+sub source_version {
 
   ### Variation_object_calls
   ### a
@@ -416,18 +416,18 @@ sub source_version {
 
 
 sub source_url {
-  
+
   ### Variation_object_calls
   ### Args: none
   ### Example    : my $vari_source_url = $object->source_url
   ### Description: gets the Variation source URL
   ### Returns String
-  
+
   my $self = shift;
   my $source_url = $self->vari->source_url;
   return $source_url;
 }
- 
+
 sub dblinks {
 
   ### Variation_object_calls
@@ -454,14 +454,14 @@ sub consequence_type {
     $consequence_type = $f->display_consequence;
   }
   $consequence_type =~s/_/ /g;
- 
+
   return $consequence_type;
 }
 
-sub evidence_status { 
+sub evidence_status {
 
   ### Variation_object_calls
-  ### 
+  ###
   ### Example    : my $evidence_status = $object->get_all_evidence_states;
   ### Returns List of supporting evidence types for variation
 
@@ -482,7 +482,7 @@ sub flanking_seq {
   my $direction = shift;
   my $call = $direction eq 'up' ? "five_prime_flanking_seq" : "three_prime_flanking_seq";
   my $sequence;
-  eval { 
+  eval {
     $sequence = $self->vari->$call;
   };
   if ($@) {
@@ -534,7 +534,7 @@ sub vari_class{
   ### Example    : my $vari_class = $object->vari_class
   ### Description: returns the variation class (indel, snp, het) for a varation
   ### Returns String
-  
+
   # /!\ The following block  needs to be changed for the e!62 by "return $_[0]->vari->var_class;" /!\
   my $var = $_[0]->vari->var_class; # only for e!61
   $var =~ tr/_/ /;
@@ -559,7 +559,7 @@ sub moltype {
 
 sub ancestor {
 
-  ### Variation_object_calls 
+  ### Variation_object_calls
   ### a
   ### Example    : $object->ancestral_allele;
   ### Description: returns the ancestral allele for the variation
@@ -572,7 +572,7 @@ sub ancestor {
 
 sub clinical_significance {
 
-  ### Variation_object_calls 
+  ### Variation_object_calls
   ### a
   ### Example    : $object->clinical_significance;
   ### Description: returns the clinical significance and the corresponding display colour.
@@ -583,13 +583,13 @@ sub clinical_significance {
 }
 
 
-sub tagged_snp { 
+sub tagged_snp {
 
   ### Variation_object_calls
   ### Args: none
   ### Example    : my $pops = $object->tagged_snp
-  ### Description: The "is_tagged" call returns an array ref of populations 
-  ###              objects Bio::Ensembl::Variation::Population where this SNP 
+  ### Description: The "is_tagged" call returns an array ref of populations
+  ###              objects Bio::Ensembl::Variation::Population where this SNP
   ###              is a tag SNP
   ### Returns hashref of pop_name
 
@@ -606,13 +606,13 @@ sub tagged_snp {
   return \%pops or {};
 }
 
-sub tag_snp { 
+sub tag_snp {
 
   ### Variation_object_calls
   ### Args: none
   ### Example    : my $pops = $object->tagged_snp
-  ### Description: The "is_tagged" call returns an array ref of populations 
-  ###              objects Bio::Ensembl::Variation::Population where this SNP 
+  ### Description: The "is_tagged" call returns an array ref of populations
+  ###              objects Bio::Ensembl::Variation::Population where this SNP
   ###              is a tag SNP
   ### Returns hashref of pop_name
 
@@ -635,7 +635,7 @@ sub freqs {
   ### Args      : none
   ### Example    : my $data = $object->freqs;
   ### Description: gets allele and genotype frequencies for this Variation
-  ### Returns hash of data, 
+  ### Returns hash of data,
 
   my $self = shift;
 
@@ -643,50 +643,50 @@ sub freqs {
 
   my $allele_list = $self->vari->get_all_Alleles;
   return {} unless $allele_list;
-  
+
   my (%data, $allele_missing);
-  foreach my $allele_obj ( sort { $a->subsnp cmp $b->subsnp }@{ $allele_list } ) {  
-    my $pop_obj = $allele_obj->population;  
-    
+  foreach my $allele_obj ( sort { $a->subsnp cmp $b->subsnp }@{ $allele_list } ) {
+    my $pop_obj = $allele_obj->population;
+
     # no population, add to special data structure
     if(!defined($pop_obj) || (defined($pop_obj) && ($pop_obj->size == 1 || !defined($allele_obj->frequency)))) {
       next unless $allele_obj->subsnp_handle();
       push @{$data{no_pop}{$allele_obj->subsnp_handle}{$allele_obj->subsnp}}, $allele_obj->allele;
       next;
     }
-    
+
     my $pop_id  = $self->pop_id($pop_obj);
     my $ssid = $allele_obj->subsnp;
-    
+
     # failed status
     $data{$pop_id}{ssid}{$ssid}{failed_desc} = $allele_obj->failed_description if $allele_obj->is_failed;
-   
+
     push (@{ $data{$pop_id}{ssid}{$ssid}{AlleleFrequency} }, $allele_obj->frequency);
     push (@{ $data{$pop_id}{ssid}{$ssid}{AlleleCount} }, $allele_obj->count);
-    push (@{ $data{$pop_id}{ssid}{$ssid}{Alleles} },   $allele_obj->allele);    
+    push (@{ $data{$pop_id}{ssid}{$ssid}{Alleles} },   $allele_obj->allele);
     next if $data{$pop_id}{pop_info};
     $data{$pop_id}{pop_info} = $self->pop_info($pop_obj);
-    
+
     ## If frequency data is available, show frequency data submitter, else show observation submitter
     $data{$pop_id}{ssid}{$ssid}{submitter}  = $allele_obj->frequency_subsnp_handle($pop_obj);
     unless (defined $data{$pop_id}{ssid}{$ssid}{submitter} ){
     $data{$pop_id}{ssid}{$ssid}{submitter}  = $allele_obj->subsnp_handle() ;
     }
   }
-  
+
   # Add genotype data;
   foreach my $pop_gt_obj ( sort { $a->subsnp cmp $b->subsnp} @{ $self->pop_genotype_obj } ) {
-    my $pop_obj = $pop_gt_obj->population; 
-    
+    my $pop_obj = $pop_gt_obj->population;
+
     # no population, add to special data structure
     if(!defined($pop_obj) || (defined($pop_obj) && ($pop_obj->size == 1 || !defined($pop_gt_obj->frequency)))) {
       next unless $pop_gt_obj->subsnp_handle();
       push @{$data{no_pop}{$pop_gt_obj->subsnp_handle}{$pop_gt_obj->subsnp}}, @{$pop_gt_obj->genotype};
       next;
     }
-    
-    my $pop_id  = $self->pop_id($pop_obj); 
-    my $ssid = $pop_gt_obj->subsnp();  
+
+    my $pop_id  = $self->pop_id($pop_obj);
+    my $ssid = $pop_gt_obj->subsnp();
     # No allele data for this population ...
     unless (exists $data{$pop_id}{ssid}{$ssid}{AlleleFrequency}){
       $allele_missing = 1;
@@ -699,13 +699,13 @@ sub freqs {
     $data{$pop_id}{pop_info} = $self->pop_info($pop_obj);
     push (@{ $data{$pop_id}{ssid}{$ssid}{GenotypeFrequency} }, $pop_gt_obj->frequency);
     push (@{ $data{$pop_id}{ssid}{$ssid}{GenotypeCount} }, $pop_gt_obj->count);
-    push (@{ $data{$pop_id}{ssid}{$ssid}{Genotypes} }, $self->pop_genotypes($pop_gt_obj)); 
+    push (@{ $data{$pop_id}{ssid}{$ssid}{Genotypes} }, $self->pop_genotypes($pop_gt_obj));
 
     $data{$pop_id}{ssid}{$ssid}{count} = $pop_gt_obj->count();
   }
 
   if ($allele_missing == 1){
-    #%data = %{ $self->calculate_allele_freqs_from_genotype($variation_feature, \%data) }; 
+    #%data = %{ $self->calculate_allele_freqs_from_genotype($variation_feature, \%data) };
   }
 
   return \%data;
@@ -780,31 +780,31 @@ sub calculate_allele_freqs_from_genotype {
   my ($self, $variation_feature, $temp_data) = @_;
   my %data = %$temp_data;
   my ($a1, $a2) = split /\//, $variation_feature->allele_string;
-  
+
   # check if have allele data, if not calculate it
   foreach my $pop_id(keys %data){
     foreach my $ssid (keys %{$data{$pop_id}{ssid}}){
       if (scalar @{$data{$pop_id}{ssid}{$ssid}{'Alleles'}} <= 1){
         my (%genotype_freqs, $i);
-        
+
         next unless $data{$pop_id}{ssid}{$ssid}{'GenotypeFrequency'};
-        
+
         foreach my $genotype (@{$data{$pop_id}{ssid}{$ssid}{'Genotypes'}}){
           $genotype_freqs{$genotype} = $data{$pop_id}{ssid}{$ssid}{'GenotypeFrequency'}[$i++];
         }
-        
+
         my $genotype_1_same = $genotype_freqs{"$a1|$a1"} || 0;
         my $genotype_1_diff = $genotype_freqs{"$a1|$a2"} || $genotype_freqs{"$a2|$a1"} || 0;
         my $freq_a1         = ($genotype_1_diff + (2 * $genotype_1_same)) /2;
         my $freq_a2         = 1 - $freq_a1;
-        
+
         @{$data{$pop_id}{ssid}{$ssid}{'Alleles'}} = ();
         @{$data{$pop_id}{ssid}{$ssid}{'AlleleFrequency'}} = ();
-        
-        push @{$data{$pop_id}{ssid}{$ssid}{'Alleles'}}, $a1; 
-        push @{$data{$pop_id}{ssid}{$ssid}{'Alleles'}}, $a2;  
-        push @{$data{$pop_id}{ssid}{$ssid}{'AlleleFrequency'}}, $freq_a1; 
-        push @{$data{$pop_id}{ssid}{$ssid}{'AlleleFrequency'}}, $freq_a2; 
+
+        push @{$data{$pop_id}{ssid}{$ssid}{'Alleles'}}, $a1;
+        push @{$data{$pop_id}{ssid}{$ssid}{'Alleles'}}, $a2;
+        push @{$data{$pop_id}{ssid}{$ssid}{'AlleleFrequency'}}, $freq_a1;
+        push @{$data{$pop_id}{ssid}{$ssid}{'AlleleFrequency'}}, $freq_a2;
       }
     }
   }
@@ -897,7 +897,7 @@ sub pop_info {
   $data{"Sub-Population"}   = $self->extra_pop($pop_obj,"sub");
   $data{PopGroup}           = $self->pop_display_group_name($pop_obj) ||undef;
   $data{GroupPriority}      = $self->pop_display_group_priority($pop_obj) ||undef;
- 
+
 
   return \%data;
 }
@@ -928,7 +928,7 @@ sub pop_id {
   ### Returns String
 
   my ($self, $pop_obj)  = @_;
-  return unless $pop_obj; 
+  return unless $pop_obj;
   return $pop_obj->dbID;
 }
 
@@ -989,7 +989,7 @@ sub extra_pop {
   return {} unless $pop_obj;
   my $call = "get_all_$type" . "_Populations";
   my @populations = @{ $pop_obj->$call};
-  
+
   my %extra_pop;
   foreach my $pop ( @populations ) {
     my $id = $self->pop_id($pop);
@@ -1010,7 +1010,7 @@ sub pop_display_group_priority{
   ### Returns String
 
   my ($self, $pop_obj)  = @_;
-  ## FIXME - temporary defensive coding until we have 76 handover! 
+  ## FIXME - temporary defensive coding until we have 76 handover!
   return $pop_obj->display_group_priority() if $self->species_defs->ENSEMBL_VERSION > 75;
 }
 sub pop_display_group_name{
@@ -1023,11 +1023,11 @@ sub pop_display_group_name{
 
 
   my ($self, $pop_obj)  = @_;
-  ## FIXME - temporary defensive coding until we have 76 handover! 
+  ## FIXME - temporary defensive coding until we have 76 handover!
   return $pop_obj->display_group_name() if $self->species_defs->ENSEMBL_VERSION > 75;
 }
 
- 
+
 
 
 # Sample table -----------------------------------------------------
@@ -1042,9 +1042,9 @@ sub sample_table {
   my $self = shift;
   my $selected_pop = shift;
   my $sample_genotypes = $self->sample_genotypes_obj($selected_pop);
-  return {} unless defined $sample_genotypes && @$sample_genotypes; 
+  return {} unless defined $sample_genotypes && @$sample_genotypes;
 
-  ### limit populations shown to those with population genotypes 
+  ### limit populations shown to those with population genotypes
   ### summarised by dbSNP or added in adaptor for 1KG
   my $pop_geno_adaptor   = $self->hub->database('variation')->get_PopulationGenotypeAdaptor();
   my $pop_genos = $pop_geno_adaptor->fetch_all_by_Variation($self->vari);
@@ -1053,11 +1053,11 @@ sub sample_table {
   my %pop_seen;
   my %pop_data;
   my %data;
-  
-  foreach my $sample_gt_obj ( @$sample_genotypes ) { 
+
+  foreach my $sample_gt_obj ( @$sample_genotypes ) {
     my $sample_obj = $sample_gt_obj->sample;
     my $ind_obj   = $sample_obj->individual;
-    
+
     next unless $ind_obj;
     next unless $sample_obj;
     next if $sample_obj->name() =~/1000GENOMES:pilot_2/; ## not currently reporting these
@@ -1071,7 +1071,7 @@ sub sample_table {
     $data{$sample_id}{Father}      = $self->parent($ind_obj,"father");
     $data{$sample_id}{Children}    = $self->child($ind_obj);
     $data{$sample_id}{Object}      = $sample_obj;
-  
+
     my $pop_objs = $sample_obj->get_all_Populations();
 
     foreach my $pop_obj (@{$pop_objs}) {
@@ -1094,7 +1094,7 @@ sub sample_table {
         };
         $pop_seen{$pop_id} = 1;
       }
-      push (@{$data{$sample_id}{Population}}, $pop_data{$pop_id}); 
+      push (@{$data{$sample_id}{Population}}, $pop_data{$pop_id});
     }
 
     if (scalar @{$pop_objs} == 0) {
@@ -1106,7 +1106,7 @@ sub sample_table {
       });
     }
   }
-  
+
   return \%data;
 }
 
@@ -1195,7 +1195,7 @@ sub child {
 
   foreach my $individual ( @{ $individual_obj->get_all_child_Individuals} ) {
     my $gender = $individual->gender;
-    $children{$individual->name} = [$gender, 
+    $children{$individual->name} = [$gender,
            $self->description($individual)];
   }
   return \%children;
@@ -1216,7 +1216,7 @@ sub get_samples_pops {
 
   foreach (@populations) {
     push (@pop_string,  {
-      Name => $self->pop_name($_), 
+      Name => $self->pop_name($_),
       Link => $self->pop_links($_),
       ID => $_->dbID
     });
@@ -1236,19 +1236,19 @@ sub get_variation_set_string {
 
   my $toplevel_sets = $vari_set_adaptor->fetch_all_top_VariationSets;
   my $variation_string;
-  my %sets_observed; 
+  my %sets_observed;
   foreach (sort { $a->name cmp $b->name } @$sets){
-    $sets_observed{$_->name}  =1 
-  } 
+    $sets_observed{$_->name}  =1
+  }
 
   foreach my $top_set (@$toplevel_sets){
     next unless exists  $sets_observed{$top_set->name};
     $variation_string = $top_set->name ;
     my $sub_sets = $top_set->get_all_sub_VariationSets(1);
     my $sub_set_string = " (";
-    foreach my $sub_set( sort { $a->name cmp $b->name } @$sub_sets ){ 
+    foreach my $sub_set( sort { $a->name cmp $b->name } @$sub_sets ){
       next unless exists $sets_observed{$sub_set->name};
-      $sub_set_string .= $sub_set->name .", ";  
+      $sub_set_string .= $sub_set->name .", ";
     }
     if ($sub_set_string =~/\(\w/){
       $sub_set_string =~s/\,\s+$//;
@@ -1263,7 +1263,7 @@ sub get_variation_set_string {
 sub get_variation_sets {
   my $self = shift;
   my $vari_set_adaptor = $self->hub->database('variation')->get_VariationSetAdaptor;
-  my $sets = $vari_set_adaptor->fetch_all_by_Variation($self->vari); 
+  my $sets = $vari_set_adaptor->fetch_all_by_Variation($self->vari);
   return $sets;
 }
 
@@ -1277,8 +1277,8 @@ sub get_variation_sub_sets {
   my $superset_obj = $vari_set_adaptor->fetch_by_name($superset_name);
   return unless defined $superset_obj;
 
-  ## FIXME - temporary defensive coding until we have 76 handover! 
-  my $sets = $self->species_defs->ENSEMBL_VERSION > 75 ? $vari_set_adaptor->fetch_all_by_Variation_super_VariationSet($self->vari, $superset_obj) : []; 
+  ## FIXME - temporary defensive coding until we have 76 handover!
+  my $sets = $self->species_defs->ENSEMBL_VERSION > 75 ? $vari_set_adaptor->fetch_all_by_Variation_super_VariationSet($self->vari, $superset_obj) : [];
   return $sets;
 }
 
@@ -1295,9 +1295,9 @@ sub variation_feature_mapping { ## used for snpview
 
   my $self = shift;
   my $recalculate = shift;
- 
+
   my %data;
-  foreach my $vari_feature_obj (@{ $self->get_variation_features }) { 
+  foreach my $vari_feature_obj (@{ $self->get_variation_features }) {
      my $varif_id = $vari_feature_obj->dbID;
      $data{$varif_id}{Type}           = $self->region_type($vari_feature_obj);
      $data{$varif_id}{Chr}            = $self->region_name($vari_feature_obj);
@@ -1312,7 +1312,7 @@ sub variation_feature_mapping { ## used for snpview
 
 # Calls for variation features -----------------------------------------------
 
-sub unique_variation_feature { 
+sub unique_variation_feature {
 
   ### Variation_features
   ### Description: returns {{Bio::Ensembl::Variation::Feature}} object if
@@ -1349,11 +1349,11 @@ sub get_variation_features {
   ### Description: gets the Variation features found  on a variation object;
   ### Returns Arrayref of Bio::EnsEMBL::Variation::VariationFeatures
 
-   my $self = shift; 
+   my $self = shift;
    return $self->vari ? $self->vari->get_all_VariationFeatures : [];
 }
 
-sub region_type { 
+sub region_type {
 
   ### Variation_features
   ### Args      : Bio::EnsEMBL::Variation::Variation::Feature
@@ -1366,13 +1366,13 @@ sub region_type {
   return $slice->coord_system_name if $slice;
 }
 
-sub region_name { 
+sub region_name {
   ### Variation_features
   ### Args      : Bio::EnsEMBL::Variation::Variation::Feature
   ### Example    : my $chr = $data->region_name($vari)
   ### Description: gets the VariationFeature slice seq region name
   ### Returns String
-  
+
   my ($self, $vari_feature) = @_;
   my $slice =  $vari_feature->slice;
   return $slice->seq_region_name() if $slice;
@@ -1404,27 +1404,27 @@ sub transcript_variation {
   ### Returns arrayref of transcript variation objs
 
   my ($self, $vari_feature, $tr_stable_id, $recalculate) = @_;
-  
+
   $self->hub->database('variation')->dnadb($self->database('core'));
-  
+
   if($recalculate) {
     $vari_feature->allele_string('A/C/G/T');
     delete $vari_feature->{transcript_variations};
     delete $vari_feature->{dbID};
   }
-  
+
   my $transcript_variation_obj =  $vari_feature->get_all_TranscriptVariations;
-  
+
   return [] unless $transcript_variation_obj;
 
   my @data;
   foreach my $tvari_obj ( @{ $transcript_variation_obj } )  {
     next unless $tvari_obj->transcript;
     next if $tr_stable_id && $tvari_obj->transcript->stable_id ne $tr_stable_id;
-     
+
     foreach my $tva_obj(@{ $tvari_obj->get_all_alternate_TranscriptVariationAlleles }) {
       my $type = join ", " , map {$_->SO_term} @{ $tva_obj->get_all_OverlapConsequences || [] };
-  
+
       push (@data, {
               vf_allele =>        $tva_obj->variation_feature_seq,
               tr_allele =>        $tva_obj->feature_seq,
@@ -1463,8 +1463,8 @@ sub ld_pops_for_snp {
   ### Description: gets an LDfeature container for this SNP and calls all the populations on this
   ### Returns array ref of population IDs
 
-  my $self = shift; 
-  my @vari_mappings = @{ $self->unique_variation_feature }; 
+  my $self = shift;
+  my @vari_mappings = @{ $self->unique_variation_feature };
   return [] unless @vari_mappings;                    # must have mapping
   return [] unless $self->counts->{'samples'};    # must have genotypes
   return [] unless $self->vari_class =~ /snp/i;  # must be a SNP or mixed
@@ -1564,7 +1564,7 @@ sub get_source {
 =head2 hgvs
 
  Arg[0]      : int $vfid (optional)
- Description : Returns a hash with unique HGVS strings for the variation and variation feature with allele as key. 
+ Description : Returns a hash with unique HGVS strings for the variation and variation feature with allele as key.
                If multiple mappings, will pick the one specified or alternatively, the one stored in the hub.
  Return type : a hash ref
 
@@ -1574,53 +1574,53 @@ sub hgvs {
   my $self = shift;
   my $vfid = shift;
   my $tr_stable_id = shift;
-  
+
   # Pick out the correct variation feature
   my $mappings      = $self->variation_feature_mapping;
   my $mapping_count = scalar keys %$mappings;
-  
+
   # skip if no mapping or somatic mutation with mutation ref base different to ensembl ref base
-  return {} unless $mapping_count && !$self->is_somatic_with_different_ref_base; 
-  
+  return {} unless $mapping_count && !$self->is_somatic_with_different_ref_base;
+
   if ($mapping_count == 1) {
     ($vfid) = keys %$mappings;
   } elsif (!$vfid) {
     $vfid = $self->hub->param('vf');
   }
-  
+
   return {} unless $vfid;
-  
+
   my $vf = $self->Obj->get_VariationFeature_by_dbID($vfid);
-  
+
   return {} unless $vf;
-  
+
   # Get all transcript variations and put them in a hash with allele seq as key
   my %tvs_by_allele;
-  
+
   push @{$tvs_by_allele{$_->{'vf_allele'}}}, $_ for @{$self->transcript_variation($vf,$tr_stable_id)};
 
   # Sort the HGVS notations so that LRGs end up last
   $tvs_by_allele{$_} = [ map $_->[1], sort { $a->[0] <=> $b->[0] } map [ $_->{'hgvs_genomic'} =~ /^LRG/ ? 1 : 0, $_ ], @{$tvs_by_allele{$_}} ] for keys %tvs_by_allele;
-  
+
   # Loop over the transcript variations and get the unique (and interesting to us) HGVS notations
   my %hgvs;
-  
+
   foreach my $allele (keys %tvs_by_allele) {
     my %seen_genomic;
-    
-    # Loop over the transcript variations 
-    foreach my $tv (@{$tvs_by_allele{$allele}}) {      
+
+    # Loop over the transcript variations
+    foreach my $tv (@{$tvs_by_allele{$allele}}) {
       # Loop over the genomic, coding and protein HGVS strings
       foreach my $type ('hgvs_genomic', 'hgvs_transcript', 'hgvs_protein') {
         my $h = $tv->{$type};
-        
+
         next if !$h || $type eq 'hgvs_genomic' && $seen_genomic{$h}++;
-        
+
         push @{$hgvs{$allele}}, $h;
       }
     }
   }
- 
+
   # add hgvs notations from the variation feature if there are no transcript variations
   # for the variation (intergenic variation)
   unless (%hgvs) {
@@ -1637,13 +1637,13 @@ sub hgvs {
 sub get_hgvs_names_url {
   my $self        = shift;
   my $display_all = shift;
-  
+
   # Get the HGVS names
   my $hgvs_hash = $self->hgvs(@_);
- 
+
   # Loop over and format the URLs
   my %url;
-  
+
   foreach my $allele (keys %$hgvs_hash) {
     foreach my $hgvs (@{$hgvs_hash->{$allele}}) {
       my $url = $self->hgvs_url($display_all,$hgvs);
@@ -1651,10 +1651,10 @@ sub get_hgvs_names_url {
 
     }
   }
-  
+
   return \%url;
 }
-  
+
 =head2 hgvs_url
 
  Arg[0]      : string $hgvs
@@ -1674,8 +1674,8 @@ sub hgvs_url {
   my $obj         = $self->Obj;
   my $hub         = $self->hub;
   my $max_length  = 40;
-  
-  # Split the HGVS string into components. We are mainly interested in 1) Reference sequence, 2) Version (optional), 3) Notation type (optional) and 4) The rest of the description 
+
+  # Split the HGVS string into components. We are mainly interested in 1) Reference sequence, 2) Version (optional), 3) Notation type (optional) and 4) The rest of the description
   my ($refseq, $version, $type, $description) = $hgvs =~ m/^((?:ENS[A-Z]*[GTP]\d+)|(?:LRG_\d+[^\.]*)|(?:[^\:]+?))(\.\d+)?\:(?:([mrcngp])\.)?(.*)$/;
 
   # Return undef if the HGVS could not be properly parsed (i.e. if the refseq and the description could not be obtained)
@@ -1688,17 +1688,17 @@ sub hgvs_url {
     v      => $obj->name,
     r      => undef,
   };
-  
+
   my $config_param = ($obj->is_somatic ? 'somatic_mutation_COSMIC=normal' : 'variation_feature_variation=normal') . ($obj->failed_description ? ',variation_set_fail_all=normal' : '');
-  
+
   # Treat the URL differently depending on if it will take us to a regular page or a LRG page
   if ($refseq =~ /^LRG/) {
     my ($id, $tr_pr, $tr_pr_id) = $refseq =~ m/^(LRG_\d+)(t|p)?(\d+)?$/; # Split the reference into LRG_id, transcript or protein
-    
+
     $p->{'type'}    = 'LRG';
     $p->{'lrg'}     = $id;
     $p->{'__clear'} = 1;
-     
+
     if ($type eq 'g') { # genomic position
       $p->{'action'}           = 'Summary';
       $p->{'contigviewbottom'} = $config_param;
@@ -1721,10 +1721,10 @@ sub hgvs_url {
       $p->{'t'}      = $refseq.$version;
     }
   }
-  
+
   # Add or override the parameters with the ones supplied to the method
   $p->{$_} = $params->{$_} for keys %$params;
-  
+
   my $hgvs_string;
   if ($display_all) {
     $hgvs_string =   substr($hgvs, length $refseq);
@@ -1756,4 +1756,65 @@ sub get_allele_genotype_colours {
                 );
   return \%colours;
 }
+
+# Get SNPedia description from snpedia.com
+sub get_snpedia_data {
+  my ($self, $rs_id) = @_;
+  my $hub = $self->hub;
+  my $snpedia_url = $hub->get_ExtURL('SNPEDIA');
+  my $rest = EnsEMBL::Web::REST->new($hub, $snpedia_url);
+  my $args= {
+    'url_params' => {
+      'action' => 'query',
+      'prop' => 'revisions',
+      'titles' => $rs_id,
+      'rvprop' => 'content',
+      'maxlag' => '5',
+      'format' => 'json',
+      '_delimiter' => '&'
+    }
+  };
+
+  my $ref = $rest->fetch('api.php', $args);
+  my $results_json = {};
+
+  # get the page id and the page hashref with title and revisions
+  my ($pageid, $pageref) = each %{ $ref->{query}->{pages} };
+  # get the first revision
+  my $rev = @{ $pageref->{revisions } }[0];
+  # delete the revision from the hashref
+  delete($pageref->{revisions});
+  # if the page is missing then return the pageref
+  return $pageref if ( defined $pageref->{missing} );
+
+  # Parse description from the result by applying some heuristics
+  # Tested working for most cases
+  # Convert all newlines to *** to remove newline characters
+  $rev->{'*'} =~s/\n+/***/g;
+  # Remove PMID and description
+  $rev->{'*'} =~s/(\{\{PMID.*?\}\}).*\.?//g;
+  # Remove all content inside {{ }}
+  $rev->{'*'} =~s/(\{\{.*?\}\})//g;
+  # Convert '***'s to html break line
+  $rev->{'*'} =~s/\*\*\*+/<br><br>/g;
+  # Remove starting newline characters
+  $rev->{'*'} =~s/^<br><br>//g;
+  # Link content inside [[ ]] to snpedia
+  $rev->{'*'} =~s/\[\[(.*?)\]\]/<a href="$snpedia_url\/index\.php\/$1">$1<\/a>/g;
+  # Create html links for content like [url linktext]
+  $rev->{'*'} =~s/\[(http:\/\/.*?)\s(.*?)\]/<a href="$1">$2<\/a>/g;
+
+  my $desc = $rev->{'*'};
+  # Get the first n words
+  $desc = join ' ', (split /\s+/, $rev->{'*'})[0..30];
+
+  if ($desc) {
+    my $more_link = "... <a href='$snpedia_url/index.php/$rs_id'>more</a>";
+    $desc .= $more_link;
+  }
+
+  # combine the pageid, the latest revision and the page title into one hash
+  return { 'pageid'=>$pageid, %{ $rev }, 'parsed_desc'=>$desc, %{ $pageref } };
+}
+
 1;

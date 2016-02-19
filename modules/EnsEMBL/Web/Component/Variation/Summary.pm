@@ -35,19 +35,20 @@ sub content {
   my $object             = $self->object;
   my $variation          = $object->Obj;
   my $vf                 = $hub->param('vf');
+  my $rs_id              = $hub->param('v');
   my $variation_features = $variation->get_all_VariationFeatures;
   my ($feature_slice)    = map { $_->dbID == $vf ? $_->feature_Slice : () } @$variation_features; # get slice for variation feature
-  my $avail              = $object->availability;  
+  my $avail              = $object->availability;
 
   my ($info_box);
-  if ($variation->failed_description || (scalar keys %{$object->variation_feature_mapping} > 1)) { 
+  if ($variation->failed_description || (scalar keys %{$object->variation_feature_mapping} > 1)) {
     ## warn if variation has been failed
-    $info_box = $self->multiple_locations($feature_slice, $variation->failed_description); 
+    $info_box = $self->multiple_locations($feature_slice, $variation->failed_description);
   }
-  
+
   my @str_array = $self->feature_summary($avail);
-  
-  my $summary_table = $self->new_twocol(    
+
+  my $summary_table = $self->new_twocol(
     $self->variation_source,
     $self->alleles($feature_slice),
     $self->location,
@@ -58,7 +59,8 @@ sub content {
     $self->synonyms,
     $self->hgvs,
     $self->sets,
-    @str_array ? ['About this variant', sprintf('This variant %s.', $self->join_with_and(@str_array))] : ()
+    @str_array ? ['About this variant', sprintf('This variant %s.', $self->join_with_and(@str_array))] : (),
+    $rs_id && $self->snpedia($rs_id)
   );
 
   return sprintf qq{<div class="summary_panel">$info_box%s</div>}, $summary_table->render;
@@ -69,19 +71,19 @@ sub content {
 # Returns     : Array
 sub feature_summary {
   my ($self, $avail) = @_;
-  
+
   my $hub             = $self->hub;
   my $vf              = $hub->param('vf');
   my $transcript_url  = $hub->url({ action => "Variation", action => "Mappings",  vf => $vf });
   my $genotype_url    = $hub->url({ action => "Variation", action => "Sample",    vf => $vf });
   my $phenotype_url   = $hub->url({ action => "Variation", action => "Phenotype", vf => $vf });
   my $citation_url    = $hub->url({ action => "Variation", action => "Citations", vf => $vf });
- 
+
   my @str_array;
-  
-  push @str_array, sprintf('overlaps <a href="%s">%s %s</a>', 
-                      $transcript_url, 
-                      $avail->{has_transcripts}, 
+
+  push @str_array, sprintf('overlaps <a href="%s">%s %s</a>',
+                      $transcript_url,
+                      $avail->{has_transcripts},
                       $avail->{has_transcripts} eq "1" ? "transcript" : "transcripts"
                   ) if($avail->{has_transcripts});
   push @str_array, sprintf('%s<a href="%s">%s %s</a>',
@@ -90,22 +92,22 @@ sub feature_summary {
                       $avail->{has_regfeats},
                       $avail->{has_regfeats} eq "1" ? "regulatory feature" : "regulatory features"
                   ) if($avail->{has_regfeats});
-  push @str_array, sprintf('has <a href="%s">%s sample %s</a>', 
-                      $genotype_url, 
-                      $avail->{has_samples}, 
-                      $avail->{has_samples} eq "1" ? "genotype" : "genotypes" 
+  push @str_array, sprintf('has <a href="%s">%s sample %s</a>',
+                      $genotype_url,
+                      $avail->{has_samples},
+                      $avail->{has_samples} eq "1" ? "genotype" : "genotypes"
                   )if($avail->{has_samples});
-  push @str_array, sprintf('is associated with <a href="%s">%s %s</a>', 
-                      $phenotype_url, 
-                      $avail->{has_ega}, 
+  push @str_array, sprintf('is associated with <a href="%s">%s %s</a>',
+                      $phenotype_url,
+                      $avail->{has_ega},
                       $avail->{has_ega} eq "1" ? "phenotype" : "phenotypes"
-                  ) if($avail->{has_ega});  
-  push @str_array, sprintf('is mentioned in <a href="%s">%s %s</a>', 
-                      $citation_url, 
-                      $avail->{has_citation}, 
-                      $avail->{has_citation} eq "1" ? "citation" : "citations" 
-                  ) if($avail->{has_citation});  
-                  
+                  ) if($avail->{has_ega});
+  push @str_array, sprintf('is mentioned in <a href="%s">%s %s</a>',
+                      $citation_url,
+                      $avail->{has_citation},
+                      $avail->{has_citation} eq "1" ? "citation" : "citations"
+                  ) if($avail->{has_citation});
+
   return @str_array;
 }
 
@@ -117,7 +119,7 @@ sub multiple_locations {
   my $html;
   my $header = $failed ? 'This variant has been flagged'
                           : "This variant maps to $count locations";
-  
+
   if ($feature_slice) {
     for (0..$#descs) {
       my $seq    = $feature_slice->seq || '-';
@@ -125,14 +127,14 @@ sub multiple_locations {
       $descs[$_] =~ s/reference allele/reference allele ($seq)/ if $descs[$_] =~ /match.+reference allele/ && $feature_slice;
     }
   }
- 
+
   ## Do a bit of user-friendly munging
   foreach (@descs) {
     if ($_ eq 'Variant maps to more than one genomic location') {
-      $_ = "Variant maps to $count genomic locations"; 
+      $_ = "Variant maps to $count genomic locations";
     }
   }
- 
+
   if (scalar @descs > 1) {
     $html  = '<ul>';
     $html .= "<li>$_</li>" foreach @descs;
@@ -146,21 +148,21 @@ sub multiple_locations {
   my $id        = $self->object->name;
   my $params    = $hub->core_params;
   my @locations = ({ value => 'null', name => 'None selected' });
-    
+
   # add locations for each mapping
   foreach (sort { $mappings{$a}{'Chr'} cmp $mappings{$b}{'Chr'} || $mappings{$a}{'start'} <=> $mappings{$b}{'start'}} keys %mappings) {
-    my $region = $mappings{$_}{'Chr'}; 
+    my $region = $mappings{$_}{'Chr'};
     my $start  = $mappings{$_}{'start'};
     my $end    = $mappings{$_}{'end'};
     my $str    = $mappings{$_}{'strand'};
-      
+
     push @locations, {
       value    => $_,
       name     => sprintf('%s (%s strand)', ($start == $end ? "$region:$start" : "$region:$start-$end"), ($str > 0 ? 'forward' : 'reverse')),
       selected => $vf == $_ ? ' selected' : ''
     };
   }
-    
+
   # ignore vf and region as we want them to be overwritten
   my $core_params = join '', map $params->{$_} && $_ ne 'vf' && $_ ne 'r' ? qq(<input name="$_" value="$params->{$_}" type="hidden" />) : (), keys %$params;
 
@@ -193,14 +195,14 @@ sub variation_source {
   my $version = $object->source_version;
   my $url     = $object->source_url;
   my ($source_link, $sname);
-  
+
   # Date version
   if ($version =~ /^(20\d{2})(\d{2})/) {
     $version = "$2/$1";
   }
-  
+
   ## parse description for links
-  (my $description = $object->source_description) =~ s/(\w+) \[(http:\/\/[\w\.\/]+)\]/<a href="$2" class="constant">$1<\/a>/; 
+  (my $description = $object->source_description) =~ s/(\w+) \[(http:\/\/[\w\.\/]+)\]/<a href="$2" class="constant">$1<\/a>/;
   my $source_prefix = 'View in';
 
   # Source link
@@ -234,9 +236,9 @@ sub variation_source {
 } else {
     $source_link = $url ? qq{<a href="$url" class="constant">$source_prefix $source</a>} : "$source $version";
   }
-  
+
   $version = ($version) ? " (release $version)" : '';
-  
+
   return ['Original source', sprintf('<p>%s%s%s%s</p>', $description, $version, $self->text_separator, $source_link)];
 }
 
@@ -264,12 +266,12 @@ sub co_located {
     my $end   = $slice->end;
     my $count = 0;
     my %by_source;
-    
+
     foreach (@variations) {
-      my $v_name = $_->variation_name; 
-      
+      my $v_name = $_->variation_name;
+
       next if $v_name eq $name;
-      
+
       my $v_start = $_->start + $start - 1;
       my $v_end   = $_->end   + $start - 1;
 
@@ -282,7 +284,7 @@ sub co_located {
 
       push @{$by_source{$_->source_name}}, $variation;
     }
-    
+
     if (scalar keys %by_source) {
       my $html;
       foreach (keys %by_source) {
@@ -296,7 +298,7 @@ sub co_located {
       return ["Co-located variant$s", $html];
     }
   }
-  
+
   return ();
 }
 
@@ -306,7 +308,7 @@ sub synonyms {
   my $object   = $self->object;
   my $synonyms = $object->dblinks;
   my ($count, $count_sources, @synonyms_list);
- 
+
   foreach my $db (sort { lc $a cmp lc $b } keys %$synonyms) {
     my @ids = @{$synonyms->{$db}};
     my @urls;
@@ -339,23 +341,23 @@ sub synonyms {
     }
 
     $count += scalar @urls;
-    
+
     push @synonyms_list, "<strong>$db</strong> " . (join ', ', @urls);
   }
-  
+
   $count_sources = scalar @synonyms_list;
 
-  return () if ($count_sources == 0);  
- 
+  return () if ($count_sources == 0);
+
   # Large text display
-  if ($count_sources > 1) { # Collapsed div display 
+  if ($count_sources > 1) { # Collapsed div display
     my $show = $self->hub->get_cookie_value('toggle_variation_synonyms') eq 'open';
 
     return [
       sprintf('Synonyms'),
       sprintf('<p>This variant has <strong>%s</strong> synonyms - <a title="Click to show synonyms" rel="variation_synonyms" href="#" class="toggle_link toggle %s _slide_toggle set_cookie ">%s</a></p><div class="variation_synonyms twocol-cell"><div class="toggleable" style="font-weight:normal;%s"><ul>%s</ul></div></div>',
-        $count,        
-        $show ? 'open' : 'closed',        
+        $count,
+        $show ? 'open' : 'closed',
         $show ? 'Hide' : 'Show',
         $show ? '' : 'display:none',
         join('', map "<li>$_</li>", @synonyms_list)
@@ -419,7 +421,7 @@ sub alleles {
       $display_alleles = substr($alleles,0,50).'...';
       $large_allele = 1;
     }
-    
+
     $alleles = join("/<br />", @l_alleles);
     my $show = $self->hub->get_cookie_value('toggle_Alleles') eq 'open';
 
@@ -443,11 +445,11 @@ sub alleles {
   if ($feature_slice) {
     my $sequence = $feature_slice->seq;
     my $allele   = $l_alleles[0];
-    
+
     if ($allele =~ /^[ACGTN]+$/) {
       my $seq   = length $sequence == 1 ? 'base': 'sequence';
       $sequence =~ s/(.{60})/$1<br \/>/g;
-      
+
       if ($sequence ne $allele) {
         $html .= '<br />' if ($large_allele == 0);
         if (length $sequence < 50) {
@@ -470,7 +472,7 @@ sub alleles {
       }
     }
   }
-  
+
   return [ 'Alleles', qq(<div class="twocol-cell">$html</div>) ];
 }
 
@@ -479,18 +481,18 @@ sub location {
   my $object   = $self->object;
   my %mappings = %{$object->variation_feature_mapping};
   my $count    = scalar keys %mappings;
-  
+
   return ['Location', 'This variant has not been mapped'] unless $count;
-  
+
   my $hub = $self->hub;
   my $vf  = $hub->param('vf');
   my $id  = $object->name;
   my (@rows, $location, $location_link);
-  
+
   if ($vf) {
     my $variation = $object->Obj;
     my $type     = $mappings{$vf}{'Type'};
-    my $region   = $mappings{$vf}{'Chr'}; 
+    my $region   = $mappings{$vf}{'Chr'};
     my $start    = $mappings{$vf}{'start'};
     my $end      = $mappings{$vf}{'end'};
 
@@ -500,10 +502,10 @@ sub location {
       $coord = "$region:$start";
     } elsif ( $start > $end ) {
       $coord = "$region</b>: between <b>$end</b> and <b>$start";
-    } 
-    
+    }
+
     $location = ucfirst(lc $type).' <b>'.$coord . '</b> (' . ($mappings{$vf}{'strand'} > 0 ? 'forward' : 'reverse') . ' strand)';
-    
+
     $location_link = sprintf(
       '%s<a href="%s" class="constant">View in location tab</a>',
       $self->text_separator,
@@ -521,7 +523,7 @@ sub location {
   else {
     $location = "This variant maps to $count genomic locations; <b>None selected</b>";
   }
-  
+
   return [ 'Location', "$location$location_link" ];
 }
 
@@ -530,7 +532,7 @@ sub evidence_status {
   my $hub            = $self->hub;
   my $object         = $self->object;
   my $status         = $object->evidence_status;
-  
+
   return unless (scalar @$status);
 
   my $html;
@@ -555,7 +557,7 @@ sub evidence_status {
   }
 
   my $src = $self->img_url.'/16/info12.png';
-  my $img = qq{<img src="$src" class="_ht" style="vertical-align:bottom;margin-bottom:2px;" title="Click to see all the evidence status descriptions"/>}; 
+  my $img = qq{<img src="$src" class="_ht" style="vertical-align:bottom;margin-bottom:2px;" title="Click to see all the evidence status descriptions"/>};
   my $info_link = qq{<a href="/info/genome/variation/data_description.html#evidence_status" target="_blank">$img</a>};
 
   return [ "Evidence status $info_link" , $html ];
@@ -565,11 +567,11 @@ sub evidence_status {
 sub clinical_significance {
   my $self   = shift;
   my $object = $self->object;
-  my $hub    = $self->hub; 
+  my $hub    = $self->hub;
   my $clin_sign = $object->clinical_significance;
 
   return unless (scalar(@$clin_sign));
-  
+
   my $src = $self->img_url.'/16/info12.png';
   my $img = qq{<img src="$src" class="_ht" style="vertical-align:bottom;margin-bottom:2px;" title="Click to see all the clinical significances"/>};
   my $info_link = qq{<a href="/info/genome/variation/data_description.html#clin_significance" target="_blank">$img</a>};
@@ -607,7 +609,7 @@ sub hgvs {
   my $count     = 0;
   my $total     = scalar keys %$hgvs_urls;
   my $html;
- 
+
   # Loop over and format the URLs
   foreach my $allele (keys %$hgvs_urls) {
     $html  .= sprintf '<p>%s</p>', join('<br />', $total > 1 ? "<b>Variant allele $allele</b>" : (), @{$hgvs_urls->{$allele}});
@@ -645,18 +647,18 @@ sub sets{
   my @genotyping_sets_list;
 
   foreach my $vs (@{$variation_sets}){
-      push @genotyping_sets_list,  $vs->name();    
+      push @genotyping_sets_list,  $vs->name();
   }
-  my $count = scalar @genotyping_sets_list;  
-  
+  my $count = scalar @genotyping_sets_list;
+
   if ($count > 3) {
     my $show = $self->hub->get_cookie_value('toggle_variation_sets') eq 'open';
-  
+
     return [
       'Genotyping chips',
       sprintf('<p>This variant has assays on <strong>%s</strong> chips - <a title="Click to show chips" rel="variation_sets" href="#" class="toggle_link toggle %s _slide_toggle set_cookie ">%s</a></p><div class="variation_sets twocol-cell"><div class="toggleable" style="font-weight:normal;%s"><ul>%s</ul></div></div>',
         $count,
-        $show ? 'open' : 'closed',        
+        $show ? 'open' : 'closed',
         $show ? 'Hide' : 'Show',
         $show ? '' : 'display:none',
         join('', map "<li>$_</li>", @genotyping_sets_list)
@@ -711,7 +713,7 @@ sub most_severe_consequence {
          $html_consequence, $consequence_link
       );
 
-      return [ 'Most severe consequence' , $html];
+      return [ 'Most severe consequence' , $html ];
     }
   }
   return ();
@@ -724,6 +726,18 @@ sub text_separator {
   my $tclass = ($no_left_padding) ? 'text-right_separator' : 'text_separator';
 
   return qq{<span class="$tclass">|</span>};
+}
+
+sub snpedia {
+  my ($self, $rs_id) = @_;
+  my $object = $self->object;
+
+  my $snpedia_wiki_results = $object->get_snpedia_data($rs_id);
+  if (!$snpedia_wiki_results->{'parsed_desc'}) {
+    return ();
+  }
+
+  return [ 'SNPedia', $snpedia_wiki_results->{'parsed_desc'} ];
 }
 
 1;

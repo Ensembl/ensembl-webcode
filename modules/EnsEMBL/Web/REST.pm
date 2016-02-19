@@ -77,10 +77,11 @@ sub fetch {
   my $type  = $content_type{lc($format)};
   $args->{'headers'}{'Content-Type'} ||= $type;
 
-  if ($args->{'url_params'}) {
-    $url .= '?';
-    while (my($k, $v) = each (%{$args->{'url_params'}||{}})) {
-      $url .= sprintf('%s=%s;', $k, $v);
+  if (keys %{$args->{'url_params'}}) {
+    my $delimiter = delete $args->{'url_params'}{'_delimiter'} || ';';
+    $url .= '?' if keys %{$args->{'url_params'}};
+    while (my($k, $v) = each (%{$args->{'url_params'}})) {
+      $url .= sprintf('%s=%s%s', $k, $v, $delimiter);
     }
     delete $args->{'url_params'};
   }

@@ -31,30 +31,19 @@ sub label { return undef; }
 
 sub render_compact {
   my $self = shift;
-  warn ">>> RENDERING PEAKS";
   $self->{'my_config'}->set('drawing_style', ['Feature::Peaks']);
-  $self->{'my_config'}->set('height', 8);
-  $self->{'my_config'}->set('vspacing', 0);
-  $self->{'my_config'}->set('hide_subtitle',1);
   $self->_render_aggregate;
 }
 
 sub render_signal {
   my $self = shift;
-  warn ">>> RENDERING SIGNAL";
   $self->{'my_config'}->set('drawing_style', ['Graph']);
-  $self->{'my_config'}->set('height', 60);
-  $self->{'my_config'}->set('hide_subtitle',1);
   $self->_render_aggregate;
 }
 
 sub render_signal_feature {
   my $self = shift;
-  warn ">>> RENDERING PEAKS WITH SIGNAL";
   $self->{'my_config'}->set('drawing_style', ['Feature::Peaks', 'Graph']);
-  $self->{'my_config'}->set('height', 60);
-  $self->{'my_config'}->set('vspacing', 0);
-  $self->{'my_config'}->set('hide_subtitle',1);
   $self->_render_aggregate;
 }
 
@@ -89,6 +78,8 @@ sub draw_aggregate {
   my $self = shift;
 
   ## Set some defaults for all displays
+  $self->{'my_config'}->set('vspacing', 0);
+  $self->{'my_config'}->set('hide_subtitle',1);
   $self->{'my_config'}->set('display_structure', 1);
   $self->{'my_config'}->set('display_summit', 1);
   $self->{'my_config'}->set('slice_start', $self->{'container'}->start);
@@ -108,7 +99,12 @@ sub draw_aggregate {
   my $set     = $self->my_config('set');
   my %config  = %{$self->track_style_config};
 
+  my $show_blocks = grep(/Feature/, @{$self->{'my_config'}->get('drawing_style')||[]});
+  my $show_wiggle = grep(/Graph/, @{$self->{'my_config'}->get('drawing_style')||[]});
+
   my $top = 0;
+  my $h   = 4;
+
   foreach (@{$self->{'my_config'}->get('drawing_style')||[]}) {
     my $style_class = 'EnsEMBL::Draw::Style::'.$_;
     my $any_on = scalar keys %{$data->{'on'}};
@@ -116,6 +112,7 @@ sub draw_aggregate {
       my ($data_method, $feature_type, $count_header, $sublabels, $more, $message_text);
 
       if ($_ =~ /Feature/) {
+        $self->{'my_config'}->set('height', $h * 2);
         $feature_type   = 'block_features';
         $more           = 'More';
         $message_text   = 'peaks';
@@ -123,6 +120,8 @@ sub draw_aggregate {
         $sublabels      = 1;
       }
       else {
+        $self->{'my_config'}->set('height', $h * 15);
+        $self->{'my_config'}->set('initial_offset', $self->{'my_config'}->get('y_start') + $h * 3);
         $feature_type   = 'wiggle_features';
         $more           = 'Legend & More';
         $message_text   = 'wiggle';
@@ -136,17 +135,18 @@ sub draw_aggregate {
         ## Prepare to draw any headers/labels in lefthand column
         my $header = EnsEMBL::Draw::Style::Extra::Header->new(\%config);
 
+        ## Add a summary title in the lefthand margin
+        my $label     = $self->my_config('label');
+        my $tracks_on;
         if ($count_header) {
-          ## Add a summary title in the lefthand margin
-          my $label     = $self->my_config('label');
-          my $tracks_on = $data->{$set}{'on'} 
+          $tracks_on = $data->{$set}{'on'} 
                     ? sprintf '%s/%s features turned on', map scalar keys %{$data->{$set}{$_} || {}}, qw(on available) 
                     : '';
-          my $subhead_height  = $header->draw_margin_subhead($label, $tracks_on);
-          ## Push features down a bit, so their labels don't overlap this header
-          my $y_start = $self->{'my_config'}->get('y_start');
-          $self->{'my_config'}->set('y_start', $y_start + $subhead_height);
         }
+        my $subhead_height  = $header->draw_margin_subhead($label, $tracks_on);
+        ## Push features down a bit, so their labels don't overlap this header
+        my $y_start = $self->{'my_config'}->get('y_start');
+        $self->{'my_config'}->set('y_start', $y_start + $subhead_height);
         
         ## Draw the features next, so we know where to put the labels in the margin
         my $style   = $style_class->new(\%config, $subset);
@@ -159,13 +159,20 @@ sub draw_aggregate {
 
         ## Finally add the popup menu
         if ($more) {
-          my $colour_legend = $feature_type eq 'wiggle_features' ? $self->_colour_legend($subset) : {};
-          $header->draw_sublegend({
-                                    label           => $more,
-                                    title           => $label,
-                                    colour_legend   => $colour_legend,
-                                    sublegend_links => $self->_sublegend_links,
-                                  });
+          ## But not twice!
+          unless ($show_blocks && $show_wiggle && $_ =~ /Feature/) {
+            my $colour_legend = $feature_type eq 'wiggle_features' ? $self->_colour_legend($subset) : {};
+            my $params = {
+                          label           => $more,
+                          title           => $label,
+                          colour_legend   => $colour_legend,
+                          sublegend_links => $self->_sublegend_links,
+                          };
+            if ($show_blocks && $show_wiggle) {
+              $params->{'y_offset'} = $h * 6;
+            }
+            $header->draw_sublegend($params);
+          }
         } 
         $self->push(@{$header->glyphs||[]});
       }
@@ -253,10 +260,10 @@ sub get_features {
       my $wiggle                  = $self->get_data($bins, $url);
       $subtrack->{'features'}     = $wiggle->[0]{'features'}{1};
 
-      my %metadata                = %{$subtrack->{'metadata'}};
-      my %from_file               = %{$wiggle->[0]{'metadata'}||{}};
-      @metadata{keys %from_file}  = values %from_file; 
-      $subtrack->{'metadata'}     = \%metadata;
+      ## Don't override values that we've already set!
+      while (my($k, $v) = each (%{$wiggle->[0]{'metadata'}||{}})) {
+        $subtrack->{'metadata'}{$k} ||= $v;
+      }
     }
     push @$data, $subtrack;
   }

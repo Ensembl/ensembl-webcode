@@ -287,6 +287,13 @@ sub handler {
     $redirect = 1;
   }
 
+  ## Trackhub short URL
+  if ($raw_path[0] =~ /^trackhub$/i) {
+    $file = '/UserData/TrackHubRedirect?'.$querystring;
+    $r->uri($file);
+    $redirect = 1;
+  }
+
   ## Simple redirect to VEP
 
   if ($SiteDefs::ENSEMBL_SUBTYPE eq 'Pre' && $file =~ /\/vep/i) { ## Pre has no VEP, so redirect to tools page

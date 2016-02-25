@@ -64,9 +64,9 @@ sub process {
       }
       else {
         ## Check if we have any supported assemblies
-        my $trackhub = EnsEMBL::Web::File::AttachedFormat::TRACKHUB->new('hub' => $self->hub, 'url' => $url);
+        my $trackhub = Bio::EnsEMBL::ExternalData::AttachedFormat::DATAHUB->new($self->hub, 'DATAHUB', $url);
         my $assembly_lookup = $hub->species_defs->assembly_lookup;
-        my $hub_info = $trackhub->{'trackhub'}->get_hub({'assembly_lookup' => $assembly_lookup, 'parse_tracks' => 0});
+        my $hub_info = $trackhub->{'datahub_adaptor'}->get_hub_info($url, $assembly_lookup);
 
         if ($hub_info->{'unsupported_genomes'}) {
           $redirect = '/trackhub_error.html';

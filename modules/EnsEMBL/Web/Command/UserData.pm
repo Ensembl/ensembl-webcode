@@ -21,6 +21,7 @@ package EnsEMBL::Web::Command::UserData;
 use strict;
 
 use HTML::Entities qw(encode_entities);
+use Digest::MD5 qw(md5_hex);
 
 use EnsEMBL::Web::File::User;
 
@@ -154,6 +155,10 @@ sub upload {
   }
   
   return $params;
+}
+
+sub check_attachment {
+### Stub - don't bother implementing this for now
 }
 
 sub attach {

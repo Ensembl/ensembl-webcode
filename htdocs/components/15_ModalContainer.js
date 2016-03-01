@@ -197,11 +197,33 @@ Ensembl.Panel.ModalContainer = Ensembl.Panel.Overlay.extend({
     }
     
     contentEl.html('<div class="spinner">Loading Content</div>').show();
-    
+
+    /*
+    * If the URL is longer than 1500 characters, request is sent by POST.
+    */
+    var data = {};
+    var type;
+
+    if(url.length > 1500){
+      $.each((url.split(/\?/)[1] || '').split(/&|;/), function(i, param) {
+        param = param.split('=');
+        if (typeof param[0] !== 'undefined' && !(param[0] in data)) {
+          data[param[0]] = param[1];
+        }
+      });
+      url = url.split(/\?/)[0];
+      type = 'POST';
+    }
+    else {
+      type = 'GET';
+    }
+
     this.xhr = $.ajax({
       url: Ensembl.replaceTimestamp(url),
       dataType: 'json',
       context: this,
+      type: type,
+      data: data,
       success: function (json) {
         var params = hash ? $.extend(json.params || {}, { hash: hash }) : json.params;
         var wrapper, buttonText, forceReload, nav;

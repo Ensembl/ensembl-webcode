@@ -117,12 +117,14 @@ sub content {
                             'name'          => 'datatype',
                             'label'         => 'Data type',
                             'values'        => $values,
+                            'value'         => $hub->param('datatype'),
       });
    
       $fieldset->add_field({
                             'type'          => 'String',
                             'name'          => 'query',
                             'label'         => 'Text search',
+                            'value'         => $hub->param('query'),
       });
  
       $fieldset->add_button({
@@ -138,8 +140,6 @@ sub content {
       $html .= sprintf('<p>Please visit the <a href="%s">Track Hub Registry website</a> for more information.</p>', $rest->server);
     }
   }
-  my $link = $hub->url({'type' => 'UserData', 'action' => 'SelectFile'});
-  $html .= $self->info_panel('Tip', qq(If you don't see the hub you are interested in listed here, you can <a href="$link" class="modal_link">manually attach any hub</a> for which you know the URL.));
 
   return sprintf '<input type="hidden" class="subpanel_type" value="UserData" /><h2>Search the Track Hub Registry</h2>%s', $html;
 

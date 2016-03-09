@@ -27,7 +27,7 @@ use List::Util qw(min);
 use Bio::EnsEMBL::Variation::Utils::Constants;
 use Bio::EnsEMBL::Variation::VariationFeature;
 
-use base qw(EnsEMBL::Draw::GlyphSet_simple);
+use base qw(EnsEMBL::Draw::GlyphSet_simpler);
 
 sub depth {
   my $self   = shift;
@@ -40,10 +40,7 @@ sub depth {
   return $self->SUPER::depth;
 }
 
-sub colour_key    { return lc $_[1]->display_consequence; }
-sub feature_label { my $label = $_[1]->ambig_code; return $label unless $label eq '-'; }
 sub label_overlay { return 1; }
-sub class         { my $depth = $_[0]->depth; return 'group' if defined $depth && $depth <= 1; }
 
 sub render_labels {
   my ($self, $labels) = @_;
@@ -67,12 +64,24 @@ sub features {
   my $self         = shift;
   my $max_length   = $self->my_config('threshold') || 1000;
   my $slice_length = $self->{'container'}->length;
+
+  my $hub = $self->{'config'}{'hub'};  
+
+  #$self->{'legend'}{'variation_legend'}{$_->display_consequence} ||= $self->get_colours($_)->{'feature'} for @$snps;
   
   if ($slice_length > $max_length * 1010) {
     $self->errorTrack("Variation features are not displayed for regions larger than ${max_length}Kb");
     return [];
   } else {
-    my $features_list = $self->fetch_features;
+    my $features_list = $hub->get_query('GlyphSet::Variation')->go($self,{
+      species => $hub->species,
+      slice => $self->{'container'},
+      id => $self->{'my_config'}->id,
+      config => [qw(filter source sources sets set_name style no_label)],
+      var_db => $self->my_config('db') || 'variation',
+      config_type => $self->{'config'}{'type'},
+      type => $self->type,
+    });
     if (!scalar(@$features_list)) {
       my $track_name = $self->my_config('name'); 
       $self->errorTrack("No $track_name data for this region");
@@ -272,7 +281,7 @@ sub render_tag {
       absolutey => 1,
       width     => $width,
       height    => $height + 2,
-      href      => $self->href($tag->{'feature'})
+      href      => $tag->{'href'}
     }));
   } elsif ($start <= $tag->{'start'}) {
     my $box_width = 8 / $pix_per_bp;
@@ -356,14 +365,14 @@ sub highlight {
   }
 
   # Are we going to highlight self item
-  my $id = $f->variation_name;  
+  my $id = $f->{'variation_name'};  
      $id =~ s/^rs//;
  
   return unless $self->{'config'}->get_option('opt_highlight_feature') != 0 && ($highlights{$id} || $highlights{"rs$id"});
   
   $composite->z(20);
   
-  my $z = $f->start > $f->end ? 0 : 18;
+  my $z = $f->{'start'} > $f->{'end'} ? 0 : 18;
   
   foreach (@{$composite->{'composite'}}) {
     $self->unshift($self->Rect({

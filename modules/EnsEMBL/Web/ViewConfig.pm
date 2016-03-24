@@ -760,7 +760,9 @@ sub add_select_all {
     my %counts  = reverse %{$self->{'track_renderers'}{$id}};
     my $popup;
     
-    $caption = $external ? $parent->data->{'caption'} : 'tracks' if $single_menu;
+    if ($single_menu && !$parent->data->{'trackhub_menu'}) {
+      $caption = $external ? $parent->data->{'caption'} : 'tracks';
+    }
     $caption = $matrix ? "Configure matrix columns for $caption" : "Enable/disable all $caption";
     
     if (scalar keys %counts != 1) {

@@ -467,7 +467,14 @@ Ensembl.Panel.ZMenu = Ensembl.Panel.extend({
       }
 
       if (this.multi === false) {
-        menu.unshift('<a class="_location_mark loc-icon-a" href="' + Ensembl.updateURL({mr: this.chr + ':' + start + '-' + end}, window.location.href) + '"><span class="loc-icon loc-mark"></span>Mark region (' + (end - start + 1) + ' bp)</a>');
+        if (this.context.params['seq_download_url']) {
+          menu.unshift('<a class="_location_download loc-icon-a" href="'
+            + Ensembl.updateURL({r: this.chr + ':' + start + '-' + end}, this.context.params['seq_download_url'])
+            + '"><span class="loc-icon loc-dl"></span>Download sequence (' + (end - start + 1) + ' bp)</a>');
+        }
+        menu.unshift('<a class="_location_mark loc-icon-a" href="'
+          + Ensembl.updateURL({mr: this.chr + ':' + start + '-' + end}, window.location.href)
+          + '"><span class="loc-icon loc-mark"></span>Mark region (' + (end - start + 1) + ' bp)</a>');
       }
 
     } else { // Point select

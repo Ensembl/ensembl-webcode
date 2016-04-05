@@ -69,8 +69,11 @@ sub content {
   $image->{'panel_number'} = 'bottom';
   $image->imagemap         = 'yes';
   $image->set_button('drag', 'title' => 'Click or drag to centre display');
-  
-  return $info . $image->render;
+
+  my $seq_url = $hub->url({'type' => 'DataExport', 'action' => 'Sequence', 'component' => 'ViewBottom', 'data_type' => 'Location'});
+     $seq_url = qq(<input type="hidden" class="js_param" name="seq_download_url" value="$seq_url">);
+
+  return $info . $image->render . $seq_url;
 }
 
 sub _add_object_track {

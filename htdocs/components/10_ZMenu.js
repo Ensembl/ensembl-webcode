@@ -115,6 +115,7 @@ Ensembl.Panel.ZMenu = Ensembl.Panel.extend({
       e.preventDefault();
 
       panel.hide();
+      panel.context.selectArea(false);
 
       Ensembl.EventManager.trigger('modalOpen', this);
     });

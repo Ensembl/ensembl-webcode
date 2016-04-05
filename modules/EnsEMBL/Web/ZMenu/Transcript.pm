@@ -111,8 +111,9 @@ sub content {
   }
 
   $self->add_entry({
-    type  => 'Exon',
-    label => $exons[0]." of ". scalar(@all_exons)
+    type      => 'Exon',
+    label     => $exons[0]." of ". scalar(@all_exons),
+    download  => $hub->url({ type => 'DataExport', action => 'ExonSeq', component => 'ExonsSpreadsheet', data_type => 'Transcript' }),
   }) if(scalar @exons);
   
   $self->add_entry({
@@ -122,20 +123,22 @@ sub content {
   
   $self->add_entry({
     type  => 'Transcript',
-    label => $stable_id, 
+    label => $stable_id,
     link  => $hub->url({ type => 'Transcript', action => 'Summary' })
   });
 
   $self->add_entry({
-    type  => ' ',
-    label => "Exons",
-    link  => $hub->url({ type => 'Transcript', action => 'Exons' })
+    type      => ' ',
+    label     => "Exons",
+    link      => $hub->url({ type => 'Transcript', action => 'Exons' }),
+    download  => $hub->url({ type => 'DataExport', action => 'ExonSeq', component => 'ExonsSpreadsheet', data_type => 'Transcript' }),
   });
  
   $self->add_entry({
     type  => ' ',
     label => 'cDNA Sequence',
-    link  => $hub->url({ type => 'Transcript', action => 'Sequence_cDNA' })
+    link  => $hub->url({ type => 'Transcript', action => 'Sequence_cDNA' }),
+    download  => $hub->url({ type => 'DataExport', action => 'Transcript', component => 'TranscriptSeq', data_type => 'Transcript' }),
   });  
   
   # Protein coding transcripts only

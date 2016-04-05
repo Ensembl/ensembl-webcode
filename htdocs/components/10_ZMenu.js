@@ -110,9 +110,16 @@ Ensembl.Panel.ZMenu = Ensembl.Panel.extend({
       Ensembl.markLocation(this.href);
 
       panel.hide();
+    }).on('click', 'a._location_download', function (e) {
+
+      e.preventDefault();
+
+      panel.hide();
+
+      Ensembl.EventManager.trigger('modalOpen', this);
     });
-    
-    $('.close', this.el).on('click', function () { 
+
+    $('.close', this.el).on('click', function () {
       panel.hide();
       if (panel.onclose) {
         panel.onclose.call(panel.context || panel);
@@ -343,6 +350,9 @@ Ensembl.Panel.ZMenu = Ensembl.Panel.extend({
         }
         return true;
       });
+    }
+    if (this.imageId && !this.imageId.match('Multi')) {
+      this.elLk.container.find('._location_download').removeClass('hidden').addClass('loc-icon loc-dl _ht').attr('title', 'Download sequence');
     }
   },
 

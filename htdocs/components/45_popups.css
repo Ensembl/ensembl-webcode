@@ -85,6 +85,8 @@ body.ie6 .floating_popup .spinner      { background-color: [[TINT_BG]]; border: 
 .zmenu .loc-change                     { background-image: url("/i/16/rev/jump.png");         }
 .zmenu .loc-zoom                       { background-image: url("/i/16/rev/search.png");       }
 .zmenu .loc-pin                        { background-image: url("/i/16/rev/location_pin.png"); }
+.zmenu .loc-dl                         { background-image: url("/i/16/rev/download.png");     }
+
 
 .zmenu .loc-icon-a:hover .loc-icon,
 .zmenu .loc-icon:hover                 { background-color: [[BUTTON_BG_HOVER]]; border: 2px solid [[BUTTON_BG_HOVER]]; }

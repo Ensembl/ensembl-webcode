@@ -229,13 +229,14 @@ sub render {
           $value = $entry->{'link'};
         } else {
           $value = sprintf(
-            '<a href="%s"%s%s>%s%s%s</a>',
+            '<a href="%s"%s%s>%s%s%s</a>%s',
             encode_entities(decode_entities($entry->{'link'})), # Decode links before encoding them stops double encoding when the link is created by EnsEMBL::Web::ExtURL->get_url
             $entry->{'external'} ? ' rel="external"' : '',
             $entry->{'link_class'} ? qq( class="$entry->{'link_class'}") : '',
             encode_entities($entry->{'label'}),
             $entry->{'label_html'},
             $entry->{'update_params'},
+            $entry->{'download'} ? qq(<a href="$entry->{'download'}" class="_location_download hidden"></a>) : ''
           );
         }
       } else {

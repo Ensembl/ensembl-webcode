@@ -79,16 +79,18 @@ sub content {
       });
       
       $self->add_entry({
-        type  => ' ',
-        label => $gene->stable_id,
-        link  => $hub->url({ type => 'Gene', action => 'Summary' })
+        type      => ' ',
+        label     => $gene->stable_id,
+        link      => $hub->url({ type => 'Gene', action => 'Summary' }),
+        download  => $hub->url({ type => 'DataExport', action => 'GeneSeq', data_type => 'Gene', component => 'GeneSeq' }),
       }); 
     } else {
       $self->add_entry({
-        type  => 'Gene',
-        label => $gene->stable_id,
-        link  => $hub->url({ type => 'Gene', action => 'Summary' })
-      });     
+        type      => 'Gene',
+        label     => $gene->stable_id,
+        link      => $hub->url({ type => 'Gene', action => 'Summary' }),
+        download  => $hub->url({ type => 'DataExport', action => 'GeneSeq', data_type => 'Gene', component => 'GeneSeq' }),
+      });
     }
     
     $self->add_entry({

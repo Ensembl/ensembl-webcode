@@ -43,6 +43,7 @@ sub process {
   ## Write out features as GFF file
   while (my ($type, $feat) = each %$features) {
     foreach my $f (@{$feat->[0] || []}) {
+      next if $f->{'region'} =~ /^LRG/;
       my $strand = $f->{'strand'} == 1 ? '+' : '-';
       my @attribs;
       
@@ -70,7 +71,7 @@ sub process {
   }
   
   $hub->param('text',   $content);
-  $hub->param('format', 'GFF');
+  $hub->param('format', 'GTF');
   $hub->param('name',   $desc);
   
   my $upload = $self->upload('text'); ## Upload munged data

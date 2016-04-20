@@ -772,11 +772,8 @@ sub add_select_all {
       $popup = $self->{'select_all_menu'}{$id};
     }
     
-    my $info;
-    #my $description = $data->{'description'};
-    #if ($description) {
-    #  $info = sprintf('<span class="info_icon">%s</span>', $description);
-    #}
+    my $description = $data->{'description'} ? sprintf('<br /><i>%s</i>', $data->{'description'}) 
+                                                : '';
 
     $menu->before('div', {
       class      => 'select_all config_menu',
@@ -786,7 +783,7 @@ sub add_select_all {
           $popup
         </ul>
         <strong>$caption</strong>
-        $info
+        $description
       )
     });
   } elsif ($caption && !$external) {

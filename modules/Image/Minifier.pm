@@ -393,7 +393,7 @@ sub maybe_generate_sprite {
   $style = 'style="'.join(';',map { "$_: $styles{$_}" } keys %styles).'"' if %styles;
   my $classes = '';
   $classes = join(' ',@classes) if @classes;
-  return qq(<img src='data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==' class="autosprite-src-$s_t $classes" $style $more_attrs/>);
+  return qq(<img src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" class="autosprite-src-$s_t $classes" $style $more_attrs/>);
 }
 
 sub load_config {

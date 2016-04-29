@@ -97,91 +97,91 @@ sub _render_features {
   my $chr_colour_key = $self->chr_colour_key;
   
   $image_config->set_parameter('chr_colour_key', $chr_colour_key) if $image_config;
+
+  ## Map some user-friendly display names
+  my $feature_display_name = {
+    'Xref'                => 'External Reference',
+    'ProbeFeature'        => 'Oligoprobe',
+    'DnaAlignFeature'     => 'Sequence Feature',
+    'ProteinAlignFeature' => 'Protein Feature',
+  };
+  my ($xref_type, $xref_name);
+  while (my ($type, $feature_set) = each (%$features)) {    
+    if ($type eq 'Xref') {
+      my $sample = $feature_set->[0][0];
+      $xref_type = $sample->{'label'};
+      $xref_name = $sample->{'extname'};
+      $xref_name =~ s/ \[#\]//;
+      $xref_name =~ s/^ //;
+    }
+  }
   
+  ## Title - a bit messy, but we want it to be human-readable!
+  my $title;
+  if ($has_internal_data) { 
+    unless ($hub->param('ph')) { ## omit h3 header for phenotypes
+      $title = 'Location';
+      $title .= 's' if $total_features > 1;
+      $title .= ' of ';
+      my ($data_type, $assoc_name, $go_link);
+      my $ftype = $hub->param('ftype');
+      my $go    = $hub->param('gotype');
+
+      #add extra description only for GO (gene ontologies) which is determined by param gotype in url
+      if($go) {
+        my $adaptor = $hub->get_databases('go')->{'go'}->get_OntologyTermAdaptor;
+        my $go_hash = $adaptor->fetch_by_accession($id);
+        my $go_name = $go_hash->{name};
+        $go_link    = $hub->get_ExtURL_link($id, $go, $id)." ".$go_name; #get_ExtURL_link will return a text if $go is not valid
+      }
+
+      if (grep (/$ftype/, keys %$features) && !$id) {
+        $data_type = $ftype;
+      } else {
+        my @A = sort keys %$features;
+        $data_type = $A[0];
+        $assoc_name = $hub->param('name');
+        unless ($assoc_name) {
+          $assoc_name = $xref_type.' ';
+          $assoc_name .= $go_link ? $go_link : $id;
+          $assoc_name .= " ($xref_name)" if $xref_name;
+        }
+      }
+
+      my %names;
+      ## De-camelcase names
+      foreach (sort keys %$features) {
+        my $pretty = $feature_display_name->{$_} || $self->decamel($_);
+        $pretty .= 's' if $total_features > 1;
+        $names{$_} = $pretty;
+      }
+
+      my @feat_names = sort values %names;
+      my $last_name = pop(@feat_names);
+      if (scalar @feat_names > 0) {
+        $title .= join ', ', @feat_names;
+        $title .= ' and ';
+      }
+      $title .= $last_name;
+      $title .= " associated with $assoc_name" if $assoc_name;
+    }
+  }
+  else {
+    $title = 'Location';
+    $title .= 'of your feature';
+    $title .= 's' if $total_features > 1;
+  }
+  $html .= "<h3>$title</h3>" if $title;        
+
   ## Draw features on karyotype, if any
   if (scalar @$chromosomes && $species_defs->MAX_CHR_LENGTH) {
     my $image = $self->new_karyotype_image($image_config);
-    
-    ## Map some user-friendly display names
-    my $feature_display_name = {
-      'Xref'                => 'External Reference',
-      'ProbeFeature'        => 'Oligoprobe',
-      'DnaAlignFeature'     => 'Sequence Feature',
-      'ProteinAlignFeature' => 'Protein Feature',
-    };
-    my ($xref_type, $xref_name);
-    while (my ($type, $feature_set) = each (%$features)) {    
-      if ($type eq 'Xref') {
-        my $sample = $feature_set->[0][0];
-        $xref_type = $sample->{'label'};
-        $xref_name = $sample->{'extname'};
-        $xref_name =~ s/ \[#\]//;
-        $xref_name =~ s/^ //;
-      }
-    }
 
     ## Create pointers to be drawn
     my $pointers = [];
     my ($legend_info, $has_gradient);
 
     if ($mapped_features) {
-
-      ## Title for image - a bit messy, but we want it to be human-readable!
-      my $title;
-      if ($has_internal_data) { 
-        unless ($hub->param('ph')) { ## omit h3 header for phenotypes
-          $title = 'Location';
-          $title .= 's' if $mapped_features > 1;
-          $title .= ' of ';
-          my ($data_type, $assoc_name, $go_link);
-          my $ftype = $hub->param('ftype');
-          my $go    = $hub->param('gotype');
-
-          #add extra description only for GO (gene ontologies) which is determined by param gotype in url
-          if($go) {
-            my $adaptor = $hub->get_databases('go')->{'go'}->get_OntologyTermAdaptor;
-            my $go_hash = $adaptor->fetch_by_accession($id);
-            my $go_name = $go_hash->{name};
-            $go_link    = $hub->get_ExtURL_link($id, $go, $id)." ".$go_name; #get_ExtURL_link will return a text if $go is not valid
-          }
-          
-          if (grep (/$ftype/, keys %$features) && !$id) {
-            $data_type = $ftype;
-          } else {
-            my @A = sort keys %$features;
-            $data_type = $A[0];
-            $assoc_name = $hub->param('name');
-            unless ($assoc_name) {
-              $assoc_name = $xref_type.' ';
-              $assoc_name .= $go_link ? $go_link : $id;
-              $assoc_name .= " ($xref_name)" if $xref_name;
-            }
-          }
-
-          my %names;
-          ## De-camelcase names
-          foreach (sort keys %$features) {
-            my $pretty = $feature_display_name->{$_} || $self->decamel($_);
-            $pretty .= 's' if $mapped_features > 1;
-            $names{$_} = $pretty;
-          }
-
-          my @feat_names = sort values %names;
-          my $last_name = pop(@feat_names);
-          if (scalar @feat_names > 0) {
-            $title .= join ', ', @feat_names;
-            $title .= ' and ';
-          }
-          $title .= $last_name;
-          $title .= " associated with $assoc_name" if $assoc_name;
-        }
-      }
-      else {
-        $title = 'Location of your feature';
-        $title .= 's' if $total_features > 1;
-      }
-      $html .= "<h3>$title</h3>" if $title;        
-     
       ## Create pointers for Ensembl features
       while (my ($feat_type, $set) = each (%$features)) {          
         my $defaults    = $self->pointer_default($feat_type);

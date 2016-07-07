@@ -27,7 +27,7 @@ use List::Util qw(min max);
 
 use Bio::EnsEMBL::Variation::StructuralVariationFeature;
 
-use base qw(EnsEMBL::Draw::GlyphSet_simple);
+use base qw(EnsEMBL::Draw::GlyphSet_simpler);
 
 sub somatic { return $_[0]->{'my_config'}->id =~ /somatic/; }
 sub class   { return 'group' if $_[0]{'display'} eq 'compact'; }
@@ -61,7 +61,23 @@ sub features {
   my $self   = shift; 
   my $config = $self->{'config'};
   my $id     = $self->type;
+  my $hub = $self->{'config'}->hub;
   
+  warn "SOMATIC: ".$self->somatic."\n"; 
+  my $features_list =
+    $hub->get_query('GlyphSet::StructuralVariant')->go($self,{
+      species => $self->{'config'}{'species'},
+      slice => $self->{'container'},
+      set_name => $self->my_config('set_name'),
+      study_name => $self->my_config('study_name'),
+      db => $self->my_config('db') || 'variation',
+      somatic => ($self->somatic||0),
+      max_size => $self->my_config('max_size'),
+      min_size => $self->my_config('min_size'),
+      compact => ($self->{'display'} eq 'compact'),
+    });
+  return $features_list;
+ 
   if (!$self->cache($id)) {
     my $slice      = $self->{'container'};
     my $set_name   = $self->my_config('set_name');
@@ -189,7 +205,9 @@ sub tag {
   my ($self, $f) = @_;
   my $colour = $self->my_colour($self->colour_key($f), 'tag');
   my @tags;
-  
+ 
+  return ();
+ 
   if ($f->breakpoint_order) {
     foreach my $coords ([ $f->start, $f->seq_region_start ], $f->start != $f->end ? [ $f->end, $f->seq_region_end ] : ()) {
       next if $coords->[0] < 0;
@@ -391,7 +409,8 @@ sub title {
 
 sub highlight {
   my ($self, $f, $composite, $pix_per_bp, $h, undef, @tags) = @_;
-  
+ 
+  return; # XXX 
   return if     $self->{'display'} eq 'compact';
   return unless $self->core('sv') eq $f->variation_name;
   

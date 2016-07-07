@@ -113,6 +113,34 @@ sub alt_allele_group_adaptor {
   return $self->_get_adaptor('get_AltAlleleGroupAdaptor','core',$species);
 }
 
+sub structural_variation_feature_adaptor {
+  my ($self,$species,$db) = @_;
+
+  $db ||= 'variation';
+  return $self->_get_adaptor('get_StructuralVariationFeatureAdaptor',$db,$species);
+}
+
+sub source_adaptor {
+  my ($self,$species,$db) = @_;
+
+  $db ||= 'variation';
+  return $self->_get_adaptor('get_SourceAdaptor',$db,$species);
+}
+
+sub variation_set_adaptor {
+  my ($self,$species,$db) = @_;
+
+  $db ||= 'variation';
+  return $self->_get_adaptor('get_VariationSetAdaptor',$db,$species);
+}
+
+sub study_adaptor {
+  my ($self,$species,$db) = @_;
+
+  $db ||= 'variation';
+  return $self->_get_adaptor('get_StudyAdaptor',$db,$species);
+}
+
 sub default_gene_tree {
   my ($self,$species,$member) = @_;
 

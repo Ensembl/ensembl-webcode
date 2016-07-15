@@ -71,9 +71,8 @@ sub init {
   unless(any { $_ eq $gtex_tissue_example } @gtex_tissues) {
     $gtex_tissue_example = $gtex_tissues[0];
   }
-
-  # Should really come from REST server.
   foreach my $tissue (sort @gtex_tissues) {
+    next if ($tissue =~ /\.sh/); 
     my $tissue_readable = $tissue;
     $tissue_readable =~ s/_/ /g;
     my $manplot_desc = qq(

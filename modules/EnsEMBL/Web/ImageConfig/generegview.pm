@@ -67,6 +67,9 @@ sub init {
 
   my @gtex_tissues = sort keys %{$self->hub->species_defs->REST_gtex_tissues||{}};
 
+  # EXCLUDED TISSUES FOR FIRST WEEK OF 85.
+  @gtex_tissues = grep { !/^[M-Z]/ } @gtex_tissues;
+
   my $gtex_tissue_example = "Whole_Blood";
   unless(any { $_ eq $gtex_tissue_example } @gtex_tissues) {
     $gtex_tissue_example = $gtex_tissues[0];

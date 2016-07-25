@@ -29,17 +29,14 @@ use HTML::Entities qw(decode_entities);
 use EnsEMBL::Web::TextSequence::ClassToStyle::RTF;
 use EnsEMBL::Web::TextSequence::Layout::RTF;
 
-sub new {
-  my $proto = shift;
-
-  my $self = $proto->SUPER::new(@_);
-  $self->c2s(EnsEMBL::Web::TextSequence::ClassToStyle::RTF->new);
-  return $self;
+sub make_c2s {
+  return EnsEMBL::Web::TextSequence::ClassToStyle::RTF->new($_[0]->view);
 }
 
 sub _unhtml {
   my ($self,$data) = @_;
 
+  $data ||= '';
   $data =~ s/<.*?>//g;
   $data = decode_entities($data);
   return $data;
@@ -52,10 +49,10 @@ sub add_line {
 
   foreach my $m (@$markup) {
     my @classes = split(' ',$m->{'class'}||'');
-    my $style = $self->c2s->convert_class_to_style(\@classes,$config);
+    my $style = $self->c2s->convert_class_to_style(\@classes,$config) || '';
     my $letter = $self->_unhtml($m->{'letter'})||' ';
     if($style =~ s/\0//g) { $letter = lc($letter); }
-    push @letters,[$style||'',$letter];
+    push @letters,[$style,$letter];
   }
 
   push @{$self->{'data'}[$line->seq->id]},{
@@ -103,7 +100,7 @@ sub make_layout {
         { post => ' ' },
         { key => 'h_space' },
         { key => 'label', width => $config->{'padding'}{'pre_number'} },
-        { key => 'start', width => $config->{'padding'}{'number'} },
+        { key => 'end', width => $config->{'padding'}{'number'} },
       ]   
     },  
     { control => '\par}' },

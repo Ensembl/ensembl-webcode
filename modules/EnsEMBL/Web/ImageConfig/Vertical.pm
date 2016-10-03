@@ -117,7 +117,8 @@ sub load_user_track_data {
     next if $display eq 'off';
     ## Of the remote formats, only bigwig is currently supported on this scale
     my $format = lc $track->get('format');
-    next if ($format eq 'bigbed' || $format eq 'bam' || $format eq 'cram');
+    next if ($format eq 'bigbed' || $format eq 'bam' || $format eq 'cram'
+              || ($format eq 'vcf' && $track->get('url')));
 
     my $logic_name = $track->get('logic_name');
     my $colour     = \@colours;

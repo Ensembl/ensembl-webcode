@@ -79,19 +79,12 @@ in the following format:
 $data = [
          { #Track1
           'metadata' => {},
-          'features' => {
-                           '1'  => [{}],
-                          '-1'  => [{}],
-                        },
+          'features' => [],
           },
           { #Track2
            ... etc...
           },
         ];
-
-The keys of the feature hashref refer to the strand on which we wish to draw the data
-(as distinct from the strand on which the feature is actually found, which may be different)
-- this should be determined in the file parser, based on settings passed to it
 
 =cut
 }

@@ -81,8 +81,8 @@ sub init_cacheable {
   my $other_node = $self->get_node('functional_other_regulatory_regions');
   $menu->insert_before($self->create_menu_node('functional_gene_expression','Gene Expression correlations'),$other_node);
 
-  # Should really come from REST server.
   foreach my $tissue (sort @gtex_tissues) {
+    next if ($tissue =~ /\.sh/);
     my $tissue_readable = $tissue;
     $tissue_readable =~ s/_/ /g;
     my $manplot_desc = qq(

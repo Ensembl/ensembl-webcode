@@ -83,7 +83,9 @@ sub init_form_non_cacheable {
         $self->add_form_element({
           'fieldset'  => $fieldset_name,
           'type'      => 'CheckBox',
-          'label'     => $sp->{$_},
+          #'label'     => $sp->{$_},
+          'disabled'  => ($sp->{$_} =~ /Ancestral/ ? 1 : 0), # e86 only - compara data bug
+          'label'     => $sp->{$_} . ($sp->{$_} =~ /Ancestral/ ? ' (temporarily not available)' : ''), # e86 only - compara data bug
           'name'      => sprintf('species_%s_%s', $row->{'id'}, lc $_),
           'value'     => 'yes',
         });

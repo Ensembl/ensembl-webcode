@@ -857,7 +857,7 @@ sub check_for_missing_species {
 
   if(defined $slice) {
     $args->{slice}   = $slice;
-    my ($slices)     = $self->object->get_slices($args);
+    my ($slices)     = $self->object->get_slices({ %$args, image => 1});
     %aligned_species = map { $_->{'name'} => 1 } @$slices;
   }
 

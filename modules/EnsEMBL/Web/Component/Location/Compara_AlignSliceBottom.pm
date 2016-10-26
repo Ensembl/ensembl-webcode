@@ -64,7 +64,8 @@ sub content {
   my ($slices)        = $object->get_slices({
                                               'slice' => $slice, 
                                               'align' => $align_params, 
-                                              'species' => $primary_species
+                                              'species' => $primary_species,
+                                              image => 1,
                         });
   my %aligned_species = map { $_->{'name'} => 1 } @$slices;
   my $i               = 1;

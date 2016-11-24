@@ -48,7 +48,7 @@ sub content {
     $fieldset->add_notes(sprintf('Sorry, no pages were found containing the term <strong>%s</strong> (or more than 50% of articles contain this term).
                         Please <a href="/Help/Search">try again</a> or use the form below to contact HelpDesk:', $hub->param('kw')));
   }
-  
+
   $fieldset->add_field([{
     'type'    => 'String',
     'name'    => 'name',
@@ -103,7 +103,7 @@ sub content {
 
   $_->set_attribute('data-role', 'none') for @{$fieldset->get_elements_by_tag_name([qw(input select textarea)])};
 
-  return $form->render;
+  return $self->info_panel("Helpdesk downtime","<p>Ensembl Helpdesk is migrating to a new infrastructure on Thursday 24th November and will be unavailable for 4 days. The migration is due to <b>start at 1700 GMT on the 24th November and finish by 0900 GMT on the 28th November</b>.</p><p>Any emails sent during this time will be queued and then released once we have confirmed the successful migration of our infrastructure. You will not receive notification of the queued email. Please refrain from sending multiple requests in. We will remove this message once our Helpdesk is open again.</p>", "auto").$form->render;
 }
 
 1;

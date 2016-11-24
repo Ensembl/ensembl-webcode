@@ -24,12 +24,21 @@ package EnsEMBL::Draw::GlyphSet::Vuserdata;
 
 use strict;
 
-use base qw(EnsEMBL::Draw::GlyphSet::V_density);
+use Role::Tiny::With;
+with 'EnsEMBL::Draw::Role::BigWig';
+
+use parent qw(EnsEMBL::Draw::GlyphSet::V_density);
 
 sub _init {
   my $self = shift;
-  my $rtn  = $self->build_tracks;
-  return $self->{'text_export'} && $self->can('render_text') ? $rtn : undef;
+  my $data = $self->get_data;
+  my $slice = $self->{'container'};
+  warn ">>> SLICE $slice"; 
+
+#  if ($set) {
+#    return $self->build_tracks($set);
+#  }
+  return undef;
 }
 
 1;

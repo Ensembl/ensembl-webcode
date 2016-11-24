@@ -38,6 +38,7 @@ sub create_structure { return EnsEMBL::Web::IOWrapper::Wig::create_structure(@_)
 sub create_tracks {
   my ($self, $slice, $metadata) = @_;
   my $data = [];
+  warn ">>> SLICE $slice";
 
   ## For speed, our track consists of an array of values, not an array of feature hashes
   my $parser    = $self->parser;
@@ -45,6 +46,36 @@ sub create_tracks {
   my $strand    = $metadata->{'default_strand'} || 1;
   my $features  = [];
   my $values    = [];
+
+  if ($slice) {
+    $data = [$self->_create_track($slice, $metadata)];
+  }
+  else {
+    ## Whole genome
+    my @chromosomes = @{$self->hub->species_defs->ENSEMBL_CHROMOSOMES};
+    my $db_adaptor = $self->database('core');
+    my ($max, $min);
+    foreach my $chr (@chromosomes) {
+      $slice        =  $db_adaptor->get_SliceAdaptor->fetch_by_region('chromosome', $chr);
+      my @tracks    = @{$self->_create_track($slice, $metadata)};
+      foreach my $track (@tracks) {
+        $max = $track->{'metadata'}{'max_score'} if $track->{'metadata'}{'max_score'} > $max;
+        $min = $track->{'metadata'}{'min_score'} if $track->{'metadata'}{'min_score'} < $min;
+        $track->{'metadata'}{'chr'} = $chr;
+        push @$data, $track;
+      }
+    }
+    ## Now set overall max on each track
+    while (my($chr, $track) = each (%$data)) {
+      $track->{'metadata'}{'max_score'} = $max;
+      $track->{'metadata'}{'min_score'} = $min;
+    }
+  }
+  return $data;
+}
+
+sub _create_track {
+  my ($self, $slice, $metadata) = @_;
 
   ## Allow for seq region synonyms
   my $seq_region_names = [$slice->seq_region_name];

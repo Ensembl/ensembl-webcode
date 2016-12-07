@@ -266,10 +266,10 @@ sub _move_to_user {
     ## Make a note of where the file was saved, since it can't currently
     ## be shown on other sites such as mirrors or archives
     $data->{'site'} = $hub->species_defs->ENSEMBL_SERVERNAME;
-    $record = $user->add_to_uploads($data);
+    $record = $user->_add_to_records('upload', $data);
   }
   else {
-    $record = $user->add_to_urls($data);
+    $record = $user->_add_to_records('url', $data);
   }
   
   if ($record) {
@@ -409,10 +409,10 @@ sub thr_search {
   $post_content->{'type'} = $hub->param('data_type');
 
   ## Search by either assembly or accession, depending on config
-  my $assembly_param    = $hub->species_defs->get_config($hub->param('species'), 'THR_ASSEMBLY_PARAM')
+  my $assembly_param    = $hub->species_defs->get_config($search_species, 'THR_ASSEMBLY_PARAM')
                             || 'ASSEMBLY_ACCESSION';
   my $key               = $assembly_param eq 'ASSEMBLY_ACCESSION' ? 'accession' : 'assembly';
-  $post_content->{$key} = $hub->species_defs->get_config($hub->param('species'), $assembly_param);
+  $post_content->{$key} = $hub->species_defs->get_config($search_species, $assembly_param);
 
   my $args = {'method' => 'post', 'content' => $post_content};
   $args->{'url_params'} = $url_params if $url_params;

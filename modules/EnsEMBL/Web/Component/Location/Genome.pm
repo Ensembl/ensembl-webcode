@@ -88,7 +88,7 @@ sub _render_features {
     return $self->_warning('Not found', $message);
   }
 
-  ## Add in userdata tracks
+  ## Get features for userdata pointers 
   my ($user_features, $mapped, $unmapped) = $image_config ? $image_config->load_user_track_data : ({}, 0, 0);
   $mapped_features    += $mapped;
   $unmapped_features  += $unmapped;

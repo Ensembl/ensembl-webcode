@@ -36,46 +36,40 @@ sub create_hash { return EnsEMBL::Web::IOWrapper::Wig::create_hash(@_); }
 sub create_structure { return EnsEMBL::Web::IOWrapper::Wig::create_structure(@_); }
 
 sub create_tracks {
-  my ($self, $slice, $metadata) = @_;
+  my ($self, $slice, $metadata, $whole_chromosome) = @_;
   my $data = [];
-  warn ">>> SLICE $slice";
 
   ## For speed, our track consists of an array of values, not an array of feature hashes
-  my $parser    = $self->parser;
-  my $bins      = $metadata->{'bins'};
   my $strand    = $metadata->{'default_strand'} || 1;
-  my $features  = [];
-  my $values    = [];
 
-  if ($slice) {
-    $data = [$self->_create_track($slice, $metadata)];
+  if ($whole_chromosome) {
+    my $bins      = $metadata->{'bins'};
+
+    my $chr_name  = $slice ? $slice->seq_region_name : undef;
+    my $raw_data  = $self->parser->fetch_scores_by_chromosome([$chr_name], $bins);
+
+    while (my($chr, $scores) = each(%$raw_data)) {
+      my $name = $metadata->{'name'} || 'data';
+      $data->[0]{$chr}{$name} = {
+                                  'scores' => $scores,
+                                  'colour' => $metadata->{'colour'},
+                                  'sort'   => 0,
+                                };
+    }
   }
   else {
-    ## Whole genome
-    my @chromosomes = @{$self->hub->species_defs->ENSEMBL_CHROMOSOMES};
-    my $db_adaptor = $self->database('core');
-    my ($max, $min);
-    foreach my $chr (@chromosomes) {
-      $slice        =  $db_adaptor->get_SliceAdaptor->fetch_by_region('chromosome', $chr);
-      my @tracks    = @{$self->_create_track($slice, $metadata)};
-      foreach my $track (@tracks) {
-        $max = $track->{'metadata'}{'max_score'} if $track->{'metadata'}{'max_score'} > $max;
-        $min = $track->{'metadata'}{'min_score'} if $track->{'metadata'}{'min_score'} < $min;
-        $track->{'metadata'}{'chr'} = $chr;
-        push @$data, $track;
-      }
-    }
-    ## Now set overall max on each track
-    while (my($chr, $track) = each (%$data)) {
-      $track->{'metadata'}{'max_score'} = $max;
-      $track->{'metadata'}{'min_score'} = $min;
-    }
+    $data = $self->_create_track($slice, $metadata);
   }
   return $data;
 }
 
 sub _create_track {
   my ($self, $slice, $metadata) = @_;
+
+  my $parser    = $self->parser;
+  my $bins      = $metadata->{'bins'};
+  my $features  = [];
+  my $values    = [];
 
   ## Allow for seq region synonyms
   my $seq_region_names = [$slice->seq_region_name];

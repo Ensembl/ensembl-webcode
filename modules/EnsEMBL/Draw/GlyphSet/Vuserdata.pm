@@ -30,15 +30,10 @@ with 'EnsEMBL::Draw::Role::BigWig';
 use parent qw(EnsEMBL::Draw::GlyphSet::V_density);
 
 sub _init {
-  my $self = shift;
-  my $data = $self->get_data;
-  my $slice = $self->{'container'};
-  warn ">>> SLICE $slice"; 
-
-#  if ($set) {
-#    return $self->build_tracks($set);
-#  }
-  return undef;
+  my $self  = shift;
+  my $data  = $self->get_data;
+  my $set   = $data->[0] || {};
+  return $self->build_tracks($set);
 }
 
 1;

@@ -43,16 +43,16 @@ sub create_tracks {
   my $strand    = $metadata->{'default_strand'} || 1;
 
   if ($whole_chromosome) {
-    my $bins      = $metadata->{'bins'};
-
-    my $chr     = $slice ? $slice->seq_region_name : undef;
-    my $scores  = $self->parser->fetch_summary_array($chr, undef, undef, $bins);
+    my $bins            = $metadata->{'bins'};
+    my $chr             = $slice ? $slice->seq_region_name : undef;
+    my ($scores, $max)  = $self->parser->fetch_summary_array_extended($chr, undef, undef, $bins);
 
     my $name = $metadata->{'name'} || 'data';
     $data->[0]{$chr}{$name} = {
-                                'scores' => $scores,
-                                'colour' => $metadata->{'colour'},
-                                'sort'   => 0,
+                                'scores'    => $scores,
+                                'colour'    => $metadata->{'colour'},
+                                'sort'      => 0,
+                                'max_value' => $max,
                               };
   }
   else {

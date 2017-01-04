@@ -45,17 +45,15 @@ sub create_tracks {
   if ($whole_chromosome) {
     my $bins      = $metadata->{'bins'};
 
-    my $chr_name  = $slice ? $slice->seq_region_name : undef;
-    my $raw_data  = $self->parser->fetch_scores_by_chromosome([$chr_name], $bins);
+    my $chr     = $slice ? $slice->seq_region_name : undef;
+    my $scores  = $self->parser->fetch_summary_array($chr, undef, undef, $bins);
 
-    while (my($chr, $scores) = each(%$raw_data)) {
-      my $name = $metadata->{'name'} || 'data';
-      $data->[0]{$chr}{$name} = {
-                                  'scores' => $scores,
-                                  'colour' => $metadata->{'colour'},
-                                  'sort'   => 0,
-                                };
-    }
+    my $name = $metadata->{'name'} || 'data';
+    $data->[0]{$chr}{$name} = {
+                                'scores' => $scores,
+                                'colour' => $metadata->{'colour'},
+                                'sort'   => 0,
+                              };
   }
   else {
     $data = $self->_create_track($slice, $metadata);

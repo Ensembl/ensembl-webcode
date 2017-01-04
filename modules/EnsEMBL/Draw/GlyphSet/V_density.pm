@@ -93,7 +93,7 @@ sub build_tracks {
     $T->{'bin_size'}  = $bin_size;
     $T->{'v_offset'}  = $v_offset;
 
-    my $current_max = max @$scores;
+    my $current_max = ref($scores->[0]) eq 'HASH' ? 0 : max @$scores;
     if (uc($chr) eq 'MT') {
       $T->{'max_value'} = undef;
     }
@@ -195,17 +195,15 @@ sub _line {
   my @mins    =  @{$T->{'mins'}};
   my @maxs    =  @{$T->{'maxs'}};
   ## These two options are mutually exclusive
-  my $draw_whiskers = $options->{'whiskers'};
+  my $draw_whiskers  = $options->{'whiskers'};
   my $scale_to_mean  = $draw_whiskers ? 0 : $options->{'scale_to_mean'};
 
   my $old_y = undef;
   for(my $x = $T->{'v_offset'} - $T->{'bin_size'}; $x < $T->{'max_len'}; $x += $T->{'bin_size'}) {
     my $datum       = shift @scores;
     last if not defined $datum;
-    my $max_value   = $T->{'max_value'} || 1;
     my $max_mean    = $T->{'max_mean'} || 1;
-    my $scale       = $scale_to_mean ? $T->{'width'} / $max_mean
-                                     : $T->{'width'} / $max_value;
+    my $scale       = $scale_to_mean ? $T->{'width'} / $max_mean : 1;
     my $new_y       = $datum * $scale;
     my $min_whisker = (shift @mins) * $scale;
     my $max_whisker = (shift @maxs) * $scale;

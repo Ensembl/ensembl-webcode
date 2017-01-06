@@ -34,10 +34,10 @@ sub new {
 sub load {
   my ($self,$key) = @_;
 
-  my $c = $self->{'hub'}->session->get_record_data({
+  my $c = $self->{'hub'}->session->get_data(
     type => 'secretform',
     code => $self->{'pkey'}
-  });
+  );
   unless($c->{'lock'} and $c->{'lock'} eq $key) {
     warn "rejected bad key\n";
     return;
@@ -53,12 +53,12 @@ sub save {
   my ($self) = @_;
 
   my $k = random_key(32);
-  my $c = $self->{'hub'}->session->set_record_data({
+  my $c = $self->{'hub'}->session->set_data(
     type => 'secretform',
     code => $self->{'pkey'},
     lock => $k,
     fields => {%{$self->{'fields'}}}
-  });
+  );
   return $k;
 }
 

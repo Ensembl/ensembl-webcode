@@ -60,7 +60,7 @@ sub merge_all {
   my $configs       = {};
 
   try {
-    foreach my $type (qw(js css ie7css image)) {
+    foreach my $type ($SiteDefs::ENSEMBL_MINIFY_TYPES) {
       push @{$configs->{$type}}, grep { !$_->empty } map { EnsEMBL::Web::Tools::DHTMLmerge::FileGroup->new($species_defs, $type, $_) } get_filegroups($species_defs, $type);
     }
     for (@{$configs->{'image'}}) {

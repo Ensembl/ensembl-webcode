@@ -134,6 +134,10 @@ sub render_content {
         $icons
       </div>
 
+      <div class="banner_msg">This is the final release of VEGA.
+          <a href="#" >Click here for more information</a>
+      </div>
+
       $main_holder
       $nav
 

@@ -102,6 +102,22 @@ body.ie6 #masthead div.toggle div                 { left: 155px; }
 body.ie6 #masthead div.toggle h4                  { width: 100%; }
 body.ie6 #masthead div.search_holder              { width: 320px; left: 100%; margin-left: -325px; }
 
+.banner_msg {
+  width: 100%;
+  background-color: rgba(0,0,0,0.8);
+  display: flex;
+  bottom: 0;
+  left: 0;
+  font-weight: 100;
+  padding: 8px;
+  font-size: 1em;
+  color: #e2e2e2;
+}
+.banner_msg a {
+  color: coral;
+  padding: 0px 8px;
+}
+
 @media print {
   #masthead   { background: #ffffff; }
   #masthead a { color: #000000; }

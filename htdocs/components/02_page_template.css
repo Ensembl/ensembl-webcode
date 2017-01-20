@@ -104,14 +104,14 @@ body.ie6 #masthead div.search_holder              { width: 320px; left: 100%; ma
 
 .banner_msg {
   width: 100%;
-  background-color: rgba(0,0,0,0.8);
-  display: flex;
+  background-color: rgb(51, 102, 153);
   bottom: 0;
   left: 0;
   font-weight: 100;
   padding: 8px;
   font-size: 1em;
   color: #e2e2e2;
+  text-align: center;
 }
 .banner_msg a {
   color: coral;

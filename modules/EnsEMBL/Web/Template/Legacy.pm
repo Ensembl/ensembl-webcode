@@ -134,8 +134,8 @@ sub render_content {
         $icons
       </div>
 
-      <div class="banner_msg">This is the final release of VEGA.
-          <a href="#" >Click here for more information</a>
+      <div class="banner_msg">This release of Vega is the final update to the site.
+          <a href="info/website/archive.html">Click here for more information about the archiving of this resource.</a>
       </div>
 
       $main_holder

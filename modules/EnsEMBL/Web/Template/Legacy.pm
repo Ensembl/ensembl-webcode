@@ -90,6 +90,9 @@ sub render_masthead {
   return qq(
   <div id="min_width_container">
     <div id="min_width_holder">
+      <div class="banner_msg">This release of Vega is the final update to the site.
+          <a href="/info/website/archive.html">Click here for more information about the archiving of this resource.</a>
+      </div>
       <div id="masthead" class="js_panel">
         <input type="hidden" class="panel_type" value="Masthead" />
         <div class="logo_holder">$elements->{'logo'}</div>
@@ -132,10 +135,6 @@ sub render_content {
   return qq(
         $tabs
         $icons
-      </div>
-
-      <div class="banner_msg">This release of Vega is the final update to the site.
-          <a href="info/website/archive.html">Click here for more information about the archiving of this resource.</a>
       </div>
 
       $main_holder

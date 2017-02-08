@@ -33,7 +33,7 @@ body.static #widemain { margin-left: 0; }
 
 
 /* Masthead */
-#masthead                                 { background-color: [[MH_BG]]; color: [[MH_TEXT]]; height: 80px; position: relative; }
+#masthead                                 { top: 32px; background-color: [[MH_BG]]; color: [[MH_TEXT]]; height: 80px; position: relative; }
 #masthead div                             { background-color: [[MH_BG]] important; }
 #masthead a,
 #masthead span.disabled                   { color: [[MH_LINK]]; text-decoration: none; outline: none; }
@@ -105,8 +105,10 @@ body.ie6 #masthead div.search_holder              { width: 320px; left: 100%; ma
 .banner_msg {
   width: 100%;
   background-color: rgb(51, 102, 153);
-  bottom: 0;
-  left: 0;
+  position: fixed;
+  top: 0;
+  z-index: 999;
+  height: 16px;
   font-weight: 100;
   padding: 8px;
   font-size: 1em;

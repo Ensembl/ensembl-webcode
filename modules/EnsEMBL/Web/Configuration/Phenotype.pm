@@ -92,6 +92,12 @@ sub populate_tree {
          ontophen EnsEMBL::Web::Component::Phenotype::OntologyMappingPhenotypesNewTable )],
     { 'availability' => $avail, 'concise' => $title2 },
   ));
+
+  $nt_menu->append($self->create_node('RelatedConditionsNT2', 'Related conditions NT [Test]',
+    [qw( ontolsum2 EnsEMBL::Web::Component::Phenotype::OntologyMappingSummary
+         ontophen2 EnsEMBL::Web::Component::Phenotype::OntologyMappingPhenotypesNewTable2 )],
+    { 'availability' => $avail, 'concise' => $title2 },
+  ));
 }
 
 1;

@@ -121,7 +121,7 @@ warn_line();
 my ($before_start, $after_start) = before_after_hooks('start');
 
 # Build the httpd command string and run all commands
-my $cmd = sprintf '%s -d %s -f %s %s', $apache_bin || "$apache_dir/bin/httpd", $apache_dir, $apache_conf, join(' ', map("-D$_", @defines, $apache_define ? grep(/\S/, split ' ', $apache_define) : ()));
+my $cmd = sprintf 'export ENV_ENSEMBL_WEBROOT=%s && %s -d %s -f %s %s', $web_root, $apache_bin || "$apache_dir/bin/httpd", $apache_dir, $apache_conf, join(' ', map("-D$_", @defines, $apache_define ? grep(/\S/, split ' ', $apache_define) : ()));
 
 require $_ for @$before_start;
 system($cmd) and die_string("Could not start server: $!.\n[FATAL] Server start failed.");

@@ -41,3 +41,11 @@ span.ld_focus_variant {background-color:[[BUTTON_BG]]; color:[[BUTTON_TEXT]];pad
 /* Gene and regulation */
 div.var_trans_pos     { height: 10px; width:100px; border:1px solid black; background-color:#FFF; margin-top:1px; box-shadow:1px 1px 2px #888; }
 div.var_trans_pos_sub { float:left; height: 10px; }
+
+/* Phenotype ontology 'Related conditions' */
+.phe_type         { border-radius:5px; text-align:center; width:100%; color:#FFF; }
+.phe_type_variant { max-width:55px; background-color:#22A; }
+.phe_type_gene    { max-width:55px; background-color:#A22; }
+.phe_type_sv      { max-width:110px; background-color:#2A2; }
+.phe_type_qtl     { max-width:55px; background-color:#d91bf7; }
+.phe_type_default { background-color:#026a7c; }

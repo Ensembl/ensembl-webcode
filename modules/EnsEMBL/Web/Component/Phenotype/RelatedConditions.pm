@@ -99,9 +99,6 @@ sub get_phenotype_data {
   ROWS: foreach my $accession (keys(%$accessions)){
     my $phenotypes = $phen_ad->fetch_all_by_ontology_accession($accession);
     my $accession_term = $accessions->{$accession};
-    my $equal_icon = qq{<img class="_ht" style="padding-right:5px;vertical-align:bottom" src="/i/val/equal.png" title="Equivalent to the ontology term"/>};
-    my $child_icon = qq{<img class="_ht" style="padding-right:5px;vertical-align:bottom" src="/i/val/arrow_down.png" title="Equivalent to the child ontology term"/>};
-    my $onto_type = ($accession eq $hub->param('oa')) ? $equal_icon : $child_icon;
 
     foreach my $pheno (@{$phenotypes}){
       next if $callback->free_wheel();
@@ -119,9 +116,6 @@ sub get_phenotype_data {
              onto_type   => ($accession eq $hub->param('oa'))?'equal':'child',
              onto_url    => $self->external_ontology($accession,$accession_term),
              onto_text   => $accession_term // $accession,
-             onto_raw    => $accession_term // $accession,
-             onto_url_old    => $onto_type.$self->external_ontology_link($accession,$accession_term),
-             onto_term   => $accession_term,
              description => $pheno->description,
              raw_desc    => $pheno->description,
              asso_type   => $mapping_type,
@@ -176,31 +170,20 @@ sub make_table {
     _key => 'onto_type', _type => 'iconic no_filter unshowable',
     label => 'Ontology Term',
   },{
-    _key => 'onto_raw', _type => 'string no_filter',
-    label => 'Ontology Term',
-    width => 2,
-    url_column => 'onto_url',
-  },{
     _key => 'onto_url', _type => 'string no_filter unshowable',
     label => 'Ontology Term',
     width => 2,
   },{
-    _key => 'onto_text', _type => 'iconic no_filter',
+    _key => 'onto_text', _type => 'iconic',
     label => 'Ontology Term',
     icon_source => 'onto_type',
     url_column => 'onto_url',
-    width => 2,
-  },{
-    _key => 'onto_url_old', _type => 'string no_filter',
-    label => 'Ontology Term',
-    width => 2,
-  },{
-    _key => 'onto_term', _type => 'iconic unshowable',
-    sort_for => 'onto_url_old',
+    url_rel => 'external',
     filter_label => 'Mapped ontology term',
     filter_keymeta_enum => 1,
     filter_sorted => 1,
     primary => 1,
+    width => 2,
   },{
     _key => 'var_count', _type => 'string no_filter',
     label => 'Variant',

@@ -25,15 +25,17 @@
 
   $.fn.newtable_decorate_iconic = function(config,data) {
     function paint_fn(column,extras) {
-      return function(value) {
-        var ann = extras[value] || {};
-        // TODO: support params to allow - or blank to be specified
-        if(ann.icon) {
-          value = '<img src="'+ann.icon+'"/>' + value;
-        } else {
-          if(ann.coltab) { value = tabify(ann.coltab,value); }
+      return {
+        go :function(value) {
+          var ann = extras[value] || {};
+          // TODO: support params to allow - or blank to be specified
+          if(ann.icon) {
+            value = '<img src="'+ann.icon+'"/>' + value;
+          } else {
+            if(ann.coltab) { value = tabify(ann.coltab,value); }
+          }
+          return value;
         }
-        return value;
       };
     }
 

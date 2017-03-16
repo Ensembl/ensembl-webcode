@@ -35,9 +35,13 @@
       return {
         go: function(html,row) {
           if (extras['*']) {
+            var more = '';
+            if(extras['*'].url_rel) {
+              more = ' rel="'+extras['*'].url_rel+'"';
+            }
             if(extras['*'].url_column) {
               var url = row[rseries[extras['*'].url_column]];
-              html = '<a href="'+url+'">'+html+'</a>';
+              html = '<a href="'+url+'"'+more+'>'+html+'</a>';
             } else if(extras['*'].base_url) {
               var url = extras['*'].base_url;
               var params = extras['*'].params || {};
@@ -66,7 +70,7 @@
               if(html.match(/<a/)) {
                 html = html.replace(/href="/g,'href="'+url);
               } else {
-                html = '<a href="'+url+'">'+html+'</a>';
+                html = '<a href="'+url+'"'+more+'>'+html+'</a>';
               }
             }
           }

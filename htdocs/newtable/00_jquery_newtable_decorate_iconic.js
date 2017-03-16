@@ -39,7 +39,7 @@
       };
     }
 
-    function decorate_fn(column,extras,series) {
+    function decorate_fn(column,extras,series,gextras) {
       var icon_col = null;
       var rseries = {};
       $.each(series,function(i,v) { rseries[v] = i; });
@@ -52,15 +52,17 @@
         prio: 10,
         go: function(html,row) {
           var values = html.split('~');
+          var source = extras;
           if(icon_col || icon_col===0) {
             values = [row[icon_col]];
+            source = gextras.iconic[extras['*']['icon_source']];
           }
           var new_html = "";
           for(var i=0;i<values.length;i++) {
             var val = "";
             var ann_val = values[i];
             var ann = {};
-            if(extras[values[i]]) { ann = extras[values[i]]; }
+            if(source[values[i]]) { ann = source[values[i]]; }
             if(ann.icon) {
               var more = '';
               if(ann.helptip) {

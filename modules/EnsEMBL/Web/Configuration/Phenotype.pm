@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016] EMBL-European Bioinformatics Institute
+Copyright [2016-2017] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,26 +25,6 @@ use base qw(EnsEMBL::Web::Configuration);
 
 sub has_tabs { return 1; }
 
-#sub init {
-#  my $self = shift;
-#  my $hub  = $self->hub;
-#
-#  $self->SUPER::init;
-#
-#  if (!$hub->param('oa') && $hub->param('ph')) {
-#    my $ontol_data =  $self->object->Obj->get_all_ontology_data();
-#    my @ontology_acc = keys %{$ontol_data};
-#    if ($ontol_data && scalar(@ontology_acc) == 1) {
-#      my $new_url = $hub->url({
-#        action => 'OntologyMappings',
-#        ph     => $hub->param('ph'),
-#        oa     => $ontology_acc[0]
-#      });
-#      $self->tree->get_node('OntologyMappings')->set('url',$new_url);
-#    }
-#  }
-#}
-
 sub caption { return 'Phenotype'; }
 
 sub modify_page_elements { $_[0]->page->remove_body_element('summary'); }
@@ -66,40 +46,17 @@ sub populate_tree {
   my $avail = ($self->object && $self->object->phenotype_id) ? 1 : 0;
   my $title1 = $self->object ? $self->object->long_caption : '';
   my $title2 = $self->object ? $self->object->long_caption_2 : '';
-  $self->create_node('Locations', "Locations on genome",
+
+  $self->create_node('Locations', "Associated loci",
     [qw( locations EnsEMBL::Web::Component::Phenotype::Locations )],
     { 'availability' => $avail, 'concise' => $title1 },
   );
-#  $self->create_node('Locations', "Locations on genome",
-#    [qw( locations EnsEMBL::Web::Component::Phenotype::Locations  )],
-#    { 'availability' => $avail },
-##    { 'availability' => $avail, 'concise' => $title },
-#  );
 
-#  $self->create_node('OntologyMappings', 'Ontology Mappings',
-#    [qw( ontolsum EnsEMBL::Web::Component::Phenotype::OntologyMappingSummary
-#         ontophen EnsEMBL::Web::Component::Phenotype::OntologyMappingPhenotypes )],
-#    { 'availability' => $avail },
-# );
-
-  my $nt_menu = $self->create_submenu('NewTable', 'NewTable');
-
-  $nt_menu->append($self->create_node('LocationsNT', "Locations on genome NT",
-    [qw( locations EnsEMBL::Web::Component::Phenotype::LocationsNewTable) ],
-    { 'availability' => $avail, 'concise' => $title1 },
-  ));
-
-  $nt_menu->append($self->create_node('RelatedConditionsNT', 'Related conditions NT',
-    [qw( ontolsum EnsEMBL::Web::Component::Phenotype::OntologyMappingSummary
-         ontophen EnsEMBL::Web::Component::Phenotype::OntologyMappingPhenotypesNewTable )],
+  $self->create_node('RelatedConditions', 'Related conditions',
+    [qw( ontolsum EnsEMBL::Web::Component::Phenotype::OntologySummary
+         relcond  EnsEMBL::Web::Component::Phenotype::RelatedConditions )],
     { 'availability' => $avail, 'concise' => $title2 },
-  ));
-
-  $nt_menu->append($self->create_node('RelatedConditionsNT2', 'Related conditions NT [Test]',
-    [qw( ontolsum2 EnsEMBL::Web::Component::Phenotype::OntologyMappingSummary
-         ontophen2 EnsEMBL::Web::Component::Phenotype::OntologyMappingPhenotypesNewTable2 )],
-    { 'availability' => $avail, 'concise' => $title2 },
-  ));
+  );
 }
 
 1;

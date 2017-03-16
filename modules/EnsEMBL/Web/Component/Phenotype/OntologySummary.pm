@@ -1,6 +1,5 @@
 =head1 LICENSE
-Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2017] EMBL-European Bioinformatics Institute
+Copyright [2017] EMBL-European Bioinformatics Institute
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -12,7 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 =cut
 
-package EnsEMBL::Web::Component::Phenotype::OntologyMappingSummary;
+package EnsEMBL::Web::Component::Phenotype::OntologySummary;
 
 
 
@@ -38,7 +37,6 @@ sub content {
 
   my $html;
 
-  #return unless  $self->hub->param('oa');
   if ($hub->param('ph')) {
     $html .= $self->get_phe_ontology();
   }
@@ -50,7 +48,7 @@ sub content {
     my $adaptor = $hub->database('go')->get_OntologyTermAdaptor;
     my $ontologyterm = $adaptor->fetch_by_accession($ontology_accession);
    
-    my $external_link = $self->ext_link();
+    my $external_link = $self->external_ontology_link($hub->param('oa'));
 
     if (defined $ontologyterm ) {
       $external_link .= " (".$ontologyterm->ontology.")" if ($external_link and $external_link ne '');
@@ -65,24 +63,6 @@ sub content {
     }  
   }
   return $html;
-}
-
-# put somewhere central
-sub ext_link{
-  my $self = shift;
-
-  my $iri_form = $self->hub->param('oa');
-  $iri_form =~ s/\:/\_/ unless $iri_form  =~ /^GO/;;
-
-  my $ontology_link;
-  $ontology_link = $self->hub->get_ExtURL_link($self->hub->param('oa'), 'EFO',  $iri_form) if $iri_form =~ /^EFO/;
-  $ontology_link = $self->hub->get_ExtURL_link($self->hub->param('oa'), 'ORDO', $iri_form) if $iri_form =~ /^Orphanet/;
-  $ontology_link = $self->hub->get_ExtURL_link($self->hub->param('oa'), 'DOID', $iri_form) if $iri_form =~ /^DO/;
-  $ontology_link = $self->hub->get_ExtURL_link($self->hub->param('oa'), 'HPO',  $iri_form) if $iri_form =~ /^HP/;
-  $ontology_link = $self->hub->get_ExtURL_link($self->hub->param('oa'), 'GO',   $iri_form) if $iri_form =~ /^GO/;
-
-
-  return $ontology_link;
 }
 
 sub get_phe_ontology {

@@ -34,6 +34,9 @@
           decorators[column] = decorators[column].concat(ff);
         }
       });
+      $.each(decorators,function(k,v) {
+        v.sort(function(a,b) { return (b.prio||50)-(a.prio||50); });
+      });
     }
 
     function make_decorators($table,fnname,series) {
@@ -63,7 +66,7 @@
             var decorators = make_decorators($table,'decorate_one');
             var ff = decorators[key] || [];
             for(var i=0;i<ff.length;i++) {
-              value = ff[i](value);
+              value = ff[i].go(value);
             }
             if(value=='') { value = 'No data'; }
             return value;
@@ -74,7 +77,6 @@
           function(need,got) {
             return {
               dundo: function(manifest,grid,series,start,length) {
-                console.log("dundo",start,length);
                 var fabric = [];
                 var decorators = make_decorators($table,'decorators',series);
                 for(var i=0;i<grid.length;i++) { fabric[i] = grid[i]; }
@@ -87,7 +89,7 @@
                     if(decorators[key]) {
                       var ff = decorators[key];
                       for(var k=0;k<ff.length;k++) {
-                        v = ff[k](v,grid[i],series);
+                        v = ff[k].go(v,grid[i],series);
                       }
                     }
                     if(!v) { v = '-'; }
@@ -95,7 +97,6 @@
                   }
                   fabric[i] = new_row;
                 }
-                console.log("dundo done");
                 return fabric;
               }
             };

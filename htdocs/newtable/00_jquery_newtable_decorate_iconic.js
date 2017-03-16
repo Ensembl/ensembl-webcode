@@ -46,45 +46,48 @@
         icon_col = rseries[extras['*']['icon_source']];
         plus_text = true;
       }
-      return function(html,row) {
-        var values = html.split('~');
-        if(icon_col || icon_col===0) {
-          values = [row[icon_col]];
-        }
-        var new_html = "";
-        for(var i=0;i<values.length;i++) {
-          var val = "";
-          var ann_val = values[i];
-          var ann = {};
-          if(extras[values[i]]) { ann = extras[values[i]]; }
-          if(ann.icon) {
-            var more = '';
-            if(ann.helptip) {
-              more += ' class="_tht" title="'+ann.helptip+'" ';
-            }
-            val += '<img src="'+ann.icon+'" '+more+'/>';
-          } else {
-            if(ann.helptip) {
-              val = '<span class="ht _tht">'+
-                '<span class="_ht_tip hidden">'+ann.helptip+'</span>';
-            }
-            val += values[i];
-            if(!values[i]) { val += '-'; }
-            if(ann.helptip) {
-              val += '</span>';
-            }
-            if(ann.coltab) { val = tabify(ann.coltab,val); }
+      return {
+        prio: 10,
+        go: function(html,row) {
+          var values = html.split('~');
+          if(icon_col || icon_col===0) {
+            values = [row[icon_col]];
           }
-          new_html += val;
+          var new_html = "";
+          for(var i=0;i<values.length;i++) {
+            var val = "";
+            var ann_val = values[i];
+            var ann = {};
+            if(extras[values[i]]) { ann = extras[values[i]]; }
+            if(ann.icon) {
+              var more = '';
+              if(ann.helptip) {
+                more += ' class="_tht" title="'+ann.helptip+'" ';
+              }
+              val += '<img src="'+ann.icon+'" '+more+'/>';
+            } else {
+              if(ann.helptip) {
+                val = '<span class="ht _tht">'+
+                  '<span class="_ht_tip hidden">'+ann.helptip+'</span>';
+              }
+              val += values[i];
+              if(!values[i]) { val += '-'; }
+              if(ann.helptip) {
+                val += '</span>';
+              }
+              if(ann.coltab) { val = tabify(ann.coltab,val); }
+            }
+            new_html += val;
+          }
+          if(plus_text) {
+            if(new_html!="") { new_html += ' '; }
+            new_html += html;
+          }
+          if(!values.length || html==='') {
+            new_html = '-';
+          }
+          return new_html;
         }
-        if(plus_text) {
-          if(new_html!="") { new_html += ' '; }
-          new_html += html;
-        }
-        if(!values.length || html==='') {
-          new_html = '-';
-        }
-        return new_html;
       };
     }
 

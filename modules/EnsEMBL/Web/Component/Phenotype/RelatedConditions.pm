@@ -188,6 +188,7 @@ sub make_table {
     _key => 'onto_text', _type => 'iconic no_filter',
     label => 'Ontology Term',
     icon_source => 'onto_type',
+    url_column => 'onto_url',
     width => 2,
   },{
     _key => 'onto_url_old', _type => 'string no_filter',

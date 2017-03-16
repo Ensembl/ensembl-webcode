@@ -96,6 +96,12 @@ sub col_link_url {
   $self->set_decorates($col,'*',{ base_url => $base, params => \%params});
 }
 
+sub col_url_column {
+  my ($self,$col,$value) = @_;
+
+  $self->set_decorates($col,'*',{ url_column => $value });
+}
+
 package EnsEMBL::Web::NewTable::Plugins::DecorateEditorial;
 use parent qw(EnsEMBL::Web::NewTable::Plugins::Decorate);
 

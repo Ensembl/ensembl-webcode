@@ -33,37 +33,41 @@
       }
 
       return function(html,row) {
-        if (!extras['*'] || !extras['*'].base_url) {
-          return html;
-        }
-        var url = extras['*'].base_url;
-        var params = extras['*'].params || {};
-        var query = extras['*'].query || {};
-        var ok = true;
-        for(var k in params) {
-          if(!params.hasOwnProperty(k)) { continue; }
-          var v = params[k];
-          var val = params[k] ? row[rseries[v]] : false;
-          if(val===null || val===undefined) {
-            ok = false;
-          } else {
-            if (val === false) {
-              delete query[k];
+        if (extras['*']) {
+          if(extras['*'].url_column) {
+            var url = row[rseries[extras['*'].url_column]];
+            html = '<a href="'+url+'">'+html+'</a>';
+          } else if(extras['*'].base_url) {
+            var url = extras['*'].base_url;
+            var params = extras['*'].params || {};
+            var query = extras['*'].query || {};
+            var ok = true;
+            for(var k in params) {
+              if(!params.hasOwnProperty(k)) { continue; }
+              var v = params[k];
+              var val = params[k] ? row[rseries[v]] : false;
+              if(val===null || val===undefined) {
+                ok = false;
+              } else {
+                if (val === false) {
+                  delete query[k];
+                } else {
+                  query[k] = encodeURIComponent(val);
+                }
+              }
+            }
+            if(!ok) { return html; }
+            url = (function(base, params) {
+              params = $.map(params, function(v,i) { return i + '=' + v }).sort().join(';');
+              return params ? base + '?' + params : base;
+            })(url, query);
+
+            if(html.match(/<a/)) {
+              html = html.replace(/href="/g,'href="'+url);
             } else {
-              query[k] = encodeURIComponent(val);
+              html = '<a href="'+url+'">'+html+'</a>';
             }
           }
-        }
-        if(!ok) { return html; }
-        url = (function(base, params) {
-          params = $.map(params, function(v,i) { return i + '=' + v }).sort().join(';');
-          return params ? base + '?' + params : base;
-        })(url, query);
-
-        if(html.match(/<a/)) {
-          html = html.replace(/href="/g,'href="'+url);
-        } else {
-          html = '<a href="'+url+'">'+html+'</a>';
         }
         return html;
       };

@@ -119,6 +119,7 @@ sub get_phenotype_data {
              onto_type   => ($accession eq $hub->param('oa'))?'equal':'child',
              onto_url    => $self->external_ontology($accession,$accession_term),
              onto_text   => $accession_term // $accession,
+             onto_raw    => $accession_term // $accession,
              onto_url_old    => $onto_type.$self->external_ontology_link($accession,$accession_term),
              onto_term   => $accession_term,
              description => $pheno->description,
@@ -175,7 +176,12 @@ sub make_table {
     _key => 'onto_type', _type => 'iconic no_filter unshowable',
     label => 'Ontology Term',
   },{
-    _key => 'onto_url', _type => 'string no_filter',
+    _key => 'onto_raw', _type => 'string no_filter',
+    label => 'Ontology Term',
+    width => 2,
+    url_column => 'onto_url',
+  },{
+    _key => 'onto_url', _type => 'string no_filter unshowable',
     label => 'Ontology Term',
     width => 2,
   },{

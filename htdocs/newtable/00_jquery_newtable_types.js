@@ -110,8 +110,8 @@
   function iconic_finish(vv,col,km) {
     var kk = Object.keys(vv);
     kk.sort(function(a,b) {
-      var aa = ((km['decorate/iconic'][col]||{})[a]||{}).order;
-      var bb = ((km['decorate/iconic'][col]||{})[b]||{}).order;
+      var aa = (((km['decorate/iconic']||{})[col]||{})[a]||{}).order;
+      var bb = (((km['decorate/iconic']||{})[col]||{})[b]||{}).order;
       if(aa && bb) { return aa-bb; }
       if(aa) { return 1; }
       if(bb) { return -1; }

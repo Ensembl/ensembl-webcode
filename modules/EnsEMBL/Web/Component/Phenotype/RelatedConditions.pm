@@ -118,7 +118,7 @@ sub get_phenotype_data {
              oa          => $accession,
              onto_url    => $onto_type.$self->external_ontology_link($accession,$accession_term),
              onto_term   => $accession_term,
-             description => $self->phenotype_url($pheno->description,$pheno->dbID()),
+             description => $pheno->description,
              raw_desc    => $pheno->description,
              asso_type   => $mapping_type,
            };
@@ -158,9 +158,12 @@ sub make_table {
     _key => 'description', _type => 'string no_filter',
     label => "Phenotype/Disease/Trait description",
     width => 2,
-  },{
-    _key => 'raw_desc', _type => 'string unshowable no_filter',
-    sort_for => 'description'
+    link_url => {
+      'type'      => 'Phenotype',
+      'action'    => 'Locations',
+      'ph'        => ["ph"],
+      __clear     => 1
+    }
   },{
     _key => 'ph', _type => 'numeric unshowable no_filter'
   },{
@@ -201,27 +204,6 @@ sub make_table {
   $table->add_columns(\@columns,\@exclude);
 
   return $table;
-}
-
-##cross reference to phenotype entries
-sub phenotype_url{
-  my $self  = shift;
-  my $pheno = shift;
-  my $pid   = shift;
-  my $hub   = $self->hub;
-
-  if ($hub->param('ph') && $hub->param('ph') == $pid) {
-    $pheno = "<b>$pheno</b>";
-  }
-
-  my $params = {
-      'type'      => 'Phenotype',
-      'action'    => 'Locations',
-      'ph'        => $pid,
-      __clear     => 1
-    };
-
-  return sprintf('<a href="%s">%s</a>', $hub->url($params), $pheno);
 }
 
 1;

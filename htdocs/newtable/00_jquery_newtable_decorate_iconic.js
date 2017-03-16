@@ -37,12 +37,24 @@
       };
     }
 
-    function decorate_fn(column,extras) {
-      return function(html) {
+    function decorate_fn(column,extras,series) {
+      var icon_col = null;
+      var rseries = {};
+      $.each(series,function(i,v) { rseries[v] = i; });
+      var plus_text = false;
+      if(extras['*'] && extras['*']['icon_source']) {
+        icon_col = rseries[extras['*']['icon_source']];
+        plus_text = true;
+      }
+      return function(html,row) {
         var values = html.split('~');
+        if(icon_col || icon_col===0) {
+          values = [row[icon_col]];
+        }
         var new_html = "";
         for(var i=0;i<values.length;i++) {
           var val = "";
+          var ann_val = values[i];
           var ann = {};
           if(extras[values[i]]) { ann = extras[values[i]]; }
           if(ann.icon) {
@@ -50,7 +62,7 @@
             if(ann.helptip) {
               more += ' class="_tht" title="'+ann.helptip+'" ';
             }
-            val = '<img src="'+ann.icon+'" '+more+'/>';
+            val += '<img src="'+ann.icon+'" '+more+'/>';
           } else {
             if(ann.helptip) {
               val = '<span class="ht _tht">'+
@@ -64,6 +76,10 @@
             if(ann.coltab) { val = tabify(ann.coltab,val); }
           }
           new_html += val;
+        }
+        if(plus_text) {
+          if(new_html!="") { new_html += ' '; }
+          new_html += html;
         }
         if(!values.length || html==='') {
           new_html = '-';

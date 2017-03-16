@@ -43,6 +43,23 @@ sub get_all_ontology_data{
 }
 
 ## build link out to Ontology source
+sub external_ontology {
+  my $self = shift;
+  my $acc  = shift;
+  my $term = shift;
+
+  my $iri_form = $acc;
+  $iri_form =~ s/\:/\_/ unless $iri_form =~ /^GO/;
+
+  my $ontology_url = undef;
+  $ontology_url = $self->hub->get_ExtURL('EFO',  $iri_form) if $iri_form =~ /^EFO/;
+  $ontology_url = $self->hub->get_ExtURL('ORDO', $iri_form) if $iri_form =~ /^Orphanet/;
+  $ontology_url = $self->hub->get_ExtURL('HPO',  $iri_form) if $iri_form =~ /^HP/;
+  $ontology_url = $self->hub->get_ExtURL('GO',   $iri_form) if $iri_form =~ /^GO/;
+
+  return $ontology_url;
+}
+
 sub external_ontology_link{
   my $self = shift;
   my $acc  = shift;

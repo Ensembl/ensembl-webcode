@@ -76,6 +76,10 @@ sub col_icon_coltab {
   $_[0]->set_decorates($_[1],$_[2],{ coltab => $col });
 }
 
+sub col_icon_source {
+  $_[0]->set_decorates($_[1],'*',{ icon_source => $_[2] });
+}
+
 package EnsEMBL::Web::NewTable::Plugins::DecorateLink;
 use parent qw(EnsEMBL::Web::NewTable::Plugins::Decorate);
 

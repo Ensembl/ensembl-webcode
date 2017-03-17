@@ -16,7 +16,7 @@
  */
 
 (function($) {
-  function expand_urls(urls_in,texts_in,titles_in,more) {
+  function expand_urls(urls_in,texts_in,titles_in,extras,more) {
     var urls = [urls_in];
     var texts = [texts_in];
     var titles = [titles_in];
@@ -36,6 +36,9 @@
       if(i<titles.length) { more_here += ' title="'+titles[i]+'"'; }
       if(urls[i]) { here = '<a href="'+urls[i]+'"'+more_here+'>'+here+'</a>'; }
       html += here;
+    }
+    if(extras) {
+      html += '<br /><span class="small" style="white-space:nowrap;"><b>ID: </b>'+extras+'</span>';
     }
     return html;
   }
@@ -68,8 +71,12 @@
               if(extras['*'].title_column) {
                 titles = row[rseries[extras['*'].title_column]];
               }
+              var extra = '';
+              if(extras['*'].extra_column) {
+                extra = row[rseries[extras['*'].extra_column]];
+              }
               var url = row[rseries[extras['*'].url_column]];
-              html = expand_urls(url,html,titles,more);
+              html = expand_urls(url,html,titles,extra,more);
             } else if(extras['*'].base_url) {
               var url = extras['*'].base_url;
               var params = extras['*'].params || {};

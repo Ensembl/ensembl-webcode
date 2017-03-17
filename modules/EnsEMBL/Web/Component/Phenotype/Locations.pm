@@ -135,9 +135,12 @@ sub table_content {
       my @gene_links = map { $_->[1]||'' } @assoc_genes;
       my @gene_titles = map { $_->[2]||'' } @assoc_genes;
 
+      my ($name_id,$name_url,$name_extra) = $self->pf_link($pf,$feat_type,$pf->phenotype_id);
+
       my $row = {
-           names            => $self->pf_link($pf,$feat_type,$pf->phenotype_id),
-           name_id          => ($pf->type eq 'Gene') ? $self->object->get_gene_display_label($pf_name) : $pf_name, 
+           name_id          => $name_id,
+           name_link        => $name_url,
+           name_extra       => $name_extra,
            loc              => "<b>$region</b>:" . ($start > $end ? " between $end & $start" : "$start".($start == $end ? '' : "-$end"))." (".$strand_label.")",
            location         => "$region:".($start>$end?$end:$start),
            feat_type        => sprintf('<div class="phe_type %s">%s</div>', $feat_type_class, $feat_type),
@@ -177,11 +180,15 @@ sub make_table {
   push @exclude,'phe_desc','p_desc' if $hub->param('ph');
 
   my @columns = ({
-    _key => 'names', _type => 'string no_filter',
+    _key => 'name_id', _type => 'string no_filter',
+    url_column => 'name_link',
+    extra_column => 'name_extra',
     label => "Name(s)",
-    width => 1,
   },{
-    _key => 'name_id', _type => 'string unshowable no_filter',
+    _key => 'name_link', _type => 'string no_filter unshowable',
+    sort_for => 'names',
+  },{
+    _key => 'name_extra', _type => 'string no_filter unshowable',
     sort_for => 'names',
   },{
     _key => 'feat_type', _type => 'iconic no_filter',
@@ -284,11 +291,7 @@ sub pf_link {
     $source =~ s/ /\_/g;
     my $species = uc(join("", map {substr($_,0,1)} split(/\_/, $self->hub->species)));
 
-    $link = $self->hub->get_ExtURL_link(
-      $pf_name,
-      $source,
-      { ID => $pf_name, SP => $species}
-    );
+    return ($pf_name,$self->hub->get_ExtURL($source,{ ID => $pf_name, SP => $species}),undef);
   }
 
   # link to gene or variation page
@@ -301,9 +304,11 @@ sub pf_link {
 
     my $display_label = '';
     my $extra_label   = '';
+    my $extra_id   = '';
     if ($type eq 'Gene') {
       $display_label = $self->object->get_gene_display_label($pf_name);
       $extra_label   = '<br /><span class="small" style="white-space:nowrap;"><b>ID: </b>'.$pf_name."</span>";
+      $extra_id = $pf_name;
 
       # LRG
       if ($pf_name =~ /(LRG)_\d+$/) {
@@ -322,13 +327,9 @@ sub pf_link {
       $id_param   => $pf_name,
       __clear     => 1
     };
-
-    $link = sprintf('<a href="%s">%s</a>%s', $self->hub->url($params), $display_label, $extra_label);
+    return ($display_label,$self->hub->url($params),$extra_id);
   }
-
-  return $link;
 }
-
 
 # Cross reference to phenotype entries
 sub phenotype_url{

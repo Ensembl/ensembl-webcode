@@ -104,7 +104,7 @@ sub table_content {
       my $external_id  = ($pf->external_id) ? $pf->external_id : undef;
       my $attribs      = $pf->get_all_attributes;
       my $source       = $pf->source_name;  
-      my $source_url   = $self->source_url($pf_name, $source, $external_id, $attribs->{'xref_id'}, $pf);
+      my ($source_text,$source_url) = $self->source_url($pf_name, $source, $external_id, $attribs->{'xref_id'}, $pf);
 
       my @reported_genes = split(/,/,$pf->associated_gene);
 
@@ -145,8 +145,8 @@ sub table_content {
            feat_type        => sprintf('<div class="phe_type %s">%s</div>', $feat_type_class, $feat_type),
            feat_type_string => $feat_type,
            genes            => join(', ', @assoc_gene_links) || '-',
-           phe_source       => $source_url,
-           p_source         => $source,
+           phe_source       => $source_text,
+           phe_link         => $source_url,
            study_links      => join('>','',@study_links),
            study_texts      => join('>','',@study_texts),
       };
@@ -220,12 +220,15 @@ sub make_table {
     filter_sorted => 1,
     primary => 3,
   },{ 
-    _key => 'phe_source', _type => 'iconic no_filter',
+    _key => 'phe_link', _type => 'string no_filter unshowable',
     label => 'Annotation source',
     helptip => 'Project or database reporting the association',
   },{
-    _key => 'p_source', _type => 'iconic unshowable',
-    sort_for => 'phe_source',
+    _key => 'phe_source', _type => 'iconic',
+    label => 'Annotation source',
+    helptip => 'Project or database reporting the association',
+    url_rel => 'external',
+    url_column => 'phe_link',
     filter_label => 'Annotation source',
     filter_keymeta_enum => 1,
     filter_sorted => 1,
@@ -349,35 +352,31 @@ sub source_url {
   if ($source eq 'Animal QTLdb') {
     my $species = uc(join("", map {substr($_,0,1)} split(/\_/, $hub->species)));
 
-    return $hub->get_ExtURL_link(
-      $source,
+    return ($source,$hub->get_ExtURL(
       $source_uc,
       { ID => $obj_name, SP => $species}
-    );
+    ));
   }
   if ($source eq 'GOA') {
-    return $hub->get_ExtURL_link(
-      $source,
+    return ($source,$hub->get_ExtURL_link(
       'QUICK_GO_IMP',
       { ID => $ext_id, PR_ID => $ext_ref_id}
-    );
+    ));
   }
   if ($source_uc eq 'RGD') {
-    return $source if (!$ext_id);
-    return $hub->get_ExtURL_link(
-      $source,
+    return ($source,undef) if (!$ext_id);
+    return ($source,$hub->get_ExtURL(
       $source_uc.'_SEARCH',
       { ID => $ext_id }
-    );
+    ));
   }
   if ($source_uc eq 'ZFIN') {
     my $phe = $pf->phenotype->description;
        $phe =~ s/,//g;
-    return $hub->get_ExtURL_link(
-      $source,
+    return ($source,$hub->get_ExtURL(
       $source_uc.'_SEARCH',
       { ID => $phe }
-    );
+    ));
   }
 
   my $url   = $hub->species_defs->ENSEMBL_EXTERNAL_URLS->{$source_uc};
@@ -401,9 +400,9 @@ sub source_url {
   my $tax = $hub->species_defs->TAXONOMY_ID;
   $url =~ s/###TAX###/$tax/;
 
-  return $source if $url eq "";
+  return ($source,undef) if $url eq "";
 
-  return qq{<a rel="external" href="$url">$label</a>};
+  return ($label,$url);
 }
 
 sub study_urls {

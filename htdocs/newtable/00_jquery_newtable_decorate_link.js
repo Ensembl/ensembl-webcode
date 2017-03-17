@@ -19,7 +19,7 @@
   function expand_urls(urls_in,texts_in,more) {
     var urls = [urls_in];
     var texts = [texts_in];
-    if((urls_in||'').charAt(0)) {
+    if((urls_in||'').charAt(0) == '>') {
       urls = urls_in.substring(1).split('>');
       texts = texts_in.substring(1).split('>');
     }

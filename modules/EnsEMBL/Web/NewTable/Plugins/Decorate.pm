@@ -24,7 +24,8 @@ package EnsEMBL::Web::NewTable::Plugins::Decorate;
 use parent qw(EnsEMBL::Web::NewTable::Plugin);
 
 sub children { return [qw(DecorateIconic DecorateLink DecorateEditorial
-                          DecorateAlso DecorateToggle DecorateRecolour)]; }
+                          DecorateAlso DecorateToggle DecorateRecolour
+                          DecorateFancyPosition)]; }
 sub decorate_key { return undef; }
 sub js_plugin {
   my $dk = $_[0]->decorate_key()||'';
@@ -163,6 +164,17 @@ sub col_recolour {
   my ($self,$col,$colours) = @_;
 
   $self->set_decorates($col,'*',{ recolour => $colours });
+}
+
+package EnsEMBL::Web::NewTable::Plugins::DecorateFancyPosition;
+use parent qw(EnsEMBL::Web::NewTable::Plugins::Decorate);
+
+sub decorate_key { return 'fancy_position'; }
+
+sub col_fancy_position  {
+  my ($self,$col,$fancy) = @_;
+
+  $self->set_decorates($col,'*',{ fancy_position => $fancy });
 }
 
 package EnsEMBL::Web::NewTable::Plugins::DecorateToggle;

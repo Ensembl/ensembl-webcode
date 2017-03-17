@@ -133,8 +133,7 @@ sub table_content {
            name_id          => $name_id,
            name_link        => $name_url,
            name_extra       => $name_extra,
-           loc              => "<b>$region</b>:" . ($start > $end ? " between $end & $start" : "$start".($start == $end ? '' : "-$end"))." (".$strand_label.")",
-           location         => "$region:".($start>$end?$end:$start),
+           location         => "$region:$start-$end$strand_label",
            feature_type     => $feat_type,
            phe_source       => $source_text,
            phe_link         => $source_url,
@@ -191,14 +190,12 @@ sub make_table {
     filter_sorted => 1,
     primary => 1,
   },{
-    _key => 'loc', _type => 'string no_filter',
+    _key => 'location', _type => 'position no_filter fancy_position',
+    label => 'Location',
+    sort_for => 'loc',
     label => 'Genomic location (strand)',
     helptip => $glossary->{'Chr:bp'}.' The symbol (+) corresponds to the forward strand and (-) corresponds to the reverse strand.',
     width => 1.4,
-  },{
-    _key => 'location', _type => 'position unshowable no_filter',
-    label => 'Location', 
-    sort_for => 'loc',
   },{
     _key => 'gene_links', _type => 'string no_filter unshowable',
   },{

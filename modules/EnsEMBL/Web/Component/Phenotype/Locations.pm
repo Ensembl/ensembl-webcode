@@ -108,13 +108,13 @@ sub table_content {
 
       my @reported_genes = split(/,/,$pf->associated_gene);
 
-      my @assoc_gene_links;
+      my @assoc_genes;
       # preparing the URL for all the associated genes and ignoring duplicate one
       foreach my $id (@reported_genes) {
         $id =~ s/\s//g;
         next if $id =~ /intergenic|pseudogene/i || $id eq 'NR';
       
-        my $gene_label = $id;
+        my $gene_label = [$id,undef,undef];
 
         if (!$gene_ids{$id}) {
           foreach my $gene (@{$gene_ad->fetch_all_by_external_name($id) || []}) {
@@ -123,19 +123,17 @@ sub table_content {
         }
 
         if ($gene_ids{$id}) {
-          $gene_label = sprintf(
-            '<a href="%s" title="%s">%s</a>',
-            $hub->url({ type => 'Gene', action => 'Summary', g => $id }),
-            $gene_ids{$id},
-            $id
-          );
+          $gene_label = [$id,$hub->url({ type => 'Gene', action => 'Summary', g => $id }),$gene_ids{$id}];
         }
-        push @assoc_gene_links, $gene_label;
+        push @assoc_genes,$gene_label;
       }
 
       my $studies = $self->study_urls($study_xref);
       my @study_links = map { $_->[0]||'' } @$studies;
       my @study_texts = map { $_->[1]||'' } @$studies;
+      my @gene_texts = map { $_->[0]||'' } @assoc_genes;
+      my @gene_links = map { $_->[1]||'' } @assoc_genes;
+      my @gene_titles = map { $_->[2]||'' } @assoc_genes;
 
       my $row = {
            names            => $self->pf_link($pf,$feat_type,$pf->phenotype_id),
@@ -144,11 +142,13 @@ sub table_content {
            location         => "$region:".($start>$end?$end:$start),
            feat_type        => sprintf('<div class="phe_type %s">%s</div>', $feat_type_class, $feat_type),
            feat_type_string => $feat_type,
-           genes            => join(', ', @assoc_gene_links) || '-',
            phe_source       => $source_text,
            phe_link         => $source_url,
            study_links      => join('>','',@study_links),
            study_texts      => join('>','',@study_texts),
+           gene_links       => join('>','',@gene_links),
+           gene_texts       => join('>','',@gene_texts),
+           gene_titles      => join('>','',@gene_titles),
       };
 
       if (!$hub->param('ph')) {
@@ -204,9 +204,15 @@ sub make_table {
     label => 'Location', 
     sort_for => 'loc',
   },{
-    _key => 'genes', _type => 'string no_filter',
+    _key => 'gene_links', _type => 'string no_filter unshowable',
+  },{
+    _key => 'gene_texts', _type => 'string no_filter',
     label => "Reported gene(s)",
     helptip => 'Gene(s) reported in the study/paper',
+    url_column => 'gene_links',
+    title_column => 'gene_titles',
+  },{
+    _key => 'gene_titles', _type => 'string no_filter unshowable',
   },{
     _key => 'phe_desc', _type => 'iconic no_filter',
     label => 'Phenotype/Disease/Trait',

@@ -16,17 +16,25 @@
  */
 
 (function($) {
-  function expand_urls(urls_in,texts_in,more) {
+  function expand_urls(urls_in,texts_in,titles_in,more) {
     var urls = [urls_in];
     var texts = [texts_in];
+    var titles = [titles_in];
     if((urls_in||'').charAt(0) == '>') {
       urls = urls_in.substring(1).split('>');
       texts = texts_in.substring(1).split('>');
     }
+    if((titles_in||'').charAt(0) == '>') {
+      titles = titles_in.substring(1).split('>');
+    }
     html = "";
     for(var i=0;i<texts.length;i++) {
+      if(i) { html += ', '; }
       var here = texts[i];
-      if(urls[i]) { here = '<a href="'+urls[i]+'"'+more+'>'+here+'</a> '; }
+      var title = '';
+      var more_here = more;
+      if(i<titles.length) { more_here += ' title="'+titles[i]+'"'; }
+      if(urls[i]) { here = '<a href="'+urls[i]+'"'+more_here+'>'+here+'</a>'; }
       html += here;
     }
     return html;
@@ -56,8 +64,12 @@
               more = ' rel="'+extras['*'].url_rel+'"';
             }
             if(extras['*'].url_column) {
+              var titles = '';
+              if(extras['*'].title_column) {
+                titles = row[rseries[extras['*'].title_column]];
+              }
               var url = row[rseries[extras['*'].url_column]];
-              html = expand_urls(url,html,more);
+              html = expand_urls(url,html,titles,more);
             } else if(extras['*'].base_url) {
               var url = extras['*'].base_url;
               var params = extras['*'].params || {};

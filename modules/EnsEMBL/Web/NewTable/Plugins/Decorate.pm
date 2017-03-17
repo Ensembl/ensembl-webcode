@@ -102,6 +102,12 @@ sub col_url_column {
   $self->set_decorates($col,'*',{ url_column => $value });
 }
 
+sub col_title_column {
+  my ($self,$col,$value) = @_;
+
+  $self->set_decorates($col,'*',{ title_column => $value });
+}
+
 sub col_url_rel {
   my ($self,$col,$value) = @_;
 

@@ -208,11 +208,11 @@ sub make_table {
 
   $table->add_columns(\@columns,\@exclude);
 
-  my $onto_text = $table->column('onto_type');
-  $onto_text->icon_url('equal',"/i/val/equal.png");
-  $onto_text->icon_helptip('equal','Equivalent to the ontology term');
-  $onto_text->icon_url('child','/i/val/arrow_down.png');
-  $onto_text->icon_helptip('child','Equivalent to the child ontology term');
+  my $onto_type = $table->column('onto_type');
+  $onto_type->icon_url('equal',"/i/val/equal.png");
+  $onto_type->icon_helptip('equal','Equivalent to the ontology term');
+  $onto_type->icon_url('child','/i/val/arrow_down.png');
+  $onto_type->icon_helptip('child','Equivalent to the child ontology term');
 
   return $table;
 }

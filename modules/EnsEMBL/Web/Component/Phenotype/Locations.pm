@@ -133,6 +133,10 @@ sub table_content {
         push @assoc_gene_links, $gene_label;
       }
 
+      my $studies = $self->study_urls($study_xref);
+      my @study_links = map { $_->[0]||'' } @$studies;
+      my @study_texts = map { $_->[1]||'' } @$studies;
+
       my $row = {
            names            => $self->pf_link($pf,$feat_type,$pf->phenotype_id),
            name_id          => ($pf->type eq 'Gene') ? $self->object->get_gene_display_label($pf_name) : $pf_name, 
@@ -143,7 +147,8 @@ sub table_content {
            genes            => join(', ', @assoc_gene_links) || '-',
            phe_source       => $source_url,
            p_source         => $source,
-           phe_study        => $self->study_url($study_xref),
+           study_links      => join('>','',@study_links),
+           study_texts      => join('>','',@study_texts),
       };
 
       if (!$hub->param('ph')) {
@@ -226,10 +231,14 @@ sub make_table {
     filter_sorted => 1,
     primary => 2,
   },{
-    _key => 'phe_study', _type => 'string no_filter',
+    _key => 'study_texts', _type => 'string no_filter',
     label => 'Study',
     helptip => 'Link to the pubmed article or other source showing the association',
+    url_column => 'study_links',
+    url_rel => 'external',
     width => 0.8,
+  },{
+    _key => 'study_links', _type => 'string no_filter unshowable',
   });
 
   $table->add_columns(\@columns,\@exclude);
@@ -397,11 +406,12 @@ sub source_url {
   return qq{<a rel="external" href="$url">$label</a>};
 }
 
-sub study_url {
+sub study_urls {
   my ($self, $xref) = @_;
 
   my $html;
 
+  my @links;
   my $link;
   if ($xref =~ /(pubmed|PMID)/) {
     foreach my $pmid (split(',',$xref)) {
@@ -413,24 +423,20 @@ sub study_url {
       $pmid =~ s/\//:/g;
       $pmid =~ s/pubmed/PMID/;
       $html .= qq{<a rel="external" href="$link">$pmid</a>; };
+      push @links,[$link,$pmid];
     }
   }
   elsif ($xref =~ /^MIM\:/) {
   foreach my $mim (split /\,\s*/, $xref) {
       my $id = (split /\:/, $mim)[-1];
-      my $sub_link = $self->hub->get_ExtURL_link($mim, 'OMIM', $id);
-      $link .= ', '.$sub_link;
-      $link =~ s/^\, //g;
+      my $sub_url = $self->hub->get_ExtURL('OMIM', $id);
+      push @links,[$sub_url,$mim];
     }
-    $html .= "$link; ";
   }
-  else {
-    $html .= "$xref; ";
+  elsif($xref) {
+    push @links,[undef,$xref];
   }
-  $html =~ s/;\s$//;
-  $html = '-' if (!$html || $html eq '');
-
-  return $html;
+  return \@links;
 }
 
 1;

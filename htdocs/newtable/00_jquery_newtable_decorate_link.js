@@ -16,6 +16,22 @@
  */
 
 (function($) {
+  function expand_urls(urls_in,texts_in,more) {
+    var urls = [urls_in];
+    var texts = [texts_in];
+    if((urls_in||'').charAt(0)) {
+      urls = urls_in.substring(1).split('>');
+      texts = texts_in.substring(1).split('>');
+    }
+    html = "";
+    for(var i=0;i<texts.length;i++) {
+      var here = texts[i];
+      if(urls[i]) { here = '<a href="'+urls[i]+'"'+more+'>'+here+'</a> '; }
+      html += here;
+    }
+    return html;
+  }
+
   $.fn.newtable_decorate_link = function(config,data) {
     function decorate_fn(column,extras,series) {
       var rseries = {};
@@ -41,7 +57,7 @@
             }
             if(extras['*'].url_column) {
               var url = row[rseries[extras['*'].url_column]];
-              html = '<a href="'+url+'"'+more+'>'+html+'</a>';
+              html = expand_urls(url,html,more);
             } else if(extras['*'].base_url) {
               var url = extras['*'].base_url;
               var params = extras['*'].params || {};

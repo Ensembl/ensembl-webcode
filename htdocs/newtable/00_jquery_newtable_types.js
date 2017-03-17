@@ -102,6 +102,9 @@
   }
 
   function iconic_sort(a,b,f,c,km,col) {
+    if(((((km['decorate/iconic']||{})[col])||{})['*']||{}).icon_source) {
+      return a.localeCompare(b)*f;
+    }
     if(!c[a] && c[a]!=='') { c[a] = iconic_string(a,km,col); }
     if(!c[b] && c[b]!=='') { c[b] = iconic_string(b,km,col); }
     return c[a].localeCompare(c[b])*-f;

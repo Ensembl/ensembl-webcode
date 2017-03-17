@@ -70,13 +70,6 @@ sub table_content {
     $pfs = $pf_ad->fetch_all_by_phenotype_accession_source($ontology_accession);
   }
 
-  my %type_class = ( 'Variant'            => 'phe_type_variant',
-                     'Gene'               => 'phe_type_gene',
-                     'Structural Variant' => 'phe_type_sv',
-                     'QTL'                => 'phe_type_qtl',
-                     'default'            => 'phe_type_default'
-                   );
-
   ROWS: foreach my $pf (@{$pfs}) {
     next if $callback->free_wheel();
 
@@ -91,7 +84,6 @@ sub table_content {
       } elsif ($feat_type eq 'StructuralVariation') {
         $feat_type = 'Structural Variant';
       }
-      my $feat_type_class = ($type_class{$feat_type}) ? $type_class{$feat_type} : $type_class{'default'};
 
       my $pf_name      = $pf->object_id;
       my $region       = $pf->seq_region_name;
@@ -143,8 +135,7 @@ sub table_content {
            name_extra       => $name_extra,
            loc              => "<b>$region</b>:" . ($start > $end ? " between $end & $start" : "$start".($start == $end ? '' : "-$end"))." (".$strand_label.")",
            location         => "$region:".($start>$end?$end:$start),
-           feat_type        => sprintf('<div class="phe_type %s">%s</div>', $feat_type_class, $feat_type),
-           feat_type_string => $feat_type,
+           feature_type     => $feat_type,
            phe_source       => $source_text,
            phe_link         => $source_url,
            study_links      => join('>','',@study_links),
@@ -191,11 +182,9 @@ sub make_table {
     _key => 'name_extra', _type => 'string no_filter unshowable',
     sort_for => 'names',
   },{
-    _key => 'feat_type', _type => 'iconic no_filter',
+    _key => 'feature_type', _type => 'iconic',
     label => "Type",
     width => 0.7,
-  },{
-    _key => 'feat_type_string', _type => 'iconic unshowable',
     sort_for => 'feat_type',
     filter_label => 'Feature type',
     filter_keymeta_enum => 1,
@@ -269,11 +258,18 @@ sub feature_type_classes {
   my ($self,$table) = @_;
 
   my @ftypes = ('Variant', 'Structural Variant', 'Gene', 'QTL');
+  my %ftype_cols = (
+    'Variant' => '#2222aa',
+    'Structural Variant' => '#22aa22',
+    'Gene' => '#aa2222',
+    'QTL' => '#d91bf7'
+  );
 
-  my $classes_col = $table->column('feat_type');
+  my $classes_col = $table->column('feature_type');
   my $i = 0;
   foreach my $type (@ftypes) {
     $classes_col->icon_order($type,$i++);
+    $classes_col->icon_coltab($type,$ftype_cols{$type});
   }
 }
 

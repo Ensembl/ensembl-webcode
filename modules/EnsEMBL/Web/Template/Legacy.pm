@@ -90,8 +90,8 @@ sub render_masthead {
   return qq(
   <div id="min_width_container">
     <div id="min_width_holder">
-      <div class="banner_msg">This release of Vega is the final update to the site.
-          <a href="/info/website/archive.html">Click here for more information about the archiving of this resource.</a>
+      <div class="banner_msg">This is an archived version of Vega.
+          <a href="/info/website/archive.html">Click here for more information.</a>
       </div>
       <div id="masthead" class="js_panel">
         <input type="hidden" class="panel_type" value="Masthead" />

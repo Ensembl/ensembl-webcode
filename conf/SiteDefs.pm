@@ -375,7 +375,7 @@ sub import {
   $ENSEMBL_COHORT            = [ grep $ENSEMBL_IDS_USED->{$_}, sort keys %$ENSEMBL_IDS_USED ]->[0] || $ENSEMBL_SERVERROOT;
 
   ### Quick hack to add machine name to config.packed
-  $ENSEMBL_COHORT = $ENSEMBL_COHORT =~ /^cluster:/ ? "$ENSEMBL_SERVERNAME-$ENSEMBL_COHORT" : $ENSEMBL_COHORT;
+  $ENSEMBL_COHORT = $ENSEMBL_COHORT =~ /^cluster:/ ? "$ENSEMBL_SERVER-$ENSEMBL_COHORT" : $ENSEMBL_COHORT;
 
   $ENSEMBL_CONFIG_FILENAME   = sprintf "%s.%s", $ENSEMBL_COHORT =~ s/\W+/-/gr, $ENSEMBL_CONFIG_FILENAME_SUFFIX;
   $ENSEMBL_TEMPLATE_ROOT     = "$ENSEMBL_SERVERROOT/biomart-perl/conf";

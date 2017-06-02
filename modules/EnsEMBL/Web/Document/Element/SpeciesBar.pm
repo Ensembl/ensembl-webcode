@@ -37,8 +37,8 @@ sub init {
 sub content {
   my $self  = shift;
   my $hub   = $self->hub;
-  return if ($hub->type eq 'GeneTree' || $hub->type eq 'Tools');
-
+  return if $hub->type =~ /^(GeneTree|Tools|Search)$/i;  
+  
   ## User-friendly species name and assembly
   my $species  = $hub->species_defs->SPECIES_COMMON_NAME; 
   return '' if $species =~ /^(multi|common)$/i;

@@ -71,6 +71,10 @@ sub features {
       $self->errorTrack("Could not connect to variation database");
       return [];
     }
+    unless ($self->{'config'}) {
+      $self->errorTrack("Track not configured correctly");
+      return [];
+    }
     my $svf_adaptor = $self->{'config'}->hub->get_adaptor('get_StructuralVariationFeatureAdaptor', $var_db);
     my $src_adaptor = $self->{'config'}->hub->get_adaptor('get_SourceAdaptor', $var_db);
 

@@ -67,8 +67,6 @@ sub content {
     my $data_elsewhere  = 0;
     my %other_servers;
 
-    $html .= sprintf '<div class="js_panel" id="ManageData"><form action="%s">', $hub->url({'action' => 'ModifyData', 'function' => 'mass_update'});
-
     my @columns = (
       { key => 'type',      title => 'Type',          width => '10%',   align => 'left'                                     },
       { key => 'name',      title => 'Source',        width => '30%',   align => 'left',    sort => 'html', class => 'wrap' },
@@ -131,8 +129,6 @@ sub content {
       my $plural = $old_assemblies > 1 ? '' : 's';
       $html .= $self->warning_panel('Possible mapping issue', "$old_assemblies of your files contain$plural data on an old or unknown assembly. You may want to convert your data and re-upload, or try an archive site.");
     }
-
-    $html .= '</form></div>';
 
     if ($data_elsewhere) {
       my $message;

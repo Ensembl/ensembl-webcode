@@ -773,7 +773,7 @@ sub _parse {
     ## (and backwards compatibility!)
     $tree->{$url} = $tree->{$prodname};
     push @$datasets, $url;
-    delete $tree->{$prodname};
+    delete $tree->{$prodname} if $prodname ne $url;
   } 
   $tree->{'MULTI'}{'ENSEMBL_DATASETS'} = $datasets;
   #warn ">>> NEW KEYS: ".Dumper($tree);

@@ -665,7 +665,7 @@ sub bed {
                $trackname,$f->{'description'},$f->{'usescore'},$f->{'color'}));
            }
          }
-         $f->{strand} = ($f->{strand} eq -1) ? '-' : '+';
+         $f->{strand} = ($f->{strand} eq -1) ? '-' : ($f->{strand} eq 1) ?  '+' : '.';
          $self->string(join("\t",map {$f->{$_}} qw/seqname start end bedname score strand thick_start thick_end item_color BlockCount BlockSizes BlockStart/));
        }
    }

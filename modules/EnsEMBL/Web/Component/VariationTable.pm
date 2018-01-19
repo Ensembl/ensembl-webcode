@@ -297,6 +297,20 @@ sub make_table {
   },{
     _key => 'vf', _type => 'numeric unshowable no_filter'
   },{
+    _key => 'tvv', _type => 'string no_filter',
+    label => 'TVV',
+    helptip => 'Link to the transcript variant view (TVV) image for the variant',
+    link_url => {
+      __external => 'http://ves-hx2-76.ebi.ac.uk:8030/tvv-widget.htm',
+      input => ['ID'],
+      transcriptId => ['transcript_id'],
+      species => ['species']
+    }
+  },{
+    _key => 'transcript_id', _type => 'string unshowable no_filter'
+  },{
+    _key => 'species', _type => 'string unshowable no_filter '
+  },{
     _key => 'location', _type => 'position unshowable',
     label => 'Location', sort_for => 'chr',
     state_filter_ephemeral => 1,
@@ -616,10 +630,15 @@ sub variation_table {
             my $clin_sig = join("~",@$clin_sigs);
 
             my $transcript_name = ($url_transcript_prefix eq 'lrgt') ? $transcript->Obj->external_name : $transcript->version ? $transcript_stable_id.".".$transcript->version : $transcript_stable_id;
+            my $tvv = 'Link';
+            my $species = 'homo_sapiens';
           
             my $more_row = {
               vf         => $raw_id,
               class      => $var_class,
+              tvv        => $tvv,
+              transcript_id => $transcript_stable_id,
+              species    => $species,
               Alleles    => $allele_string,
               vf_allele  => $vf_allele,
               Ambiguity  => $snp->ambig_code,
@@ -644,10 +663,13 @@ sub variation_table {
               polyphen_value => $polys->[2],
               HGVS       => $self->param('hgvs') eq 'on' ? ($self->get_hgvs($tva) || '-') : undef,
             };
+
             $row = { %$row, %$more_row };
           }
+
           $num++;
           $callback->add_row($row);
+          
           last ROWS if $callback->stand_down;
         }
       }

@@ -100,11 +100,15 @@ sub table_content {
       # SIFT and PolyPhen
       my $sifts = $self->classify_sift_polyphen($tva->sift_prediction,$tva->sift_score);
       my $polys = $self->classify_sift_polyphen($tva->polyphen_prediction, $tva->polyphen_score);
+      my $tvv = 'Link';
 
       my $row = {
         vf      => $var->{'vf'}->dbID,
         res     => $var->{'position'},
         ID      => $var->{'snp_id'},
+        tvv     => $tvv,
+        transcript_id => $hub->param('t'),
+        species => $hub->species,
         snptype => $type,
         source  => $var->{'snp_source'}->name,
         status  => $status,
@@ -164,6 +168,21 @@ sub make_table {
   },{
     _key => 'vf', _type => 'numeric no_filter unshowable'
   },{
+    _key => 'tvv', _type => 'string no_filter',
+    label => 'TVV',
+    width => 1,
+    helptip => 'Opens the TVV image of the variant',
+    link_url => {
+      __external => 'http://ves-hx2-76.ebi.ac.uk:8030/tvv-widget.htm',
+      input => ['ID'],
+      transcriptId => ['transcript_id'],
+      species => ['species']
+    }
+  },{
+    _key => 'transcript_id', _type => 'string unshowable no_filter'
+  }, {
+    _key => 'species', _type => 'string unshowable no_filter'
+  }, {
     _key => 'snptype', _type => 'iconic', label => "Conseq. Type",
     filter_label => 'Consequences',
     filter_sorted => 1,

@@ -631,14 +631,13 @@ sub variation_table {
 
             my $transcript_name = ($url_transcript_prefix eq 'lrgt') ? $transcript->Obj->external_name : $transcript->version ? $transcript_stable_id.".".$transcript->version : $transcript_stable_id;
             my $tvv = 'Link';
-            my $species = 'homo_sapiens';
           
             my $more_row = {
               vf         => $raw_id,
               class      => $var_class,
               tvv        => $tvv,
               transcript_id => $transcript_stable_id,
-              species    => $species,
+              species    => $hub->species,
               Alleles    => $allele_string,
               vf_allele  => $vf_allele,
               Ambiguity  => $snp->ambig_code,

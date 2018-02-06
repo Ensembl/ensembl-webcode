@@ -762,26 +762,37 @@ sub _parse {
 
   ## Final munging
   my $datasets = [];
-  my $aliases  = $tree->{'MULTI'}{'ENSEMBL_SPECIES_URL_MAP'};
-  foreach my $prodname (@$SiteDefs::PRODUCTION_NAMES) {
+
+## multispecies
+## loop through ALL keys; we can't use @$SiteDefs::PRODUCTION_NAMES as per Ensembl 
+## because that list doesn't include genomes in the collection dbs         
+  foreach my $key (sort keys %$tree) {
+    next unless (defined $tree->{$key}{'SPECIES_URL'}); # skip if not a species key
+    my $prodname = $key;
+
     my $url = $tree->{$prodname}{'SPECIES_URL'};
-    if ($url) {
-    
-      ## Add in aliases to production names
-      $aliases->{$prodname} = $url;
-    
-      ## Rename the tree keys for easy data access via URLs
-      ## (and backwards compatibility!)
-      if ($url ne $prodname) {
-        $tree->{$url} = $tree->{$prodname};
-        delete $tree->{$prodname};
-      }
-      push @$datasets, $url;
-    }
-    else {
-      warn ">>> SPECIES $prodname has no URL defined";
-    }
-  } 
+
+    ## Add in aliases to production names
+    #$aliases->{$prodname} = $url;
+
+    ## Rename the tree keys for easy data access via URLs
+    ## (and backwards compatibility!)
+    $tree->{$url} = $tree->{$prodname};
+    push @$datasets, $url;
+    delete $tree->{$prodname} if $prodname ne $url;
+  }
+
+  # For EG we need to merge collection info into the species hash
+  foreach my $prodname (@$SiteDefs::PRODUCTION_NAMES) {
+    next unless $tree->{$prodname};
+    my @db_species = @{$tree->{$prodname}->{DB_SPECIES}};
+    my $species_lookup = { map {$_ => 1} @db_species };
+    foreach my $sp (@db_species) {
+      $self->_merge_species_tree( $tree->{$sp}, $tree->{$prodname}, $species_lookup);
+    } 
+  }
+##
+
   $tree->{'MULTI'}{'ENSEMBL_DATASETS'} = $datasets;
   #warn ">>> NEW KEYS: ".Dumper($tree);
 
@@ -790,6 +801,17 @@ sub _parse {
   $CONF->{'_storage'} = $tree; # Store the tree
   $self->_info_line('Filesystem', 'Trawled species static content');
 }
+
+## multispecies
+sub _merge_species_tree {
+  my ($self, $a, $b, $species_lookup) = @_;
+  foreach my $key (keys %$b) {
+    # don't bloat the configs with references to all the other speices in this collection    
+    next if $species_lookup->{$key}; 
+    $a->{$key} = $b->{$key} unless exists $a->{$key};
+  }
+}
+##
 
 sub process_ini_files {
   my ($self, $species, $config_packer, $defaults) = @_;

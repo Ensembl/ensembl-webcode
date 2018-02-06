@@ -134,6 +134,18 @@ sub get_DBAdaptor {
   $self->clean($dba);
   # warn "$species - $database - $dba";
 
+## multispecies
+## set multispecies flag and id
+  if (! $dba ) {
+    my $sg = $self->{species_defs}->get_config($species, "SPECIES_DATASET");
+    $dba = $reg->get_DBAdaptor($sg, $database) if $sg;
+    if ($dba) {
+      $dba->{_is_multispecies} = 1;
+      $dba->{_species_id} = $self->{species_defs}->get_config($species, "SPECIES_META_ID");
+    }
+  }
+##
+
   $self->{'_dbs'}{$species}{$database} = $dba;
   
   return $self->{'_dbs'}{$species}{$database};

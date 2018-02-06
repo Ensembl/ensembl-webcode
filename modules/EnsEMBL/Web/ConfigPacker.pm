@@ -118,6 +118,14 @@ sub modify_databases_multi   {}
 sub modify_config_tree       {}
 sub modify_config_tree_multi {}
 
+## multispecies
+sub is_collection {
+  my ($self, $db_name) = @_;
+  my $database_name = $self->tree->{'databases'}->{'DATABASE_CORE'}{'NAME'};
+  return $database_name =~ /_collection/;
+}
+##
+
 sub _summarise_generic {
   my( $self, $db_name, $dbh ) = @_;
   my $t_aref = $dbh->selectall_arrayref( 'show table status' );
@@ -139,6 +147,25 @@ sub _summarise_generic {
 ## Needs tweaking to work with new ensembl_ontology_xx db, which has no species_id in meta table
   if( $self->_table_exists( $db_name, 'meta' ) ) {
     my $hash = {};
+
+## multispecies
+# With multi species DB there is no way to define the list of chromosomes for the karyotype in the ini file
+# The idea is the people who produce the DB can define the lists in the meta table using region.toplevel meta key
+# In case there is no such definition of the karyotype - we just create the lists of toplevel regions 
+   #  if($db_name =~ /CORE/) {
+   #    if ($self->is_collection('DATABASE_CORE')) {
+   #      my $t_aref = $dbh->selectall_arrayref(
+   #        qq{SELECT cs.species_id, s.name FROM seq_region s, coord_system cs
+   #        WHERE s.coord_system_id = cs.coord_system_id AND cs.attrib = 'default_version' AND cs.name IN ('plasmid', 'chromosome')
+   #        ORDER BY cs.species_id, s.name, s.seq_region_id}
+   #      );
+
+   #      foreach my $row ( @$t_aref ) {
+   #          push @{$hash->{$row->[0]}{'region.toplevel'}}, $row->[1];
+   #      }
+   #   }
+   # }
+##
 
     $t_aref  = $dbh->selectall_arrayref(
       'select meta_key,meta_value,meta_id, species_id
@@ -1543,8 +1570,10 @@ sub _munge_meta {
 
   ## How many species in database?
   $self->tree->{'SPP_IN_DB'} = scalar @sp_count;
-    
-  if (scalar @sp_count > 1) {
+
+## multispecies    
+  if ($self->is_collection('DATABASE_CORE')) {
+##
     if ($meta_info->{0}{'species.group'}) {
       $self->tree->{'DISPLAY_NAME'} = $meta_info->{0}{'species.group'};
     } else {
@@ -1557,8 +1586,11 @@ sub _munge_meta {
 
   while (my ($species_id, $meta_hash) = each (%$meta_info)) {
     next unless $species_id && $meta_hash && ref($meta_hash) eq 'HASH';
-    
-    my $species  = $meta_hash->{'species.url'}[0];
+
+    my $species          = $meta_hash->{'species.url'}[0];
+    my $production_name  = $meta_hash->{'species.production_name'}[0];
+
+    next unless $species; 
     my $bio_name = $meta_hash->{'species.scientific_name'}[0];
     
     ## Put other meta info into variables
@@ -1573,8 +1605,13 @@ sub _munge_meta {
                   ? $self->db_tree->{'ASSEMBLY_VERSION'} : $value;
       }
 
-      $self->tree->{$key} = $value;
+      $self->tree($production_name)->{$key} = $value;
+
     }
+
+##?
+    #$self->tree($production_name)->{'DISPLAY_NAME'} = $self->tree($production_name)->{'SPECIES_COMMON_NAME'};
+##?
 
     ## Do species group
     my $taxonomy = $meta_hash->{'species.classification'};
@@ -1582,9 +1619,9 @@ sub _munge_meta {
     if ($taxonomy && scalar(@$taxonomy)) {
       my %valid_taxa = map {$_ => 1} @{ $self->tree->{'TAXON_ORDER'} };
       my @matched_groups = grep {$valid_taxa{$_}} @$taxonomy;
-      $self->tree->{'TAXONOMY'} = $taxonomy;
-      $self->tree->{'SPECIES_GROUP'} = $matched_groups[0] if @matched_groups;
-      $self->tree->{'SPECIES_GROUP_HIERARCHY'} = \@matched_groups;
+      $self->tree($production_name)->{'TAXONOMY'} = $taxonomy;
+      $self->tree($production_name)->{'SPECIES_GROUP'} = $matched_groups[0] if @matched_groups;
+      $self->tree($production_name)->{'SPECIES_GROUP_HIERARCHY'} = \@matched_groups;
     }
 
     ## create lookup hash for species aliases
@@ -1596,38 +1633,35 @@ sub _munge_meta {
     $self->full_tree->{'MULTI'}{'SPECIES_ALIASES'}{$species} = $species;
 
     ## Backwards compatibility
-    $self->tree->{'SPECIES_BIO_NAME'}  = $bio_name;
+    $self->tree($production_name)->{'SPECIES_BIO_NAME'}  = $bio_name;
     ## Used mainly in <head> links
-    ($self->tree->{'SPECIES_BIO_SHORT'} = $bio_name) =~ s/^([A-Z])[a-z]+_([a-z]+)$/$1.$2/;
-    
-    if ($self->tree->{'ENSEMBL_SPECIES'}) {
-      push @{$self->tree->{'DB_SPECIES'}}, $species;
-    } else {
-      $self->tree->{'DB_SPECIES'} = [ $species ];
-    }
-    
-    $self->tree->{'SPECIES_META_ID'} = $species_id;
+    ($self->tree($production_name)->{'SPECIES_BIO_SHORT'} = $bio_name) =~ s/^([A-Z])[a-z]+_([a-z]+)$/$1.$2/;
+
+    push @{$self->tree->{'DB_SPECIES'}}, $species; # add to collection
+    $self->tree($production_name)->{'DB_SPECIES'} = [$species];
+
+    $self->tree($production_name)->{'SPECIES_META_ID'} = $species_id;
 
     ## Munge genebuild info
     my @A = split '-', $meta_hash->{'genebuild.start_date'}[0];
     
-    $self->tree->{'GENEBUILD_START'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
-    $self->tree->{'GENEBUILD_BY'}    = $A[2];
+    $self->tree($production_name)->{'GENEBUILD_START'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
+    $self->tree($production_name)->{'GENEBUILD_BY'}    = $A[2];
 
     @A = split '-', $meta_hash->{'genebuild.initial_release_date'}[0];
     
-    $self->tree->{'GENEBUILD_RELEASE'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
+    $self->tree($production_name)->{'GENEBUILD_RELEASE'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
     
     @A = split '-', $meta_hash->{'genebuild.last_geneset_update'}[0];
 
-    $self->tree->{'GENEBUILD_LATEST'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
+    $self->tree($production_name)->{'GENEBUILD_LATEST'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
     
     @A = split '-', $meta_hash->{'assembly.date'}[0];
     
-    $self->tree->{'ASSEMBLY_DATE'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
+    $self->tree($production_name)->{'ASSEMBLY_DATE'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
     
 
-    $self->tree->{'HAVANA_DATAFREEZE_DATE'} = $meta_hash->{'genebuild.havana_datafreeze_date'}[0];
+    $self->tree($production_name)->{'HAVANA_DATAFREEZE_DATE'} = $meta_hash->{'genebuild.havana_datafreeze_date'}[0];
 
     # check if there are sample search entries defined in meta table ( the case with Ensembl Genomes)
     # they can be overwritten at a later stage  via INI files
@@ -1648,12 +1682,15 @@ sub _munge_meta {
       } 
     }
 
-    $self->tree->{'SAMPLE_DATA'} = $shash if scalar keys %$shash;
+    $self->tree($production_name)->{'SAMPLE_DATA'} = $shash if scalar keys %$shash;
 
     # check if the karyotype/list of toplevel regions ( normally chroosomes) is defined in meta table
-    @{$self->tree->{'TOPLEVEL_REGIONS'}} = @{$meta_hash->{'regions.toplevel'}} if $meta_hash->{'regions.toplevel'};
-  }
+    @{$self->tree($production_name)->{'TOPLEVEL_REGIONS'}} = @{$meta_hash->{'regions.toplevel'}} if $meta_hash->{'regions.toplevel'};
 
+    (my $dataset = (ucfirst $self->{'_species'})) =~ s/_collection//;
+    $self->tree($production_name)->{'SPECIES_DATASET'} = $dataset;
+    ## TODO - ENSEMBL_CHROMOSOMES
+  }
 }
 
 sub _munge_variation {

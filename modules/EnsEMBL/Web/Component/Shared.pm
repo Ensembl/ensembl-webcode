@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2017] EMBL-European Bioinformatics Institute
+Copyright [2016-2018] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -1073,6 +1073,10 @@ sub _sort_similarity_links {
       $word .= " ($primary_id)" if $A eq 'MARKERSYMBOL';
 
       if ($link) {
+        ## KEGG Enzyme xrefs are compound, consisting of pathway and enzyme ids.
+        ## Need to modify the xref for linkouts to work.
+        $link =~ s/%2B/&multi_query=/ if $externalDB eq 'KEGG_Enzyme';
+        
         $text = qq{<a href="$link" class="constant">$word</a>};
       } else {
         $text = $word;
@@ -1444,7 +1448,7 @@ sub render_consequence_type {
       $self->coltab($_->label, $hex, $_->description);
     }
     @consequences;
-  my $rank = $consequences[0]->rank;
+  my $rank = @consequences ? $consequences[0]->rank : undef;
       
   return ($type) ? qq{<span class="hidden">$rank</span>$type} : '-';
 }

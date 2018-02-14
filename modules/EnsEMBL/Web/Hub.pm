@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2017] EMBL-European Bioinformatics Institute
+Copyright [2016-2018] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -824,6 +824,7 @@ sub source_url {
 }
 
 sub ie_version {
+  return 11 if $ENV{'HTTP_USER_AGENT'} =~ m#Trident/7#;
   return 0 unless $ENV{'HTTP_USER_AGENT'} =~ /MSIE (\d+)/;
   return $1;
 }

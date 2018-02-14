@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2017] EMBL-European Bioinformatics Institute
+Copyright [2016-2018] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -73,6 +73,28 @@ use EnsEMBL::Draw::Glyph::Rect;
 use EnsEMBL::Draw::Glyph::Space;
 use EnsEMBL::Draw::Glyph::Sprite;
 use EnsEMBL::Draw::Glyph::Text;
+
+sub rainbow {
+## Enable drawing of features in different colours so they can be told apart
+## (Generally only used for debugging)
+## @param index - Integer (optional)
+## Usage: 
+## my $debug = $self->track_config->get('DEBUG_RAINBOW');
+## $feature->{'colour'} = $self->random_colour if $debug;
+  my ($self, $index) = @_;
+  my $rainbow = $self->image_config->hub->species_defs->RAINBOW || [qw(magenta red orange yellow green cyan blue purple)];
+  if (defined $index) {
+    ## Use the supplied index but adjust to fit within the array
+    if ($index > scalar(@$rainbow)) {
+      $index = $index % scalar(@$rainbow);
+    }
+  }
+  else {
+    ## Return a random colour 
+    $index = rand() * scalar(@$rainbow);
+  }
+  return $rainbow->[$index];  
+}
 
 ### Wrappers around low-level drawing code
 sub Arc        { my $self = shift; return EnsEMBL::Draw::Glyph::Arc->new(@_);        }
@@ -398,8 +420,8 @@ sub add_messages {
 }
 
 sub add_connection {
-  my ($self, $glyph, $tag, @params) = @_;
-  push @{$self->{'connections'}}, {'glyph' => $glyph, 'tag' => $tag, 'params' => \@params};
+  my ($self, $glyph, $tag, $params) = @_;
+  push @{$self->{'connections'}}, {'glyph' => $glyph, 'tag' => $tag, 'params' => $params};
 }
 
 #### TRIGONOMETRY FOR CIRCULAR GLYPHS

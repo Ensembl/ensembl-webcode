@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2017] EMBL-European Bioinformatics Institute
+Copyright [2016-2018] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -110,14 +110,23 @@ sub get_message {
     my $sample_data = $hub->species_defs->get_config($species, 'SAMPLE_DATA') || {};
     my $default_loc = $sample_data->{'LOCATION_PARAM'};
     my $current_loc = $hub->referer->{'params'}->{'r'}[0];
-    my $url = $hub->url({
+    my $page_action = $hub->referer->{'ENSEMBL_ACTION'};
+    my $params      = {
                           species   => $species,
                           type      => 'Location',
-                          action    => 'View',
+                          action    => $page_action,,
                           function  => undef,
                           r         => $current_loc || $default_loc,
-              });
-    $message .= sprintf('</p><p><a href="%s#modal_config_viewbottom-%s">Configure your hub</a>', $url, $menu_id);
+                      };
+    if ($page_action eq 'Multi') {
+      foreach (keys %{$hub->referer->{'params'}}) {
+        next unless $_ =~ /^[r|s]\d*$/;
+        $params->{$_} = $hub->referer->{'params'}{$_}[0];  
+      } 
+    }
+    my $url = $hub->url($params);
+    my $config = $page_action eq 'Multi' ? 'multibottom' : 'viewbottom';
+    $message .= sprintf('</p><p><a href="%s#modal_config_%s-%s">Configure your hub</a>', $url, $config, $menu_id);
   }
 
   if ($try_archive) {

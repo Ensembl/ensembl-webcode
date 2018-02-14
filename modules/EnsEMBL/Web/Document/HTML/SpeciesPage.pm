@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2017] EMBL-European Bioinformatics Institute
+Copyright [2016-2018] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -140,7 +140,7 @@ sub render {
       $pre_link   = '-';
     }
     $table->add_row({
-        'common' => sprintf('<a href="%s%s/"><img src="/i/species/48/%s.png" alt="%s" style="float:left;padding-right:4px;%s" /></a>%s',
+        'common' => sprintf('<a href="%s%s/"><img src="/i/species/%s.png" alt="%s" class="badge-48" style="float:left;padding-right:4px;%s" /></a>%s',
                         $img_url, $dir,  $dir, $common, $image_fade, $sp_link),
       'species'     => '<i>'.$name.'</i>',
       'taxon_id'    => $info->{'taxon_id'},
@@ -155,7 +155,7 @@ sub render {
 # if a species is both pre and ensembl we are adding a new row for the pre assembly    
     if ($info->{'status'} eq 'both') {
       $table->add_row({
-          'common' => sprintf('<a href="//pre.ensembl.org/%s"><img src="/i/species/48/%1$s.png" alt="%s" style="float:left;padding-right:4px;opacity:0.7" /></a><a href="//pre.ensembl.org/%1$s" rel="external" class="bigtext pre_species">%2$s</a><br />(Pre)', $dir, $common),
+          'common' => sprintf('<a href="//pre.ensembl.org/%s"><img src="/i/species/%1$s.png" alt="%s" class="badge-48" style="float:left;padding-right:4px;opacity:0.7" /></a><a href="//pre.ensembl.org/%1$s" rel="external" class="bigtext pre_species">%2$s</a><br />(Pre)', $dir, $common),
           'species'     => '<i>'.$name.'</i>',
           'taxon_id'    => $info->{'taxon_id'},
           'assembly'    => '-',

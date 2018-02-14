@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2017] EMBL-European Bioinformatics Institute
+Copyright [2016-2018] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ sub add_auto_format_dropdown {
 sub trackhub_search {
   my $self            = shift;
   my $hub             = $self->hub;
-  return sprintf '<a href="%s" class="modal_link" rel="modal_user_data"><img src="/i/16/globe.png" style="margin-right:8px; vertical-align:middle" />Search for public track hubs</a></p>', $hub->url({'action' => 'TrackHubSearch'});
+  return sprintf '<a href="%s" class="modal_link find" style="inline-block" rel="modal_user_data">Search for public track hubs</a></p>', $hub->url({'action' => 'TrackHubSearch'});
 }
 
 sub userdata_form {

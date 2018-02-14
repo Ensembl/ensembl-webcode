@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2017] EMBL-European Bioinformatics Institute
+Copyright [2016-2018] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ sub draw_collapsed_genes {
   my $style = $style_class->new(\%config, $data);
   $self->push($style->create_glyphs);
   ## Add old-style 'tags' between genes or transcripts
-  $self->_add_connections($style);
+  $self->add_connections($style);
 
   $self->_make_legend($genes,$self->my_config('name'));
 
@@ -141,7 +141,7 @@ sub draw_expanded_transcripts {
   my $style = $style_class->new(\%config, $data);
   $self->push($style->create_glyphs);
   ## Add old-style 'tags' between genes or transcripts
-  $self->_add_connections($style);
+  $self->add_connections($style);
 
   $self->_make_legend($transcripts, $self->my_config('name'));
 
@@ -177,7 +177,7 @@ sub draw_rect_genes {
   my $style = $style_class->new(\%config, $data);
   $self->push($style->create_glyphs);
   ## Add old-style 'tags' between genes or transcripts
-  $self->_add_connections($style);
+  $self->add_connections($style);
 
   $self->_make_legend($genes,$self->my_config('name'));
 
@@ -245,16 +245,6 @@ sub _create_exon_structure {
   }
   $f->{'structure'} = $structure;
   return 1;
-}
-
-sub _add_connections {
-  my ($self, $style) = @_;
-  my @A = @{$style->connections};
-  #warn ">>> ADDING BRIDGES @A";
-  #use Data::Dumper; $Data::Dumper::Maxdepth = 1; warn Dumper($style);
-  foreach (@{$style->connections}) {
-    $self->join_tag($_->{'glyph'}, $_->{'tag'}, @{$_->{'params'}||[]});
-  }
 }
 
 sub _add_connection_to_legend {

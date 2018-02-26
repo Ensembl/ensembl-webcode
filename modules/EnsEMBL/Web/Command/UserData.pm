@@ -139,9 +139,11 @@ sub attach {
     if ($attachable->name eq 'TRACKHUB' && $hub->param('registry')) {
       my ($result, $error) = $self->object->thr_hub_info($options->{'name'});
       foreach my $item (@{$result->{'items'}}) {
+        next unless $item->{'hub'}{'name'} eq $options->{'name'};
         (my $sp_name = $item->{'species'}{'scientific_name'}) =~ s/ /_/g;
         my $array = $ensembl_assemblies->{$sp_name.'_'.$item->{'assembly'}{'name'}} 
-                      || $ensembl_assemblies->{$sp_name.'_'.$item->{'assembly'}{'synonym'}}; 
+                      || $ensembl_assemblies->{$sp_name.'_'.$item->{'assembly'}{'synonyms'}} 
+                      || $ensembl_assemblies->{$sp_name.'_'.$item->{'assembly'}{'accession'}}; 
         push @assembly_info, $array if $array;
       } 
     }
@@ -154,6 +156,19 @@ sub attach {
       }
     }
     delete $options->{'name'};
+
+    unless (scalar @assembly_info) {
+      $redirect = 'SelectFile';
+      $error  = sprintf('<p>Unable to attach remote TrackHub: %s</p>', $options->{'name'});
+      $error .= "This track hub does not contain any genomes compatible with this website.";
+
+      $hub->session->set_record_data({
+                        type     => 'message',
+                        code     => 'AttachURL',
+                        message  => $error,
+                        function => '_error'
+                      });
+    }
 
     foreach (@assembly_info) {
       my ($current_species, $assembly, $is_old) = @$_;

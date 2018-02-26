@@ -67,7 +67,7 @@ sub update_from_url {
   my $raw_params;
   foreach (split(/;/, $self->hub->controller->query)) {
     $_ =~ /(\w+)=(.+)/;
-    $raw_params->{$1} = $2;
+    $raw_params->{$1} = $2 if $1;
   }
   my @values = grep $_, split(/,/, $raw_params->{'attach'} || ''); #attach=url:https://some_url_to_attach/=normal
   push @values, grep $_, split(/,/, $raw_params->{$self->type} || ''); # contigviewbottom=url:https://some_url_to_attach/=normal

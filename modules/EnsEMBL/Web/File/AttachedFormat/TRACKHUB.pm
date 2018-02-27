@@ -121,16 +121,18 @@ sub check_assemblies {
 
     ## Check assembly synonyms as well
     unless (scalar @$match) {
-      my $s = $assembly_lookup->{$sp_name.'_'.$item->{'assembly'}{'synonyms'}};
+      my $s = $item->{'assembly'}{'synonyms'};
       my @synonyms = ref($s) eq 'ARRAY' ? @$s : ($s);  
       #warn ">>> CHECKING SYNONYMS: @synonyms";
       foreach (@synonyms) {
+        #warn "... KEY: ".$sp_name.'_'.$_;
         $match = $assembly_lookup->{$sp_name.'_'.$_} || [];
         last if scalar @$match;
       } 
     }
     push @$matches, $match if scalar @$match; 
   }
+  #warn Dumper($matches);
   return $matches;
 }
 

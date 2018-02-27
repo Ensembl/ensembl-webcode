@@ -75,19 +75,9 @@ sub process {
         my $supported = 0;
 
         if ($hub->param('registry')) {
-          my ($result, $error) = $self->object->thr_hub_info($hub->param('name'));
-          foreach my $item (@{$result->{'items'}}) {
-            next unless ($item->{'hub'}{'name'} eq $hub->param('name') || $item->{'hub'}{'shortLabel'} eq  $hub->param('name'));
-            (my $sp_name = $item->{'species'}{'scientific_name'}) =~ s/ /_/g;
-            my $array = $ensembl_assemblies->{$sp_name.'_'.$item->{'assembly'}{'name'}}
-                          || $ensembl_assemblies->{$sp_name.'_'.$item->{'assembly'}{'synonyms'}} 
-                          || $ensembl_assemblies->{$sp_name.'_'.$item->{'assembly'}{'accession'}}
-                          || [];
-            if (scalar @$array) {
-              $supported = 1;
-              last;
-            }          
-          }
+          my $matches = $trackhub->check_assemblies($hub->param('name'), $self->object, $ensembl_assemblies);
+          ## Do we have a match?
+          $supported = 1 if scalar @{$matches->[0]||[]};
         }
         else {
           my $hub_info = $trackhub->{'trackhub'}->get_hub({'assembly_lookup' => $ensembl_assemblies, 'parse_tracks' => 0});

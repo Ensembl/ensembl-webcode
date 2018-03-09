@@ -22,9 +22,12 @@ Ensembl.Panel.Piechart = Ensembl.Panel.Content.extend({
     this.base();
     
     if (typeof Raphael === 'undefined') {
+      console.log('Getting raphael-min script');
       $.getScript('/raphael/raphael-min.js', function () {
+        console.log('Getting g.raphael-min script');
         $.getScript('/raphael/g.raphael-min.js', function () {
-          $.getScript('/raphael/g.pie-modified-min.js', function () { panel.getContent(); });
+          console.log('Getting g.pie-modified-min script');
+          $.getScript('/raphael/g.pie-modified-min.js', function () { console.log('All scripts loaded'); panel.getContent(); });
         });
       });
     }
@@ -33,12 +36,12 @@ Ensembl.Panel.Piechart = Ensembl.Panel.Content.extend({
   getContent: function () {
     var panel   = this;
     var visible = [];
-    
+    console.log('Calling getContent()');
     this.graphData   = [];
     this.graphConfig = {};
     this.graphEls    = {};
     this.dimensions  = eval($('input.graph_dimensions', this.el).val());
-    
+    console.log('Dimensions: ', this.dimensions);
     $('input.graph_data', this.el).each(function () {
       panel.graphData.push(eval(this.value));
     });
@@ -54,7 +57,7 @@ Ensembl.Panel.Piechart = Ensembl.Panel.Content.extend({
         visible.push(i);
       }
     }
-    
+    console.log('graphEls: ', this.graphEls);
     this.makeGraphs(visible);
   },
   

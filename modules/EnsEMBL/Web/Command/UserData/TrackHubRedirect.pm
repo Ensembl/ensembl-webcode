@@ -70,39 +70,20 @@ sub process {
       }
       else {
         ## Check if we have any supported assemblies
-        my $trackhub = EnsEMBL::Web::File::AttachedFormat::TRACKHUB->new('hub' => $hub, 'url' => $url);
-        my $ensembl_assemblies = $hub->species_defs->assembly_lookup;
-        my $supported = 0;
+        my $trackhub = EnsEMBL::Web::File::AttachedFormat::TRACKHUB->new('hub' => $self->hub, 'url' => $url);
+        my $assembly_lookup = $hub->species_defs->assembly_lookup;
+        my $hub_info = $trackhub->{'trackhub'}->get_hub({'assembly_lookup' => $assembly_lookup, 'parse_tracks' => 0});
 
-        if ($hub->param('registry')) {
-          my ($result, $error) = $self->object->thr_hub_info($hub->param('name'));
-          foreach my $item (@{$result->{'items'}}) {
-            next unless $item->{'hub'}{'name'} eq $hub->param('name');
-            (my $sp_name = $item->{'species'}{'scientific_name'}) =~ s/ /_/g;
-            my $array = $ensembl_assemblies->{$sp_name.'_'.$item->{'assembly'}{'name'}}
-                          || $ensembl_assemblies->{$sp_name.'_'.$item->{'assembly'}{'synonyms'}} 
-                          || $ensembl_assemblies->{$sp_name.'_'.$item->{'assembly'}{'accession'}};
-            if ($array) {
-              $supported = 1;
-              last;
-            }          
-          }
-        }
-        else {
-          my $hub_info = $trackhub->{'trackhub'}->get_hub({'assembly_lookup' => $ensembl_assemblies, 'parse_tracks' => 0});
-          $supported = 1 unless $hub_info->{'unsupported_genomes'};
+        if ($hub_info->{'unsupported_genomes'}) {
+          $redirect = '/trackhub_error.html';
+          $params->{'error'}  = 'archive_only';
+          $params->{'url'}    = $url;
           ## Get lookup that includes old assemblies
           my $lookup = $hub->species_defs->assembly_lookup(1);
           foreach (@{$hub_info->{'unsupported_genomes'}||{}}) {
             my $info = $lookup->{$_};
             $params->{'species_'.$info->[0]} = $info->[1];
           }
-        }
-
-        if (!$supported) {
-          $redirect = '/trackhub_error.html';
-          $params->{'error'}  = 'archive_only';
-          $params->{'url'}    = $url;
         }
         else {
           ($new_action, $params) = $self->attach($trackhub, $filename); 

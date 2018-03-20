@@ -1191,28 +1191,30 @@ sub assembly_lookup {
   foreach ($self->valid_species) {
     my $assembly = $self->get_config($_, 'ASSEMBLY_VERSION');
 
-    ## We need the Ensembl keys to be unique, but some species have 
-    ## the same assembly name, so include both species and assembly
+    ## REMOTE INDEXED FILES
+    ## Unique keys, needed for attaching URL data to correct species
+    ## even when assembly name is not unique
     $lookup->{$_.'_'.$assembly} = [$_, $assembly, 0];
 
-    ## Add UCSC assembly name if available (need for track hubs only)
-    ## Note that we don't include the species name in these, because
-    ## track hubs don't specify the species
-    my $ucsc = $self->get_config($_, 'UCSC_GOLDEN_PATH');
-    if ($ucsc) {
-      $lookup->{$ucsc} = [$_, $assembly, 0];
-      if ($old_assemblies) {
-        ## Include past UCSC assemblies
-        if ($self->get_config($_, 'UCSC_ASSEMBLIES')) {
-          my %ucsc = @{$self->get_config($_, 'UCSC_ASSEMBLIES')||[]};
-          while (my($k, $v) = each(%ucsc)) {
-            $lookup->{$k} = [$_, $v, 1];
-          }
+    ## TRACKHUBS
+    ## Add UCSC assembly name if available
+    if ($self->get_config($_, 'UCSC_GOLDEN_PATH')) {
+      $lookup->{$self->get_config($_, 'UCSC_GOLDEN_PATH')} = [$_, $assembly, 0];
+    }
+    else {
+      ## Otherwise assembly-only keys for species with no UCSC id configured
+      $lookup->{$assembly} = [$_, $assembly, 0];
+    }
+    if ($old_assemblies) {
+      ## Include past UCSC assemblies
+      if ($self->get_config($_, 'UCSC_ASSEMBLIES')) {
+        my %ucsc = @{$self->get_config($_, 'UCSC_ASSEMBLIES')||[]};
+        while (my($k, $v) = each(%ucsc)) {
+          $lookup->{$k} = [$_, $v, 1];
         }
       }
     }
   }
-
   return $lookup;
 }
 

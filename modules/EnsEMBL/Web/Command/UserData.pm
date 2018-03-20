@@ -137,8 +137,15 @@ sub attach {
 
     ## Look up the species and assembly on the Track Hub Registry if possible
     if ($attachable->name eq 'TRACKHUB' && $hub->param('registry')) {
-      my $matches = $attachable->check_assemblies($options->{'name'}, $self->object, $ensembl_assemblies); 
-      push @assembly_info, @$matches if scalar @$matches;
+      my ($result, $error) = $self->object->thr_hub_info($options->{'name'});
+      foreach my $item (@{$result->{'items'}}) {
+        next unless ($item->{'hub'}{'name'} eq $options->{'name'} || $item->{'hub'}{'shortLabel'} eq $options->{'name'});
+        (my $sp_name = $item->{'species'}{'scientific_name'}) =~ s/ /_/g;
+        my $array = $ensembl_assemblies->{$sp_name.'_'.$item->{'assembly'}{'name'}} 
+                      || $ensembl_assemblies->{$sp_name.'_'.$item->{'assembly'}{'synonyms'}} 
+                      || $ensembl_assemblies->{$sp_name.'_'.$item->{'assembly'}{'accession'}}; 
+        push @assembly_info, $array if $array;
+      } 
     }
     else {
       my $assemblies = $options->{'assemblies'} || [$hub->species_defs->get_config($hub->data_species, 'ASSEMBLY_VERSION')];

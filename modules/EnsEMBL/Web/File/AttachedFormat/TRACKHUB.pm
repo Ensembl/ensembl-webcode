@@ -97,43 +97,6 @@ sub check_data {
           );  
 }
 
-sub check_assemblies {
-  my ($self, $name, $object, $assembly_lookup) = @_;
-
-  ## Look up hub on THR in order to get synonyms
-  my ($result, $error) = $object->thr_hub_info($name);
-  my $matches = [];
-  #use Data::Dumper; $Data::Dumper::Maxdepth = 4; warn Dumper($result);
-
-  foreach my $item (@{$result->{'items'}}) {
-    #warn ">>> CHECKING HUB ".$item->{'hub'}{'name'}.' ('.$item->{'hub'}{'shortLabel'}.')';
-    ## Horrible string matching - use unique ID once available
-    next unless (lc $item->{'hub'}{'name'} eq lc $name 
-                  || lc $item->{'hub'}{'shortLabel'} eq lc $name 
-                  || lc $item->{'hub'}{'shortLabel_stripped'} eq lc $name);
-    (my $sp_name = $item->{'species'}{'scientific_name'}) =~ s/ /_/g;
-    #warn "... SPECIES NAME $sp_name";
-
-    ## Try to match all possible assembly names
-    my $match = $assembly_lookup->{$sp_name.'_'.$item->{'assembly'}{'name'}}
-                 || $assembly_lookup->{$sp_name.'_'.$item->{'assembly'}{'accession'}}
-                 || [];
-
-    ## Check assembly synonyms as well
-    unless (scalar @$match) {
-      my $s = $assembly_lookup->{$sp_name.'_'.$item->{'assembly'}{'synonyms'}};
-      my @synonyms = ref($s) eq 'ARRAY' ? @$s : ($s);  
-      #warn ">>> CHECKING SYNONYMS: @synonyms";
-      foreach (@synonyms) {
-        $match = $assembly_lookup->{$sp_name.'_'.$_} || [];
-        last if scalar @$match;
-      } 
-    }
-    push @$matches, $match if scalar @$match; 
-  }
-  return $matches;
-}
-
 sub style {
   my $self = shift;
   return $self->{'_cache'}{'style'} ||= $self->_calc_style;

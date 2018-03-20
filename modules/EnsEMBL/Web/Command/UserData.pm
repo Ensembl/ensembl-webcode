@@ -139,7 +139,7 @@ sub attach {
     if ($attachable->name eq 'TRACKHUB' && $hub->param('registry')) {
       my ($result, $error) = $self->object->thr_hub_info($options->{'name'});
       foreach my $item (@{$result->{'items'}}) {
-        next unless ($item->{'hub'}{'name'} eq $options->{'name'} || $item->{'hub'}{'shortLabel'} eq $options->{'name'});
+        next unless $item->{'hub'}{'name'} eq $options->{'name'};
         (my $sp_name = $item->{'species'}{'scientific_name'}) =~ s/ /_/g;
         my $array = $ensembl_assemblies->{$sp_name.'_'.$item->{'assembly'}{'name'}} 
                       || $ensembl_assemblies->{$sp_name.'_'.$item->{'assembly'}{'synonyms'}} 

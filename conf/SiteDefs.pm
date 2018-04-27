@@ -43,6 +43,7 @@ our $ENSEMBL_RELEASE_DATE   = 'Mar 2017';    # As it would appear in the copyrig
 ###############################################################################
 ## Default folder locations
 our $ENSEMBL_SERVERROOT   = _get_serverroot(__FILE__);              # Root dir that contains all Ensembl checkouts
+$ENSEMBL_SERVERROOT =~ s!/services/!/public/release/!; # XXX hack during GPFS migration
 our $ENSEMBL_WEBROOT      = "$ENSEMBL_SERVERROOT/ensembl-webcode";  # webcode checkout
 our $ENSEMBL_DOCROOT      = "$ENSEMBL_WEBROOT/htdocs";              # htdocs default path
 ###############################################################################
@@ -575,7 +576,10 @@ sub _get_serverroot {
   my $file            = shift;
   my ($volume, $dir)  = File::Spec->splitpath($file);
 
-  return File::Spec->catpath($volume, [split '/ensembl-webcode', $dir]->[0]) || '.';
+  my $path = File::Spec->catpath($volume, [split '/ensembl-webcode', $dir]->[0]) || '.';
+     $path =~ s|\.snapshots?/[^/]+|latest|;
+
+  return $path;
 }
 
 sub _populate_plugins_list {

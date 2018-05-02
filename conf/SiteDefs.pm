@@ -43,6 +43,7 @@ our $ENSEMBL_RELEASE_DATE   = 'December 2017'; # As it would appear in the copyr
 ###############################################################################
 ## Default folder locations
 our $ENSEMBL_SERVERROOT   = _get_serverroot(__FILE__);              # Root dir that contains all Ensembl checkouts
+$ENSEMBL_SERVERROOT =~ s!/services/!/public/release/!; # XXX hack during GPFS migration
 our $ENSEMBL_WEBROOT      = "$ENSEMBL_SERVERROOT/ensembl-webcode";  # webcode checkout
 our $ENSEMBL_DOCROOT      = "$ENSEMBL_WEBROOT/htdocs";              # htdocs default path
 ###############################################################################
@@ -519,7 +520,7 @@ sub _get_serverroot {
   my ($volume, $dir)  = File::Spec->splitpath($file);
 
   my $path = File::Spec->catpath($volume, [split '/ensembl-webcode', $dir]->[0]) || '.';
-     $path =~ s|\.snapshots/[^/]+|latest|;
+     $path =~ s|\.snapshots?/[^/]+|latest|;
 
   return $path;
 }

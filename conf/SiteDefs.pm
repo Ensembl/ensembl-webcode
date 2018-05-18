@@ -133,10 +133,9 @@ our $ENSEMBL_WARN_DATABASES         = 0; # Shows missing databases in EnsEMBL::W
 ###############################################################################
 
 ###############################################################################
-## GDPR parameters - set to blank by default, for internal mirrors
-our $GDPR_VERSION                   = 0;
-our $GDPR_SERVICE_ID                = '';
+## Privacy Policy URL - needed for email footers 
 ###############################################################################
+our $GDPR_POLICY_URL              = 'http://www.ensembl.org/info/about/legal/privacy.html';
 
 ###############################################################################
 ## Cookies and cookie encryption

@@ -46,6 +46,15 @@ our @ENSEMBL_PLUGINS_PATHS = (
 );
 our $ENSEMBL_PLUGINS;
 
+###############################################################################
+## GDPR variables
+## Some variables are assigned null for external users to override
+###############################################################################
+our $GDPR_VERSION                 = '';
+our $GDPR_COOKIE_NAME             = '';
+our $GDPR_POLICY_URL              = 'https://www.ebi.ac.uk/data-protection/ensembl/privacy-notice';
+our $GDPR_TERMS_URL               = 'https://www.ebi.ac.uk/about/terms-of-use';
+
 ## Define Plugin directories
 if(-e "$ENSEMBL_WEBROOT/conf/Plugins.pm") {
   eval qq(require '$ENSEMBL_WEBROOT/conf/Plugins.pm');

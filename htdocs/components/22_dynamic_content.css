@@ -243,19 +243,6 @@ div.cookie-message span.close:hover{
   background : coral;
 }
 
-div.cookie-message a.more-info-link {
-  display: none;
-}
-div.cookie-message a.more-info-link {
-  display: none;
-  align-items: center;
-  cursor: pointer;
-  text-decoration: none;
-  padding: 8px;
-  background-color: #ccc;
-  font-weight: 400;
-}
-
 div.cookie-message div.agree-button {
     cursor: pointer;
     background: rgba(148, 148, 148, 0.7);

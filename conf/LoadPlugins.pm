@@ -63,6 +63,7 @@ sub import {
     # with EnsEMBL::Web::, EnsEMBL::Draw or Bio::
     return unless substr($filename, 0, 12) eq 'ORM/EnsEMBL/'
                     || substr($filename, 0, 12) eq 'EnsEMBL/Web/'
+                    || substr($filename, 0, 14) eq 'EnsEMBL/Users/'
                     || substr($filename, 0, 13) eq 'EnsEMBL/Draw/'
                     || substr($filename, 0, 4) eq 'Bio/'
                     || substr($filename, 0, 7) eq 'Preload'

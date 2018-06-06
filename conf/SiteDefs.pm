@@ -29,6 +29,15 @@ our $ENSEMBL_RELEASE_DATE      = 'July 2015';
 ####################### LOCAL CONFIGURATION VARIABLES #########################
 ###############################################################################
 
+###############################################################################
+## GDPR variables
+## Some variables are assigned null for external users to override
+###############################################################################
+our $GDPR_VERSION                 = '';
+our $GDPR_COOKIE_NAME             = '';
+our $GDPR_POLICY_URL              = 'https://www.ebi.ac.uk/data-protection/ensembl/privacy-notice';
+our $GDPR_TERMS_URL               = 'https://www.ebi.ac.uk/about/terms-of-use';
+
 ##########################################################################
 # You need to change the following server root setting.  It points to the
 # directory that contains htdocs, modules, perl, ensembl, etc

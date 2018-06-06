@@ -500,6 +500,11 @@ sub html_template {
 
   my $main_class = $self->main_class();        
 
+  my $gdpr_version        = $hub->species_defs->GDPR_VERSION;
+  my $gdpr_policy_url     = $hub->species_defs->GDPR_POLICY_URL;
+  my $gdpr_terms_url      = $hub->species_defs->GDPR_TERMS_URL;
+  my $gdpr_cookie_name    = $hub->species_defs->GDPR_COOKIE_NAME;
+
   my $nav_class           = $self->isa('EnsEMBL::Web::Document::Page::Configurator') ? 'cp_nav' : 'nav';
   my $nav;
   my $icons = $self->icon_bar if $self->can('icon_bar');  
@@ -561,6 +566,10 @@ sub html_template {
   <input type="hidden" id="species_path" name="species_path" value="$species_path" />
   <input type="hidden" id="species_common_name" name="species_common_name" value="$species_common_name" />
   <input type="hidden" id="max_region_length" name="max_region_length" value="$max_region_length" />
+  <input type="hidden" id="gdpr_version" name="gdpr_version" value="$gdpr_version" />
+  <input type="hidden" id="gdpr_policy_url" name="gdpr_policy_url" value="$gdpr_policy_url" />
+  <input type="hidden" id="gdpr_terms_url" name="gdpr_terms_url" value="$gdpr_terms_url" />
+  <input type="hidden" id="gdpr_cookie_name" name="gdpr_cookie_name" value="$gdpr_cookie_name" />
   $elements->{'modal'}
   $elements->{'body_javascript'}
 </body>

@@ -149,7 +149,6 @@ Ensembl.LayoutManager.extend({
     this.showMobileMessage();
     this.handleMirrorRedirect();
     this.showGDPRCookieBanner();
-    this.showMirrorMessage();
   },
   
   reloadPage: function (args, url) {

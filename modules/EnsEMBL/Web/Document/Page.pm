@@ -493,10 +493,10 @@ sub html_template {
 
   my $main_class = $self->main_class();        
 
-  my $gdpr_version        = $hub->species_defs->GDPR_VERSION;
-  my $gdpr_policy_url     = $hub->species_defs->GDPR_POLICY_URL;
-  my $gdpr_terms_url      = $hub->species_defs->GDPR_TERMS_URL;
-  my $gdpr_cookie_name    = $hub->species_defs->GDPR_COOKIE_NAME;
+  my $gdpr_version        = $self->hub->species_defs->GDPR_VERSION;
+  my $gdpr_policy_url     = $self->hub->species_defs->GDPR_POLICY_URL;
+  my $gdpr_terms_url      = $self->hub->species_defs->GDPR_TERMS_URL;
+  my $gdpr_cookie_name    = $self->hub->species_defs->GDPR_COOKIE_NAME;
 
   my $nav_class           = $self->isa('EnsEMBL::Web::Document::Page::Configurator') ? 'cp_nav' : 'nav';
   my $nav;

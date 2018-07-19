@@ -27,6 +27,8 @@ use base qw(EnsEMBL::Web::ConfigPacker_base);
 
 use EnsEMBL::Web::File::Utils::URL qw(read_file);
 
+use JSON qw(from_json);
+
 sub munge {
   my ($self, $func) = @_;
   
@@ -771,8 +773,8 @@ sub _summarise_funcgen_db {
 ### the current regulatory build
   my $c_aref =  $dbh->selectall_arrayref(
     'select
-      distinct epigenome.name, epigenome.epigenome_id, 
-                epigenome.display_label, epigenome.description
+      distinct epigenome.display_label, epigenome.epigenome_id, 
+                epigenome.description
         from regulatory_build 
       join regulatory_build_epigenome using (regulatory_build_id) 
       join epigenome using (epigenome_id)
@@ -781,9 +783,9 @@ sub _summarise_funcgen_db {
   );
   foreach my $row (@$c_aref) {
     my $cell_type_key =  $row->[0] .':'. $row->[1];
-    $self->db_details($db_name)->{'tables'}{'cell_type'}{'names'}{$cell_type_key} = $row->[2];
-    $self->db_details($db_name)->{'tables'}{'cell_type'}{'regbuild_names'}{$cell_type_key} = $row->[2];
-    $self->db_details($db_name)->{'tables'}{'cell_type'}{'epi_desc'}{$cell_type_key} = $row->[3];
+    $self->db_details($db_name)->{'tables'}{'cell_type'}{'names'}{$cell_type_key} = $row->[0];
+    $self->db_details($db_name)->{'tables'}{'cell_type'}{'regbuild_names'}{$cell_type_key} = $row->[0];
+    $self->db_details($db_name)->{'tables'}{'cell_type'}{'epi_desc'}{$cell_type_key} = $row->[2];
     $self->db_details($db_name)->{'tables'}{'cell_type'}{'ids'}{$cell_type_key} = 1;
     $self->db_details($db_name)->{'tables'}{'cell_type'}{'regbuild_ids'}{$cell_type_key} = 1;
   }
@@ -791,7 +793,7 @@ sub _summarise_funcgen_db {
   ## Now look for cell lines that _aren't_ in the build
   $c_aref = $dbh->selectall_arrayref(
     'select
-        epigenome.name, epigenome.epigenome_id, epigenome.display_label, epigenome.description
+        epigenome.display_label, epigenome.epigenome_id, epigenome.description
      from epigenome 
         left join (regulatory_build_epigenome rbe, regulatory_build rb) 
           on (rbe.epigenome_id = epigenome.epigenome_id 
@@ -803,8 +805,8 @@ sub _summarise_funcgen_db {
   );
   foreach my $row (@$c_aref) {
     my $cell_type_key =  $row->[0] .':'. $row->[1];
-    $self->db_details($db_name)->{'tables'}{'cell_type'}{'names'}{$cell_type_key} = $row->[2];
-    $self->db_details($db_name)->{'tables'}{'cell_type'}{'epi_desc'}{$cell_type_key} = $row->[3];
+    $self->db_details($db_name)->{'tables'}{'cell_type'}{'names'}{$cell_type_key} = $row->[0];
+    $self->db_details($db_name)->{'tables'}{'cell_type'}{'epi_desc'}{$cell_type_key} = $row->[2];
     $self->db_details($db_name)->{'tables'}{'cell_type'}{'ids'}{$cell_type_key} = 0;
   }
   
@@ -849,7 +851,6 @@ sub _summarise_funcgen_db {
 	          epigenome_id,
 	          epigenome.display_label,
             epigenome.description,
-	          epigenome.name,
             displayable,
             segmentation_file.name
 	        from segmentation_file
@@ -860,19 +861,19 @@ sub _summarise_funcgen_db {
   );
 
   foreach my $C (@$res_cell) {
-    my $key = $C->[0].':'.$C->[4];
+    my $key = $C->[0].':'.$C->[2];
     my $value = {
       name => qq($C->[2]),
       desc => qq(Genome segmentation in $C->[2]),
       epi_desc => qq($C->[3]),
-      disp => $C->[5],
+      disp => $C->[4],
       'web' => {
           celltype      => $C->[1],
           celltypename  => $C->[2],
           'colourset'   => 'fg_segmentation_features',
           'display'     => 'off',
           'key'         => "seg_$key",
-          'seg_name'    => $C->[6],
+          'seg_name'    => $C->[5],
           'type'        => 'fg_segmentation_features'
       },
       count => 1,
@@ -1018,12 +1019,38 @@ sub _summarise_website_db {
   }
 
   ## Get glossary
-  $t_aref = $dbh->selectall_arrayref(
-    'select data from help_record where type = "glossary" and status = "live"'
-  );
-  foreach my $row (@$t_aref) {
-    my $entry = eval($row->[0]);
-    $self->db_tree->{'ENSEMBL_GLOSSARY'}{$entry->{'word'}} = $entry->{'meaning'}; 
+  my $ols = $SiteDefs::ENSEMBL_GLOSSARY_REST;
+  if ($ols) {
+    my $endpoint = $ols.'/terms?size=500';
+    my $data     = $self->_get_rest_data($endpoint);
+    if ($data) {
+      foreach my $term (@{$data->{'_embedded'}{'terms'}||[]}) {
+        next unless scalar @{$term->{'description'}||[]};
+        ## Get parent for this term
+        $endpoint = $ols.'/terms/http%253A%252F%252Fensembl.org%252Fglossary%252F'.$term->{'short_form'}.'/hierarchicalParents'; 
+        my $parent_data = $self->_get_rest_data($endpoint);
+        my $parents = [];
+        foreach (@{$parent_data->{'_embedded'}{'terms'}||[]}) {
+          push @$parents, $_->{'label'};
+        }
+
+        ## Get Wikipedia entry
+        my $wiki;
+        my $xrefs = $term->{'annotation'}{'hasDbXref'} || [];
+        foreach (@$xrefs) {
+          if ($_ =~ /wikipedia/) {
+            $wiki = $_;
+            last;
+          }
+        }
+
+        $self->db_tree->{'ENSEMBL_GLOSSARY'}{$term->{'label'}} = {
+                                                              'desc'    => $term->{'description'}[0],
+                                                              'parents' => $parents,
+                                                              'wiki'    => $wiki,      
+                                                              };
+      }
+    }
   }
 
   ## Get attrib text lookup
@@ -1032,11 +1059,33 @@ sub _summarise_website_db {
   );
   foreach my $row (@$t_aref) {
     my $entry = eval($row->[0]);
-    $self->db_tree->{'TEXT_LOOKUP'}{$entry->{'word'}} = $entry->{'meaning'}; 
+    $self->db_tree->{'TEXT_LOOKUP'}{$entry->{'word'}} = {'desc' => $entry->{'meaning'}}; 
   }
 
 
   $dbh->disconnect();
+}
+
+sub _get_rest_data {
+  my ($self, $endpoint) = @_;
+  my $data = '';
+
+  my $response = read_file($endpoint,{
+                    proxy => $SiteDefs::HTTP_PROXY,
+                    nice => 1,
+                    no_exception => 1,
+                  });
+  if($response->{'error'}) {
+    warn "REST ERROR at $endpoint\n";
+  }
+  else {
+    eval { $data = from_json($response->{'content'}); };    
+    if ($@) {
+      warn "ERROR FROM REST SERVER: $@\n";
+      $data = '';
+    }
+  }
+  return $data;
 }
 
 sub _summarise_archive_db {
@@ -1809,5 +1858,6 @@ sub _munge_species_url_map {
 
   $multi_tree->{'ENSEMBL_SPECIES_URL_MAP'} = \%species_map;
 }
+
 
 1;

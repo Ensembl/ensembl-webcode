@@ -34,15 +34,16 @@ use Sys::Hostname::Long;
 
 ###############################################################################
 ## Ensembl Version and release dates (these get updated every release)
-our $ENSEMBL_VERSION        = 91;            # Ensembl release number
-our $ARCHIVE_VERSION        = 'Dec2017';     # Archive site for this version
-our $ENSEMBL_RELEASE_DATE   = 'December 2017'; # As it would appear in the copyright/footer
+our $ENSEMBL_VERSION        = 93;            # Ensembl release number
+our $ARCHIVE_VERSION        = 'Jul2018';     # Archive site for this version
+our $ENSEMBL_RELEASE_DATE   = 'July 2018'; # As it would appear in the copyright/footer
 ###############################################################################
 
 
 ###############################################################################
 ## Default folder locations
 our $ENSEMBL_SERVERROOT   = _get_serverroot(__FILE__);              # Root dir that contains all Ensembl checkouts
+$ENSEMBL_SERVERROOT =~ s!/services/!/public/release/!; # XXX hack during GPFS migration
 our $ENSEMBL_WEBROOT      = "$ENSEMBL_SERVERROOT/ensembl-webcode";  # webcode checkout
 our $ENSEMBL_DOCROOT      = "$ENSEMBL_WEBROOT/htdocs";              # htdocs default path
 ###############################################################################
@@ -131,6 +132,14 @@ our $ENSEMBL_DEBUG_CACHE            = 0; # Turns debug messages on for EnsEMBL::
 our $ENSEMBL_WARN_DATABASES         = 0; # Shows missing databases in EnsEMBL::Web::SpeciesDefs
 ###############################################################################
 
+###############################################################################
+## GDPR variables
+## Some variables are assigned null for external users to override
+###############################################################################
+our $GDPR_VERSION                 = '';
+our $GDPR_COOKIE_NAME             = '';
+our $GDPR_POLICY_URL              = 'https://www.ebi.ac.uk/data-protection/ensembl/privacy-notice';
+our $GDPR_TERMS_URL               = 'https://www.ebi.ac.uk/about/terms-of-use';
 
 ###############################################################################
 ## Cookies and cookie encryption
@@ -210,8 +219,13 @@ our $ENSEMBL_WISE2_PATH   = "$ENSEMBL_SERVERROOT/genewise";
 our $GRAPHIC_TTF_PATH     = "/etc/fonts";
 our $GEOCITY_DAT          = "$ENSEMBL_SERVERROOT/geocity/GeoLiteCity.dat";
 our $ENSEMBL_JAVA         = "java"; # For js/css minification
+
 ###############################################################################
 
+## REST services used by e.g. ConfigPacker
+
+our $OLS_REST_API          = 'https://www.ebi.ac.uk/ols/api/';
+our $ENSEMBL_GLOSSARY_REST = $OLS_REST_API.'ontologies/ensemblglossary';
 
 ###############################################################################
 ## See Memoize.pm for meaning of these
@@ -245,9 +259,10 @@ our $ENSEMBL_MEMCACHED  = {}; # Keys 'server' [list of server:port], 'debug' [0|
 
 ###############################################################################
 ## Page specific configurations
-our $FLANK5_PERC                  = 0.02; # % 5' flanking region for images (used for region comparison and location view)
-our $FLANK3_PERC                  = 0.02; # % 3' flanking region for images (used for region comparison and location view)
-our $ENSEMBL_ALIGNMENTS_HIERARCHY = ['LASTZ', 'CACTUS_HAL_PW', 'TBLAT', 'LPATCH'];  # Hierarchy of alignment methods
+our $FLANK5_PERC                        = 0.02; # % 5' flanking region for images (used for region comparison and location view)
+our $FLANK3_PERC                        = 0.02; # % 3' flanking region for images (used for region comparison and location view)
+our $ENSEMBL_ALIGNMENTS_HIERARCHY       = ['LASTZ', 'CACTUS_HAL_PW', 'TBLAT', 'LPATCH'];  # Hierarchy of alignment methods
+our $ALIGNMENTS_SPECIES_SELECTION_LIMIT = 70;
 ###############################################################################
 
 
@@ -520,7 +535,7 @@ sub _get_serverroot {
   my ($volume, $dir)  = File::Spec->splitpath($file);
 
   my $path = File::Spec->catpath($volume, [split '/ensembl-webcode', $dir]->[0]) || '.';
-     $path =~ s|\.snapshots/[^/]+|latest|;
+     $path =~ s|\.snapshots?/[^/]+|latest|;
 
   return $path;
 }

@@ -94,15 +94,12 @@ sub add_auto_format_dropdown {
 sub trackhub_search {
   my $self            = shift;
   my $hub             = $self->hub;
-  return sprintf '<a href="%s" class="modal_link find" style="inline-block" rel="modal_user_data">Search for public track hubs</a></p>', $hub->url({'action' => 'TrackHubSearch'});
+  return sprintf '<a href="%s" class="modal_link inline-button find" style="inline-block" rel="modal_user_data">Search for public track hubs</a></p>', $hub->url({'action' => 'TrackHubSearch'});
 }
 
 sub userdata_form {
   my $self  = shift;
   my $hub   = $self->hub;
-
-  ## Only show this form on 'Manage Data' if there are no records
-  return if $hub->action eq 'ManageData' && @{$self->object->get_userdata_records};
 
   my $sd              = $hub->species_defs;
   my $sitename        = $sd->ENSEMBL_SITETYPE;

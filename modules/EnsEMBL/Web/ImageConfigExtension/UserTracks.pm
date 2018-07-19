@@ -160,7 +160,7 @@ sub _load_remote_url_tracks {
     my $data = $record->data;
 
     next if $data->{'no_attach'};
-    ## Don't turn off trackhubs that were added before disconnection code
+    ## Don't turn off tracks that were added before disconnection code
     next if (defined $data->{'disconnected'} && $data->{'disconnected'} == 1);
 
     my $source_name = strip_HTML($data->{'name'}) || $data->{'url'};
@@ -209,7 +209,17 @@ sub _load_remote_url_tracks {
     my $track_data = $tracks_data{$code};
 
     if (lc $track_data->{'format'} eq 'trackhub') {
-      my ($trackhub_menu) = $self->get_parameter('can_trackhubs') ? $self->_add_trackhub(strip_HTML($track_data->{'source_name'}), $track_data->{'source_url'}) : ();
+      my ($trackhub_menu, $hub_info) = $self->get_parameter('can_trackhubs') ? $self->_add_trackhub(strip_HTML($track_data->{'source_name'}), $track_data->{'source_url'}) : ();
+
+      if ($hub_info->{'error'}) {
+        $self->hub->session->set_record_data({
+          'type'      => 'message',
+          'function'  => '_warning',
+          'code'      => 'trackhub_barf',
+          'message'   => "Problem parsing hub data: ".join('', @{$hub_info->{'error'}}),
+        });
+        next;
+      }
 
       if ($trackhub_menu && ($trackhub_menu = $self->get_node($trackhub_menu))) {
         $trackhub_menu->set_data('linked_record', $track_data->{'linked_record'});
@@ -259,6 +269,8 @@ sub _load_uploaded_tracks {
   foreach my $record (@$session_records, @$user_records) {
 
     my $data    = $record->data;
+    next if (defined $data->{'disconnected'} && $data->{'disconnected'} == 1);
+
     my $is_user = $record->record_type ne 'session'; # both user and group
 
     ## Do we have any saved config for this track?
@@ -310,7 +322,7 @@ sub _load_uploaded_tracks {
 }
 
 sub _add_trackhub {
-  my ($self, $menu_name, $url, $is_poor_name, $existing_menu, $force_hide) = @_;
+  my ($self, $menu_name, $url, $existing_menu, $force_hide) = @_;
 
   ## Check if this trackhub is already attached - now that we can attach hubs via
   ## URL, they may not be saved in the imageconfig
@@ -326,10 +338,12 @@ sub _add_trackhub {
     ## Probably couldn't contact the hub
     push @{$hub_info->{'error'}||[]}, '<br /><br />Please check the source URL in a web browser.';
   } else {
-    my $shortLabel = strip_HTML($hub_info->{'details'}{'shortLabel'});
-    $menu_name = $shortLabel if $shortLabel and $is_poor_name;
+    my $description = $hub_info->{'details'}{'longLabel'};
+    if ($hub_info->{'details'}{'descriptionUrl'}) {
+      $description .= sprintf ' <a href="%s">More information</a>', $hub_info->{'details'}{'descriptionUrl'};
+    }
 
-    my $menu     = $existing_menu || $self->tree->root->append_child($self->create_menu_node($menu_name, $menu_name, { external => 1, trackhub_menu => 1, description =>  $hub_info->{'details'}{'longLabel'}}));
+    my $menu     = $existing_menu || $self->tree->root->append_child($self->create_menu_node($menu_name, $menu_name, { external => 1, trackhub_menu => 1, description =>  $description}));
 
     my $node;
     my $assemblies = $self->hub->species_defs->get_config($self->species,'TRACKHUB_ASSEMBLY_ALIASES');
@@ -384,7 +398,7 @@ sub _add_trackhub_node {
     my $config  = {};
     my @ok_keys = qw(visibility dimensions priority);
     if ($data->{'superTrack'} && $data->{'superTrack'} eq 'on') {
-      my @inherited = qw(visibility viewLimits maxHeightPixels);
+      my @inherited = qw(on_off visibility viewLimits maxHeightPixels);
       foreach (@inherited) {
         $config->{$_} = $data->{$_};
       }
@@ -677,7 +691,7 @@ sub load_file_format {
         ## Force hiding of internally configured trackhubs, because they should be
         ## off by default regardless of the settings in the hub
         my $force_hide = $internal ? 1 : 0;
-        $self->_add_trackhub(strip_HTML($source->{'source_name'}), $source->{'url'}, undef, $menu, $force_hide);
+        $self->_add_trackhub(strip_HTML($source->{'source_name'}), $source->{'url'}, $menu, $force_hide);
       }
       else {
         my $is_internal = $source->{'source_url'} ? 0 : $internal;

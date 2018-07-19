@@ -175,6 +175,7 @@ sub _add_matrix {
     $column_track = $self->create_track_node($column_key, $data->{'track_name'} || $column, {
       renderers   => $data->{'renderers'},
       label_x     => $column,
+      c_header    => $matrix->{'column_label'},
       display     => 'off',
       subset      => $subset,
       $matrix->{'row'} ? (matrix => 'column') : (),
@@ -631,8 +632,7 @@ sub add_repeat_features {
 
   my $data    = $hashref->{'repeat_feature'}{'analyses'};
   my %options = (
-    glyphset    => '_repeat',
-    optimizable => 1,
+    glyphset    => 'repeat',
     depth       => 0.5,
     bump_width  => 0,
     strand      => 'r',
@@ -646,7 +646,7 @@ sub add_repeat_features {
     description => 'All repeats',
     colourset   => 'repeat',
     display     => 'off',
-    renderers   => [qw(off Off normal On)],
+    renderers   => [qw(off Off compact Compact normal Expanded)],
     %options
   }));
 
@@ -682,7 +682,7 @@ sub add_repeat_features {
           colours     => $colours,
           description => "$data->{$key_2}{'desc'} ($key_3)",
           display     => 'off',
-          renderers   => [qw(off Off normal On)],
+          renderers   => [qw(off Off compact Compact normal Expanded)],
           %options
         }));
       }
@@ -1063,7 +1063,7 @@ sub add_regulation_builds {
     depth       => 0,
     colourset   => 'fg_regulatory_features',
     display     => 'normal',
-    description => '',
+    description => $self->databases->{'DATABASE_FUNCGEN'}{'tables'}{'regulatory_build'}{'analyses'}{'Regulatory_Build'}{'desc'}{'reg_feats'},
     renderers   => [qw(off Off normal On)],
     caption     => 'Regulatory Build',
   }));
@@ -1126,6 +1126,10 @@ sub add_regulation_builds {
     my $set_info;
     $set_info->{'core'}     = $db_tables->{'feature_types'}{'core'}{$cell_line} || {};
     $set_info->{'non_core'} = $db_tables->{'feature_types'}{'non_core'}{$cell_line}      || {};
+  
+    #use Data::Dumper; 
+    #$Data::Dumper::Maxdepth = 2;
+    #warn Dumper($set_info->{'core'});
 
     my $core_count      = scalar keys %{$set_info->{'core'}};
     my $non_core_count  = scalar keys %{$set_info->{'non_core'}};
@@ -1143,6 +1147,7 @@ sub add_regulation_builds {
       }];
 
       foreach (@{$all_types{$set}||[]}) {
+        #warn ">>> ADDING TRACKS TO MATRIX FOR ID ".$_->dbID;
         if ($set_info->{$set}{$_->dbID}) {
           $matrix_rows{$cell_line}{$set}{$_->name} ||= {
                             row         => $_->name,
@@ -1230,19 +1235,20 @@ sub add_regulation_builds {
     foreach (grep exists $matrix_rows{$cell_line}{$_}, keys %matrix_menus) {
       $self->_add_matrix({
         track_name  => "$evidence_info->{$_}{'name'}$label",
-        section => $cell_line,
+        section     => $cell_line,
         matrix      => {
-          menu   => $matrix_menus{$_}->id,
-          column => $cell_line,
-          section => $cell_line,
-          rows   => [ values %{$matrix_rows{$cell_line}{$_}} ],
-        },
+                        menu          => $matrix_menus{$_}->id,
+                        column        => $cell_line,
+                        column_label  => $cell_names{$cell_line},
+                        section       => $cell_line,
+                        rows          => [ values %{$matrix_rows{$cell_line}{$_}} ],
+                        },
         column_data => {
-          set         => $_,
-          label       => "$evidence_info->{$_}{'label'}",
-          description => $data->{$key_2}{'description'}{$_},
-          %column_data
-        },
+                        set         => $_,
+                        label       => "$evidence_info->{$_}{'label'}",
+                        description => $data->{$key_2}{'description'}{$_},
+                        %column_data
+                        },
       }, $matrix_menus{$_});
     }
   }

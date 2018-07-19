@@ -24,6 +24,7 @@ use warnings;
 no warnings "uninitialized";
 
 use EnsEMBL::Web::DBSQL::WebsiteAdaptor;
+use EnsEMBL::Web::REST;
 
 use base qw(EnsEMBL::Web::Component::Help);
 
@@ -37,26 +38,67 @@ sub _init {
 sub content {
   my $self    = shift;
   my $hub     = $self->hub;
-  my $adaptor = EnsEMBL::Web::DBSQL::WebsiteAdaptor->new($hub);
-  my $table   = $self->new_twocol({'striped' => 1});
-  my $words   = [];
+  my $ols     = $hub->species_defs->ENSEMBL_GLOSSARY_REST;
+  my $html    = '<div id="Glossary" class="js_panel">';
 
-  if ($hub->param('word')) {
-    $words = [$adaptor->fetch_glossary_by_word($hub->param('word'))];
-  }
-  elsif ($hub->param('id')) {
-    $words = $adaptor->fetch_help_by_ids([ $hub->param('id') ]);
-  }
-  else {
-    $words = $adaptor->fetch_glossary;
+  if ($ols) {
+    ## Use the new Ontology Lookup Service
+
+    ## Embedded search
+    $html .= '<input type="hidden" class="panel_type" value="Glossary">';
+    $html .= '<h2>Search for a term</h2>';
+
+    my $search = $hub->species_defs->OLS_REST_API.'search?ontology=ensemblglossary';
+
+    my $form = $self->new_form({'class' => 'freeform _glossary_search', 'method' => 'get'});
+    $form->add_field({'type' => 'String', 'name' => 'query'});
+    $form->add_hidden({'name' => 'glossary_search_endpoint', 'value' => $search, 'class' => 'js_param' });
+    $form->add_button({'type' => 'Submit', 'value' => 'Search', 'class' => '_rest_search'});
+    $html .= $form->render;
+    $html .= '<div class="_glossary_results hidden"></div>';
+
+    ## Show table of terms
+    my %glossary = $hub->species_defs->multiX('ENSEMBL_GLOSSARY');
+    if (keys %glossary) {
+      $html .= '<h2 class="top-margin">Browse full list of terms</h2>';
+      my $table = $self->new_table([
+                                  {'key' => 'term', 'title' => 'Term'},
+                                  {'key' => 'type', 'title' => 'Category'},
+                                  {'key' => 'desc', 'title' => 'Description'},
+                                  {'key' => 'more', 'title' => 'Read more'},
+                                ], [], {'class' => 'padded-cell'});
+
+      foreach my $term (sort { lc $a cmp lc $b } keys %glossary) {
+        ## Show parent, to disambiguate similar terms
+        my $entry = $glossary{$term};
+        my $type;
+        if ($entry->{'parents'}) {
+          $type = join(', ', @{$entry->{'parents'}});
+        }
+        else {
+          $type = '-';
+        }
+
+        ## Link to Wikipedia if available
+        my $more = '';
+        if ($entry->{'wiki'}) {
+          $more = sprintf '<a href="%s">Wikipedia</a>', $entry->{'wiki'};
+        }      
+
+        $table->add_row({
+                          'term' => $term, 
+                          'type' => $type,
+                          'desc' => $entry->{'desc'},
+                          'more' => $more,
+                        }); 
+      }
+      $html .= $table->render;
+    }
   }
 
-  $table->add_row(
-    $_->{'word'} . ( $_->{'expanded'} ? " ($_->{'expanded'})" : '' ),
-    $_->{'meaning'}
-  ) for @$words;
+  $html .= '</div>';
 
-  return sprintf '<h2>Glossary</h2>%s', $table->render;
-}
+  return $html;
+} 
 
 1;

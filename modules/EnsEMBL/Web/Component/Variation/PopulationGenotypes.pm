@@ -227,7 +227,8 @@ sub format_table {
     ## Get URL
     my $url = $self->pop_url($name, $freq_data->{$pop_id}{'pop_info'}{'PopLink'});
     if ($url) {
-      $pop_urls{$pop_id} = $url;
+      $pop_urls{$pop_id}  = $url;
+      $pop_urls{$pop_id} .= $name if ($url eq $hub->get_ExtURL('EVA_STUDY'));
       $urls_seen{$url}++;
     }
 
@@ -253,9 +254,18 @@ sub format_table {
   push @ids, $all if $all;
   my @super_order = sort {$tree->{$a}{'name'} cmp $tree->{$b}{'name'}} keys (%$tree);
   foreach my $super (@super_order) {
-    next if ($all && $super == $all); # Skip the 3 layers structure, which leads to duplicated rows
-    push @ids, $super;
     my $children = $tree->{$super}{'children'} || {};
+    my $next_level_has_children = 0;
+    foreach my $child_id (keys %$children) {
+      if ($tree->{$child_id}{'children'}) {
+        $next_level_has_children = 1;
+      }
+    }
+    if ($all && $super == $all) {
+      next if ($next_level_has_children); # Skip the 3 layers structure, which leads to duplicated rows
+    } else {
+      push @ids, $super;
+    }
     push @ids, sort {$children->{$a} cmp $children->{$b}} keys (%$children);
   }
 
@@ -490,11 +500,14 @@ sub generic_group_link {
   my $title   = shift;
   my $pop_url = shift;
 
+  return '' if ($title =~ /PRJEB\d+/i);
+
   $title =~ /^(.+)\s*\(\d+\)/;
   my $project_name = ($1) ? $1 : $title;
-  $project_name = ($project_name =~ /(project|consortium)/i) ? "<b>$project_name</b>" : ' ';
+
+  $project_name = ($project_name =~ /(project|consortium)/i) ? "<b>$project_name</b> " : '';
   
-  return sprintf('<div style="clear:both"></div><p><a href="%s" rel="external">More information about the %s populations</a></p>', $pop_url, $project_name);
+  return sprintf('<div style="clear:both"></div><p><a href="%s" rel="external">More information about the %spopulations</a></p>', $pop_url, $project_name);
 }
 
 sub format_allele_genotype_content {

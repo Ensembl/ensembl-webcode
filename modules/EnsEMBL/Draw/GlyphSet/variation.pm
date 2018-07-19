@@ -114,15 +114,18 @@ sub get_data {
       ## This is a bit clunky, but we have to pass colour data 
       ## to the drawing module on a per-feature basis
       my $colour_lookup = {};
+      my $ok_features   = [];
       foreach (@$features_list) {
+        next if $_->{'end'} < 1;
         my $key = $_->{'colour_key'};
         $colour_lookup->{$key} ||= $self->get_colours($_);
         my $colour = $self->{'legend'}{'variation_legend'}{$key} ||= $colour_lookup->{$key}{'feature'};
         $_->{'colour'}        = $colour;
         $_->{'colour_lookup'} = $colour_lookup->{$key};
         $self->{'legend'}{'variation_legend'}{$key} ||= $colour;
+        push @$ok_features, $_;
       }
-      return [{'features' => $features_list}];
+      return [{'features' => $ok_features}];
     }
   }
 }

@@ -101,9 +101,9 @@ sub transcript_table {
     }
   }
   if (%unique_synonyms) {
-    my $syns = join ', ', keys %unique_synonyms;
+    my $syns = join ', ', sort keys %unique_synonyms;
     $syns_html = "<p>$syns</p>";
-    $table->add_row('Synonyms', $syns_html);
+    $table->add_row('Gene Synonyms', $syns_html);
   }
 
   my $seq_region_name  = $object->seq_region_name;
@@ -714,13 +714,18 @@ sub species_stats {
   });
   my $prov_name = $sd->PROVIDER_NAME;
   if ($prov_name) {
-    $prov_name =~ s/_/ /;
-    my $prov_url  = $sd->PROVIDER_URL;
-    $prov_url = 'http://'.$prov_url unless $prov_url =~ /^http/;
-    my $provider = $prov_url && $prov_name ne 'Ensembl' ? sprintf('<a href="%s">%s</a>', $prov_url, $prov_name) : $prov_name;
+    my @prov_names = ref $prov_name eq 'ARRAY' ? @$prov_name : ($prov_name);
+    my @providers;
+    foreach my $pv (@prov_names) {
+      $prov_name =~ s/_/ /;
+      my $prov_url  = $sd->PROVIDER_URL;
+      $prov_url = 'http://'.$prov_url unless $prov_url =~ /^http/;
+      my $provider = $prov_url && $pv ne 'Ensembl' ? sprintf('<a href="%s">%s</a>', $prov_url, $pv) : $pv;
+      push @providers, $provider;
+    }
     $summary->add_row({
       'name' => '<b>Annotation provider</b>',
-      'stat' => $provider, 
+      'stat' => join(', ', @providers), 
     });
   }
   my @A         = @{$meta_container->list_value_by_key('genebuild.method')};
@@ -908,11 +913,25 @@ sub check_for_missing_species {
       $warnings .= sprintf('<p>None of the other species in this set align to %s in this region</p>', $species_defs->SPECIES_COMMON_NAME);
     } else {
       my $str = '';
-      $str = $missing_hash->{strains} ? @{$missing_hash->{strains}} . ' strain' : '';
-      $str .= $missing_hash->{strains} && @{$missing_hash->{strains}} > 1 ? 's' : '';
-      $str .= $missing_hash->{species} ? ' and ' . @{$missing_hash->{species}} . ' species' : '';
+      my $count = 0;
 
-      $warnings .= sprintf('<p>The following %s have no alignment in this region:<ul><li>%s</li></ul></p>',
+      if ($missing_hash->{strains}) {
+        $count = scalar @{$missing_hash->{strains}};
+        $str .= "$count strain";
+        $str .= 's' if $count > 1;
+      }
+
+      $str .= ' and ' if ($missing_hash->{strains} && $missing_hash->{species});
+      
+      if ($missing_hash->{species}) {
+        my $sp_count = @{$missing_hash->{species}};
+        $str .= "$sp_count species";
+        $count += $sp_count;
+      }
+
+      $str .= $count > 1 ? ' have' : ' has';
+
+      $warnings .= sprintf('<p>The following %s no alignment in this region:<ul><li>%s</li></ul></p>',
                                  $str,
                                  join "</li>\n<li>", sort map $species_defs->species_label($_), @missing
                             );
@@ -1509,20 +1528,16 @@ sub render_var_coverage {
   my ($f_s, $f_e, $v_s, $v_e, $color) = @_;
 
   my $render;
+  my $var_render;
 
   $color ||= 'red';
 
   my $total_width = 100;
   my $left_width  = 0;
+  my $right_width = 0;
+  my $small_var   = 0;
 
   my $scale = $total_width / ($f_e - $f_s + 1);
-
-  # left part
-  if($v_s > $f_s) {
-    $left_width = sprintf("%.0f", ($v_s - $f_s) * $scale);
-    $left_width-- if ($left_width == $total_width);
-    $render .= '<div class="var_trans_pos_sub" style="width:'.$left_width.'px"></div>';
-  }
 
   # middle part
   if ($v_s <= $f_e && $v_e >= $f_s) {
@@ -1531,10 +1546,27 @@ sub render_var_coverage {
 
     my $bp = ($e - $s) + 1;
 
-    my $right_width = sprintf("%.0f", $bp * $scale);
-       $right_width = 1 if ($right_width < 1 || $left_width == ($total_width - 1));
-    $render .= sprintf(qq{<div class="var_trans_pos_sub" style="width:%ipx;background-color:%s"></div>}, $right_width, $color);
+    $right_width = sprintf("%.0f", $bp * $scale);
+    if (($right_width <= 2) || $left_width == $total_width) {
+      $right_width = 3;
+      $small_var   = 1;
+    }
+    $var_render = sprintf(qq{<div class="var_trans_pos_sub" style="width:%ipx;background-color:%s"></div>}, $right_width, $color);
   }
+
+  # left part
+  if($v_s > $f_s) {
+    $left_width = sprintf("%.0f", ($v_s - $f_s) * $scale);
+    if ($left_width == $total_width)  {
+      $left_width -= $right_width;
+      $left_width = 0 if ($left_width < 0);
+    }
+    elsif ($small_var && $left_width > 0) {
+      $left_width--;
+    }
+    $render .= '<div class="var_trans_pos_sub" style="width:'.$left_width.'px"></div>';
+  }
+  $render .= $var_render if ($var_render);
 
   if ($render) {
     $render = qq{<div class="var_trans_pos">$render</div>};
@@ -1574,12 +1606,13 @@ sub vep_icon {
 }
 
 sub display_items_list {
-  my ($self, $div_id, $title, $label, $display_data, $export_data, $no_count_label) = @_;
+  my ($self, $div_id, $title, $label, $display_data, $export_data, $no_count_label, $specific_count) = @_;
 
   my $html = "";
   my @sorted_data = ($display_data->[0] =~ /^<a/i) ? @{$display_data} : sort { lc($a) cmp lc($b) } @{$display_data};
   my $count = scalar(@{$display_data});
-  if ($count > 5) {
+  my $count_threshold = ($specific_count) ? $specific_count : 5;
+  if ($count >= $count_threshold) {
     $html = sprintf(qq{
         <a title="Click to show the list of %s" rel="%s" href="#" class="toggle_link toggle closed _slide_toggle _no_export">%s</a>
         <div class="%s"><div class="toggleable" style="display:none"><span class="hidden export">%s</span><ul class="_no_export">%s</ul></div></div>

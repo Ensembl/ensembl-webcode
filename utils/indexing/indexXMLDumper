@@ -65,9 +65,9 @@ GetOptions('species=s'        => \$species_list,
            'log=s'            => \$log,
            'dir=s'            => \$dir,
            'check_xml'        => \$check_xml,
-	   'help'             => \$help,
-	   'tmpdir=s'         => \$tmpdir,
-	   'array'	      => \$array,
+     'help'             => \$help,
+     'tmpdir=s'         => \$tmpdir,
+     'array'        => \$array,
          );
 
 if ($help){
@@ -89,19 +89,22 @@ my $website_url = $sitetype eq 'Vega' ? 'http://vega.sanger.ac.uk/'
 
 # used to boost certain records
 my $boosts = {
-	      'GeneTrans' => {
-			      'core'    => 40,
-			      'is_ref'  => 10,
-                              'non_ref' => 0,
-			     },
-	      'Family' => {
-			   'species' => 50,
-                           'ms'      => 10,
-			  },
-	      'GeneTree' => {
-			     'All' => 50,
-			    },
-	     };
+        'GeneTrans' => {
+          'core'    => 40,
+          'is_ref'  => 10,
+          'non_ref' => 0,
+        },
+        'Family' => {
+          'species' => 50,
+          'ms'      => 10,
+        },
+        'GeneTree' => {
+          'All' => 50,
+        },
+        'PhenotypeOntlogy' => {
+          'All' => 50,
+        }, 
+      };
 
 # redirect STDOUT and STDERR to a file if not in debug mode
 if ($debug) {
@@ -166,7 +169,7 @@ else {
 
 # where are xml files put on the filesystem ?
 my %shards = (
-  Domain              => 'ensembl_core',	
+  Domain              => 'ensembl_core',  
   Family              => 'ensembl_core',
   Gene                => 'ensembl_core',
   GeneTree            => 'ensembl_core',
@@ -262,7 +265,7 @@ foreach my $index (@indexes) {
       $conf->{'variation_dbh'} = DBI->connect( "dbi:mysql:$variation->{'NAME'};host=$variation->{'HOST'};port=$variation->{'PORT'}",
                                                $variation->{'USER'},
                                                $variation->{'PASS'},
-					        { PrintError => 1, RaiseError => 0} );
+                  { PrintError => 1, RaiseError => 0} );
       $conf->{'variation_details'} = $variation;
       $conf->{'variation_dbname'}  = $variation->{'NAME'};
     }
@@ -278,7 +281,7 @@ foreach my $index (@indexes) {
       $conf->{'website'}{'dbh'}  = DBI->connect("dbi:mysql:$website->{'NAME'};host=$website->{'HOST'};port=$website->{'PORT'}",
                                                 $website->{'USER'},
                                                 $website->{'PASS'},
-						 { PrintError => 1, RaiseError => 0} );
+             { PrintError => 1, RaiseError => 0} );
     }
     else {
       $conf->{'species'}             = $species;
@@ -307,18 +310,18 @@ foreach my $index (@indexes) {
         $conf->{'dbh'} = DBI->connect("dbi:mysql:$core->{'NAME'};host=$core->{'HOST'};port=$core->{'PORT'}",
                                       $core->{'USER'},
                                       $core->{'PASS'},
- 				       {PrintError => 1, RaiseError => 0}
+                {PrintError => 1, RaiseError => 0}
                                     );
         if ( ! $conf->{'dbh'}) {
           print LOG "WARNING: Unable to get database connection for ".$core->{'NAME'}."\n";
           exit;
         }
-        if ($index =~ /Family|GeneTree/) {
+        if ($index =~ /Family|GeneTree|Gene/) {
           my $compara = $PD->{'MULTI'}{'databases'}{'DATABASE_COMPARA'};
           $conf->{'dbh_compara'} = DBI->connect("dbi:mysql:$compara->{'NAME'};host=$compara->{'HOST'};port=$compara->{'PORT'}",
                                                 $compara->{'USER'},
                                                 $compara->{'PASS'},
-						  {PrintError => 1, RaiseError => 0}
+              {PrintError => 1, RaiseError => 0}
                                               );
         }
         my $function = "dump$index";
@@ -597,7 +600,6 @@ sub dumpVariation {
   my $conf = shift;
   my $VariationDB = $conf->{'variation_dbname'};
   return unless $VariationDB;
-
   my $counter   = make_counter(0);
   my $dbspecies = $conf->{'species'};
   my $file = $conf->{'directory'}."/${VariationDB}_Variation.xml";
@@ -608,6 +610,7 @@ sub dumpVariation {
   print LOG "  Dumping $VariationDB Variations to $file... ".&date_and_mem()."\n";
   header($fh);
   my ($counter2,$file2,$fh2);
+
   my $somatic = { map { @$_ } @{$conf->{'variation_dbh'}->selectall_arrayref( "select source_id, somatic_status from source" )} };
   my $somatic_present =  $do_private ? 0 : ( grep { $somatic->{$_} } keys %$somatic ) ? 1 : 0;
   if ($somatic_present) {
@@ -623,15 +626,26 @@ sub dumpVariation {
   my $sth;
   my ($hgvs_sth);
   my $all_hgvs_names = on_disk_set('all_hgvs_names');
+  my $sql_batch = 250000000; #split the HGVS query into batches of this size
   if ($dbspecies ne 'omo_sapiens') {
     print LOG "    Preparing to get HGVS data ".&date_and_mem()."\n";
-    $sth = $conf->{'variation_dbh'}->prepare(qq(
-    SELECT variation_id, hgvs_name
-       FROM variation_hgvs));
-    $sth->execute;
-    print LOG "    Got HGVS data ".&date_and_mem()."\n";
-    while ( my ($variation_id,$hgvs_name) = $sth->fetchrow_array ) {
-      set_add($all_hgvs_names,$variation_id,$hgvs_name);
+    my $i = 0;
+    my $continue = 1;
+    while($continue) {
+      $sth = $conf->{'variation_dbh'}->prepare(qq(
+        SELECT variation_id, hgvs_name
+          FROM variation_hgvs limit $sql_batch offset $i));
+      $sth->execute;
+      #$continue++;
+      if($sth->rows) {
+        $i += $sql_batch;
+        print LOG "    Got HGVS data set ".&date_and_mem()."\n";
+        while ( my ($variation_id,$hgvs_name) = $sth->fetchrow_array ) {
+          set_add($all_hgvs_names,$variation_id,$hgvs_name);      
+        }
+      } else {
+        $continue = 0;
+      }
     }
   }
   else {
@@ -639,7 +653,6 @@ sub dumpVariation {
     my $sql = qq(SELECT hgvs_name FROM variation_hgvs where variation_id = ?);
     $hgvs_sth = $conf->{'variation_dbh'}->prepare($sql);
   }
-
   print LOG "    Preparing to get HGNC data ".&date_and_mem()."\n";
   my $all_hgnc_names = on_disk_set('all_hgnc_names');
   $sth = $conf->{'variation_dbh'}->prepare(qq(
@@ -766,12 +779,24 @@ GROUP_CONCAT(vs.source_id,' ',vs.name)
 
   # Statement to get all variations, both mapped, failed and the precious non-mapped, non-failed
   print LOG "    Preparing to get all SNPs ".&date_and_mem()."\n";
-  $sth = $conf->{'variation_dbh'}->prepare(qq(
-    SELECT v.variation_id, v.name, v.source_id, v.somatic
-      FROM variation v));
+    my $rowcache;
+    my $i = 0;
+    my $continue = 1;
+#split query
+    while($continue) {      
+      $sth = $conf->{'variation_dbh'}->prepare(qq(
+        SELECT v.variation_id, v.name, v.source_id, v.somatic
+          FROM variation v limit $sql_batch offset $i));
 
-  $sth->execute() or die "Error:", $DBI::errstr;
-
+      $sth->execute() or die "Error:", $DBI::errstr;
+      #$continue++;
+      if($sth->rows) {
+        $i += $sql_batch;
+        push(@$rowcache, @{$sth->fetchall_arrayref});
+      } else {
+        $continue = 0;
+      }
+    }
   print LOG "     ...executed SQL, now retrieving data and generating xml ".&date_and_mem()."\n";
 
   my $new_syn_c = 0;
@@ -1003,8 +1028,10 @@ sub PhenLine {
                     $id);
   $species =~ s/_/ /;
   $name = &clean($name,'name');
+  my $boost = $is_ont ? $boosts->{'PhenotypeOntlogy'}{'All'} : '';
+  my $doc = $boost ? qq(doc boost="$boost") : 'doc';
   my $xml = qq(
-<doc>
+<$doc>
   <field name="id">$id</field>
   <field name="name">$name</field>);
   foreach my $syn (@$synonyms) {
@@ -1784,8 +1811,8 @@ sub dumpFamily {
     my (%genes,%proteins,%transcripts);
     foreach my $gene_id (split ',',$gene_member_ids) {
       if ($gene_members->{$gene_id}) {
-	my $stable_id = $gene_members->{$gene_id}{'stable_id'};
-	my $display_label = $gene_names->{$stable_id} || 'none';
+  my $stable_id = $gene_members->{$gene_id}{'stable_id'};
+  my $display_label = $gene_names->{$stable_id} || 'none';
         $genes{$stable_id}{display_label} = $display_label;
       }
     }
@@ -1793,8 +1820,8 @@ sub dumpFamily {
       if ($protein_members->{$tl_id}) {
         my $tl_sid = $protein_members->{$tl_id}{'stable_id'};
         $proteins{$tl_sid}++;
-	my $t_sid = $transl->{$tl_sid}{'trans'};
-	$transcripts{$t_sid}++;
+  my $t_sid = $transl->{$tl_sid}{'trans'};
+  $transcripts{$t_sid}++;
       }
     }
     if (%genes) {
@@ -2163,6 +2190,21 @@ sub dumpGene {
   $dbs{'otherfeatures'} = $ESTGENEDB if $ESTGENEDB;
 #  $dbs{'rnaseq'} = $RNASEQDB if $RNASEQDB; #don't add these until the IDs mean something and the gene pages are usefull!
   my $total_c;
+
+# lookup orthologs for later
+  my $has_orthologues = ();
+  my $sql = qq(
+       SELECT stable_id
+         FROM gene_member gm, gene_member_hom_stats gmhs
+        WHERE gm.gene_member_id = gmhs.gene_member_id
+          AND gmhs.collection = 'default'
+          AND gmhs.orthologues);
+  my $sth = $conf->{'dbh_compara'}->prepare($sql);
+  $sth->execute;
+  while (my $r = $sth->fetchrow_arrayref()) {
+      $has_orthologues->{$r->[0]}=1;
+   }
+
  DB:
   foreach my $db ( sort { $b cmp $a } keys %dbs) {
     my $dbname    = $dbs{$db};
@@ -2237,7 +2279,7 @@ sub dumpGene {
       }
       print LOG "    $type xref query done ".&date_and_mem()."\n";
     }
-    #    warn Dumper(\%xrefs); exit;
+#        warn Dumper(\%xrefs); exit;
 
     my %gene_trans_syns = ();
     if ($sitetype eq 'Vega') {
@@ -2320,11 +2362,11 @@ sub dumpGene {
       next if $wd->{'gene'}{'do_not_display'};
       next if ($ln =~ /rnaseq/);
       next if ($ln =~ /ccds_import/); #exclude CCDS transcripts
-      next if ($ln =~ /refseq_\w+_import/); #exclude RefSeq transcripts
+      next if ($ln =~ /refseq_.*import/); #exclude RefSeq transcripts
       if( $old->{'gid'} != $gid ) {
         if( $old->{'gid'} ) {
           my $type = $old->{'biotype'}.' '.$old->{'ad_dl'};
-	  (my $old_gsi) = keys %{$old->{'gsid'}};
+         (my $old_gsi) = keys %{$old->{'gsid'}};
           &p( GeneTransLine('Gene',
                        $dbspecies,
                        $old->{'gsid'},
@@ -2341,6 +2383,7 @@ sub dumpGene {
                        '',
                        $gene_locations->{$old_gsi},
                        $has_patches,
+                       $has_orthologues->{$gsid} ? 1 : 0,
                        $db,
                        $counter),
               $fh);
@@ -2411,6 +2454,7 @@ sub dumpGene {
                         '',
                         $gene_locations->{$old_gsi},
                         $has_patches,
+                        $has_orthologues->{$old->{'gsid'}} ? 1 : 0,
                         $db,
                         $counter),
           $fh);
@@ -2694,11 +2738,11 @@ sub dumpTranscript {
       next if $wd->{'gene'}{'do_not_display'};
       next if ($ln =~ /rnaseq/);
       next if ($ln =~ /ccds_import/); #exclude CCDS transcripts
-      next if ($ln =~ /refseq_human_import/); #exclude RefSeq transcripts
+      next if ($ln =~ /refseq_.*import/); #exclude RefSeq transcripts
       if( $old->{'tid'} != $tid ) {
         if( $old->{'tid'} ) {
           my $type = $old->{'biotype'}.' '.$old->{'ad_dl'};
-	  (my $old_tsi) = keys %{$old->{'tsid'}};
+    (my $old_tsi) = keys %{$old->{'tsid'}};
           &p( GeneTransLine('Transcript',
                         $dbspecies,
                         $old->{'tsid'},
@@ -2715,6 +2759,7 @@ sub dumpTranscript {
                         $old->{'domains'},
                         $trans_locations->{$old_tsi},
                         $has_patches,
+                        '',
                         $db,
                         $counter),
               $fh);
@@ -2799,6 +2844,7 @@ sub dumpTranscript {
                         $old->{'domains'},
                         $trans_locations->{$old_tsi},
                         $has_patches,
+                        '',
                         $db,
                         $counter),
           $fh) if ($old->{'tsid'});
@@ -2815,7 +2861,7 @@ sub dumpTranscript {
 }
 
 sub GeneTransLine {
-  my ($type, $species, $id, $tsids, $tlsids, $exons, $biotype, $ad_label, $disp_xref, $desc, $xrefs, $synonyms, $supporting_evidence, $domains, $feat_loc, $has_patches, $db, $counter) = @_;
+  my ($type, $species, $id, $tsids, $tlsids, $exons, $biotype, $ad_label, $disp_xref, $desc, $xrefs, $synonyms, $supporting_evidence, $domains, $feat_loc, $has_patches, $has_orthologues, $db, $counter) = @_;
 
   #get stable ID of object
   my ($sid,$sid_ver);
@@ -2845,9 +2891,14 @@ sub GeneTransLine {
     $loc = $feat_loc->{'sr_name'} .':'. $feat_loc->{'seq_region_start'} .'-'. $feat_loc->{'seq_region_end'} .':'. $feat_loc->{'seq_region_strand'};
   }
 
-  my $quick_links;
+  my @quick_links;
   if ($type eq 'Transcript') {
-    $quick_links = %{$tlsids} ? 'protein:1' : 'protein:0';
+    my $value = %{$tlsids} ? 'protein:1' : 'protein:0';
+    push @quick_links, $value; 
+  }
+  else {
+    my $value = $has_orthologues ? 'orthologues:1' : 'orthologues:0';
+    push @quick_links, $value;  
   }
 
   $species =~ s/_/ /;
@@ -2871,9 +2922,9 @@ sub GeneTransLine {
   <field name="ref_boost">$ref_boost_value</field>);
   }
   $xml .= &common_fields($species,$type,$db);
-  if ($quick_links) {
+  foreach (@quick_links) {
    $xml .=qq(
-  <field name="quick_links">$quick_links</field>);
+  <field name="quick_links">$_</field>);
   }
   my (%seen_labels,%seen_syns,%seen_sources,%labels);
 
@@ -3330,7 +3381,6 @@ sub on_disk_set {
 my $SYNC_COUNT = 0;
 sub set_add {
   my ($var,$k,$v) = @_;
-
   $var->{$k}.="\t$v";
   $SYNC_COUNT++;
   unless($SYNC_COUNT%1000000) {

@@ -218,7 +218,10 @@ sub populate_tree {
   ));
   
   $var_menu->append($self->create_node('Variation_Gene/Image',  'Variant image',
-    [qw( image EnsEMBL::Web::Component::Gene::VariationImage )],
+    [qw( 
+        notice  EnsEMBL::Web::Component::Gene::RetirementNotice 
+        image   EnsEMBL::Web::Component::Gene::VariationImage 
+      )],
     { 'availability' => 'gene database:variation core not_patch' }
   ));
 	
@@ -276,6 +279,12 @@ sub populate_tree {
     { 'availability' => 'gene', 'no_menu_entry' => 1 }
   );
 
+  my $gxa = $self->get_node('ExpressionAtlas');
+  my $pathway = $self->create_node('Pathway', 'Pathway',
+    [qw( pathway EnsEMBL::Web::Component::Gene::Pathway )],
+    { 'availability'  => 'gene has_pathway' }
+  );
+  $gxa->after($pathway);
 
 }
 

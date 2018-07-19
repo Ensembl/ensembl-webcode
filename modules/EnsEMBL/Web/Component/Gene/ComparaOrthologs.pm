@@ -65,27 +65,38 @@ sub content {
   my $is_ncrna     = ($object->Obj->biotype =~ /RNA/);
   my $species_name = $species_defs->DISPLAY_NAME;
   my $strain_url   = $species_defs->IS_STRAIN_OF ? "Strain_" : "";
-  my $strain_param = ";strain=1" if($self->is_strain);
-  
+  my $strain_param = $self->is_strain ? ";strain=1" : ""; # initialize variable even if is_strain is falsy to avoid warnings
+
   my @orthologues = (
     $object->get_homology_matches('ENSEMBL_ORTHOLOGUES', undef, undef, $cdb), 
-  );
+  ); 
   
   my %orthologue_list;
   my %skipped;
 
   my %not_seen = $self->_get_all_analysed_species($cdb);
-  
+
+  # The %not_seen hash can either have the production name or species url as the code is shared across ensembl and all divisions of e!g.
+  # These use either production name or species url, so difficult to find out what is used by the %not_seen hash.
+  # In some case cases, such as pan compara, there can be a mix of production name and species url.
+  # Therefore, need to have two delete statements to make sure the species (with orthologues) get deleted properly.
   delete $not_seen{$hub->species}; #deleting current species
+  delete $not_seen{lc($hub->species)};
 
   for (keys %not_seen) {
     #do not show non-strain species on strain view
-    if ($self->is_strain && !$species_defs->get_config($_, 'RELATED_TAXON')) { delete $not_seen{$_}; }
+    if ($self->is_strain && !$species_defs->get_config($_, 'RELATED_TAXON')) {
+      delete $not_seen{$_};
+      delete $not_seen{lc $_};
+    }
 
     #do not show strain species on main species view
-    if(!$self->is_strain && $species_defs->get_config($_, 'IS_STRAIN_OF')) { delete $not_seen{$_}; }
+    if (!$self->is_strain && $species_defs->get_config($_, 'IS_STRAIN_OF')) {
+      delete $not_seen{$_};
+      delete $not_seen{lc $_};
+    }
   }
-  
+
   foreach my $homology_type (@orthologues) {
     foreach (keys %$homology_type) {
       (my $species = $_) =~ tr/ /_/;
@@ -94,15 +105,17 @@ sub content {
       #do not show strain species on main species view
       if ((!$self->is_strain && $species_defs->get_config($species, 'IS_STRAIN_OF')) || ($self->is_strain && !$species_defs->get_config($species, 'RELATED_TAXON'))) {
         delete $not_seen{$species};
+        delete $not_seen{lc $species};
         next;
       }
 
       $orthologue_list{$species} = {%{$orthologue_list{$species}||{}}, %{$homology_type->{$_}}};
       $skipped{$species}        += keys %{$homology_type->{$_}} if $self->param('species_' . lc $species) eq 'off';
       delete $not_seen{$species};
+      delete $not_seen{lc $species};
     }
   }
-  
+
   return '<p>No orthologues have been identified for this gene</p>' unless keys %orthologue_list;
 
   my %orthologue_map = qw(SEED BRH PIP RHS);
@@ -135,11 +148,12 @@ sub content {
 
     foreach my $set (@$set_order) {
       my $set_info = $species_sets->{$set};
-      
+      my $species_selected = $set eq 'all' ? 'checked="checked"' : ''; # select all species by default
+
       my $none_title = $set_info->{'none'} ? sprintf('<a href="#list_no_ortho">%d</a>', $set_info->{'none'}) : 0;
       push @rows, {
         'set'       => "<strong>$set_info->{'title'}</strong> (<i>$set_info->{'all'} species</i>)<br />$set_info->{'desc'}",
-        'show'      => qq{<input type="checkbox" class="table_filter" title="Check to show these species in table below" name="orthologues" value="$set" />},
+        'show'      => qq{<input type="checkbox" class="table_filter" title="Check to show these species in table below" name="orthologues" value="$set" $species_selected />},
         '1:1'       => $set_info->{'1-to-1'}       || 0,
         '1:many'    => $set_info->{'1-to-many'}    || 0,
         'many:many' => $set_info->{'Many-to-many'} || 0,
@@ -190,14 +204,14 @@ sub content {
       # Add in the dN/dS ratio
       my $orthologue_dnds_ratio = $orthologue->{'homology_dnds_ratio'} || 'n/a';
       my $dnds_class  = ($orthologue_dnds_ratio ne "n/a" && $orthologue_dnds_ratio >= 1) ? "box-highlight" : "";
-      
+
       # GOC Score, wgac and high confidence
       my $goc_score  = (defined $orthologue->{'goc_score'} && $orthologue->{'goc_score'} >= 0) ? $orthologue->{'goc_score'} : 'n/a';
       my $wgac       = (defined $orthologue->{'wgac'} && $orthologue->{'wgac'} >= 0) ? $orthologue->{'wgac'} : 'n/a';
       my $confidence = $orthologue->{'highconfidence'} eq '1' ? 'Yes' : $orthologue->{'highconfidence'} eq '0' ? 'No' : 'n/a';
       my $goc_class  = ($goc_score ne "n/a" && $goc_score >= $orthologue->{goc_threshold}) ? "box-highlight" : "";
       my $wga_class  = ($wgac ne "n/a" && $wgac >= $orthologue->{wga_threshold}) ? "box-highlight" : "";
-         
+
       (my $spp = $orthologue->{'spp'}) =~ tr/ /_/;     
       my $link_url = $hub->url({
         species => $spp,
@@ -246,7 +260,7 @@ sub content {
         if ($is_ncrna) {
           $alignment_link .= sprintf '<li><a href="%s" class="notext">Alignment</a></li>', $hub->url({action => $strain_url.'Compara_Ortholog', function => 'Alignment' . ($cdb =~ /pan/ ? '_pan_compara' : ''), hom_id => $orthologue->{'dbID'}, g1 => $stable_id});
         } else {
-          $alignment_link .= sprintf '<a href="%s" class="_zmenu">View Sequence Alignments</a><a class="hidden _zmenu_link" href="%s%s"></a>', $page_url ,$zmenu_url, $strain_param;          
+          $alignment_link .= sprintf '<a href="%s" class="_zmenu">View Sequence Alignments</a><a class="hidden _zmenu_link" href="%s%s"></a>', $page_url ,$zmenu_url, $strain_param;
         }
         
         $alignview = 1;
@@ -293,7 +307,7 @@ sub content {
       });
 
       my $table_details = {
-        'Species'    => join('<br />(', split /\s*\(/, $species_defs->species_label($species)),
+        'Species'    => join('<br />(', split(/\s*\(/, $species_defs->species_label($species))),
         'Type'       => $self->html_format ? glossary_helptip($hub, ucfirst $orthologue_desc, ucfirst "$orthologue_desc orthologues").qq{<p class="top-margin"><a href="$tree_url">View Gene Tree</a></p>} : glossary_helptip($hub, ucfirst $orthologue_desc, ucfirst "$orthologue_desc orthologues") ,
         'dN/dS'      => qq{<span class="$dnds_class">$orthologue_dnds_ratio</span>},
         'identifier' => $self->html_format ? $id_info : $stable_id,
@@ -305,7 +319,7 @@ sub content {
         'options'    => { class => join(' ', @{$sets_by_species->{$species} || []}) }
       };      
       $table_details->{'Gene name(Xref)'}=$orthologue->{'display_id'} if(!$self->html_format);
-      
+
       push @rows, $table_details;
     }
   }
@@ -331,16 +345,18 @@ sub content {
       )
     );
   }   
- 
+
   if (%not_seen) {
     $html .= '<br /><a name="list_no_ortho"/>' . $self->_info(
       'Species without orthologues',
       sprintf(
-        '<p>%d species are not shown in the table above because they don\'t have any orthologue with %s.<ul><li>%s</li></ul></p>',
+        '<p><span class="no_ortho_count">%d</span> species are not shown in the table above because they don\'t have any orthologue with %s.<ul id="no_ortho_species">%s</ul></p> <input type="hidden" class="panel_type" value="ComparaOrtholog" />',
         scalar(keys %not_seen),
         $self->object->Obj->stable_id,
-        join "</li>\n<li>", sort map {$species_defs->species_label($_)} keys %not_seen,
-      )
+        $self->get_no_ortho_species_html(\%not_seen, $sets_by_species)
+      ),
+      undef,
+      'no_ortho_message_pad'
     );
   }
 
@@ -348,6 +364,20 @@ sub content {
 }
 
 sub export_options { return {'action' => 'Orthologs'}; }
+
+sub get_no_ortho_species_html {
+  my ($self, $not_seen, $sets_by_species) = @_;
+  my $hub = $self->hub;
+  my $no_ortho_species_html = '';
+
+  foreach (keys %$not_seen) {
+    if ($sets_by_species->{$_}) {
+      $no_ortho_species_html .= '<li class="'. join(' ', @{$sets_by_species->{$_}}) .'">'. $hub->species_defs->species_label($_) .'</li>';
+    }
+  }
+
+  return $no_ortho_species_html;
+}
 
 sub get_export_data {
 ## Get data for export

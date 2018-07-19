@@ -171,6 +171,11 @@ sub web_proxy {
   return $SiteDefs::HTTP_PROXY || '';
 }
 
+sub https_proxy {
+  ## Gets the http and https proxy address
+  return $SiteDefs::HTTPS_PROXY || '';
+}
+
 sub image_width {
   ## Gets image width or sets it for subsequent requests by setting a cookie
   ## @param Width in pixels (if setting)
@@ -269,7 +274,9 @@ sub core_object {
 
   my $object;
   if ($self->{'builder'}) {
-    $object = $self->{'builder'}->object(ucfirst $name); 
+    ## Hack for inconsistent capitalisation of LRG
+    if ($name =~ /lrg/i) { $name = 'LRG'; } else { $name = ucfirst($name); }
+    $object = $self->{'builder'}->object($name); 
   }
   return $object;
 }
@@ -687,8 +694,8 @@ sub glossary_lookup {
     my %glossary  = $self->species_defs->multiX('ENSEMBL_GLOSSARY');
     my %lookup    = $self->species_defs->multiX('TEXT_LOOKUP');
 
-    $self->{'_glossary_lookup'}{$_} = $glossary{$_} for keys %glossary;
-    $self->{'_glossary_lookup'}{$_} = $lookup{$_}   for keys %lookup;
+    $self->{'_glossary_lookup'}{$_} = $glossary{$_}{'desc'} for keys %glossary;
+    $self->{'_glossary_lookup'}{$_} = $lookup{$_}{'desc'} for keys %lookup;
   }
 
   return $self->{'_glossary_lookup'};

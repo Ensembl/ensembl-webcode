@@ -575,13 +575,14 @@ sub location {
   my $id  = $object->name;
   my (@rows, $location, $location_link);
   
-  if(my $selected_mapping = $object->selected_variation_feature_mapping) {
+  my $selected_mapping = $object->selected_variation_feature_mapping;
+
+  if ($selected_mapping && scalar(keys(%$selected_mapping))!=0) {
     my $variation = $object->Obj;
     my $type      = $selected_mapping->{'Type'};
     my $region    = $selected_mapping->{'Chr'}; 
     my $start     = $selected_mapping->{'start'};
     my $end       = $selected_mapping->{'end'};
-
 
     my $coord = "$region:$start-$end";
     if ($start == $end) {
@@ -609,7 +610,7 @@ sub location {
     );
   }
   else {
-    $location = "This variant maps to $count genomic locations; <b>None selected</b>";
+    $location_link = "This variant maps to $count genomic locations. Please select a location in the box above.";
   }
 
   my $vcf = $self->to_VCF;
@@ -662,7 +663,7 @@ sub evidence_status {
 
   my $src = $self->img_url.'/16/info12.png';
   my $img = qq{<img src="$src" class="_ht" style="vertical-align:bottom;margin-bottom:2px;" title="Click to see all the evidence status descriptions"/>}; 
-  my $info_link = qq{<a href="/info/genome/variation/data_description.html#evidence_status" target="_blank">$img</a>};
+  my $info_link = qq{<a href="/info/genome/variation/prediction/variant_quality.html#evidence_status" target="_blank">$img</a>};
 
   return [ "Evidence status $info_link" , $html ];
 }
@@ -678,7 +679,7 @@ sub clinical_significance {
   
   my $src = $self->img_url.'/16/info12.png';
   my $img = qq{<img src="$src" class="_ht" style="vertical-align:bottom;margin-bottom:2px;" title="Click to see all the clinical significances"/>};
-  my $info_link = qq{<a href="/info/genome/variation/data_description.html#clin_significance" target="_blank">$img</a>};
+  my $info_link = qq{<a href="/info/genome/variation/phenotype/phenotype_annotation.html#clin_significance" target="_blank">$img</a>};
 
   my %clin_sign_icon;
   foreach my $cs (@{$clin_sign}) {
@@ -919,7 +920,7 @@ sub snpedia {
   my ($self, $var_id) = @_;
   my $hub = $self->hub;
   my $cache = $hub->cache;
-  my $desc;
+  my ($desc, $count);
   my $key = $var_id . "_SNPEDIA_DESC";
 
   if($cache) {
@@ -927,65 +928,45 @@ sub snpedia {
     $desc = decode('utf8', $cache->get($key));
   }
 
-  if ($desc) {
-    if ($desc ne 'no_entry') {
-      return [
-        'Description from SNPedia',
-        $desc
-      ];
-    }
-    else {
-      return ();
-    }
-  }
-  else {
+  unless ($desc) {
     # Fetch from snpedia
     my $object = $self->object;
     my $snpedia_wiki_results = $object->get_snpedia_data($var_id);
-    if (!$snpedia_wiki_results->{'pageid'}) {
-      $cache && $cache->set($key, 'no_entry', 60*60*24*7);
-      return ();
-    }
-    
-    my $snpedia_search_link = $hub->get_ExtURL_link('[More information from SNPedia]', 'SNPEDIA_SEARCH', { 'ID' => $var_id });
-    if ($#{$snpedia_wiki_results->{desc}} < 0) {
-      $snpedia_wiki_results->{desc}[0] = 'Description not available ' . $snpedia_search_link;
-    }
+    if ($snpedia_wiki_results->{'pageid'}) {
+      $count = 1; ## Assume we have at least one result
+      my $snpedia_search_link = $hub->get_ExtURL_link('[More information from SNPedia]', 'SNPEDIA_SEARCH', { 'ID' => $var_id });
+      if ($#{$snpedia_wiki_results->{desc}} < 0) {
+        $snpedia_wiki_results->{desc}[0] = 'Description not available ' . $snpedia_search_link;
+      }
 
-    my $count = scalar @{$snpedia_wiki_results->{desc}}; 
-    if ($count > 1) {
-      my $show = 0;
+      $count = scalar @{$snpedia_wiki_results->{desc}}; 
+      if ($count > 1) {
+        my $show = 0;
 
-      $desc =  sprintf( '%s...
+        $desc =  sprintf( '%s...
                     <a title="Click to read more" rel="snpedia_more_desc" href="#" class="toggle_link toggle %s _slide_toggle">%s</a>
                     <div class="toggleable snpedia_more_desc" style="%s">
                       %s
                       %s
                     </div>
                   ',
-        shift @{$snpedia_wiki_results->{desc}},
-        $show ? 'open' : 'closed',        
-        $show ? 'Hide' : 'Show',
-        $show ? '' : 'display:none',
-        join('', map "<p>$_</p>", @{$snpedia_wiki_results->{desc}}),
-        $snpedia_search_link
-      );
-
-      $cache && $cache->set($key, encode('utf8', $desc) || 'no_entry', 60*60*24*7);
-
-      return [
-        'Description from SNPedia',
-        $desc
-      ];
-    }
-    else {
-      $desc = $snpedia_wiki_results->{'desc'}[0];
-      $cache && $cache->set($key, $desc || 'no_entry', 60*60*24*7);
-      return $count ? 
-        [ 'Description from SNPedia',  $desc]
-        : ();
+                  shift @{$snpedia_wiki_results->{desc}},
+                  $show ? 'open' : 'closed',        
+                  $show ? 'Hide' : 'Show',
+                  $show ? '' : 'display:none',
+                  join('', map "<p>$_</p>", grep {$_ =~ /\w+/} @{$snpedia_wiki_results->{desc}}),
+                  $snpedia_search_link
+                );
+      }
+      else {
+        $desc = $snpedia_wiki_results->{'desc'}[0];
+      }
     }
   }
+
+  $desc = $desc ? encode('utf8', $desc) : 'no_entry';
+  $cache && $cache->set($key, $desc, 60*60*24*7);
+  return $count ? [ 'Description from SNPedia', $desc ] : (); 
 }
 
 1;

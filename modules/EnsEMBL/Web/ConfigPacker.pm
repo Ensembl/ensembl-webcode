@@ -77,13 +77,12 @@ sub modify_rest_multi {}
 
 sub munge_databases {
   my $self   = shift;
-  my @tables = qw(core cdna vega vega_update otherfeatures rnaseq);
+  my @tables = qw(core cdna otherfeatures rnaseq);
   $self->_summarise_core_tables($_, 'DATABASE_' . uc $_) for @tables;
   $self->_summarise_xref_types('DATABASE_' . uc $_) for @tables;
   $self->_summarise_variation_db('variation', 'DATABASE_VARIATION');
   $self->_summarise_variation_db('variation_private', 'DATABASE_VARIATION_PRIVATE');
   $self->_summarise_funcgen_db('funcgen', 'DATABASE_FUNCGEN');
-  $self->_compare_update_db('vega_update','DATABASE_VEGA_UPDATE');
 }
 
 sub munge_databases_multi {
@@ -1105,12 +1104,11 @@ sub _summarise_archive_db {
     $self->db_tree->{'ASSEMBLIES'}->{$row->[0]}{$row->[1]}=$row->[2];
   }
 
-  $t_aref = $dbh->selectall_arrayref('select name, common_name, code, vega from species');
+  $t_aref = $dbh->selectall_arrayref('select name, common_name, code from species');
   foreach my $row ( @$t_aref ) {
     $self->db_tree->{'ALL_WEB_SPECIES'}{$row->[0]}    = 1;
     $self->db_tree->{'ALL_WEB_SPECIES'}{lc $row->[1]} = 1;
     $self->db_tree->{'ALL_WEB_SPECIES'}{$row->[2]}    = 1;
-    $self->db_tree->{'ENSEMBL_VEGA'}{$row->[0]}       = $row->[3] eq 'Y' ? 1 : 0;
   }
 
   $dbh->disconnect();
@@ -1204,8 +1202,6 @@ sub _summarise_compara_db {
   
   my $constrained_elements = {};
   my %valid_species = map { $_ => 1 } keys %{$self->full_tree};
-  # Check if contains a species not in vega - use to determine whether or not to run vega specific queries
-  my $vega = 1;
   
   foreach my $row (@$res_aref) { 
     my ($class, $type, $species, $name, $id, $species_set_id) = ($row->[0], uc $row->[1], ucfirst $row->[2], $row->[3], $row->[4], $row->[5]);
@@ -1220,8 +1216,6 @@ sub _summarise_compara_db {
     } elsif ($type !~ /EPO_LOW_COVERAGE/ && ($class =~ /tree_alignment/ || $type  =~ /EPO/)) {
       $self->db_tree->{$db_name}{$key}{$id}{'species'}{'ancestral_sequences'} = 1 unless exists $self->db_tree->{$db_name}{$key}{$id};
     }
-    
-    $vega = 0 if $species eq 'Ailuropoda_melanoleuca';
     
     if ($intra_species{$species_set_id}) {
       $intra_species_constraints{$species}{$_} = 1 for keys %{$intra_species{$species_set_id}};
@@ -1256,7 +1250,7 @@ sub _summarise_compara_db {
   }
   
   # if there are intraspecies alignments then get full details of genomic alignments, ie start and stop, constrained by a set defined above (or no constraint for all alignments)
-  $self->_summarise_compara_alignments($dbh, $db_name, $vega ? undef : \%intra_species_constraints) if scalar keys %intra_species_constraints;
+  $self->_summarise_compara_alignments($dbh, $db_name, \%intra_species_constraints) if scalar keys %intra_species_constraints;
   
   my %sections = (
     ENSEMBL_ORTHOLOGUES => 'GENE',
@@ -1328,8 +1322,6 @@ sub _summarise_compara_alignments {
   my ($self, $dbh, $db_name, $constraint) = @_;
   my (%config, $lookup_species, @method_link_species_set_ids);
 
-  my $vega = !(defined $constraint);
-
   if ($constraint) {
     $lookup_species              = join ',', map $dbh->quote($_), sort keys %$constraint;
     @method_link_species_set_ids = map keys %$_, values %$constraint;
@@ -1378,7 +1370,6 @@ sub _summarise_compara_alignments {
   
   # get details of alignments
   my @where;
-  # push @where,"is_reference = 0" unless $vega;
   if(@method_link_species_set_ids) {
     my $mlss = join(',',@method_link_species_set_ids);
     push @where,"ga_ref.method_link_species_set_id in ($mlss)";

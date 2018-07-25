@@ -147,25 +147,6 @@ sub _summarise_generic {
   if( $self->_table_exists( $db_name, 'meta' ) ) {
     my $hash = {};
 
-## multispecies
-# With multi species DB there is no way to define the list of chromosomes for the karyotype in the ini file
-# The idea is the people who produce the DB can define the lists in the meta table using region.toplevel meta key
-# In case there is no such definition of the karyotype - we just create the lists of toplevel regions 
-   #  if($db_name =~ /CORE/) {
-   #    if ($self->is_collection('DATABASE_CORE')) {
-   #      my $t_aref = $dbh->selectall_arrayref(
-   #        qq{SELECT cs.species_id, s.name FROM seq_region s, coord_system cs
-   #        WHERE s.coord_system_id = cs.coord_system_id AND cs.attrib = 'default_version' AND cs.name IN ('plasmid', 'chromosome')
-   #        ORDER BY cs.species_id, s.name, s.seq_region_id}
-   #      );
-
-   #      foreach my $row ( @$t_aref ) {
-   #          push @{$hash->{$row->[0]}{'region.toplevel'}}, $row->[1];
-   #      }
-   #   }
-   # }
-##
-
     $t_aref  = $dbh->selectall_arrayref(
       'select meta_key,meta_value,meta_id, species_id
          from meta
@@ -193,24 +174,9 @@ sub _summarise_core_tables {
 
   $self->_summarise_generic( $db_name, $dbh );
 
-## Get chromosomes in order (replacement for array in ini files)
-## and also check for presence of LRGs
-## Only need to do this once!
+  ## Check for LRGs
   if ($db_name eq 'DATABASE_CORE') {
     my $s_aref = $dbh->selectall_arrayref(
-      'select s.name 
-      from seq_region s, seq_region_attrib sa, attrib_type a 
-      where sa.seq_region_id = s.seq_region_id 
-        and sa.attrib_type_id = a.attrib_type_id 
-        and a.code = "karyotype_rank" 
-      order by abs(sa.value)'
-    );
-    my $chrs = [];
-    foreach my $row (@$s_aref) {
-      push @$chrs, $row->[0];
-    }
-    $self->db_tree->{'ENSEMBL_CHROMOSOMES'} = $chrs;
-    $s_aref = $dbh->selectall_arrayref(
         'select count(*) from seq_region where name like "LRG%"'
     );
     if ($s_aref->[0][0] > 0) {
@@ -1724,8 +1690,103 @@ sub _munge_meta {
 
     $self->tree($production_name)->{'SAMPLE_DATA'} = $shash if scalar keys %$shash;
 
-    # check if the karyotype/list of toplevel regions ( normally chroosomes) is defined in meta table
-    @{$self->tree($production_name)->{'TOPLEVEL_REGIONS'}} = @{$meta_hash->{'regions.toplevel'}} if $meta_hash->{'regions.toplevel'};
+    ## Do karyotype
+    my $chrs = [];
+
+    ## First try the karyotype table, which is currently only valid for single-species db
+    unless ($self->is_collection('DATABASE_CORE')) {
+
+      my $dbh = $self->db_connect('DATABASE_CORE');
+
+      my $s_aref = $dbh->selectall_arrayref(
+        'select s.name 
+          from seq_region s, seq_region_attrib sa, attrib_type a 
+          where sa.seq_region_id = s.seq_region_id 
+            and sa.attrib_type_id = a.attrib_type_id 
+            and a.code = "karyotype_rank" 
+          order by abs(sa.value)'
+      );
+      foreach my $row (@$s_aref) {
+        push @$chrs, $row->[0];
+      }
+    }
+
+    unless (scalar @$chrs) {
+      if ($self->is_collection('DATABASE_CORE')) {
+      # check if the karyotype/list of toplevel regions ( normally chromosomes) is defined in meta table
+        if (scalar @{$meta_hash->{'region.toplevel'}||[]}) {
+          @{$self->tree($production_name)->{'TOPLEVEL_REGIONS'}} = @{$meta_hash->{'region.toplevel'}};
+          ## Check whether the toplevel regions contain anything other than chrs & plasmids
+          my $sname = $meta_hash->{'region.toplevel'}->[0];
+          my $dbh = $self->db_connect('DATABASE_CORE');
+
+          my $t_aref = $dbh->selectall_arrayref(
+                        "select       
+                            coord_system.name, 
+                            seq_region.name
+                        from 
+                            meta, 
+                            coord_system, 
+                            seq_region, 
+                            seq_region_attrib
+                        where 
+                            coord_system.coord_system_id = seq_region.coord_system_id
+                            and seq_region_attrib.seq_region_id = seq_region.seq_region_id
+                            and seq_region_attrib.attrib_type_id =  (SELECT attrib_type_id FROM attrib_type where name = 'Top Level') 
+                            and meta.species_id=coord_system.species_id 
+                            and meta.meta_key = 'species.production_name'
+                            and meta.meta_value = '" . $production_name . "'
+                            and seq_region.name = '" . $sname . "'
+                            and coord_system.name not in ('plasmid', 'chromosome')"
+                        ) || [];
+          if (@$t_aref) {
+            my $mt; ## Put mitochondrion at end
+            foreach (sort {lc $a cmp lc $b} @{@{$meta_hash->{'region.toplevel'}}}) {
+              if ($_ =~ /^mt?$/) {
+                $mt = $_;
+              }
+              else {
+                push @$chrs, $_;
+              }
+            }
+            push @$chrs, $mt if $mt;
+          }
+        }
+      }
+
+      ## OK, I got nothing - compile a list of all seq_regions of type chromosome or plasmid
+      unless (scalar @$chrs) {
+        my $dbh = $self->db_connect('DATABASE_CORE');
+
+        my $t_aref = $dbh->selectall_arrayref(
+                      "SELECT s.name 
+                      FROM seq_region s, coord_system cs
+                      WHERE s.coord_system_id = cs.coord_system_id 
+                        AND cs.attrib = 'default_version' 
+                        AND cs.name IN ('plasmid', 'chromosome')
+                        AND cs.species_id = '$species_id'"
+                    );
+
+        my (@num, @str, $mt);
+        foreach my $row (@$t_aref) {
+          my $name = $row->[0];
+          if ($name =~ /^\d+/) {
+            push @num, $name;
+          }
+          elsif ($name =~ /^mt?$/i) {
+            $mt = $name;
+          }
+          else {
+            push @str, $name;
+          }
+        }   
+        push @$chrs, sort {$a <=> $b} @num;
+        push @$chrs, sort {$a cmp $b} @str;
+        push @$chrs, $mt if $mt;
+      }
+    }
+
+    $self->tree($production_name)->{'ENSEMBL_CHROMOSOMES'} = $chrs;
 
     (my $dataset = (ucfirst $self->{'_species'})) =~ s/_collection//;
     $self->tree($production_name)->{'SPECIES_DATASET'} = $dataset;

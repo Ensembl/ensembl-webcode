@@ -1538,6 +1538,7 @@ sub classify_score_prediction {
   my ($rank, $rank_str);
   
   if(defined($score)) {
+    $rank = int(1000 * $score) + 1;
     $rank_str = "$score";
   }
   else {

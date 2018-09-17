@@ -375,20 +375,24 @@ sub content {
       # check that the motif has a binding matrix, if not there's not 
       # much we can do so don't return anything
       next unless defined $mf->binding_matrix;
-      my $matrix = $mf->display_label;
-      
-      my $matrix_url = $mf->binding_matrix->description =~ /Jaspar/ ? $hub->get_ExtURL_link($matrix, 'JASPAR', (split ':', $matrix)[-1]) : $matrix;
+#      my $matrix = $mf->display_label;
+      my $matrix = $mf->binding_matrix; 
+      my $matrix_name = join(':',  @{$matrix->get_TranscriptionFactorComplex_names||[]});
+
+#      my $matrix_url = $mf->binding_matrix->description =~ /Jaspar/ ? $hub->get_ExtURL_link($matrix, 'JASPAR', (split ':', $matrix)[-1]) : $matrix;
+      my $matrix_url = $mf->binding_matrix->stable_id =~ /Jaspar/ ? $hub->get_ExtURL_link($matrix_name, 'JASPAR', (split ':', $matrix_name)[-1]) : $matrix_name;
+
       
       # get the corresponding regfeat
-      my $rf = $rfa->fetch_all_by_attribute_feature($mf)->[0];
+#      my $rf = $rfa->fetch_all_by_attribute_feature($mf)->[0];
 
-      next unless $rf;
+#      next unless $rf;
 
       # create a URL
       my $url = $hub->url({
         type   => 'Regulation',
         action => 'Summary',
-        rf     => $rf->stable_id,
+        mf     => $mf->stable_id,
         fdb    => 'funcgen',
       });
       $url .= ';regulation_view=variation_feature_variation=normal';
@@ -401,15 +405,15 @@ sub content {
       for my $mfva (@{ $mfv->get_all_alternate_MotifFeatureVariationAlleles }) {
         my $type = $self->render_consequence_type($mfva);
         
-        my $m_allele = $self->trim_large_string($mfva->variation_feature_seq,'mfva_'.$rf->stable_id,25);
+        my $m_allele = $self->trim_large_string($mfva->variation_feature_seq,'mfva_'.$mf->stable_id,25);
         
         my $motif_overlap = $self->_overlap_glyph(1, $motif_length, $mfva->motif_start, $mfva->motif_end, $mf, 'Motif feature', 1, $mfv_colour);
 
         my $motif_length_label = $self->_overlap_glyph_label($mfva->motif_start, $mfva->motif_end, $motif_length);
 
         my $row = {
-          rf       => sprintf('%s<br/><span class="small" style="white-space:nowrap;"><a href="%s">%s</a></span>', $mf->binding_matrix->name, $url, $rf->stable_id),
-          ftype    => $mfva->feature->feature_type->so_name,#'Motif feature',
+          rf       => sprintf('%s<br/><span class="small" style="white-space:nowrap;"><a href="%s">%s</a></span>', $mf->stable_id, $url, $mf->stable_id),
+          ftype    => 'MotifFeature', #$mfva->feature->feature_type->so_name,#'Motif feature',
           allele   => $m_allele,
           type     => $type,
           matrix   => $matrix_url,

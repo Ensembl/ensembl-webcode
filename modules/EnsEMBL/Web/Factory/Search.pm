@@ -314,7 +314,7 @@ sub search_SEQUENCE {
 
   $self->_fetch_results( 
     [ 'core', 'Sequence',
-      "select sr.name, cs.name, 1, length, sr.seq_region_id from seq_region as sr, coord_system as cs where cs.coord_system_id = sr.coord_system_id and cs.species_id = $species_id and sr.name [[COMP]] '[[KEY]]'" ],
+       "select sr.name, cs.name, 1, length, sr.seq_region_id from seq_region as sr left join seq_region_synonym srs using (seq_region_id), coord_system as cs where cs.coord_system_id = sr.coord_system_id and cs.species_id = $species_id and sr.name [[COMP]] '[[KEY]]' or srs.synonym [[COMP]] '[[KEY]]' group by sr.name" ],
     [ 'core', 'Sequence',
       "select ma.value, group_concat( distinct ms.name ), seq_region_start, seq_region_end, seq_region_id
          from misc_set as ms, misc_feature_misc_set as mfms,

@@ -94,8 +94,26 @@ sub _fetch {
   (my $t = $search_SQL ) =~ s/'\[\[KEY\]\]'/$kw/g;
   $t =~ s/\[\[COMP\]\]/$comparator/g;
   $t =~ s/\[\[FULLTEXTKEY\]\]/$full_kw/g;
+  #warn "SQL>>> $t\n";
   my $res = $dbh->dbc->db_handle->selectall_arrayref( "$t limit $limit" ) || [];
   return $res;
+}
+
+sub species_id {
+  my $self = shift;
+  unless ($self->{species_id}) {
+    my $species_defs = EnsEMBL::Web::SpeciesDefs->new();
+    $self->{species_id} = $species_defs->SPECIES_META_ID || 1;  
+  }
+  return $self->{species_id};
+}
+
+sub _species_join_sql {
+  my $self = shift;
+  return sprintf(
+    'JOIN seq_region sr USING(seq_region_id) JOIN coord_system cs ON (sr.coord_system_id = cs.coord_system_id AND cs.species_id = %s)',
+    $self->species_id
+  );  
 }
 
 sub search_ALL {
@@ -135,6 +153,7 @@ sub search_ALL {
   foreach my $method (@valid_methods) {
     $self->{_results}      = [];
     if( $self->can($method) ) {
+      #warn "$method\n";
       $self->$method;
     }
   }
@@ -189,15 +208,16 @@ sub search_GENOMICALIGNMENT {
   my $self = shift;
   my $species = $self->species;
   my $species_path = $self->species_path;
-  
+  my $join_sql = $self->_species_join_sql;
+
   $self->_fetch_results(
     [
       'core', 'DNA',
-      "select a.logic_name, f.hit_name, 'Dna', 'core',count(*)  from dna_align_feature as f, analysis as a where a.analysis_id = f.analysis_id and f.hit_name [[COMP]] '[[KEY]]' group by a.logic_name, f.hit_name"
+      "select a.logic_name, f.hit_name, 'Dna', 'core',count(*)  from dna_align_feature as f $join_sql, analysis as a where a.analysis_id = f.analysis_id and f.hit_name [[COMP]] '[[KEY]]' group by a.logic_name, f.hit_name"
     ],
     [
       'core', 'Protein',
-      "select a.logic_name, f.hit_name, 'Protein', 'core',count(*) from protein_align_feature as f, analysis as a where a.analysis_id = f.analysis_id and f.hit_name [[COMP]] '[[KEY]]' group by a.logic_name, f.hit_name"
+      "select a.logic_name, f.hit_name, 'Protein', 'core',count(*) from protein_align_feature as f $join_sql, analysis as a where a.analysis_id = f.analysis_id and f.hit_name [[COMP]] '[[KEY]]' group by a.logic_name, f.hit_name"
     ],
     [
       'vega', 'DNA',
@@ -228,18 +248,20 @@ sub search_DOMAIN {
   my $self = shift;
   my $species = $self->species;
   my $species_path = $self->species_path;
+  my $join_sql = $self->_species_join_sql;
   
   $self->_fetch_results(
     [ 'core', 'Domain',
-      "select x.dbprimary_acc, x.description
-         FROM xref as x, external_db as e
-        WHERE e.db_name = 'Interpro' and e.external_db_id = x.external_db_id and
-              x.dbprimary_acc [[COMP]] '[[KEY]]'" ],
-    [ 'core', 'Domain',
-      "SELECT x.dbprimary_acc, x.description                                       
-         FROM xref as x, external_db as e
-        WHERE e.db_name = 'Interpro' and e.external_db_id = x.external_db_id and
-              x.description [[COMP]] '[[KEY]]'" ],
+      "SELECT DISTINCT x.dbprimary_acc, x.description
+        FROM xref x
+        JOIN interpro i ON (i.interpro_ac = x.dbprimary_acc)
+        LEFT JOIN protein_feature pf ON (i.id = pf.hit_name)
+        JOIN translation tl USING(translation_id)
+        JOIN transcript t USING(transcript_id)
+        $join_sql
+        JOIN external_db e USING(external_db_id)
+        WHERE e.db_name = 'Interpro'
+        AND (x.dbprimary_acc [[COMP]] '[[KEY]]' OR x.description [[COMP]] '[[KEY]]')" ],
   );
   foreach ( @{$self->{_results}} ) {
     $_ = {
@@ -287,14 +309,16 @@ sub search_SEQUENCE {
   
   my $species = $self->species;
   my $species_path = $self->species_path;
-  
+  my $species_id = $self->species_id;
+  my $join_sql = $self->_species_join_sql;
+
   $self->_fetch_results( 
     [ 'core', 'Sequence',
-      "select sr.name, cs.name, 1, length, sr.seq_region_id from seq_region as sr, coord_system as cs where cs.coord_system_id = sr.coord_system_id and sr.name [[COMP]] '[[KEY]]'" ],
+      "select sr.name, cs.name, 1, length, sr.seq_region_id from seq_region as sr, coord_system as cs where cs.coord_system_id = sr.coord_system_id and cs.species_id = $species_id and sr.name [[COMP]] '[[KEY]]'" ],
     [ 'core', 'Sequence',
       "select ma.value, group_concat( distinct ms.name ), seq_region_start, seq_region_end, seq_region_id
          from misc_set as ms, misc_feature_misc_set as mfms,
-              misc_feature as mf, misc_attrib as ma, 
+              misc_feature as mf $join_sql, misc_attrib as ma, 
               attrib_type as at,
               (
                 select distinct ma2.misc_feature_id
@@ -391,6 +415,7 @@ sub search_GENE {
   my $self = shift;
   my $species = $self->species;
   my $species_path = $self->species_path;
+  my $join_sql = $self->_species_join_sql;
   my @databases = ('core');
   push @databases, 'vega' if $self->species_defs->databases->{'DATABASE_VEGA'};
   push @databases, 'est' if $self->species_defs->databases->{'DATABASE_OTHERFEATURES'};
@@ -399,34 +424,34 @@ sub search_GENE {
 
       # Search Gene, Transcript, Translation stable ids.. 
     [ $db, 'Gene',
-      "SELECT g.stable_id, g.description, '$db', 'Gene', 'gene' FROM gene as g WHERE g.stable_id [[COMP]] '[[KEY]]'" ],
+      "SELECT g.stable_id, g.description, '$db', 'Gene', 'gene' FROM gene as g $join_sql WHERE g.stable_id [[COMP]] '[[KEY]]'" ],
     [ $db, 'Gene',
-      "SELECT g.stable_id, g.description, '$db', 'Transcript', 'transcript' FROM transcript as g WHERE g.stable_id [[COMP]] '[[KEY]]'" ],
+      "SELECT g.stable_id, g.description, '$db', 'Transcript', 'transcript' FROM transcript as g $join_sql WHERE g.stable_id [[COMP]] '[[KEY]]'" ],
     [ $db, 'Gene',
-      "SELECT g.stable_id, x.description, '$db', 'Transcript', 'peptide' FROM translation as g, transcript as x WHERE g.transcript_id = x.transcript_id and g.stable_id [[COMP]] '[[KEY]]'" ],
+      "SELECT g.stable_id, x.description, '$db', 'Transcript', 'peptide' FROM translation as g, transcript as x $join_sql WHERE g.transcript_id = x.transcript_id and g.stable_id [[COMP]] '[[KEY]]'" ],
 
       # search dbprimary_acc ( xref) of type 'Gene'
     [ $db, 'Gene',
-      "SELECT g.stable_id, concat( display_label, ' - ', g.description ), '$db', 'Gene', 'gene' from gene as g, object_xref as ox, xref as x
+      "SELECT g.stable_id, concat( display_label, ' - ', g.description ), '$db', 'Gene', 'gene' from gene as g $join_sql, object_xref as ox, xref as x
         where g.gene_id = ox.ensembl_id and ox.ensembl_object_type = 'Gene' and
               ox.xref_id = x.xref_id and x.dbprimary_acc [[COMP]] '[[KEY]]'" ],
       # search display_label(xref) of type 'Gene' where NOT match dbprimary_acc !! - could these two statements be done better as one using 'OR' ?? !! 
       # Eagle change  - added 2 x distinct clauses to prevent returning duplicate stable ids caused by multiple xref entries for one gene
     [ $db, 'Gene',
-      "SELECT distinct(g.stable_id), concat( display_label, ' - ', g.description ), '$db', 'Gene', 'gene' from gene as g, object_xref as ox, xref as x
+      "SELECT distinct(g.stable_id), concat( display_label, ' - ', g.description ), '$db', 'Gene', 'gene' from gene as g $join_sql, object_xref as ox, xref as x
         where g.gene_id = ox.ensembl_id and ox.ensembl_object_type = 'Gene' and
               ox.xref_id = x.xref_id and x.display_label [[COMP]] '[[KEY]]' and
               not(x.dbprimary_acc [[COMP]] '[[KEY]]')" ],
 
       # Eagle added this to search gene.description.  Could really do with an index on description field, but still works. 
       [ $db, 'Gene', 
-      "SELECT distinct(g.stable_id), concat( display_label, ' - ', g.description ), 'core', 'Gene', 'gene' from gene as g, object_xref as ox, xref as x
+      "SELECT distinct(g.stable_id), concat( display_label, ' - ', g.description ), 'core', 'Gene', 'gene' from gene as g $join_sql, object_xref as ox, xref as x
          where g.gene_id = ox.ensembl_id and ox.ensembl_object_type = 'Gene' and ox.xref_id = x.xref_id 
          and match(g.description) against('+[[FULLTEXTKEY]]' IN BOOLEAN MODE) and not(x.display_label [[COMP]] '[[KEY]]' ) and not(x.dbprimary_acc [[COMP]] '[[KEY]]')" ],
 
       # Eagle added this to search external_synonym.  Could really do with an index on description field, but still works. 
       [ $db, 'Gene', 
-      "SELECT distinct(g.stable_id), concat( display_label, ' - ', g.description ), 'core', 'Gene', 'gene' from gene as g, object_xref as ox, xref as x, external_synonym as es
+      "SELECT distinct(g.stable_id), concat( display_label, ' - ', g.description ), 'core', 'Gene', 'gene' from gene as g $join_sql, object_xref as ox, xref as x, external_synonym as es 
          where g.gene_id = ox.ensembl_id and ox.ensembl_object_type = 'Gene' and ox.xref_id = x.xref_id  and es.xref_id = x.xref_id
          and es.synonym [[COMP]] '[[KEY]]' and not( match(g.description) against('+[[FULLTEXTKEY]]' IN BOOLEAN MODE)) and not(x.display_label [[COMP]] '[[KEY]]' ) and not(x.dbprimary_acc [[COMP]] '[[KEY]]')" ],
 
@@ -434,12 +459,12 @@ sub search_GENE {
       # search dbprimary_acc ( xref) of type 'Transcript' - this could possibly be combined with Gene above if we return the object_xref.ensembl_object_type rather than the fixed 'Gene' or 'Transcript' 
       # to make things simpler and perhaps faster
     [ $db, 'Gene',
-      "SELECT g.stable_id, concat( display_label, ' - ', g.description ), '$db', 'Transcript', 'transcript' from transcript as g, object_xref as ox, xref as x
+      "SELECT g.stable_id, concat( display_label, ' - ', g.description ), '$db', 'Transcript', 'transcript' from transcript as g $join_sql, object_xref as ox, xref as x
         where g.transcript_id = ox.ensembl_id and ox.ensembl_object_type = 'Transcript' and
               ox.xref_id = x.xref_id and x.dbprimary_acc [[COMP]] '[[KEY]]'" ],
       # search display_label(xref) of type 'Transcript' where NOT match dbprimary_acc !! - could these two statements be done better as one using 'OR' ?? !! -- See also comment about combining with Genes above
     [ $db, 'Gene',
-      "SELECT distinct(g.stable_id), concat( display_label, ' - ', g.description ), '$db', 'Transcript', 'transcript' from transcript as g, object_xref as ox, xref as x
+      "SELECT distinct(g.stable_id), concat( display_label, ' - ', g.description ), '$db', 'Transcript', 'transcript' from transcript as g $join_sql, object_xref as ox, xref as x
         where g.transcript_id = ox.ensembl_id and ox.ensembl_object_type = 'Transcript' and
               ox.xref_id = x.xref_id and x.display_label [[COMP]] '[[KEY]]' and
               not(x.dbprimary_acc [[COMP]] '[[KEY]]')" ],
@@ -447,11 +472,11 @@ sub search_GENE {
 
       ## Same again but for Translation - see above
     [ $db, 'Gene',
-      "SELECT g.stable_id, concat( display_label ), '$db', 'Transcript', 'peptide' from translation as g, object_xref as ox, xref as x
+      "SELECT g.stable_id, concat( display_label ), '$db', 'Transcript', 'peptide' from translation as g JOIN transcript USING(transcript_id) $join_sql, object_xref as ox, xref as x 
         where g.translation_id = ox.ensembl_id and ox.ensembl_object_type = 'Translation' and 
               ox.xref_id = x.xref_id and x.dbprimary_acc [[COMP]] '[[KEY]]'" ],
     [ $db, 'Gene',
-      "SELECT distinct(g.stable_id), concat( display_label ), '$db', 'Transcript', 'peptide' from translation as g, object_xref as ox, xref as x
+      "SELECT distinct(g.stable_id), concat( display_label ), '$db', 'Transcript', 'peptide' from translation as g JOIN transcript USING(transcript_id) $join_sql, object_xref as ox, xref as x 
         where g.translation_id = ox.ensembl_id and ox.ensembl_object_type = 'Translation' and 
               ox.xref_id = x.xref_id and x.display_label [[COMP]] '[[KEY]]' and
               not(x.dbprimary_acc [[COMP]] '[[KEY]]')" ]

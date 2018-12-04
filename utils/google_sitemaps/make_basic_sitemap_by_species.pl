@@ -169,7 +169,7 @@ sub get_dataset_urls {
   foreach my $row (@rows) {
     my ($stable_id, $id, $chromosome, $start, $end, $species_id) = @{$row};     
       
-    my $url = $domain . $species . '/Gene/Summary?g=' . $stable_id;
+    my $url = $domain . '/' . $species . '/Gene/Summary?g=' . $stable_id;
     $url .= ";r=$chromosome:$start-$end";
     push @urls, $url;       
   }    

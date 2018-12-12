@@ -553,6 +553,11 @@ sub _add_trackhub_tracks {
       $options{'display'} = 'off';
     }
 
+    ## Hack for one-file trackhubs where the track name is same as the hub
+    if (scalar @$children == 1) {
+      $track->{'track'} = 'track_'.$track->{'track'};
+    }
+
     ## Note that we use a duplicate value in description and longLabel, because non-hub files
     ## often have much longer descriptions so we need to distinguish the two
     my $source       = {

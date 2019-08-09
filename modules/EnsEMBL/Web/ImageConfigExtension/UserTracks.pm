@@ -207,7 +207,7 @@ sub _load_remote_url_tracks {
     my $track_data = $tracks_data{$code};
 
     if (lc $track_data->{'format'} eq 'trackhub') {
-      my ($trackhub_menu, $hub_info) = $self->get_parameter('can_trackhubs') ? $self->_add_trackhub(strip_HTML($track_data->{'source_name'}), $track_data->{'source_url'}) : ();
+      my ($trackhub_menu, $hub_info) = $self->get_parameter('can_trackhubs') ? $self->_add_trackhub(strip_HTML($track_data->{'source_name'}), $track_data->{'source_url'}, {'code' => $code}) : ();
 
       if ($hub_info->{'error'}) {
         $self->hub->session->set_record_data({
@@ -319,12 +319,52 @@ sub _load_uploaded_tracks {
 }
 
 sub _add_trackhub {
-  my ($self, $menu_name, $url, $existing_menu, $force_hide) = @_;
+  my ($self, $menu_name, $url, $args) = @_;
+  my $existing_menu = $args->{'menu'};
+  my $force_hide    = $args->{'hide'};
+  my $code          = $args->{'code'};
+  my $hub           = $self->hub;
 
   ## Check if this trackhub is already attached - now that we can attach hubs via
   ## URL, they may not be saved in the imageconfig
   my $already_attached = $self->get_node($menu_name);
   return ($menu_name, {}) if ($already_attached || $self->{'_attached_trackhubs'}{$url});
+
+  ## Warning for users who attached trackhubs before the redesign
+  ## Default is to show the message, since it won't do any harm
+  my $is_old = 1;
+  my $record;
+  if ($code) {
+    (my $short_code = $code) =~ s/^url_//;
+    foreach my $m (grep $_, $hub->user, $hub->session) {
+      $record = $m->get_record_data({'type' => 'url', 'code' => $short_code});
+      if ($record && $record->{'timestamp'}) {
+        ## Release timestamp - 12 noon, 11/9/19
+        if ($record->{'timestamp'} > 1568203200) {
+          $is_old = 0;
+        }
+        else {
+          ## Update the record so the user doesn't see this again
+          $record->{'timestamp'} = time();
+          $m->set_record_data($record);
+        }
+        last;
+      }
+    }
+  }
+  elsif ($force_hide) {
+    ## Don't warn for internal trackhubs as they're off by default 
+    $is_old = 0;
+  }
+  if ($is_old) {
+    ## Warn user that we are reattaching the trackhub
+    $hub->session->set_record_data({
+      'type'      => 'message',
+      'function'  => '_warning',
+      'code'      => 'th_reattachment',
+      'message'   => "We have changed our trackhub interface to make it easier to configure tracks, so your old configuration may have been lost.",
+    });
+  }
 
   ## Note: no need to validate assembly at this point, as this will have been done
   ## by the attachment interface - otherwise we run into issues with synonyms
@@ -799,7 +839,7 @@ sub load_file_format {
         ## Force hiding of internally configured trackhubs, because they should be
         ## off by default regardless of the settings in the hub
         my $force_hide = $internal ? 1 : 0;
-        $self->_add_trackhub(strip_HTML($source->{'source_name'}), $source->{'url'}, $menu, $force_hide);
+        $self->_add_trackhub(strip_HTML($source->{'source_name'}), $source->{'url'}, {'menu' => $menu, 'hide' => $force_hide});
       }
       else {
         my $is_internal = $source->{'source_url'} ? 0 : $internal;

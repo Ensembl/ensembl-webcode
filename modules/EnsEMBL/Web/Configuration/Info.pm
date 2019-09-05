@@ -52,9 +52,14 @@ sub populate_tree {
   my $species_defs   = $self->hub->species_defs;
   my %error_messages = EnsEMBL::Web::Constants::ERROR_MESSAGES;
 
+  use Data::Dumper;
+  warn '>>>>>>>>>>>>>';
+  warn Dumper($species_defs->strain_group);
+  warn Dumper($species_defs->STRAIN_GROUP);
   ## Redirect strains to the strain page for the parent species as long as we're not on the parent species
-  if ($self->hub->action ne 'Strains' && $species_defs->STRAIN_COLLECTION && $species_defs->SPECIES_STRAIN !~ /reference/) {
-    my $url = $self->hub->url({'species' => $species_defs->STRAIN_COLLECTION, 'action' => 'Strains'});
+  if ( $self->hub->action ne 'Strain' && $species_defs->STRAIN_GROUP && $species_defs->SPECIES_STRAIN !~ /reference/
+    ) {
+    my $url = $self->hub->url({'species' => $species_defs->STRAIN_GROUP, 'action' => 'Strains'});
     $self->hub->redirect($url);
   }
 

@@ -63,6 +63,7 @@ sub fn {
   my ($self,$type,$base) = @_;
 
   $base ||= $self->{'base'};
+warn "FN " . "$self->{'dir'}/$base.$type";
   return "$self->{'dir'}/$base.$type";
 }
 

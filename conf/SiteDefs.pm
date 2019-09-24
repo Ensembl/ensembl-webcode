@@ -243,7 +243,7 @@ our $MEMOIZE_SIZE         = [14,32,4*1024*1024];
 ## Precache settings
 our $ENSEMBL_PRECACHE_DIR     = defer { "$ENSEMBL_SYS_DIR/precache" };
 our $ENSEMBL_PRECACHE_DISABLE = 0;
-our $ENSEMBL_PRECACHE_DEBUG   = 0;      # change this to 1, 2 or 3 to get required level of EnsEMBL::Web::Query debug info
+our $ENSEMBL_PRECACHE_DEBUG   = 2;      # change this to 1, 2 or 3 to get required level of EnsEMBL::Web::Query debug info
 ###############################################################################
 
 

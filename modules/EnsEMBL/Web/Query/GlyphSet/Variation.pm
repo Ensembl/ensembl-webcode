@@ -63,6 +63,20 @@ sub precache {
         type => 'variation_set_1kg_3',
       }
     },
+    'gnomad' => {
+      loop => ['genome'],
+      args => {
+        species => 'Homo_sapiens',
+        id => 'variation_set_gnomAD',
+        config => {
+          sets => ['gnomAD'],
+          set_name => 'gnomAD - short variants (SNPs and indels)',
+        },
+        var_db => 'variation',
+        config_type => 'contigviewbottom',
+        type => 'variation_set_gnomAD',
+      }
+    },
     'variation-mouse' => {
       loop => ['genome'],
       args => {

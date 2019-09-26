@@ -93,7 +93,11 @@ sub go {
   my ($hits,$misses) = (0,0);
   foreach my $a (@args) { 
     $self->_check_unblessed($a);
-    my $part = $self->{'store'}->_try_get_cache(ref($self->{'impl'}),$a);
+### Temporarily disable precache for gene availability
+#    my $part = $self->{'store'}->_try_get_cache(ref($self->{'impl'}),$a);
+    my $part;
+    $part = $self->{'store'}->_try_get_cache(ref($self->{'impl'}),$a) if (ref($self->{'impl'}) ne "EnsEMBL::Web::Query::Availability::Gene");
+###
     if(defined $part) {
       $hits++;
       warn "\n\n -- HIT  -- \n ".ref($self->{'impl'})." ".JSON->new->encode($a)."\n\n" if($DEBUG>2);

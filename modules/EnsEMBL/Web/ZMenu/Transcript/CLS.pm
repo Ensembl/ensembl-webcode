@@ -30,6 +30,7 @@ sub content {
   my $self        = shift;
   my $hub         = $self->hub;
   my $object      = $self->object;
+  my @click       = $self->click_location;
   my ($gene, $transcript);
 
   eval {
@@ -65,6 +66,11 @@ sub content {
   if ($@) {
     $transcript = undef;
   }
+
+  $self->add_entry({
+    type  => 'Exon count',
+    label => (scalar @{$transcript->get_all_Exons})
+  }) if $transcript;
 
   $self->add_entry({
     type  => 'Transcript',

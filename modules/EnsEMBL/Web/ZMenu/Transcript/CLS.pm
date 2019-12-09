@@ -30,7 +30,6 @@ sub content {
   my $self        = shift;
   my $hub         = $self->hub;
   my $object      = $self->object;
-  my @click       = $self->click_location;
   my ($gene, $transcript);
 
   eval {

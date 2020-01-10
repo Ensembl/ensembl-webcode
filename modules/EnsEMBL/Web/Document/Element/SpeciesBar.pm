@@ -31,7 +31,7 @@ use base qw(EnsEMBL::Web::Document::Element);
 
 sub init {
   my $self          = shift;
-  $self->init_species_list($self->hub);
+  #$self->init_species_list($self->hub);
 }
 
 sub content {
@@ -56,17 +56,20 @@ sub content {
     $header = sprintf '<span class="species">%s %s</span> <span class="more">%s %s</span>', $1, $2, $3, $4;
     ## No dropdown species selector
     $arrow = '';
-    $dropdown = ''; 
   }
   else {
     $header = sprintf '<img src="/i/species/%s.png" class="badge-32"><span class="species">%s</span> <span class="more">(%s)</span>', $hub->species, $species, $assembly;
     ## Species selector
-    $arrow     = sprintf '<span class="dropdown"><a class="toggle species" href="#" rel="species">&#9660;</a></span>';
-    $dropdown  = $self->species_list;
+    my $selector  = $self->hub->url({
+                                      'type'      => 'Info', 
+                                      'action'    => 'TaxonSelector',
+                                      'function'  => 'ajax/selector',
+                                    });
+    $arrow        = sprintf '<span class="dropdown"><a class="toggle species modal_link" href="%s" rel="modal_select_a_species">&#9660;</a></span>', $selector;
   }
 
   my $content = sprintf '<span class="header"><a href="%s">%s</a></span> %s %s', 
-                          $home_url, $header, $arrow, $dropdown;
+                          $home_url, $header, $arrow;
  
   return $content;
 }

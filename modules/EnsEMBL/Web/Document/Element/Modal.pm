@@ -129,5 +129,19 @@ sub init {
        __clear => 1
      })
   });
+
+  $self->add_entry({
+    id      => 'select_a_species',
+    class   => 'fixed_width',
+    caption => 'Species Selector',
+    url     => $hub->url({
+       type    => 'Info',
+       action  => 'TaxonSelector',
+       time    => time,
+       __clear => 1
+     })
+  });
+
 }
+
 1;

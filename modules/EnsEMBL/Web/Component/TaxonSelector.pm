@@ -29,6 +29,7 @@ use HTML::Entities qw(encode_entities);
 sub _init {
   my $self = shift;
   my $hub = $self->hub;
+  warn "... INITIALISING GENERIC TAXON SELECTOR";
   
   $self->cacheable(0);
   $self->ajaxable(0);
@@ -51,11 +52,13 @@ sub _init {
 }
 
 sub content {
+  warn "... FETCHING CONTENT";
   return "";
 }
 
 sub content_ajax {
   my $self = shift;
+  warn "... AJAX FETCH";
   my $hub = $self->hub;
   my $urlParams = { map { ($_ => $hub->param($_)) } $hub->param };
 

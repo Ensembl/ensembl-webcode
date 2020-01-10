@@ -111,6 +111,11 @@ sub populate_tree {
     [qw(whatsnew EnsEMBL::Web::Component::Info::WhatsNew)]
   );
 
+  $self->create_node('TaxonSelector', '',
+    [qw(selector EnsEMBL::Web::Component::Info::TaxonSelector)]
+  );
+
+
   ## Generic node for including arbitrary HTML files about a species
   $self->create_node('Content', '',
     [qw(content EnsEMBL::Web::Component::Info::Content)]

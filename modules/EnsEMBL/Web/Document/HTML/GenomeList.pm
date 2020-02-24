@@ -39,7 +39,7 @@ sub render_ajax {
   my $self      = shift;
   my $hub       = $self->hub;
 
-  return to_json($self->_species_list);
+  return to_json($self->genome_list);
 }
 
 sub _get_dom_tree {
@@ -47,7 +47,7 @@ sub _get_dom_tree {
   my $self      = shift;
   my $hub       = $self->hub;
   my $sd        = $hub->species_defs;
-  my $species   = $self->_species_list({'no_user' => 1});
+  my $species   = $self->genome_list({'no_user' => 1});
   my $template  = $self->_fav_template;
   my $prehtml   = '';
 
@@ -70,15 +70,17 @@ sub _get_dom_tree {
   my @ok_species = $sd->valid_species;
   my $sitename  = $self->hub->species_defs->ENSEMBL_SITETYPE;
   if (scalar @ok_species > 1) {
-    my $list_html = sprintf qq(<h3>Find a genome</h3>
+    my $list_html = sprintf qq(<h3>All genomes</h3>
+      <p>%s currently provides %s distinct genomes (including some strains and breeds).
+      To find out more about a species, select from the favourites list, right (tip: log in 
+      to edit the list) or choose one of the links below:</p> 
+      <p class="space-above"><a class="button" href="%s">View all species</a></p>
       %s
-      <h3 class="space-above"></h3>
-      %s
-      <p><a href="%s">View full list of all %s species</a></p>
       ), 
-      $self->add_species_dropdown,
-      $self->add_genome_groups, 
-      $self->species_list_url, $sitename;
+      $sitename,
+      scalar(@$species),
+      $self->species_list_url,
+      $self->add_genome_groups; 
 
     my $sort_html = qq(<p>For easy access to commonly used genomes, drag from the bottom list to the top one</p>
         <p><strong>Favourites</strong></p>
@@ -190,25 +192,6 @@ sub _get_dom_tree {
   }
 }
 
-sub add_species_selector {
-  my $self = shift;
-  my $finder_prompt = 'Start typing the name of a species...';
-
-  my $html = qq(
-    <div class="taxon_tree_master hidden"></div>
-    <div class="species_select_container">
-      <div class="species_homepage_selector">
-        <div class="content">
-          <div class="finder">
-            <input type="text" autofocus class="ui-autocomplete-input inactive" title="$finder_prompt" placeholder="$finder_prompt" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-  return $html;
-}
-
 sub add_genome_groups {
   my $self = shift;
   
@@ -217,7 +200,7 @@ sub add_genome_groups {
 
   foreach my $item (@featured) {
     $html .= sprintf qq(
-<div class="species-box-outer">
+<div class="species-box-outer space-above">
   <div class="species-box">
     <a href="%s"><img src="/i/species/%s" alt="%s" title="Browse %s" class="badge-48"/></a>
     ), $item->{'url'}, $item->{'img'}, $item->{'name'}, $item->{'name'};
@@ -254,62 +237,7 @@ sub get_featured_genomes {
 }
 
 
-sub add_species_dropdown { '<p><select class="fselect _all_species"><option value="">-- Select a species --</option></select></p>' }
-
 sub species_list_url { return '/info/about/species.html'; }
-
-sub _species_list {
-  ## @private
-  my ($self, $params) = @_;
-
-  $params   ||= {};
-  my $hub     = $self->hub;
-  my $sd      = $hub->species_defs;
-  my $species = $hub->get_species_info;
-  my $user    = $params->{'no_user'} ? undef : $hub->users_plugin_available && $hub->user;
-  my $img_url = $sd->img_url || '';
-  my @fav     = @{$hub->get_favourite_species(!$user)};
-  my %fav     = map { $_ => 1 } @fav;
-
-  my (@list, %done);
-
-  for (@fav, sort {$species->{$a}{'common'} cmp $species->{$b}{'common'}} keys %$species) {
-
-    next if ($done{$_} || !$species->{$_} || !$species->{$_}{'is_reference'});
-
-    $done{$_} = 1;
-
-    my $homepage      = $hub->url({'species' => $_, 'type' => 'Info', 'function' => 'Index', '__clear' => 1});
-    my $alt_assembly  = $sd->get_config($_, 'SWITCH_ASSEMBLY');
-    my $strainspage   = '';
-    my $strain_type   = '';
-    if ($species->{$_}{'strain_group'}) {
-      $strainspage = $hub->url({'species' => $_, 'type' => 'Info', 'function' => 'Strains', '__clear' => 1});
-      $strain_type = $sd->get_config($_, 'STRAIN_TYPE').'s'; 
-    }
-
-    my $extra = $_ eq 'Homo_sapiens' ? '<a href="/info/website/tutorials/grch37.html" class="species-extra">Still using GRCh37?</a>' : '';
-
-    push @list, {
-      key         => $_,
-      group       => $species->{$_}{'group'},
-      homepage    => $homepage,
-      name        => $species->{$_}{'name'},
-      img         => sprintf('%sspecies/%s.png', $img_url, $_),
-      common      => $species->{$_}{'common'},
-      assembly    => $species->{$_}{'assembly'},
-      assembly_v  => $species->{$_}{'assembly_version'},
-      favourite   => $fav{$_} ? 1 : 0,
-      strainspage => $strainspage,
-      strain_type => $strain_type,
-      has_alt     => $alt_assembly ? 1 : 0,
-      extra       => $extra,
-    };
-
-  }
-
-  return \@list;
-}
 
 sub _fav_template {
   ## @private

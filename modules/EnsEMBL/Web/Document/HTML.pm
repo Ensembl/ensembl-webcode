@@ -104,6 +104,77 @@ sub new_panel {
   return undef;
 }
 
+sub genome_autocomplete {
+  my $self = shift;
+  my $finder_prompt = 'Start typing the name of a species...';
+
+  my $html = qq(
+    <div class="taxon_tree_master hidden"></div>
+    <div class="species_select_container">
+      <div class="species_homepage_selector">
+        <div class="content">
+          <div class="finder">
+            <input type="text" autofocus class="ui-autocomplete-input inactive" title="$finder_prompt" placeholder="$finder_prompt" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+  return $html;
+}
+
+sub genome_list {
+  my ($self, $params) = @_;
+
+  $params   ||= {};
+  my $hub     = $self->hub;
+  my $sd      = $hub->species_defs;
+  my $species = $hub->get_species_info;
+  my $user    = $params->{'no_user'} ? undef : $hub->users_plugin_available && $hub->user;
+  my $img_url = $sd->img_url || '';
+  my @fav     = @{$hub->get_favourite_species(!$user)};
+  my %fav     = map { $_ => 1 } @fav;
+
+  my (@list, %done);
+
+  for (@fav, sort {$species->{$a}{'common'} cmp $species->{$b}{'common'}} keys %$species) {
+
+    next if ($done{$_} || !$species->{$_} || !$species->{$_}{'is_reference'});
+
+    $done{$_} = 1;
+
+    my $homepage      = $hub->url({'species' => $_, 'type' => 'Info', 'function' => 'Index', '__clear' => 1});
+    my $alt_assembly  = $sd->get_config($_, 'SWITCH_ASSEMBLY');
+    my $strainspage   = '';
+    my $strain_type   = '';
+    if ($species->{$_}{'strain_group'}) {
+      $strainspage = $hub->url({'species' => $_, 'type' => 'Info', 'function' => 'Strains', '__clear' => 1});
+      $strain_type = $sd->get_config($_, 'STRAIN_TYPE').'s';
+    }
+
+    my $extra = $_ eq 'Homo_sapiens' ? '<a href="/info/website/tutorials/grch37.html" class="species-extra">Still using GRCh37?</a>' : '';
+
+    push @list, {
+      key         => $_,
+      group       => $species->{$_}{'group'},
+      homepage    => $homepage,
+      name        => $species->{$_}{'name'},
+      img         => sprintf('%sspecies/%s.png', $img_url, $_),
+      common      => $species->{$_}{'common'},
+      assembly    => $species->{$_}{'assembly'},
+      assembly_v  => $species->{$_}{'assembly_version'},
+      favourite   => $fav{$_} ? 1 : 0,
+      strainspage => $strainspage,
+      strain_type => $strain_type,
+      has_alt     => $alt_assembly ? 1 : 0,
+      extra       => $extra,
+    };
+
+  }
+
+  return \@list;
+}
+
 sub news_header {
   my ($self, $hub, $release_id) = @_;
   my $header_text;

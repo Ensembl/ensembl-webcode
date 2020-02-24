@@ -130,7 +130,7 @@ search-form on home page and species home page
 ----------------------------------------------------------------------*/
 form.search-form div.form-field { margin: 0; }
 
-form.search-form          label.ff-label { line-height: 20px; font-weight: normal; width: auto;}
+form.search-form          label.ff-label { line-height:25px; margin-right:0.5em; width: auto;}
 form.search-form          div.ff-right,
 form.search-form          div.ff-notes { padding-left: 0px; }
 form.search-form          div.ff-notes p.search-example { margin: 0; }

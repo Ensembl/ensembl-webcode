@@ -109,42 +109,14 @@ sub render {
   }
   $examples = qq(<p class="search-example">e.g. $examples</p>) if $examples;
 
-  # species dropdown
-  if ($config->{'show_species'}) {
-    my $field = $form->add_field({});
-
-    my $species_info = $hub->get_species_info;
-    my %species      = map { $species_info->{$_}{'common'} => $_ } grep { $species_info->{$_}{'is_reference'} } sort keys %$species_info;
-    my %common_names = reverse %species;
-    my $values = [
-                  {'value' => '', 'caption' => 'All species'},
-                  {'value' => 'help', 'caption' => 'Help and Documentation' },
-                  {'value' => '', 'caption' => '---', 'disabled' => 1},
-                  ];
-    ## If more than one species, show favourites
-    if (scalar keys %species > 1) {
-        push @$values, map({ $common_names{$_} ? {'value' => $_, 'caption' => $common_names{$_}, 'group' => 'Favourite species'} : ()} @$favourites);
-        push @$values, {'value' => '', 'caption' => '---', 'disabled' => 1};
-    }
-    push @$values, map({'value' => $species{$_}, 'caption' => $_}, sort { uc $a cmp uc $b } keys %species);
-
-    $field->add_element({
-      'type'    => 'dropdown',
-      'name'    => 'species',
-      'label'   => 'Search',
-      'id'      => 'species',
-      'class'   => 'input',
-      'values'  => $values,
-    }, $inline)->first_child->after('label', {'inner_HTML' => '&nbsp;for', 'for' => 'q'});
-
-  }
-
   # search input box & submit button
   my $search_prompt = defined($config->{'search_prompt'}) ? $config->{'search_prompt'}
                                                           : "Search $species_name&hellip;";
+  my $label = defined($config->{'label'}) ? $config->{'label'} : '';
   my $q_params = {'type'        => 'string', 
                   'name'        => 'q', 
                   'id'          => 'q',
+                  'label'       => $label,
                   'value'       => $search_prompt, 
                   'size'        => 50, 
                   'class'       => 'query input inactive',
@@ -153,6 +125,24 @@ sub render {
                   };
   my $q_field = $form->add_field($q_params, $inline);
   $q_field->add_element({'type' => 'submit', 'value' => 'Go'}, 1);
+
+  # species dropdown
+  if ($config->{'show_species'}) {
+    my $field = $form->add_field({});
+
+    my $values = [];
+=pod
+    $field->add_element({
+      'type'    => 'input',
+      'name'    => 'species',
+      'label'   => 'Search',
+      'id'      => 'species',
+      'title'   => 'All species',
+      'class'   => 'ui-autocomplete-input inactive',
+      'values'  => $values,
+    }, $inline)->first_child->after('label', {'inner_HTML' => '&nbsp;for', 'for' => 'q'});
+=cut
+  }
 
   return sprintf '<div id="SpeciesSearch" class="js_panel"><input type="hidden" class="panel_type" value="SearchBox" />%s</div>', $form->render;
 }

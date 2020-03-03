@@ -79,7 +79,7 @@ sub content {
 
 
   return {
-    'popup_message' => $announcement_banner_message,
+    'popup_message' => $popup_message,
     'announcement_banner_message' => $announcement_banner_message 
   }
 

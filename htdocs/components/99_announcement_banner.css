@@ -17,13 +17,17 @@
 
 
 #announcement-banner {
-    background-color: #CD0000;
+    background-color: gold;
     padding: 12px 8px 12px 8px;
-    color: #FFF;
+    color: #333;
     text-align: center;
 }
 
 #announcement-banner p{
     margin:0;
     font-weight: bold;
+}
+
+#announcement-banner a{
+    color: #3399FF;
 }

@@ -20,8 +20,6 @@ limitations under the License.
 package EnsEMBL::Web::Template::Legacy;
 
 ### Legacy page template, used by standard HTML pages
-
-use EnsEMBL::Web::Utils::FileHandler qw(file_get_contents);
 use parent qw(EnsEMBL::Web::Template);
 
 use HTML::Entities qw(encode_entities);

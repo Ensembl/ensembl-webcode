@@ -146,7 +146,7 @@ our $GDPR_TERMS_URL               = 'https://www.ebi.ac.uk/about/terms-of-use';
 
 ###############################################################################
 ## Cookies and cookie encryption
-our $ENSEMBL_USER_COOKIE          = 'ENSEMBL_WWW_USER';     # Cookie name for User cookie (if user plugin is enabled)
+our $ENSEMBL_USER_COOKIE          = 'ENSEMBL_WWW_USER_FB';     # Cookie name for User cookie (if user plugin is enabled)
 our $ENSEMBL_USER_COOKIEHOST      = '';                     # Cookie host for User cookie
 our $ENSEMBL_SESSION_COOKIE       = 'ENSEMBL_WWW_SESSION';  # Cookie name for session cookie
 our $ENSEMBL_SESSION_COOKIEHOST   = '';                     # Cookie host for session cookie

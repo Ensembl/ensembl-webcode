@@ -90,6 +90,7 @@ our $SITE_LOGO_HEIGHT = '';
 our $SITE_LOGO_ALT = '';
 our $SITE_LOGO_HREF = '';
 
+our $DIVISION                         = 'www';
 our $ENSEMBL_CONFIG_FILENAME_SUFFIX   = 'config.packed';
 our $ENSEMBL_CONFIG_BUILD             = 0; # Build config on server startup? Setting to 0 will try to recover from $ENSEMBL_CONFIG_FILENAME on startup
 our $ENSEMBL_SERVER_SIGNATURE         = "$ENSEMBL_SERVER-$ENSEMBL_SERVERROOT" =~ s/\W+/-/gr; # Unique string representing this machine/server

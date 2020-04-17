@@ -40,7 +40,6 @@ sub render {
   my $species_defs        = $hub->species_defs;
   my $page_species        = $hub->species || 'Multi';
   my $species_name        = $page_species eq 'Multi' ? '' : $species_defs->DISPLAY_NAME;
-  my $favourites          = $hub->get_favourite_species;
   my $search_url          = $species_defs->ENSEMBL_WEB_ROOT . "$page_species/Psychic";
   my $default_search_code = $species_defs->ENSEMBL_DEFAULT_SEARCHCODE;
 
@@ -109,35 +108,6 @@ sub render {
   }
   $examples = qq(<p class="search-example">e.g. $examples</p>) if $examples;
 
-  # species dropdown
-  if ($config->{'show_species'}) {
-    my $field = $form->add_field({});
-
-    my $species_info = $hub->get_species_info;
-    my %species      = map { $species_info->{$_}{'common'} => $_ } grep { $species_info->{$_}{'is_reference'} } sort keys %$species_info;
-    my %common_names = reverse %species;
-    my $values = [
-                  {'value' => '', 'caption' => 'All species'},
-                  {'value' => 'help', 'caption' => 'Help and Documentation' },
-                  {'value' => '', 'caption' => '---', 'disabled' => 1},
-                  ];
-    ## If more than one species, show favourites
-    if (scalar keys %species > 1) {
-        push @$values, map({ $common_names{$_} ? {'value' => $_, 'caption' => $common_names{$_}, 'group' => 'Favourite species'} : ()} @$favourites);
-        push @$values, {'value' => '', 'caption' => '---', 'disabled' => 1};
-    }
-    push @$values, map({'value' => $species{$_}, 'caption' => $_}, sort { uc $a cmp uc $b } keys %species);
-
-    $field->add_element({
-      'type'    => 'dropdown',
-      'name'    => 'species',
-      'label'   => 'Search',
-      'id'      => 'species',
-      'class'   => 'input',
-      'values'  => $values,
-    }, $inline)->first_child->after('label', {'inner_HTML' => '&nbsp;for', 'for' => 'q'});
-
-  }
 
   # search input box & submit button
   my $search_prompt = defined($config->{'search_prompt'}) ? $config->{'search_prompt'}
@@ -152,6 +122,48 @@ sub render {
                   'notes'       => $examples,
                   };
   my $q_field = $form->add_field($q_params, $inline);
+
+
+  # Filter
+  if ($config->{'show_species'}) {
+
+    my $favourites          = $hub->get_favourite_species;
+    my $species_info = $hub->get_species_info;
+    my %species      = map { $species_info->{$_}{'common'} => $_ } grep { $species_info->{$_}{'is_reference'} } sort keys %$species_info;
+    my %common_names = reverse %species;
+    my $values = [
+                  {'value' => '', 'caption' => 'Filter by...'},
+                  {'value' => '', 'caption' => '---', 'disabled' => 1},
+                  ];
+    ## If more than one species, show favourites
+    if (scalar keys %species > 1) {
+        push @$values, map({ $common_names{$_} ? {'value' => $_, 'caption' => $common_names{$_}, 'group' => 'Favourite species'} : ()} @$favourites);
+        push @$values, {'value' => '', 'caption' => '---', 'disabled' => 1};
+    }
+    ## Add divisions
+    my %divisions = $hub->species_defs->multiX('ENSEMBL_DIVISIONS');
+
+    my $this_site = $hub->species_defs->DIVISION;
+    my $site_label = delete $divisions{$this_site};
+
+    push @$values, {'value' => '', 'caption' => "$site_label"};
+    push @$values, {'value' => '', 'caption' => '---', 'disabled' => 1};
+
+    foreach (sort keys %divisions) {
+      my $division = $divisions{$_};
+      push @$values, {'value' => $_, 'caption' => "All $division", 'group' => 'Other divisions'};
+    }
+
+    $q_field->add_element({
+      'type'    => 'dropdown',
+      'name'    => 'species',
+      'label'   => 'Search',
+      'id'      => 'species',
+      'class'   => 'input',
+      'values'  => $values,
+    }, $inline);
+  }
+
   $q_field->add_element({'type' => 'submit', 'value' => 'Go'}, 1);
 
   return sprintf '<div id="SpeciesSearch" class="js_panel"><input type="hidden" class="panel_type" value="SearchBox" />%s</div>', $form->render;

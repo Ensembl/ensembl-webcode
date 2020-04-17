@@ -586,7 +586,7 @@ sub to_VCF {
   my $vcf_rep = $vf->to_VCF_record();
   return unless $vcf_rep && @$vcf_rep;
   
-  return '<span style="font-family:Courier,monospace;white-space:nowrap;margin-left:5px;padding:2px 4px;background-color:#F6F6F6">'.join("&nbsp;&nbsp;", map {encode_entities($_)} @{$vcf_rep}[0..4]).'</span>';
+  return '<span style="font-family:Courier,monospace;word-break:break-all;margin-left:5px;padding:2px 4px;background-color:#F6F6F6">'.join("&nbsp;&nbsp;", map {encode_entities($_)} @{$vcf_rep}[0..4]).'</span>';
 }
 
 sub location {
@@ -738,8 +738,10 @@ sub change_tolerance {
   my $self = shift;
   my $object = $self->object;
   my ($CADD_scores, $CADD_source) = @{$object->CADD_score};
-  my ($GERP_score, $GERP_source) = @{$object->GERP_score};
-
+  my ($GERP_score, $GERP_source);
+  eval {
+    ($GERP_score, $GERP_source) = @{$object->GERP_score};
+  };
   return unless (defined $CADD_scores || defined $GERP_score);
   my $html = '';
   if (defined $CADD_scores) {

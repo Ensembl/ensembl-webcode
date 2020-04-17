@@ -44,8 +44,7 @@ sub SEARCH_CONFIG {
 ### Configuration options for the large search box, depending on context
   return {
     'home' => {
-                'header'        => '',
-                'label'         => 'Search for',
+                'header'        => 'Search',
                 'form_classes'  => [qw(homepage-search-form no-sel)],
                 'show_species'  => 1,
                 'search_prompt' => ' ', ## leave blank for now

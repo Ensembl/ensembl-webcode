@@ -91,7 +91,7 @@ div.box-right               { width:49.5%; float:right; margin-left: 0.5%; margi
 div.column-twothird         { float:left; width: 66.7% }
 
 /* Tweaks to columns */
-div.static_all_species p    { margin-right: 1em; }
+div.static_all_species p    { padding-right: 1em; }
 
 /* IE 6 & 7 hacks for above */
 body.ie67 div.column-wrapper,

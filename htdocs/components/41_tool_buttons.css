@@ -23,7 +23,7 @@
     background-position: 12px 50%; 
     background-repeat: no-repeat; 
     margin: 6px 1px; 
-    padding: 7px 15px 4px 36px; 
+    padding: 7px 15px 6px 36px; 
     -moz-border-radius: 6px; 
     -webkit-border-radius: 6px; 
     border-radius: 6px;
@@ -77,6 +77,7 @@
      
 .tool_buttons .config       { background-image: url(/i/16/rev/setting.png);       }
 .tool_buttons .data         { background-image: url(/i/16/rev/page-user.png);     }
+.tool_buttons .search       { background-image: url(/i/16/rev/search.png);     }
 .tool_buttons .export       { background-image: url(/i/16/rev/download.png);      }
 .tool_buttons .iexport      { background-image: url(/i/16/rev/picture.png);      }
 .tool_buttons .view         { background-image: url(/i/16/rev/eye.png);           }

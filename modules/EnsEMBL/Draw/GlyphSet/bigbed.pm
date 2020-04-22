@@ -55,7 +55,7 @@ sub get_data {
                         };
                         
 
-  my $iow = EnsEMBL::Web::IOWrapper::Indexed::open($url, 'BigBed', $args);
+  my $iow = $self->get_iow($url, $args);
 
   if ($iow) {
     ## We need to pass 'faux' metadata to the ensembl-io wrapper, because
@@ -73,7 +73,10 @@ sub get_data {
                     'spectrum'        => $self->{'my_config'}->get('spectrum'),
                     'colorByStrand'   => $self->{'my_config'}->get('colorByStrand'),
                     'use_synonyms'    => $hub->species_defs->USE_SEQREGION_SYNONYMS,
+                    'link_template'   => $self->{'my_config'}->get('link_template'),
+                    'link_label'      => $self->{'my_config'}->get('link_label'),
                     'zmenu_extras'    => $self->{'my_config'}->get('zmenu_extras'), 
+                    'custom_fields'   => $self->{'my_config'}->get('custom_fields'), 
                     };
 
     ## Also set a default gradient in case we need it
@@ -117,7 +120,8 @@ sub get_data {
       $total += scalar @{$_->{'features'}||[]};
     }
 
-    if ($total > 500) {
+    my $limit = $self->{'my_config'}->get('bigbed_limit') || 500;
+    if ($total > $limit) {
       $self->{'data'} = [];
       $self->{'no_empty_track_message'}  = 1;
       return $self->errorTrack('This track has too many features to show at this scale. Please zoom in.');
@@ -132,6 +136,11 @@ sub get_data {
 
   return $data;
 }
+
+sub get_iow { 
+  my ($self, $url, $args) = @_;
+  return EnsEMBL::Web::IOWrapper::Indexed::open($url, 'BigBed', $args); 
+} 
  
 sub extra_metadata {}
  

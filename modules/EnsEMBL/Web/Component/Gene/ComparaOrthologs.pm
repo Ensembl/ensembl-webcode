@@ -70,7 +70,7 @@ sub content {
   my @orthologues = (
     $object->get_homology_matches('ENSEMBL_ORTHOLOGUES', undef, undef, $cdb), 
   ); 
-  
+
   my %orthologue_list;
   my %skipped;
 
@@ -109,8 +109,18 @@ sub content {
         next;
       }
 
+      # Skip strains that belongs to a different parent species
+      if($self->is_strain && $species_defs->get_config($species, 'RELATED_TAXON') ne $species_defs->RELATED_TAXON){
+        delete $not_seen{$species};
+        delete $not_seen{lc $species};
+        next;
+      } 
+
       $orthologue_list{$species} = {%{$orthologue_list{$species}||{}}, %{$homology_type->{$_}}};
-      $skipped{$species}        += keys %{$homology_type->{$_}} if $self->param('species_' . lc $species) eq 'off';
+      if($self->param('species_' . lc $species) eq 'off') {
+        $skipped{$species}        += keys %{$homology_type->{$_}};
+      }
+
       delete $not_seen{$species};
       delete $not_seen{lc $species};
     }
@@ -178,7 +188,6 @@ sub content {
     { key => 'Species',    align => 'left', width => '10%', sort => 'html'                                                },
     { key => 'Type',       align => 'left', width => '10%', sort => 'html'                                            },   
     { key => 'identifier', align => 'left', width => '15%', sort => 'none', title => 'Orthologue'},      
-    { key => 'dN/dS',      align => 'left', width => '5%',  sort => 'html'                                             },
     { key => 'Target %id', align => 'left', width => '5%',  sort => 'position_html', label => 'Target %id', help => "Percentage of the orthologous sequence matching the $species_name sequence" },
     { key => 'Query %id',  align => 'left', width => '5%',  sort => 'position_html', label => 'Query %id',  help => "Percentage of the $species_name sequence matching the sequence of the orthologue" },
     { key => 'goc_score',  align => 'left', width => '5%',  sort => 'position_html', label => 'GOC Score',  help => "<a href='/info/genome/compara/Ortholog_qc_manual.html/#goc'>Gene Order Conservation Score (values are 0-100)</a>" },
@@ -200,10 +209,6 @@ sub content {
       
       # Add in Orthologue description
       my $orthologue_desc = $orthologue_map{$orthologue->{'homology_desc'}} || $orthologue->{'homology_desc'};
-      
-      # Add in the dN/dS ratio
-      my $orthologue_dnds_ratio = $orthologue->{'homology_dnds_ratio'} || 'n/a';
-      my $dnds_class  = ($orthologue_dnds_ratio ne "n/a" && $orthologue_dnds_ratio >= 1) ? "box-highlight" : "";
 
       # GOC Score, wgac and high confidence
       my $goc_score  = (defined $orthologue->{'goc_score'} && $orthologue->{'goc_score'} >= 0) ? $orthologue->{'goc_score'} : 'n/a';
@@ -268,7 +273,7 @@ sub content {
      
       my $tree_url = $hub->url({
         type   => 'Gene',
-        action => $strain_url.'Compara_Tree' . ($cdb =~ /pan/ ? '/pan_compara' : ''),
+        action => $strain_url . ($cdb =~ /pan/ ? 'PanComparaTree' : 'Compara_Tree'),
         g1     => $stable_id,
         anc    => $orthologue->{'gene_tree_node_id'},
         r      => undef
@@ -309,7 +314,6 @@ sub content {
       my $table_details = {
         'Species'    => join('<br />(', split(/\s*\(/, $species_defs->species_label($species))),
         'Type'       => $self->html_format ? glossary_helptip($hub, ucfirst $orthologue_desc, ucfirst "$orthologue_desc orthologues").qq{<p class="top-margin"><a href="$tree_url">View Gene Tree</a></p>} : glossary_helptip($hub, ucfirst $orthologue_desc, ucfirst "$orthologue_desc orthologues") ,
-        'dN/dS'      => qq{<span class="$dnds_class">$orthologue_dnds_ratio</span>},
         'identifier' => $self->html_format ? $id_info : $stable_id,
         'Target %id' => qq{<span class="$target_class">}.sprintf('%.2f&nbsp;%%', $target).qq{</span>},
         'Query %id'  => qq{<span class="$query_class">}.sprintf('%.2f&nbsp;%%', $query).qq{</span>},

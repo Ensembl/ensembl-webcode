@@ -83,6 +83,18 @@ sub get_redirect_uri {
   ## In a plugin, use this function with PREV to add plugin specific rules
   my ($r, $uri) = @_;
 
+  ## Redirect to OLS
+  if ($uri =~ m|^/glossary/|) {
+    my $ols = $SiteDefs::ENSEMBL_GLOSSARY_URL;
+    if ($uri =~ m|ENSGLOSSARY_(\d+)|) {
+      my $id = $1;
+      return $ols.'/terms?iri=http%3A%2F%2Fensembl.org%2Fglossary%2FENSGLOSSARY_'.$id;
+    }
+    else {
+      return $ols;
+    }
+  }
+
   ## Redirect to contact form
   if ($uri =~ m|^/contact\?$|) {
     return '/Help/Contact';
@@ -93,8 +105,13 @@ sub get_redirect_uri {
     return $uri =~ s/Summary/Explore/r;
   }
 
-  if ($uri =~ /\/psychic/) {
-    return $uri =~ s/psychic/Psychic/r;
+  if ($uri =~ /\/Multi\/psychic/) {
+    return $uri =~ s/\/Multi\/psychic/\/Multi\/Psychic/r;
+  }
+  
+  ## Handle id lookups from ensemblgenomes.org to the corresponding page
+  if ($uri =~ /\/common\/psychic/ && $uri =~ /[\&\;\?]{1}q=([^\&\;]+)/ ) {
+    return stable_id_redirect_uri('id', $1)
   }
 
   ## quick fix for solr autocomplete js bug
@@ -115,6 +132,11 @@ sub get_redirect_uri {
   ## Redirect moved documentation
   if ($uri =~ /\/info\/docs\/(variation|funcgen|compara|genebuild|microarray)/) {
      return $uri =~ s/docs/genome/r;
+ }
+
+  ## Broken links in old genebuild PDFs
+  if ($uri =~ /\/info\/docs\/genebuild\/genome_annotation.html/) {
+     return $uri =~ s/genome_annotation/index/r;
  }
 
   ## For stable id URL (eg. /id/ENSG000000nnnnnn) or malformed Gene URL with g param
@@ -434,7 +456,8 @@ sub howsitgoing {
   $r->print("\n");
 
   my $uptime = time - $start_time;
-  $r->print("uptime: $uptime\n");
+  my $host = hostname;
+  $r->print("uptime: $uptime\n$host\n");
 }
 
 sub handler {
@@ -522,10 +545,18 @@ sub handler {
   }
 
   # give up if no response code was set by any of the handlers
-  return DECLINED unless defined $response_code;
+  if (not defined $response_code) {
+    # when the request is declined, it will eventually be treated by Apache as a 404,
+    # at which point its uri will be re-written to /Error (see httpd.conf);
+    # so let's keep the original uri in a custom header
+    # (not using the standard Referer header, because a referrer is a full url, with protocol and hostname)
+    $r->headers_in->add('X-Declined-From' => $r->unparsed_uri);
+    return DECLINED;
+  }
 
   # kill off the process when it grows too large
-  $r->push_handlers(PerlCleanupHandler => \&Apache2::SizeLimit::handler) if $response_code == OK;
+  # Rely on OOB now. (Mart exceeds what this package can handle)
+#  $r->push_handlers(PerlCleanupHandler => \&Apache2::SizeLimit::handler) if $response_code == OK;
 
   tidy_databases();
 

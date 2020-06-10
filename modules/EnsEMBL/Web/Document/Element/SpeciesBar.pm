@@ -60,7 +60,8 @@ sub content {
   }
   else {
     my $image = $hub->species_defs->SPECIES_IMAGE || $hub->species;
-    $header = sprintf '<img src="/i/species/%s.png" class="badge-32"><span class="species">%s</span> <span class="more">(%s)</span>', $image, $hub->species_defs->PREFERRED_DISPLAY_NAME, $assembly;
+    my $name  = $hub->species_defs->PREFERRED_DISPLAY_NAME || $species;
+    $header = sprintf '<img src="/i/species/%s.png" class="badge-32"><span class="species">%s</span> <span class="more">(%s)</span>', $image, $name, $assembly;
     ## Species selector
     $arrow     = sprintf '<span class="dropdown"><a class="toggle species" href="#" rel="species">&#9660;</a></span>';
     $dropdown  = $self->species_list;
@@ -75,7 +76,7 @@ sub content {
 sub init_species_list {
   my ($self, $hub) = @_;
   my $species_defs = $hub->species_defs;
-  my $name_key = $species_defs->PREFER_COMMON_NAMES ? 'SPECIES_COMMON_NAME' : 'SPECIES_SCIENTIFIC_NAME';
+  my $name_key = $species_defs->USE_COMMON_NAMES ? 'SPECIES_COMMON_NAME' : 'SPECIES_SCIENTIFIC_NAME';
   
   $self->{'species_list'} = [ 
     sort { $a->[1] cmp $b->[1] } 

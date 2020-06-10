@@ -22,8 +22,6 @@ package EnsEMBL::Web::Controller::SSI;
 use strict;
 use warnings;
 
-use Text::Markdown qw(markdown);
-
 use EnsEMBL::Web::Document::HTML::Movie;
 use EnsEMBL::Web::Utils::FileHandler qw(file_get_contents);
 
@@ -119,12 +117,6 @@ sub template_INCLUDE {
         local($/) = undef;
         $content = <FH>;
         close FH;
-
-        ## convert markdown into HTML
-        if ($filename =~ /\.md$/) {
-          $content = markdown($content);
-        }
-        
         $content =~ s/src="(\/i(mg)?\/)/src="$static_server$1/g if $static_server;
         return $content;
       }

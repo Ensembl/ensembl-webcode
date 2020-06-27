@@ -821,8 +821,6 @@ sub _parse {
       }
     }
   }
-  # Used for grouping same species with different assemblies in species selector
-  $tree->{'SPECIES_ASSEMBLY_MAP'} = $species_to_assembly;
 
   ## Compile strain info into a single structure
   while (my($k, $v) = each (%$species_to_strains)) {
@@ -896,8 +894,8 @@ sub _parse {
                                                     $common_name : $scientific_name; 
 
         # Populate taxonomy division using e_divisions.json template
-        push @{$species_to_assembly->{$common_name}}, $config_packer->tree->{'ASSEMBLY_VERSION'};
-        my $taxonomy = $config_packer->tree->{TAXONOMY};
+        push @{$species_to_assembly->{$common_name}}, $tree->{$url}->{'ASSEMBLY_VERSION'};
+        my $taxonomy = $tree->{$url}->{TAXONOMY};
         my $children = [];
         my $other_species_children = [];
         my @other_species = grep { $_->{key} =~ m/other_species/ } @{$tree->{'ENSEMBL_TAXONOMY_DIVISION'}->{child_nodes}};
@@ -973,6 +971,10 @@ sub _parse {
       warn "!!! SPECIES $prodname has no URL defined";
     }
   } 
+
+  # Used for grouping same species with different assemblies in species selector
+  $tree->{'SPECIES_ASSEMBLY_MAP'} = $species_to_assembly;
+
   $tree->{'MULTI'}{'ENSEMBL_DATASETS'} = $datasets;
   #warn ">>> NEW KEYS: ".Dumper($tree);
 

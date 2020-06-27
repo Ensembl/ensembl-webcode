@@ -200,6 +200,7 @@ our @ENSEMBL_CONF_DIRS               = ("$ENSEMBL_WEBROOT/conf");               
 our @ENSEMBL_HTDOCS_DIRS             = ($ENSEMBL_DOCROOT, "$ENSEMBL_SERVERROOT/biomart-perl/htdocs");  # locates static content
 our $ENSEMBL_TAXONOMY_DIVISION_FILE  = ("$ENSEMBL_DOCROOT/e_divisions.json");
 our $DEFAULT_SPECIES_IMG_DIR         = 'htdocs/i/species';
+our $SPECIES_IMAGE_DIR               = defer { $SiteDefs::ENSEMBL_SERVERROOT.'/public-plugins/ensembl/'. $SiteDefs::DEFAULT_SPECIES_IMG_DIR };
 ###############################################################################
 
 

@@ -231,15 +231,15 @@ Each directory on <a href="$ftp" rel="external">$ftp_domain</a> contains a
       { key => 'ancestral', title => '', align => 'center' }
     ], [{
       database  => 'Comparative genomics',
-      mysql     => qq(<a rel="external" title="$title{'mysql'}" href="/$rel/mysql/">MySQL</a>),
-      emf       => qq(<a rel="external" title="$title{'emf'}" href="/$rel/emf/ensembl-compara/">EMF</a>),
-      maf       => qq(<a rel="external" title="$title{'maf'}" href="/$rel/maf/ensembl-compara/">MAF</a>),
-      bed       => qq(<a rel="external" title="$title{'bed'}" href="/$rel/bed/">BED</a>),
-      xml       => qq(<a rel="external" title="$title{'xml'}" href="/$rel/xml/ensembl-compara/homologies/">XML</a>),
-      ancestral => qq(<a rel="external" title="$title{'ancestral'}" href="/$rel/fasta/ancestral_alleles">Ancestral Alleles</a>),
+      mysql     => sprintf('<a rel="external" title="%s" href="%s/mysql/">MySQL</a>', $title{'mysql'}, $ftp_base),
+      emf       => sprintf('<a rel="external" title="%s" href="%s/emf/ensembl-compara/">EMF</a>', $title{'emf'}, $ftp_base),
+      maf       => sprintf('<a rel="external" title="%s" href="%s/maf/ensembl-compara/">MAF</a>',$title{'maf'}, $ftp_base),
+      bed       => sprintf('<a rel="external" title="%s" href="%s/bed/">BED</a>', $title{'bed'}, $ftp_base),
+      xml       => sprintf('<a rel="external" title="%s" href="%s/xml/ensembl-compara/homologies/">XML</a>', $title{'xml'}, $ftp_base),
+      ancestral => sprintf('<a rel="external" title="%s" href="%s/fasta/ancestral_alleles">Ancestral Alleles</a>',$title{'ancestral'}, $ftp_base),
     }, {
       database  => 'BioMart',
-      mysql     => qq(<a rel="external" title="$title{'mysql'}" href="/$rel/mysql/">MySQL</a>),
+      mysql     => sprintf('<a rel="external" title="%s" href="%s/mysql/">MySQL</a>',$title{'mysql'}, $ftp_base),
       emf       => '-',
       maf       => '-',
       bed       => '-',
@@ -247,7 +247,7 @@ Each directory on <a href="$ftp" rel="external">$ftp_domain</a> contains a
       ancestral => '-',
     }, {
       database  => 'Stable ids',
-      mysql     => qq(<a rel="external" title="$title{'mysql'}" href="/$rel/mysql/ensembl_stable_ids_$version/">MySQL</a>),
+      mysql     => sprintf('<a rel="external" title="%s" href="%s/mysql/ensembl_stable_ids_%s/">MySQL</a>', $title{'mysql'}, $ftp_base, $version ),
       emf       => '-',
       maf       => '-',
       bed       => '-',

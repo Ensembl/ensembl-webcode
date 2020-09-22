@@ -504,7 +504,7 @@ sub generic_group_link {
   $title =~ /^(.+)\s*\(\d+\)/;
   my $project_name = ($1) ? $1 : $title;
 
-  my $terms;
+  my $terms = '';
   my $pop_use_url;
   if ($project_name =~ /ncbi alfa/i) {
     $pop_use_url = $self->hub->get_ExtURL('ALFA_POP_USE');

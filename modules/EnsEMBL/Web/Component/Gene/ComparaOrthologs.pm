@@ -438,6 +438,7 @@ sub buttons {
 
     ## Add any species settings
     foreach (grep { /^species_/ } $self->param) {
+      next unless $hub->action ne 'Strain_Compara_Ortholog' || $_ =~ lc($hub->species);
       $params->{$_} = $self->param($_);
     }
 

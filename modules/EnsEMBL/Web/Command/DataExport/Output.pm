@@ -50,7 +50,6 @@ sub process {
   my $error;
   my $format = $hub->param('format');
 
-
   ## Clean up parameters to remove chosen format from name (see Component::DataExport)
   foreach ($hub->param) {
     if ($_ =~ /_$format$/) {
@@ -65,7 +64,6 @@ sub process {
  
   ## Make filename safe
   ($filename = $hub->param('name')) =~ s/ |-/_/g;
-
   ## Compress file by default
   $extension   = $format_info->{'ext'};
   $compression = $hub->param('compression');
@@ -354,8 +352,6 @@ sub write_alignment {
   my ($alignment, $result);
   my $flag = $align ? undef : 'sequence';
   my $data = $component->get_export_data($flag);
-  
-
   if (!$data) {
     $result->{'error'} = ['No data returned'];
   }

@@ -50,6 +50,7 @@ sub process {
   my $error;
   my $format = $hub->param('format');
 
+
   ## Clean up parameters to remove chosen format from name (see Component::DataExport)
   foreach ($hub->param) {
     if ($_ =~ /_$format$/) {
@@ -64,7 +65,7 @@ sub process {
  
   ## Make filename safe
   ($filename = $hub->param('name')) =~ s/ |-/_/g;
- 
+
   ## Compress file by default
   $extension   = $format_info->{'ext'};
   $compression = $hub->param('compression');
@@ -82,9 +83,12 @@ sub process {
     ($component, $error) = $self->object->create_component;
 
     # Override the options saved in viewconfig by the one selected by the user in the form (these settings are not saved to session since we don't call session->store afterwards)
-    my $view_config = $hub->param('data_type') ? $hub->get_viewconfig({component => $component->id, type => $hub->param('data_type'), cache => 1}) : undef;
-    for ($view_config ? $view_config->field_order : ()) {
-      $view_config->set($_, $hub->param(sprintf '%s_%s', $_, $format) || 'off');
+    if( $component->id ne 'ComparaOrthologs'){
+      my $view_config = $hub->param('data_type') ? $hub->get_viewconfig({component => $component->id, type => $hub->param('data_type'), cache => 1}) : undef;
+
+      for ($view_config ? $view_config->field_order : ()) {
+        $view_config->set($_, $hub->param(sprintf '%s_%s', $_, $format) || 'off');
+      }
     }
 
     $file = EnsEMBL::Web::File::User->new(
@@ -350,6 +354,8 @@ sub write_alignment {
   my ($alignment, $result);
   my $flag = $align ? undef : 'sequence';
   my $data = $component->get_export_data($flag);
+  
+
   if (!$data) {
     $result->{'error'} = ['No data returned'];
   }

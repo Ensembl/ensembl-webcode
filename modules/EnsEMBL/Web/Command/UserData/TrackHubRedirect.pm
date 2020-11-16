@@ -35,13 +35,8 @@ sub process {
   my $url           = $hub->param('url');
      $url           =~ s/(^\s+|\s+$)//g; # Trim leading and trailing whitespace
   my $filename      = [split '/', $url]->[-1];
-  my @bits          = split /\./, $filename;
-  my $extension     = $bits[-1] eq 'gz' ? $bits[-2] : $bits[-1];
-  my $pattern       = "^$extension\$";
   my ($redirect, $anchor);
   my $params        = {};
-  warn ">>> LOC ".$hub->param('r');
-  warn ">>> GENE ".$hub->param('g');
 
   ## Allow for manually-created URLs with capitalisation, and 
   ## also validate any user-provided species name

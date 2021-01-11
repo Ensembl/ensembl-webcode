@@ -333,7 +333,7 @@ sub update_from_input {
     my $diff = delete $params->{$self->config_type};
 
     # Reset regulation matrix tracks by default
-    $self->altered($self->reset_user_settings('matrix', $params));
+    $self->altered($self->reset_user_settings('reg_matrix', $params));
 
     if (keys %$diff) {
 

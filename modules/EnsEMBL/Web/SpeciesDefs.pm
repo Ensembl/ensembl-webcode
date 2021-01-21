@@ -656,7 +656,8 @@ sub _expand_database_templates {
         $tree->{'databases'}{'DATABASE_'.$_} = $db_name;
       }
       else {
-        unless ($filename eq 'MULTI' && $SiteDefs::NO_COMPARA) {
+        ## Ignore this step for MULTI, as it may not have a core db
+        unless ($filename eq 'MULTI') {
           print STDERR "\t  [WARN] CORE DATABASE NOT FOUND - looking for '$db_name'\n" if $_ eq 'CORE';
           $self->_info_line('Databases', "-- database $db_name not available") if $SiteDefs::ENSEMBL_WARN_DATABASES;
         }

@@ -183,7 +183,7 @@ sub _get_prediction_transcripts {
   my $db_alias = $args->{'db'};
   my @out;
   foreach my $logic_name (@{$args->{'logic_names'}}) {
-    my $logic_name_with_species = $logic_name + $args->{'species'};
+    my $logic_name_with_species = $logic_name.'_'.$args->{'species'};
 
     my @t = @{$slice->get_all_PredictionTranscripts($logic_name_with_species,$db_alias)};
     my @g = map { $self->_fake_gene($_) } @t;
@@ -205,12 +205,12 @@ sub _get_genes {
     my $lrg_slices = $slice->project('lrg');
     if ($lrg_slices->[0]) {
       my $lrg_slice = $lrg_slices->[0]->to_Slice;
-      return [map @{$lrg_slice->get_all_Genes($_ + $species,$db_alias) || []}, @$analyses];
+      return [map @{$lrg_slice->get_all_Genes($_.'_'. $species,$db_alias) || []}, @$analyses];
     }
   } elsif ($slice->isa('Bio::EnsEMBL::LRGSlice') && $analyses->[0] ne 'LRG_import') {
-    return [map @{$slice->feature_Slice->get_all_Genes($_ + $species, $db_alias) || []}, @$analyses];
+    return [map @{$slice->feature_Slice->get_all_Genes($_.'_'.$species, $db_alias) || []}, @$analyses];
   } else {
-    return [map @{$slice->get_all_Genes($_ + $species,$db_alias) || []}, @$analyses];
+    return [map @{$slice->get_all_Genes($_.'_'.$species,$db_alias) || []}, @$analyses];
   }
 }
 

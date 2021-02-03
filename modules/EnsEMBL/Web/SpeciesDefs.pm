@@ -817,10 +817,15 @@ sub _parse {
   my $defaults = $self->_read_in_ini_file('DEFAULTS', {});
   $self->_info_line('Parsing', 'DEFAULTS ini file');
   
-  # Loop for each species exported from SiteDefs
+  # Loop for each database exported from SiteDefs
   # grab the contents of the ini file AND
   # IF  the DB packed files exist expand them
   # o/w attach the species databases
+
+  # Note that because the code was developed for vertebrates first,
+  # the variable PRODUCTION_NAMES actually comprises the names of ini files
+  # and their corresponding databases, not necessarily individual species 
+  # (e.g. in the case of collections)
 
   # load the data and store the packed files
   foreach my $species (@$SiteDefs::PRODUCTION_NAMES, 'MULTI') {

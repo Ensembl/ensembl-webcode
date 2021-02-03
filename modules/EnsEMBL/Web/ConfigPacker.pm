@@ -1704,8 +1704,11 @@ sub _munge_meta {
     ## Used mainly in <head> links
     ($self->tree($production_name)->{'SPECIES_BIO_SHORT'} = $self->tree->{'SPECIES_URL'}) =~ s/^([A-Z])[a-z]+_([a-z]+)$/$1.$2/;
     
-    push @{$self->tree->{'DB_SPECIES'}}, $species;
-    $self->tree($production_name)->{'DB_SPECIES'} = [$species];
+    push @{$self->tree($production_name)->{'DB_SPECIES'}}, $species;
+    ## Also add it to the main tree for collection dbs
+    if ($self->is_collection('DATABASE_CORE')) {
+      push @{$self->tree->{'DB_SPECIES'}}, $species;
+    }
     
     $self->tree($production_name)->{'SPECIES_META_ID'} = $species_id;
 
@@ -1814,7 +1817,8 @@ sub _munge_meta {
     ## need to explicitly define as empty array by default
     ## SpeciesDefs looks for a value at collection level
     if ($self->is_collection('DATABASE_CORE')) {
-      @{$self->tree($production_name)->{'ENSEMBL_CHROMOSOMES'}} = ();                                     @{$self->tree($production_name)->{'ENSEMBL_CHROMOSOMES'}} = @{$meta_hash->{'region.toplevel'}} if $meta_hash->{'region.toplevel'};
+      @{$self->tree($production_name)->{'ENSEMBL_CHROMOSOMES'}} = ();
+      @{$self->tree($production_name)->{'ENSEMBL_CHROMOSOMES'}} = @{$meta_hash->{'region.toplevel'}} if $meta_hash->{'region.toplevel'};
     }
   }
 
@@ -1939,7 +1943,8 @@ sub _munge_species_url_map {
 
 sub is_collection {
   my ($self, $db_name) = @_;
-  my $database_name = $self->tree->{'databases'}->{'DATABASE_CORE'}{'NAME'};
+  $db_name ||= 'DATABASE_CORE';
+  my $database_name = $self->tree->{'databases'}->{$db_name}{'NAME'};
   return $database_name =~ /_collection/;
 }
 

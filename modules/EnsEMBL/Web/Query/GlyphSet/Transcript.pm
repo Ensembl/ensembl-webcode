@@ -200,7 +200,8 @@ sub _get_genes {
   my $analyses       = $args->{'logic_names'};
   my $db_alias       = $args->{'db'};
   my $species        = $args->{'species'};
-  my $is_gencode_basic = $args->{'only_attrib'} eq 'gencode_basic' ? 1 : 0;
+  my $only_attrib    = $args->{'only_attrib'} || '' ;
+  my $is_gencode_basic = $only_attrib eq 'gencode_basic' ? 1 : 0;
 
   if ($analyses->[0] eq 'LRG_import' && !$slice->isa('Bio::EnsEMBL::LRGSlice')) {
     warn "!!! DEPRECATED CODE - please change this track to use GlyphSet::lrg";

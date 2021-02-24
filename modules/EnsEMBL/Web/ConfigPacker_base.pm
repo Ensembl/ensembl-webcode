@@ -85,6 +85,10 @@ sub db_connect {
   ### Arguments: configuration tree (hash ref), database name (string)
   ### Returns: DBI database handle
   my ($self, $db, $details, $no_warn) = @_;
+  use Data::Dumper;
+  $Data::Dumper::Sortkeys = 1;
+  $Data::Dumper::Maxdepth = 1;
+  warn ">>> CONNECTING TO DB ".Dumper($self->tree->{'databases'}{$db});
   return unless ($details || exists $self->tree->{'databases'}{$db});
   $details ||= $self->tree->{'databases'}{$db};
   my $dbname  = $details->{'NAME'};

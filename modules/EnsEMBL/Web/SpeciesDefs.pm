@@ -631,6 +631,7 @@ sub _expand_database_templates {
   ## Autoconfigure databases
   unless (exists $tree->{'databases'} && exists $tree->{'databases'}{'DATABASE_CORE'}) {
     my @db_types = qw(CORE CDNA OTHERFEATURES RNASEQ FUNCGEN VARIATION);
+    push @db_types, 'COMPARA' if $SiteDefs::SINGLE_SPECIES_COMPARA;
     my $db_details = {
                       'HOST'    => $HOST,
                       'PORT'    => $PORT,
@@ -646,7 +647,12 @@ sub _expand_database_templates {
         my $non_vert_version = $SiteDefs::SITE_RELEASE_VERSION;
         $db_name = sprintf('%s_%s', $filename, lc($_));
         $db_name .= '_'.$non_vert_version if $non_vert_version;                                 
-        $db_name .= sprintf('_%s_%s', $SiteDefs::ENSEMBL_VERSION, $species_version);
+        if ($_ eq 'COMPARA') {
+          $db_name .= sprintf('_%s', $SiteDefs::ENSEMBL_VERSION);
+        }
+        else {
+          $db_name .= sprintf('_%s_%s', $SiteDefs::ENSEMBL_VERSION, $species_version);
+        } 
       }
       ## Does this database exist?
       $db_details->{'NAME'} = $db_name;
@@ -1123,7 +1129,13 @@ sub multi {
 
 sub compara_like_databases {
   my $self = shift;
-  return $self->multi_val('compara_like_databases');
+  if ($self->SINGLE_SPECIES_COMPARA) {
+    my $species = shift;
+    return $self->get_config($species, 'compara_like_databases');
+  }
+  else {
+    return $self->multi_val('compara_like_databases');
+  }
 }
 
 sub multi_val {

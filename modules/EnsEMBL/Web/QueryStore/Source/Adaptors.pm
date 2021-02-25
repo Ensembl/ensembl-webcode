@@ -37,7 +37,7 @@ sub _database {
   my ($self,$species,$db) = @_;
 
   $db ||= 'core';
-  if($db =~ /compara/) {
+  if ($db =~ /compara/ && !$self->{_sd}->SINGLE_SPECIES_COMPARA) {
     $species = 'multi';
   }
   my $dbc = EnsEMBL::Web::DBSQL::DBConnection->new($species,$self->{'_sd'});
@@ -128,9 +128,10 @@ sub epigenome_by_stableid {
 }
 
 sub compara_member {
-  my ($self,$id) = @_;
+  my ($self,$id, $species) = @_;
 
-  my $gma = $self->_get_adaptor('get_GeneMemberAdaptor','compara');
+  ## Pass species in case this site has single-species compara
+  my $gma = $self->_get_adaptor('get_GeneMemberAdaptor','compara', $species);
   return undef unless $gma;
   return $gma->fetch_by_stable_id($id);
 }

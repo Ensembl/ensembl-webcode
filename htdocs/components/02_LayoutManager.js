@@ -340,7 +340,7 @@ Ensembl.LayoutManager.extend({
       ].join(''));
 
         $('#ebi-survey-close-button').on('click', function (e) {
-          Ensembl.cookie.set(cookie_name, 'closed', '', true, cookie_for_all_sites);
+          Ensembl.cookie.set(cookie_name, 'closed', 5259600000, true, cookie_for_all_sites);
           $(this).addClass('clicked')
                  .closest('.ebi-survey-message').delay(1000).fadeOut(100);
       });

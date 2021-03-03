@@ -330,8 +330,7 @@ Ensembl.LayoutManager.extend({
 
     if (shouldShowSurvey !== 'closed') {
       $('#masthead').after([ "<div class='ebi-survey-message' style='background-color: #FFCC00; height: 40px; text-align: center;padding-top: 15px;position: relative;color: #000000;'>",
-          "<span style='font-weight:bold; margin-right: 40px;'>We need your help!</span>",
-          "<span style='margin-right: 40px;'>If you’ve ever found our data helpful, please take our impact survey (15 min). Your replies will help keep the data flowing to the scientific community.</span>",
+          "<span style='margin-right: 40px;'>We need your help in understanding the impact of Ensembl in your research. Please take the EMBL-EBI impact survey that includes Ensembl (15 min). Your replies will help keep the data flowing to the scientific community.</span>",
           "<a style='color: white; background-color: #23B123; display: inline-block;padding: 6px 20px;border-radius: 10px;text-decoration: none;' href='https://www.surveymonkey.co.uk/r/EMBL-EBI_Impact_DR' target='_blank'>Take the survey</a>",
           "<span id='ebi-survey-close-button' style='position: absolute; top: 14px; right: 25px;cursor: pointer;font-size:22px;'>",
             "×",

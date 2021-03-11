@@ -144,6 +144,7 @@ Ensembl.LayoutManager.extend({
     });
 
     this.showGDPRCookieBanner();
+    this.showEBISurveyBanner();
     this.showTemporaryMessage();
     this.showMirrorMessage();
   },
@@ -314,6 +315,33 @@ Ensembl.LayoutManager.extend({
           Ensembl.cookie.set(cookie_name, Ensembl.gdpr_version, '', true, cookie_for_all_sites);
           $(this).addClass('clicked')
                  .closest('.cookie-message').delay(1000).fadeOut(100);
+      });
+      return true;
+    }
+
+    return false;
+  },
+
+  showEBISurveyBanner: function() {
+
+    var cookie_name = 'ebi_survey';
+    var cookie_for_all_sites = true;
+    var shouldShowSurvey = Ensembl.cookie.get(cookie_name);
+
+    if (shouldShowSurvey !== 'closed') {
+      $('#masthead').after([ "<div class='ebi-survey-message' style='background-color: #FFCC00; height: 40px; text-align: center;padding-top: 15px;position: relative;color: #000000;'>",
+          "<span style='margin-right: 40px;'>We need your help in understanding the impact of Ensembl in your research. Please take the EMBL-EBI impact survey that includes Ensembl (15 min). Your replies will help keep the data flowing to the scientific community.</span>",
+          "<a style='color: white; background-color: #23B123; display: inline-block;padding: 6px 20px;border-radius: 10px;text-decoration: none;' href='https://www.surveymonkey.co.uk/r/EMBL-EBI_Impact_DR' target='_blank'>Take the survey</a>",
+          "<span id='ebi-survey-close-button' style='position: absolute; top: 14px; right: 25px;cursor: pointer;font-size:22px;'>",
+            "×",
+          "</div>",
+        "</div>"
+      ].join(''));
+
+        $('#ebi-survey-close-button').on('click', function (e) {
+          Ensembl.cookie.set(cookie_name, 'closed', 5259600000, true, cookie_for_all_sites);
+          $(this).addClass('clicked')
+                 .closest('.ebi-survey-message').delay(1000).fadeOut(100);
       });
       return true;
     }

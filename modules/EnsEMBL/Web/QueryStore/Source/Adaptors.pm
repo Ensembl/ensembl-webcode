@@ -37,9 +37,15 @@ sub _database {
   my ($self,$species,$db) = @_;
 
   $db ||= 'core';
-  if ($db =~ /compara/ && !$self->{_sd}->SINGLE_SPECIES_COMPARA) {
-    $species = 'multi';
+
+  ## Rapid site has both single-species and multi-species compara
+  if ($self->{_sd}->SINGLE_SPECIES_COMPARA) { 
+    $species = 'multi' if $db =~ /compara_pan/;
   }
+  else {
+    $species = 'multi' if $db =~ /compara/;
+  }
+
   my $dbc = EnsEMBL::Web::DBSQL::DBConnection->new($species,$self->{'_sd'});
   if($db eq 'go') {
     return $dbc->get_databases_species($species,'go')->{'go'};

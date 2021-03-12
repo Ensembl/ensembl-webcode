@@ -654,6 +654,15 @@ sub _expand_database_templates {
           $db_name .= sprintf('_%s_%s', $SiteDefs::ENSEMBL_VERSION, $species_version);
         } 
       }
+      if ($_ eq 'COMPARA') {
+        $db_details = {
+                        'HOST'    => 'mysql-ens-compara-prod-9',
+                        'PORT'    => '4647',
+                        'USER'    => 'ensadmin',
+                        'PASS'    => 'ensembl',
+                        'DRIVER'  => $DRIVER,
+                      };
+      }
       ## Does this database exist?
       $db_details->{'NAME'} = $db_name;
       my $db_exists = $config_packer->db_connect($_, $db_details, 1);
@@ -662,7 +671,7 @@ sub _expand_database_templates {
         $tree->{'databases'}{'DATABASE_'.$_} = $db_name;
       }
       else {
-        unless ($filename eq 'MULTI' && $SiteDefs::NO_COMPARA) {
+        unless ($filename eq 'MULTI') {
           print STDERR "\t  [WARN] CORE DATABASE NOT FOUND - looking for '$db_name'\n" if $_ eq 'CORE';
           $self->_info_line('Databases', "-- database $db_name not available") if $SiteDefs::ENSEMBL_WARN_DATABASES;
         }

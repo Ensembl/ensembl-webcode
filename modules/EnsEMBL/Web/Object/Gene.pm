@@ -787,18 +787,19 @@ sub get_homologies {
   $homology_source      = 'ENSEMBL_HOMOLOGUES' unless defined $homology_source;
   $homology_description = 'ortholog' unless defined $homology_description;
   
-  my $geneid   = $self->stable_id;
   my $database = $self->database($compara_db);
   my %homologues;
 
   return unless $database;
 
-  my $query_member   = $database->get_GeneMemberAdaptor->fetch_by_stable_id($geneid);
+  my $query_member = $database->get_GeneMemberAdaptor->fetch_by_stable_id($self->stable_id);
+  #use Data::Dumper; $Data::Dumper::Maxdepth = 2; warn "... MEMBER ".Dumper($query_member);
 
   return unless defined $query_member;
   
   my $homology_adaptor = $database->get_HomologyAdaptor;
   my $homologies_array = $homology_adaptor->fetch_all_by_Member($query_member); # It is faster to get all the Homologues and discard undesired entries than to do fetch_all_by_Member_method_link_type
+  #warn ">>> HOMOLOG ARRAY @$homologies_array";
 
   # Strategy: get the root node (this method gets the whole lineage without getting sister nodes)
   # We use right - left indexes to get the order in the hierarchy.
@@ -832,6 +833,7 @@ sub fetch_homology_species_hash {
   my $compara_db           = shift || 'compara';
   my $name_lookup          = $self->hub->species_defs->production_name_lookup;
   my ($homologies, $classification, $query_member) = $self->get_homologies($homology_source, $homology_description, $compara_db);
+  #warn ">>> HOMOLOGIES @$homologies";
   my %homologues;
   my $missing;
 

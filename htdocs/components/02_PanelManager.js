@@ -148,7 +148,7 @@ Ensembl.PanelManager.extend({
    * Creates the panels in the Ensembl object, adds to the panels registry and initializes it
    */
   createPanel: function (id, type, params) {
-    if (this.panels[id]) {
+    if (this.panels[id] && !this.panels[id].multi) {
       this.destroyPanel(id, 'cleanup');
     }
     if (type) {

@@ -23,6 +23,7 @@ Ensembl.Panel.TextSequence = Ensembl.Panel.Content.extend({
   },
   
   init: function () {
+    this.multi = true;
     var panel = this;
     this.base();
     

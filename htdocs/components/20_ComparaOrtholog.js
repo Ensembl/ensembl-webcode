@@ -24,7 +24,6 @@ Ensembl.Panel.ComparaOrtholog = Ensembl.Panel.Content.extend({
   },
 
   updateDownloadButton: function (classNames) {
-    console.log(classNames)
     var downloadButton = $('.export.modal_link')[0];
     var exportButtonUrl = downloadButton.href;
     // Remove the existing filtered_sets param

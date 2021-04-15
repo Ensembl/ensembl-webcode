@@ -103,7 +103,7 @@ sub process {
       my %align_formats = EnsEMBL::Web::Constants::ALIGNMENT_FORMATS;
       my $in_bioperl    = grep { lc($_) eq lc($format) } keys %align_formats;
       ## Alignments and trees are handled by external writers
-      if (($hub->param('align') && lc($format) ne 'rtf')
+      if (($hub->get_alignment_id && lc($format) ne 'rtf')
           || (ref($component) =~ /Paralog/ && $in_bioperl && lc($format) ne 'fasta')) {
         my %tree_formats  = EnsEMBL::Web::Constants::TREE_FORMATS;
         my $is_tree       = grep { lc($_) eq lc($format) } keys %tree_formats;
@@ -346,7 +346,7 @@ sub write_emboss {
 sub write_alignment {
   my ($self, $component) = @_;
   my $hub     = $self->hub;
-  my $align = $hub->param('align');
+  my $align = $hub->get_alignment_id;
   my ($alignment, $result);
   my $flag = $align ? undef : 'sequence';
   my $data = $component->get_export_data($flag);
@@ -385,7 +385,7 @@ sub write_alignment {
 
         $alignment = $self->object->get_alignments({
           'slice'     => $data->slice,
-          'align'     => $hub->param('align'),
+          'align'     => $align,
           'species'   => $hub->species,
           'type'      => $hub->param('data_type'),
           'component' => $hub->param('data_action'), 

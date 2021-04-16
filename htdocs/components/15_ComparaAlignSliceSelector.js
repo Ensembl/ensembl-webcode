@@ -14,6 +14,7 @@ Ensembl.Panel.ComparaAlignSliceSelector = Ensembl.Panel.extend({
     panel.elLk.go = $('form a.alignment-go', panel.el);
     panel.configUrl = $('input.compara_config_url', panel.el).val();
     panel.updateComponent = $('input.update_component', panel.el).val();
+    Ensembl.updateURL({'align' : panel.elLk.selectedInput.val()});
   },
 
   updateAlignmentSpeciesSelection: function(node) {

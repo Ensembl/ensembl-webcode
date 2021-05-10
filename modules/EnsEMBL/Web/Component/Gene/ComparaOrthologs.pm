@@ -230,7 +230,7 @@ sub content {
       if ($hub->function && $hub->function eq 'pan_compara') {
         my $prod_name = $rev_lookup->{$spp};
         my $site      = $pan_lookup->{$prod_name}{'division'};
-        if ($site ne $hub->species_defs->DIVISION) {
+        if ($site && $site ne $hub->species_defs->DIVISION) {
           $site         = 'www' if $site eq 'vertebrates';
           $base_url     = "https://$site.ensembl.org";
         }

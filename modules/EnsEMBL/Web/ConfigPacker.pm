@@ -140,6 +140,23 @@ sub _summarise_generic {
   if( $self->_table_exists( $db_name, 'meta' ) ) {
     my $hash = {};
 
+    ## Get karyotype info for collection dbs
+    ## The idea is the people who produce the DB can define the lists in the meta table using 
+    ## region.toplevel meta key. If there is no such definition of the karyotype, we just create 
+    ## the lists of toplevel regions 
+    if ($db_name =~ /CORE/ && $self->is_collection('DATABASE_CORE')) {
+      my $t_aref = $dbh->selectall_arrayref(
+          qq{SELECT cs.species_id, s.name FROM seq_region s, coord_system cs
+          WHERE s.coord_system_id = cs.coord_system_id AND cs.attrib = 'default_version' AND cs.name IN ('plasmid', 'chromosome')
+          ORDER BY cs.species_id, s.name, s.seq_region_id}
+      );
+
+      foreach my $row ( @$t_aref ) {
+        push @{$hash->{$row->[0]}{'region.toplevel'}}, $row->[1];
+      }
+    }
+
+    ## Get meta info
     $t_aref  = $dbh->selectall_arrayref(
       'select meta_key,meta_value,meta_id, species_id
          from meta
@@ -1630,27 +1647,34 @@ sub _munge_meta {
     species.taxonomy_id           TAXONOMY_ID
     species.url                   SPECIES_URL
     species.stable_id_prefix      SPECIES_PREFIX
-    species.display_name          SPECIES_DISPLAY_NAME
-    species.common_name           SPECIES_COMMON_NAME
     species.production_name       SPECIES_PRODUCTION_NAME
     species.db_name               SPECIES_DB_NAME
+    species.display_name          SPECIES_DISPLAY_NAME
+    species.common_name           SPECIES_COMMON_NAME
     species.scientific_name       SPECIES_SCIENTIFIC_NAME
+    species.species_name          SPECIES_BINOMIAL
     assembly.accession            ASSEMBLY_ACCESSION
     assembly.web_accession_source ASSEMBLY_ACCESSION_SOURCE
     assembly.web_accession_type   ASSEMBLY_ACCESSION_TYPE
     assembly.name                 ASSEMBLY_NAME
+    assembly.default              ASSEMBLY_NAME
     liftover.mapping              ASSEMBLY_MAPPINGS
+    genome.assembly_type          GENOME_ASSEMBLY_TYPE
+    assembly.provider_name        ASSEMBLY_PROVIDER_NAME
+    assembly.provider_url         ASSEMBLY_PROVIDER_URL
     genebuild.method              GENEBUILD_METHOD
+    genebuild.version             GENEBUILD_VERSION
     genebuild.last_geneset_update LAST_GENESET_UPDATE
     annotation.provider_name      ANNOTATION_PROVIDER_NAME
     annotation.provider_url       ANNOTATION_PROVIDER_URL
-    assembly.provider_name        ASSEMBLY_PROVIDER_NAME
-    assembly.provider_url         ASSEMBLY_PROVIDER_URL
     species.strain                SPECIES_STRAIN
     species.strain_group          STRAIN_GROUP
     strain.type                   STRAIN_TYPE
-    genome.assembly_type          GENOME_ASSEMBLY_TYPE
     gencode.version               GENCODE_VERSION
+    species.sql_name              SYSTEM_NAME
+    species.biomart_dataset       BIOMART_DATASET
+    species.wikipedia_url         WIKIPEDIA_URL
+    ploidy                        PLOIDY
   );
   
   my @months    = qw(blank Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
@@ -1660,7 +1684,7 @@ sub _munge_meta {
   ## How many species in database?
   $self->tree->{'SPP_IN_DB'} = scalar @sp_count;
     
-  if (scalar @sp_count > 1) {
+  if (scalar @sp_count > 1) { ## collection db
     if ($meta_info->{0}{'species.group'}) {
       $self->tree->{'GROUP_DISPLAY_NAME'} = $meta_info->{0}{'species.group'};
     } else {
@@ -1671,12 +1695,14 @@ sub _munge_meta {
     $self->tree->{'GROUP_DISPLAY_NAME'} = $meta_info->{1}{'species.display_name'}[0];
   }
 
-
   while (my ($species_id, $meta_hash) = each (%$meta_info)) {
     next unless $species_id && $meta_hash && ref($meta_hash) eq 'HASH';
     
-    my $species         = $meta_hash->{'species.url'}[0];
+    my $species = $meta_hash->{'species.url'}[0];
+    next unless $species;
+
     my $production_name = $meta_hash->{'species.production_name'}[0];
+    my $scientific_name = $meta_hash->{'species.scientific_name'}[0];
     
     ## Put other meta info into variables
     while (my ($meta_key, $key) = each (%keys)) {
@@ -1694,7 +1720,9 @@ sub _munge_meta {
     }
 
     ## Uppercase first part of common name, for consistency
-    $self->tree($production_name)->{'SPECIES_COMMON_NAME'} = ucfirst($self->tree->{'SPECIES_COMMON_NAME'});
+    if ($self->tree($production_name)->{'SPECIES_COMMON_NAME'}) {
+      $self->tree($production_name)->{'SPECIES_COMMON_NAME'} = ucfirst($self->tree($production_name)->{'SPECIES_COMMON_NAME'});
+    }
 
     ## Do species group
     my $taxonomy = $meta_hash->{'species.classification'};

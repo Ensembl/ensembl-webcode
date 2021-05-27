@@ -1677,14 +1677,15 @@ sub _munge_meta {
     ploidy                        PLOIDY
   );
   
-  my @months    = qw(blank Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
-  my $meta_info = $self->_meta_info('DATABASE_CORE') || {};
-  my @sp_count  = grep { $_ > 0 } keys %$meta_info;
+  my @months      = qw(blank Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+  my $meta_info   = $self->_meta_info('DATABASE_CORE') || {};
+  my @sp_count    = grep { $_ > 0 } keys %$meta_info;
+  my $collection  = $self->is_collection('DATABASE_CORE'); 
 
   ## How many species in database?
   $self->tree->{'SPP_IN_DB'} = scalar @sp_count;
     
-  if (scalar @sp_count > 1) { ## collection db
+  if ($collection) { 
     if ($meta_info->{0}{'species.group'}) {
       $self->tree->{'GROUP_DISPLAY_NAME'} = $meta_info->{0}{'species.group'};
     } else {
@@ -1703,6 +1704,7 @@ sub _munge_meta {
 
     ## We use this as the species key initially
     my $prod_name = $meta_hash->{'species.production_name'}[0];
+    $self->tree($prod_name)->{'SPECIES_META_ID'} = $species_id;
     
     ## Put other meta info into variables
     while (my ($meta_key, $key) = each (%keys)) {
@@ -1710,14 +1712,13 @@ sub _munge_meta {
       
       my $value = scalar @{$meta_hash->{$meta_key}} > 1 ? $meta_hash->{$meta_key} : $meta_hash->{$meta_key}[0]; 
 
-      ## Set version of assembly name that we can use where space is limited 
-      if ($meta_key eq 'assembly.name') {
-        $self->tree->{'ASSEMBLY_SHORT_NAME'} = (length($value) > 16)
-                  ? $self->db_tree->{'ASSEMBLY_VERSION'} : $value;
-      }
-
       $self->tree($prod_name)->{$key} = $value;
     }
+
+    #### PROCESS VARIABLES ####
+
+    ## Set version of assembly name that we can use where space is limited 
+    $self->tree->{'ASSEMBLY_SHORT_NAME'} = (length($value) > 16) ? $self->db_tree->{'ASSEMBLY_VERSION'} : $value;
 
     ## Uppercase first part of common name, for consistency
     if ($self->tree($prod_name)->{'SPECIES_COMMON_NAME'}) {
@@ -1743,24 +1744,15 @@ sub _munge_meta {
     ## otherwise the mapping in Apache handlers will fail
     $self->full_tree->{'MULTI'}{'SPECIES_ALIASES'}{$species} = $species;
 
-    ## Only seems to be used by the title attribute of opensearch links in the <head> of pages
-    ## so it doesn't need to be unique, e.g. M.mus
+    ## This parameter only seems to be used by the title attribute of opensearch links 
+    ## in the <head> of pages, e.g. M.mus, so it doesn't need to be unique
     ($self->tree($prod_name)->{'SPECIES_BIO_SHORT'} = $self->tree($prod_name)->{'SPECIES_URL'}) =~ s/^([A-Z])[a-z]+_([a-z]+)/$1.$2/;
-    
-    $self->tree($production_name)->{'DB_SPECIES'} = [$species];
-
-    ## Also add it to the main tree for collection dbs
-    if ($self->is_collection('DATABASE_CORE')) {
-      push @{$self->tree->{'DB_SPECIES'}}, $species;
-    }
-    
-    $self->tree($prod_name)->{'SPECIES_META_ID'} = $species_id;
 
     ## fall back to 'strain' if no strain type set
     if (!$self->tree($prod_name)->{'STRAIN_TYPE'}) {
       $self->tree($prod_name)->{'STRAIN_TYPE'} = 'strain';
     }
-
+    
     ## Munge genebuild info
     my @A = split '-', $meta_hash->{'genebuild.start_date'}[0];
     
@@ -1780,100 +1772,26 @@ sub _munge_meta {
     
     $self->tree($prod_name)->{'HAVANA_DATAFREEZE_DATE'} = $meta_hash->{'genebuild.havana_datafreeze_date'}[0];
 
-    ## check if there are sample search entries from the ini file
-    my $ini_hash = $self->tree->{'SAMPLE_DATA'};
+    ## SAMPLE_DATA is quite complex, as we have to merge the db entries and ini file
+    $self->_munge_sample_data($prod_name, $meta_hash);
 
-    # check if there are sample search entries defined in meta table
-    my @mks = grep { /^sample\./ } keys %{$meta_hash || {}}; 
-    my $mk_hash = {};
-    foreach my $k (@mks) {
-      ## Convert key to format used in webcode
-      (my $k1 = $k) =~ s/^sample\.//;
-      $mk_hash->{uc $k1} = $meta_hash->{$k}->[0];
-    }
- 
-    ## add in any missing values where text omitted because same as param
-    while (my ($key, $value) = each (%$mk_hash)) {
-      next unless $key =~ /PARAM/;
-      (my $type = $key) =~ s/_PARAM//;
-      unless ($mk_hash->{$type.'_TEXT'}) {
-        $mk_hash->{$type.'_TEXT'} = $value;
-      }
-    }
- 
-    ## Merge param keys into single set
-    my (%seen, @param_keys, @other_keys);
-    foreach (keys %$mk_hash, keys %{$ini_hash || {}}) {
-      next if $seen{$_};
-      if ($_ =~ /PARAM/) {
-        push @param_keys, $_;
-      }
-      else {
-        push @other_keys, $_;
-      }
-      $seen{$_} = 1;
-    }
+    $self->tree($prod_name)->{'DB_SPECIES'} = [$species];
 
-    ## Merge the two sample sets into one hash, giving priority to ini file
-    my $sample_hash = {};
-    foreach my $key (@param_keys) {
-      (my $text_key = $key) =~ s/PARAM/TEXT/;
-
-      if ($ini_hash->{$key}) {
-        $sample_hash->{$key} = $ini_hash->{$key};
-        ## Now set accompanying text
-        if ($ini_hash->{$text_key}) {
-          $sample_hash->{$text_key} = $ini_hash->{$text_key};
-        }
-        else {
-          $sample_hash->{$text_key} = $ini_hash->{$key};
-        }
-      }
-      elsif ($mk_hash->{$key}) {
-        $sample_hash->{$key} = $mk_hash->{$key};
-        ## Now set accompanying text
-        if ($mk_hash->{$text_key}) {
-          $sample_hash->{$text_key} = $mk_hash->{$text_key};
-        }
-        else {
-          $sample_hash->{$text_key} = $mk_hash->{$key};
-        }
-      }
+    ## Extra stuff needed by collection databases
+    if ($collection) {
+      push @{$self->tree->{'DB_SPECIES'}}, $species;
     }
-    ## Deal with any atypical entries, e.g. search
-    foreach (@other_keys) {
-      next if $sample_hash->{$_};
-      if ($ini_hash->{$_}) {
-        $sample_hash->{$_} = $ini_hash->{$_};
-      }
-      elsif ($mk_hash->{$_}) {
-        $sample_hash->{$_} = $mk_hash->{$_};
-      }
-    }
-
-    ## Finally deduplicate any values
-    my $dedupe = {};
-    while (my($k,$v) = each(%$sample_hash)) {
-      next unless $k =~ /TEXT/;
-      if ($dedupe->{$v}) {
-        delete $sample_hash->{$k};
-      }
-      $dedupe->{$v}++;
-    }
-
-    $self->tree($prod_name)->{'SAMPLE_DATA'} = $sample_hash if scalar keys %$sample_hash;
-
+    
     # check if the karyotype/list of toplevel regions ( normally chroosomes) is defined in meta table
     @{$self->tree($prod_name)->{'TOPLEVEL_REGIONS'}} = @{$meta_hash->{'regions.toplevel'}} if $meta_hash->{'regions.toplevel'};
 
     ## need to explicitly define as empty array by default
-    ## SpeciesDefs looks for a value at collection level
+    ## as SpeciesDefs looks for a value at collection level
     if ($self->is_collection('DATABASE_CORE')) {
       $self->tree($prod_name)->{'ENSEMBL_CHROMOSOMES'}} = [];
       @{$self->tree($prod_name)->{'ENSEMBL_CHROMOSOMES'}} = @{$meta_hash->{'region.toplevel'}} if $meta_hash->{'region.toplevel'};
     }
   }
-
 }
 
 sub _munge_variation {
@@ -1933,6 +1851,93 @@ sub is_collection {
   $db_name ||= 'DATABASE_CORE';
   my $database_name = $self->tree->{'databases'}->{$db_name}{'NAME'};
   return $database_name =~ /_collection/;
+}
+
+sub _munge_sample_data {
+  my ($self, $prod_name, $meta_hash) = @_;
+
+  ## check if there are sample search entries from the ini file
+  my $ini_hash = $self->tree->{'SAMPLE_DATA'};
+
+  # check if there are sample search entries defined in meta table
+  my @mks = grep { /^sample\./ } keys %{$meta_hash || {}}; 
+  my $mk_hash = {};
+  foreach my $k (@mks) {
+    ## Convert key to format used in webcode
+    (my $k1 = $k) =~ s/^sample\.//;
+    $mk_hash->{uc $k1} = $meta_hash->{$k}->[0];
+  }
+ 
+  ## add in any missing values where text omitted because same as param
+  while (my ($key, $value) = each (%$mk_hash)) {
+    next unless $key =~ /PARAM/;
+    (my $type = $key) =~ s/_PARAM//;
+    unless ($mk_hash->{$type.'_TEXT'}) {
+      $mk_hash->{$type.'_TEXT'} = $value;
+    }
+  }
+
+  ## Merge param keys into single set
+  my (%seen, @param_keys, @other_keys);
+  foreach (keys %$mk_hash, keys %{$ini_hash || {}}) {
+    next if $seen{$_};
+    if ($_ =~ /PARAM/) {
+      push @param_keys, $_;
+    }
+    else {
+      push @other_keys, $_;
+    }
+    $seen{$_} = 1;
+  }
+
+  ## Merge the two sample sets into one hash, giving priority to ini file
+  my $sample_hash = {};
+  foreach my $key (@param_keys) {
+    (my $text_key = $key) =~ s/PARAM/TEXT/;
+
+    if ($ini_hash->{$key}) {
+      $sample_hash->{$key} = $ini_hash->{$key};
+      ## Now set accompanying text
+      if ($ini_hash->{$text_key}) {
+        $sample_hash->{$text_key} = $ini_hash->{$text_key};
+      }
+      else {
+        $sample_hash->{$text_key} = $ini_hash->{$key};
+      }
+    }
+    elsif ($mk_hash->{$key}) {
+      $sample_hash->{$key} = $mk_hash->{$key};
+      ## Now set accompanying text
+      if ($mk_hash->{$text_key}) {
+        $sample_hash->{$text_key} = $mk_hash->{$text_key};
+      }
+      else {
+        $sample_hash->{$text_key} = $mk_hash->{$key};
+      }
+    }
+  }
+  ## Deal with any atypical entries, e.g. search
+  foreach (@other_keys) {
+    next if $sample_hash->{$_};
+    if ($ini_hash->{$_}) {
+      $sample_hash->{$_} = $ini_hash->{$_};
+    }
+    elsif ($mk_hash->{$_}) {
+      $sample_hash->{$_} = $mk_hash->{$_};
+    }
+  }
+
+  ## Finally deduplicate any values
+  my $dedupe = {};
+  while (my($k,$v) = each(%$sample_hash)) {
+    next unless $k =~ /TEXT/;
+    if ($dedupe->{$v}) {
+      delete $sample_hash->{$k};
+    }
+    $dedupe->{$v}++;
+  }
+
+  $self->tree($prod_name)->{'SAMPLE_DATA'} = $sample_hash if scalar keys %$sample_hash;
 }
 
 1;

@@ -1641,12 +1641,12 @@ sub _summarise_go_db {
 sub _go_sql {
 ## Factored out bc non-vertebrates exclude some ontologies
   return qq(
-     'select o.ontology_id, o.name, t.accession, t.name
+     select o.ontology_id, o.name, t.accession, t.name
       from ontology o
         join term t using (ontology_id)
       where is_root = 1
        and is_obsolete = 0
-      order by o.ontology_id');
+      order by o.ontology_id;
   );
 }
 
@@ -1744,8 +1744,9 @@ sub _munge_meta {
     $self->tree($prod_name)->{'DB_SPECIES'} = [$species];
     $self->tree($prod_name)->{'POLYPLOIDY'} = ($self->tree($prod_name)->{'PLOIDY'} && $self->tree($prod_name)->{'PLOIDY'} > 2);
 
-    ## Set version of assembly name that we can use where space is limited 
-    $self->tree->{'ASSEMBLY_SHORT_NAME'} = (length($value) > 16) ? $self->db_tree->{'ASSEMBLY_VERSION'} : $value;
+    ## Set version of assembly name that we can use where space is limited
+    my $assembly_name = $self->tree->{'ASSEMBLY_NAME'}; 
+    $self->tree->{'ASSEMBLY_SHORT_NAME'} = (length($assembly_name) > 16) ? $self->db_tree->{'ASSEMBLY_VERSION'} : $assembly_name;
 
     ## Uppercase first part of common name, for consistency
     if ($self->tree($prod_name)->{'SPECIES_COMMON_NAME'}) {

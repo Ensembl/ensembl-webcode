@@ -1605,25 +1605,37 @@ sub _summarise_go_db {
   my $db_name = 'DATABASE_GO';
   my $dbh     = $self->db_connect( $db_name );
   return unless $dbh;
-  #$self->_summarise_generic( $db_name, $dbh );
   # get the list of the available ontologies
-  my $t_aref = $dbh->selectall_arrayref(
-     'select ontology.ontology_id, ontology.name, accession, term.name
-      from ontology
-        join term using (ontology_id)
-      where is_root = 1
-       and is_obsolete = 0
-      order by ontology.ontology_id');
+  my $sql = $self->_go_sql;
+  my $t_aref = $dbh->selectall_arrayref($sql);
   foreach my $row (@$t_aref) {
-      my ($oid, $ontology, $root_term, $description) = @$row;
-      $self->db_tree->{'ONTOLOGIES'}->{$oid} = {
-    db => $ontology,
-    root => $root_term,
-    description => $description
+    my ($oid, $ontology, $root_term, $description) = @$row;
+    next unless ($ontology && $root_term);
+
+    $oid =~ s/(-|\s)/_/g;
+    $description =~ s/\s+$//; # hack to strip trailing whitespace
+    $description =~ s/[-\s]/_/g;
+
+    $self->db_tree->{'ONTOLOGIES'}->{$oid} = {
+                db => $ontology,
+                root => $root_term,
+                description => $description
     };
   }
 
   $dbh->disconnect();
+}
+
+sub _go_sql {
+## Factored out bc non-vertebrates exclude some ontologies
+  return qq(
+     'select o.ontology_id, o.name, t.accession, t.name
+      from ontology o
+        join term t using (ontology_id)
+      where is_root = 1
+       and is_obsolete = 0
+      order by o.ontology_id');
+  );
 }
 
 sub _munge_meta {
@@ -1777,20 +1789,16 @@ sub _munge_meta {
 
     $self->tree($prod_name)->{'DB_SPECIES'} = [$species];
 
+    ## Probably only used by NV
+    (my $group_name = (ucfirst $self->{'_species'})) =~ s/_collection//;
+    $self->tree($prod_name)->{'SPECIES_DATASET'} = $group_name;
+    $self->tree($prod_name)->{'POLYPLOIDY'} = ($self->tree($prod_name)->{'PLOIDY'} > 2);
+
     ## Extra stuff needed by collection databases
     if ($collection) {
       push @{$self->tree->{'DB_SPECIES'}}, $species;
     }
     
-    # check if the karyotype/list of toplevel regions ( normally chroosomes) is defined in meta table
-    @{$self->tree($prod_name)->{'TOPLEVEL_REGIONS'}} = @{$meta_hash->{'regions.toplevel'}} if $meta_hash->{'regions.toplevel'};
-
-    ## need to explicitly define as empty array by default
-    ## as SpeciesDefs looks for a value at collection level
-    if ($self->is_collection('DATABASE_CORE')) {
-      $self->tree($prod_name)->{'ENSEMBL_CHROMOSOMES'}} = [];
-      @{$self->tree($prod_name)->{'ENSEMBL_CHROMOSOMES'}} = @{$meta_hash->{'region.toplevel'}} if $meta_hash->{'region.toplevel'};
-    }
   }
 }
 

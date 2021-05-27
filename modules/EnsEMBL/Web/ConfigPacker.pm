@@ -1701,8 +1701,8 @@ sub _munge_meta {
     my $species = $meta_hash->{'species.url'}[0];
     next unless $species;
 
-    my $production_name = $meta_hash->{'species.production_name'}[0];
-    my $scientific_name = $meta_hash->{'species.scientific_name'}[0];
+    ## We use this as the species key initially
+    my $prod_name = $meta_hash->{'species.production_name'}[0];
     
     ## Put other meta info into variables
     while (my ($meta_key, $key) = each (%keys)) {
@@ -1716,12 +1716,12 @@ sub _munge_meta {
                   ? $self->db_tree->{'ASSEMBLY_VERSION'} : $value;
       }
 
-      $self->tree($production_name)->{$key} = $value;
+      $self->tree($prod_name)->{$key} = $value;
     }
 
     ## Uppercase first part of common name, for consistency
-    if ($self->tree($production_name)->{'SPECIES_COMMON_NAME'}) {
-      $self->tree($production_name)->{'SPECIES_COMMON_NAME'} = ucfirst($self->tree($production_name)->{'SPECIES_COMMON_NAME'});
+    if ($self->tree($prod_name)->{'SPECIES_COMMON_NAME'}) {
+      $self->tree($prod_name)->{'SPECIES_COMMON_NAME'} = ucfirst($self->tree($prod_name)->{'SPECIES_COMMON_NAME'});
     }
 
     ## Do species group
@@ -1730,9 +1730,9 @@ sub _munge_meta {
     if ($taxonomy && scalar(@$taxonomy)) {
       my %valid_taxa = map {$_ => 1} @{ $self->tree->{'TAXON_ORDER'} };
       my @matched_groups = grep {$valid_taxa{$_}} @$taxonomy;
-      $self->tree($production_name)->{'TAXONOMY'} = $taxonomy;
-      $self->tree($production_name)->{'SPECIES_GROUP'} = $matched_groups[0] if @matched_groups;
-      $self->tree($production_name)->{'SPECIES_GROUP_HIERARCHY'} = \@matched_groups;
+      $self->tree($prod_name)->{'TAXONOMY'} = $taxonomy;
+      $self->tree($prod_name)->{'SPECIES_GROUP'} = $matched_groups[0] if @matched_groups;
+      $self->tree($prod_name)->{'SPECIES_GROUP_HIERARCHY'} = \@matched_groups;
     }
 
     ## create lookup hash for species aliases
@@ -1743,41 +1743,42 @@ sub _munge_meta {
     ## otherwise the mapping in Apache handlers will fail
     $self->full_tree->{'MULTI'}{'SPECIES_ALIASES'}{$species} = $species;
 
-    ## Used mainly in <head> links
-    ($self->tree($production_name)->{'SPECIES_BIO_SHORT'} = $self->tree->{'SPECIES_URL'}) =~ s/^([A-Z])[a-z]+_([a-z]+)$/$1.$2/;
+    ## Only seems to be used by the title attribute of opensearch links in the <head> of pages
+    ## so it doesn't need to be unique, e.g. M.mus
+    ($self->tree($prod_name)->{'SPECIES_BIO_SHORT'} = $self->tree($prod_name)->{'SPECIES_URL'}) =~ s/^([A-Z])[a-z]+_([a-z]+)/$1.$2/;
     
-    push @{$self->tree($production_name)->{'DB_SPECIES'}}, $species;
+    $self->tree($production_name)->{'DB_SPECIES'} = [$species];
+
     ## Also add it to the main tree for collection dbs
     if ($self->is_collection('DATABASE_CORE')) {
       push @{$self->tree->{'DB_SPECIES'}}, $species;
     }
     
-    $self->tree($production_name)->{'SPECIES_META_ID'} = $species_id;
+    $self->tree($prod_name)->{'SPECIES_META_ID'} = $species_id;
 
     ## fall back to 'strain' if no strain type set
-    if (!$self->tree($production_name)->{'STRAIN_TYPE'}) {
-      $self->tree($production_name)->{'STRAIN_TYPE'} = 'strain';
+    if (!$self->tree($prod_name)->{'STRAIN_TYPE'}) {
+      $self->tree($prod_name)->{'STRAIN_TYPE'} = 'strain';
     }
 
     ## Munge genebuild info
     my @A = split '-', $meta_hash->{'genebuild.start_date'}[0];
     
-    $self->tree($production_name)->{'GENEBUILD_START'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
+    $self->tree($prod_name)->{'GENEBUILD_START'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
 
     @A = split '-', $meta_hash->{'genebuild.initial_release_date'}[0];
     
-    $self->tree($production_name)->{'GENEBUILD_RELEASE'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
+    $self->tree($prod_name)->{'GENEBUILD_RELEASE'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
     
     @A = split '-', $meta_hash->{'genebuild.last_geneset_update'}[0];
 
-    $self->tree($production_name)->{'GENEBUILD_LATEST'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
+    $self->tree($prod_name)->{'GENEBUILD_LATEST'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
     
     @A = split '-', $meta_hash->{'assembly.date'}[0];
     
-    $self->tree($production_name)->{'ASSEMBLY_DATE'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
+    $self->tree($prod_name)->{'ASSEMBLY_DATE'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
     
-
-    $self->tree($production_name)->{'HAVANA_DATAFREEZE_DATE'} = $meta_hash->{'genebuild.havana_datafreeze_date'}[0];
+    $self->tree($prod_name)->{'HAVANA_DATAFREEZE_DATE'} = $meta_hash->{'genebuild.havana_datafreeze_date'}[0];
 
     ## check if there are sample search entries from the ini file
     my $ini_hash = $self->tree->{'SAMPLE_DATA'};
@@ -1790,7 +1791,16 @@ sub _munge_meta {
       (my $k1 = $k) =~ s/^sample\.//;
       $mk_hash->{uc $k1} = $meta_hash->{$k}->[0];
     }
-  
+ 
+    ## add in any missing values where text omitted because same as param
+    while (my ($key, $value) = each (%$mk_hash)) {
+      next unless $key =~ /PARAM/;
+      (my $type = $key) =~ s/_PARAM//;
+      unless ($mk_hash->{$type.'_TEXT'}) {
+        $mk_hash->{$type.'_TEXT'} = $value;
+      }
+    }
+ 
     ## Merge param keys into single set
     my (%seen, @param_keys, @other_keys);
     foreach (keys %$mk_hash, keys %{$ini_hash || {}}) {
@@ -1851,16 +1861,16 @@ sub _munge_meta {
       $dedupe->{$v}++;
     }
 
-    $self->tree($production_name)->{'SAMPLE_DATA'} = $sample_hash if scalar keys %$sample_hash;
+    $self->tree($prod_name)->{'SAMPLE_DATA'} = $sample_hash if scalar keys %$sample_hash;
 
     # check if the karyotype/list of toplevel regions ( normally chroosomes) is defined in meta table
-    @{$self->tree($production_name)->{'TOPLEVEL_REGIONS'}} = @{$meta_hash->{'regions.toplevel'}} if $meta_hash->{'regions.toplevel'};
+    @{$self->tree($prod_name)->{'TOPLEVEL_REGIONS'}} = @{$meta_hash->{'regions.toplevel'}} if $meta_hash->{'regions.toplevel'};
 
     ## need to explicitly define as empty array by default
     ## SpeciesDefs looks for a value at collection level
     if ($self->is_collection('DATABASE_CORE')) {
-      @{$self->tree($production_name)->{'ENSEMBL_CHROMOSOMES'}} = ();
-      @{$self->tree($production_name)->{'ENSEMBL_CHROMOSOMES'}} = @{$meta_hash->{'region.toplevel'}} if $meta_hash->{'region.toplevel'};
+      $self->tree($prod_name)->{'ENSEMBL_CHROMOSOMES'}} = [];
+      @{$self->tree($prod_name)->{'ENSEMBL_CHROMOSOMES'}} = @{$meta_hash->{'region.toplevel'}} if $meta_hash->{'region.toplevel'};
     }
   }
 

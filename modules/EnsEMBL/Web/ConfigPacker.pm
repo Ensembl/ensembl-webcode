@@ -1235,6 +1235,10 @@ sub _summarise_compara_db {
   push @{$self->db_tree->{'compara_like_databases'}}, $db_name;
 
   $self->_summarise_generic($db_name, $dbh);
+
+  if ($code eq 'compara_pan_ensembl') {
+    $self->_summarise_pan_compara($dbh);
+  }
  
   # Get list of species in the compara db (no longer everything!)
   my $spp_aref = $dbh->selectall_arrayref('select name from genome_db');
@@ -1245,17 +1249,7 @@ sub _summarise_compara_db {
   }
  
   # See if there are any intraspecies alignments (ie a self compara)
-  my $intra_species_aref = $dbh->selectall_arrayref('
-    select mls.species_set_id, mls.method_link_species_set_id, count(*) as count
-      from method_link_species_set as mls, 
-        method_link as ml, species_set as ss, genome_db as gd 
-      where mls.species_set_id = ss.species_set_id
-        and ss.genome_db_id = gd.genome_db_id 
-        and mls.method_link_id = ml.method_link_id
-        and ml.class = "GenomicAlignBlock.pairwise_alignment"
-      group by mls.method_link_species_set_id, mls.method_link_id
-      having count = 1
-  ');
+  my $intra_species_aref = $dbh->selectall_arrayref($self->_intraspecies_sql);
   
   my (%intra_species, %intra_species_constraints);
   $intra_species{$_->[0]}{$_->[1]} = 1 for @$intra_species_aref;
@@ -1323,13 +1317,14 @@ sub _summarise_compara_db {
   # if there are intraspecies alignments then get full details of genomic alignments, ie start and stop, constrained by a set defined above (or no constraint for all alignments)
   $self->_summarise_compara_alignments($dbh, $db_name, \%intra_species_constraints) if scalar keys %intra_species_constraints;
   
+  # We've done the DB hash... So lets get on with the DNA, SYNTENY and GENE hashes;
   my %sections = (
     ENSEMBL_ORTHOLOGUES => 'GENE',
     HOMOLOGOUS_GENE     => 'GENE',
     HOMOLOGOUS          => 'GENE',
   );
   
-  # We've done the DB hash... So lets get on with the DNA, SYNTENY and GENE hashes;
+  ## Store a lookup using genome (species) names
   $res_aref = $dbh->selectall_arrayref('
     select ml.type, gd1.name, gd2.name
       from genome_db gd1, genome_db gd2, species_set ss1, species_set ss2,
@@ -1345,18 +1340,8 @@ sub _summarise_compara_db {
        ss2.genome_db_id = gd2.genome_db_id
   ');
   
-  ## That's the end of the compara region munging!
-
-  my $res_aref_2 = $dbh->selectall_arrayref(qq{
-    select ml.type, gd.name, gd.name, count(*) as count
-      from method_link_species_set as mls, method_link as ml, species_set as ss, genome_db as gd 
-      where mls.species_set_id = ss.species_set_id and
-        ss.genome_db_id = gd.genome_db_id and
-        mls.method_link_id = ml.method_link_id and
-        ml.type not like '%PARALOGUES'
-      group by mls.method_link_species_set_id, mls.method_link_id
-      having count = 1
-  });
+  ## Include intraspecies
+  my $res_aref_2 = $dbh->selectall_arrayref($self->_genome_names_sql);
   
   push @$res_aref, $_ for @$res_aref_2;
   
@@ -1376,6 +1361,33 @@ sub _summarise_compara_db {
   ###################################################################
   
   $dbh->disconnect;
+}
+
+sub _intraspecies_sql {
+  return qq(
+    select mls.species_set_id, mls.method_link_species_set_id, count(*) as count
+      from method_link_species_set as mls, 
+        method_link as ml, species_set as ss, genome_db as gd 
+      where mls.species_set_id = ss.species_set_id
+        and ss.genome_db_id = gd.genome_db_id 
+        and mls.method_link_id = ml.method_link_id
+        and ml.class = "GenomicAlignBlock.pairwise_alignment"
+      group by mls.method_link_species_set_id, mls.method_link_id
+      having count = 1
+  );
+}
+
+sub _homologies_sql {
+  return qq(
+    select ml.type, gd.name, gd.name, count(*) as count
+      from method_link_species_set as mls, method_link as ml, species_set as ss, genome_db as gd 
+      where mls.species_set_id = ss.species_set_id and
+        ss.genome_db_id = gd.genome_db_id and
+        mls.method_link_id = ml.method_link_id and
+        ml.type not like '%PARALOGUES'
+      group by mls.method_link_species_set_id, mls.method_link_id
+      having count = 1
+  );
 }
 
 sub _summarise_compara_alignments {

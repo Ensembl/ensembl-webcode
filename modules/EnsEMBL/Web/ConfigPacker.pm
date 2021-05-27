@@ -1729,6 +1729,9 @@ sub _munge_meta {
 
     #### PROCESS VARIABLES ####
 
+    $self->tree($prod_name)->{'DB_SPECIES'} = [$species];
+    $self->tree($prod_name)->{'POLYPLOIDY'} = ($self->tree($prod_name)->{'PLOIDY'} && $self->tree($prod_name)->{'PLOIDY'} > 2);
+
     ## Set version of assembly name that we can use where space is limited 
     $self->tree->{'ASSEMBLY_SHORT_NAME'} = (length($value) > 16) ? $self->db_tree->{'ASSEMBLY_VERSION'} : $value;
 
@@ -1787,15 +1790,10 @@ sub _munge_meta {
     ## SAMPLE_DATA is quite complex, as we have to merge the db entries and ini file
     $self->_munge_sample_data($prod_name, $meta_hash);
 
-    $self->tree($prod_name)->{'DB_SPECIES'} = [$species];
-
-    ## Probably only used by NV
-    (my $group_name = (ucfirst $self->{'_species'})) =~ s/_collection//;
-    $self->tree($prod_name)->{'SPECIES_DATASET'} = $group_name;
-    $self->tree($prod_name)->{'POLYPLOIDY'} = ($self->tree($prod_name)->{'PLOIDY'} > 2);
-
     ## Extra stuff needed by collection databases
     if ($collection) {
+      (my $group_name = (ucfirst $self->{'_species'})) =~ s/_collection//;
+      $self->tree($prod_name)->{'SPECIES_DATASET'} = $group_name;
       push @{$self->tree->{'DB_SPECIES'}}, $species;
     }
     

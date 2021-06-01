@@ -1341,7 +1341,7 @@ sub _summarise_compara_db {
   ');
   
   ## Include intraspecies
-  my $res_aref_2 = $dbh->selectall_arrayref($self->_genome_names_sql);
+  my $res_aref_2 = $dbh->selectall_arrayref($self->_homologies_sql);
   
   push @$res_aref, $_ for @$res_aref_2;
   

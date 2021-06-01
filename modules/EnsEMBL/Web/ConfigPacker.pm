@@ -142,8 +142,9 @@ sub _summarise_generic {
 
     ## Get karyotype info for collection dbs
     ## The idea is the people who produce the DB can define the lists in the meta table using 
-    ## region.toplevel meta key. If there is no such definition of the karyotype, we just create 
-    ## the lists of toplevel regions 
+    ## region.toplevel meta key (although it does not seem to be in use at the moment). 
+    ## In case there is no such definition of the karyotype, we default to lists of 
+    ## top level seq_regions with name 'chromosome' or 'plasmid'
     if ($db_name =~ /CORE/ && $self->is_collection('DATABASE_CORE')) {
       my $t_aref = $dbh->selectall_arrayref(
           qq{SELECT cs.species_id, s.name FROM seq_region s, coord_system cs
@@ -167,7 +168,7 @@ sub _summarise_generic {
     foreach my $r( @$t_aref) {
       push @{ $hash->{$r->[3]+0}{$r->[0]}}, $r->[1];
     }
-    
+ 
     $self->db_details($db_name)->{'meta_info'} = $hash;
   }
 }

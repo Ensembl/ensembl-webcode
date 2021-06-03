@@ -671,8 +671,10 @@ sub _expand_database_templates {
         $tree->{'databases'}{'DATABASE_'.$_} = $db_name;
       }
       else {
+        ## Ignore this step for MULTI, as it may not have a core db
         unless ($filename eq 'MULTI') {
-          print STDERR "\t  [WARN] CORE DATABASE NOT FOUND - looking for '$db_name'\n" if $_ eq 'CORE';
+          my $db_string = $db_name.'@'.$db_details->{'HOST'};
+          print STDERR "\t  [WARN] CORE DATABASE NOT FOUND - looking for '$db_string'\n" if $_ eq 'CORE';
           $self->_info_line('Databases', "-- database $db_name not available") if $SiteDefs::ENSEMBL_WARN_DATABASES;
         }
       }
@@ -732,6 +734,15 @@ sub _merge_db_tree {
   Hash::Merge::set_behavior('RIGHT_PRECEDENT');
   my $t = merge($tree->{$key}, $db_tree->{$key});
   $tree->{$key} = $t;
+}
+
+sub _merge_species_tree {
+  my ($self, $a, $b, $species_lookup) = @_;
+
+  foreach my $key (keys %$b) {
+    next if $species_lookup->{$key};
+    $a->{$key} = $b->{$key} unless exists $a->{$key};
+  }
 }
 
 sub _get_valid_urls {
@@ -822,10 +833,15 @@ sub _parse {
   my $defaults = $self->_read_in_ini_file('DEFAULTS', {});
   $self->_info_line('Parsing', 'DEFAULTS ini file');
   
-  # Loop for each species exported from SiteDefs
+  # Loop for each database exported from SiteDefs
   # grab the contents of the ini file AND
   # IF  the DB packed files exist expand them
   # o/w attach the species databases
+
+  # Note that because the code was developed for vertebrates first,
+  # the variable PRODUCTION_NAMES actually comprises the names of ini files
+  # and their corresponding databases, not necessarily individual species 
+  # (e.g. in the case of collections)
 
   # load the data and store the packed files
   foreach my $species (@$SiteDefs::PRODUCTION_NAMES, 'MULTI') {
@@ -866,16 +882,12 @@ sub _parse {
     $config_packer->tree->{'SAMPLE_DATA'} = $sample;
 
     ## Need to gather strain info for all species
-    $config_packer->tree->{'STRAIN_GROUP'} = undef if $SiteDefs::NO_STRAIN_GROUPS;
+    $config_packer->tree->{'IS_REFERENCE'} = 1;
     my $strain_group = $config_packer->tree->{'STRAIN_GROUP'};
-    my $strain_name = $config_packer->tree->{'SPECIES_STRAIN'};
-    my $species_key = $config_packer->tree->{'SPECIES_URL'}; ## Key on actual URL, not production name
-    if ($strain_group && $strain_name !~ /reference/) {
-      if ($species_to_strains->{$strain_group}) {
-        push @{$species_to_strains->{$strain_group}}, $species_key;
-      }
-      else {
-        $species_to_strains->{$strain_group} = [$species_key];
+    if ($strain_group && !$SiteDefs::NO_STRAIN_GROUPS) {
+      $config_packer->tree->{'IS_REFERENCE'} = 0 if ($strain_group ne $species);
+      if (!$config_packer->tree->{'IS_REFERENCE'}) {
+        push @{$species_to_strains->{$strain_group}}, $config_packer->tree->{'SPECIES_URL'}; ## Key on actual URL, not production name
       }
     }
   }
@@ -893,7 +905,12 @@ sub _parse {
   my $datasets = [];
   my $aliases  = $tree->{'MULTI'}{'ENSEMBL_SPECIES_URL_MAP'};
   my $labels    = $tree->{'MULTI'}{'TAXON_LABEL'};  
-  foreach my $prodname (@$SiteDefs::PRODUCTION_NAMES) {
+
+  ## Loop through all keys, not just PRODUCTION_NAMES (need for collection dbs)
+  foreach my $key (sort keys %$tree) {
+    next unless (defined $tree->{$key}{'SPECIES_PRODUCTION_NAME'}); # skip if not a species key
+    my $prodname = $key;
+
     my $url = $tree->{$prodname}{'SPECIES_URL'};
     if ($url) {
     
@@ -907,123 +924,138 @@ sub _parse {
         delete $tree->{$prodname};
       }
       push @$datasets, $url;
-    
-      ## Assign an image to this species
-      my $image_dir = $SiteDefs::SPECIES_IMAGE_DIR;
-      my $no_image  = 1;
-      if ($image_dir) {
-        ## This site has individual species images for all/most species
-        ## So check if it exists
-        my $image_path = $image_dir.'/'.$url.'.png';
+    }
+    else {
+      warn "!!! SPECIES $prodname has no URL defined";
+    }
+  }
+
+  ## Merge collection info into the species hash
+  foreach my $prodname (@$SiteDefs::PRODUCTION_NAMES) {
+    next unless $tree->{$prodname};
+    my @db_species = @{$tree->{$prodname}->{DB_SPECIES}};
+    my $species_lookup = { map {$_ => 1} @db_species };
+    foreach my $sp (@db_species) {
+      $self->_merge_species_tree( $tree->{$sp}, $tree->{$prodname}, $species_lookup);
+    }
+  }
+
+  ## Continue with munging
+  foreach my $sp (@$datasets) {
+    my $url = $tree->{$sp}{'SPECIES_URL'};
+
+    ## Assign an image to this species
+    my $image_dir = $SiteDefs::SPECIES_IMAGE_DIR;
+    my $no_image  = 1;
+    if ($image_dir) {
+      ## This site has individual species images for all/most species
+      ## So check if it exists
+      my $image_path = $image_dir.'/'.$url.'.png';
+      if (-e $image_path) {
+        $tree->{$url}{'SPECIES_IMAGE'} = $url;
+        $no_image = 0;
+      }
+      elsif ($tree->{$url}{'SPECIES_STRAIN'}) {
+        ## Look for a strain image (needed for pig)
+        my $parent_image = ucfirst($tree->{$url}{'STRAIN_GROUP'});
+        my $strain_image = $parent_image.'_'.$tree->{$url}{'STRAIN_TYPE'};
+        $image_path =  $image_dir.'/'.$strain_image.'.png';
         if (-e $image_path) {
-          $tree->{$url}{'SPECIES_IMAGE'} = $url;
+          $tree->{$url}{'SPECIES_IMAGE'} = $strain_image;
           $no_image = 0;
         }
-        elsif ($tree->{$url}{'SPECIES_STRAIN'}) {
-          ## Look for a strain image (needed for pig)
-          my $parent_image = ucfirst($tree->{$url}{'STRAIN_GROUP'});
-          my $strain_image = $parent_image.'_'.$tree->{$url}{'STRAIN_TYPE'};
-          $image_path =  $image_dir.'/'.$strain_image.'.png';
+        else {
+          ## Use the parent image for this strain
+          $image_path = $image_dir.'/'.$parent_image.'.png';
           if (-e $image_path) {
-            $tree->{$url}{'SPECIES_IMAGE'} = $strain_image;
+            $tree->{$url}{'SPECIES_IMAGE'} = $parent_image;
             $no_image = 0;
-          }
-          else {
-            ## Use the parent image for this strain
-            $image_path = $image_dir.'/'.$parent_image.'.png';
-            if (-e $image_path) {
-              $tree->{$url}{'SPECIES_IMAGE'} = $parent_image;
-              $no_image = 0;
-            }
-          }
-        }
-      }
-      if ($no_image) {
-        my $clade = $tree->{$url}{'SPECIES_GROUP'};
-        $tree->{$url}{'SPECIES_IMAGE'} = $labels->{$clade};
-      }
-
-      ## Species-specific munging
-      if ($url ne "MULTI" && $url ne "databases") {
-                                       
-        my $display_name = $tree->{$url}{'SPECIES_DISPLAY_NAME'};
-             
-        # Populate taxonomy division using e_divisions.json template
-        push @{$species_to_assembly->{$display_name}}, $tree->{$url}->{'ASSEMBLY_VERSION'};
-        my $taxonomy = $tree->{$url}{'TAXONOMY'};
-        my $children = [];
-        my $other_species_children = [];
-        my @other_species = grep { $_->{key} =~ m/other_species/ } @{$tree->{'ENSEMBL_TAXONOMY_DIVISION'}->{child_nodes}};
-        $other_species[0]->{child_nodes} = [] if ($other_species[0] && !$other_species[0]->{child_nodes});
-
-        my $strain_name = $tree->{$url}{'SPECIES_STRAIN'};
-        my $strain_group = $tree->{$url}{'STRAIN_GROUP'};
-        my $group_name   = $tree->{$url}{'SPECIES_COMMON_NAME'};
-        my $species_key = $tree->{$url}{'SPECIES_URL'}; ## Key on actual URL, not production name
-
-        foreach my $node (@{$tree->{'ENSEMBL_TAXONOMY_DIVISION'}->{child_nodes}}) {
-          my $child = {
-            key             => $species_key,
-            scientific_name => $tree->{$url}{'SPECIES_SCIENTIFIC_NAME'},
-            common_name     => $tree->{$url}{'SPECIES_COMMON_NAME'},
-            display_name    => $tree->{$url}{'GROUP_DISPLAY_NAME'},
-            image           => $tree->{$url}{'SPECIES_IMAGE'},
-            is_leaf         => 'true'
-          };
-
-          if ($strain_group && $strain_name !~ /reference/) {
-            $child->{type} = $group_name . ' ' . $tree->{$url}{'STRAIN_TYPE'}. 's';
-          }
-          elsif($strain_group && $strain_name =~ /reference/) {
-            # Create display name for Reference species
-            my $ref_name = $tree->{$url}{'SPECIES_DISPLAY_NAME'} . ' '. $strain_name;
-            $child->{display_name} = $ref_name;
-          }
-
-          if (!$node->{taxa}) {
-            push @{$other_species[0]->{child_nodes}}, $child;
-          }
-          else {
-            my %taxa = map {$_ => 1} @{ $node->{taxa} };
-            my @matched_groups = grep { $taxa{$_} } @$taxonomy;
-            if ($#matched_groups >= 0) {
-              if ($node->{child_nodes}) {
-                my $cnode_match = {};
-                foreach my $cnode ( @{$node->{child_nodes}}) {
-                  my @match = grep { /$matched_groups[0]/ }  @{$cnode->{taxa}};
-                  if ($#match >=0 ) {
-                    $cnode_match = $cnode;
-                    last;
-                  }
-                }
-
-                if (keys %$cnode_match) {
-                  if (!$cnode_match->{child_nodes}) {
-                    $cnode_match->{child_nodes} = [];
-                  }
-                  push @{$cnode_match->{child_nodes}}, $child;
-                  last;
-                }
-                else {
-                  if (!$node->{child_nodes}) {
-                    $node->{child_nodes} = [];
-                  }
-                  push @{$node->{child_nodes}}, $child;
-                  last;
-                }
-              }
-              else {
-                $node->{child_nodes} = [];
-                push @{$node->{child_nodes}}, $child;
-                last;
-              }
-            }
           }
         }
       }
     }
-    else {
-      warn "!!! SPECIES $prodname has no URL defined";
+    if ($no_image) {
+      my $clade = $tree->{$url}{'SPECIES_GROUP'};
+      $tree->{$url}{'SPECIES_IMAGE'} = $labels->{$clade};
+    }
+
+    ## Species-specific munging
+    if ($url ne "MULTI" && $url ne "databases") {
+                                     
+      my $display_name = $tree->{$url}{'SPECIES_DISPLAY_NAME'};
+             
+      # Populate taxonomy division using e_divisions.json template
+      push @{$species_to_assembly->{$display_name}}, $tree->{$url}->{'ASSEMBLY_VERSION'};
+      my $taxonomy = $tree->{$url}{'TAXONOMY'};
+      my $children = [];
+      my $other_species_children = [];
+      my @other_species = grep { $_->{key} =~ m/other_species/ } @{$tree->{'ENSEMBL_TAXONOMY_DIVISION'}->{child_nodes}};
+      $other_species[0]->{child_nodes} = [] if ($other_species[0] && !$other_species[0]->{child_nodes});
+
+      my $strain_name = $tree->{$url}{'SPECIES_STRAIN'};
+      my $strain_group = $tree->{$url}{'STRAIN_GROUP'};
+      my $group_name   = $tree->{$url}{'SPECIES_COMMON_NAME'};
+      my $species_key = $tree->{$url}{'SPECIES_URL'}; ## Key on actual URL, not production name
+
+      foreach my $node (@{$tree->{'ENSEMBL_TAXONOMY_DIVISION'}->{child_nodes}}) {
+        my $child = {
+          key             => $species_key,
+          scientific_name => $tree->{$url}{'SPECIES_SCIENTIFIC_NAME'},
+          common_name     => $tree->{$url}{'SPECIES_COMMON_NAME'},
+          display_name    => $tree->{$url}{'GROUP_DISPLAY_NAME'},
+          image           => $tree->{$url}{'SPECIES_IMAGE'},
+          is_leaf         => 'true'
+        };
+
+        if ($strain_group && $strain_name !~ /reference/) {
+          $child->{type} = $group_name . ' ' . $tree->{$url}{'STRAIN_TYPE'}. 's';
+        }
+        elsif($strain_group && $strain_name =~ /reference/) {
+          # Create display name for Reference species
+          my $ref_name = $tree->{$url}{'SPECIES_DISPLAY_NAME'} . ' '. $strain_name;
+          $child->{display_name} = $ref_name;
+        }
+
+        if (!$node->{taxa}) {
+          push @{$other_species[0]->{child_nodes}}, $child;
+        }
+        else {
+          my %taxa = map {$_ => 1} @{ $node->{taxa} };
+          my @matched_groups = grep { $taxa{$_} } @$taxonomy;
+          if ($#matched_groups >= 0) {
+            if ($node->{child_nodes}) {
+              my $cnode_match = {};
+              foreach my $cnode ( @{$node->{child_nodes}}) {
+                my @match = grep { /$matched_groups[0]/ }  @{$cnode->{taxa}};
+                if ($#match >=0 ) {
+                  $cnode_match = $cnode;
+                  last;
+                }
+              }
+
+              if (keys %$cnode_match) {
+                if (!$cnode_match->{child_nodes}) {
+                  $cnode_match->{child_nodes} = [];
+                }
+                push @{$cnode_match->{child_nodes}}, $child;
+                last;
+              }
+              else {
+                if (!$node->{child_nodes}) {
+                  $node->{child_nodes} = [];
+                }
+                push @{$node->{child_nodes}}, $child;
+                last;
+              }
+            }
+            else {
+              $node->{child_nodes} = [];
+              push @{$node->{child_nodes}}, $child;
+              last;
+            }
+          }
+        }
+      }
     }
   }
 
@@ -1035,6 +1067,12 @@ sub _parse {
 
   ## New species list - currently only used by rapid release
   $tree->{'MULTI'}{'NEW_SPECIES'} = $self->_read_species_list_file('NEW_SPECIES');
+
+  ## File format info
+  my $format_info = $self->_get_file_format_info($tree);;
+  $tree->{'MULTI'}{'UPLOAD_FILE_FORMATS'} = $format_info->{'upload'};
+  $tree->{'MULTI'}{'REMOTE_FILE_FORMATS'} = $format_info->{'remote'};
+  $tree->{'MULTI'}{'DATA_FORMAT_INFO'} = $format_info->{'formats'};
 
   ## Parse species directories for static content
   $tree->{'SPECIES_INFO'} = $self->_load_in_species_pages;
@@ -1072,6 +1110,73 @@ sub process_ini_files {
   }
 }
 
+sub _get_file_format_info {
+  my ($self, $tree) = @_;
+
+  my %unsupported = map {uc($_) => 1} @{$tree->{'MULTI'}{'UNSUPPORTED_FILE_FORMATS'}||[]};
+  my (@upload, @remote);
+
+  ## Get info on all formats
+  my %formats = (
+    'bed'       => {'ext' => 'bed', 'label' => 'BED',       'display' => 'feature'},
+    'bedgraph'  => {'ext' => 'bed', 'label' => 'bedGraph',  'display' => 'graph'},
+    'gff'       => {'ext' => 'gff', 'label' => 'GFF',       'display' => 'feature'},
+    'gtf'       => {'ext' => 'gtf', 'label' => 'GTF',       'display' => 'feature'},
+    'psl'       => {'ext' => 'psl', 'label' => 'PSL',       'display' => 'feature'},
+    'vcf'       => {'ext' => 'vcf', 'label' => 'VCF',       'display' => 'graph'},
+    'vep_input' => {'ext' => 'txt', 'label' => 'VEP',       'display' => 'feature'},
+    'wig'       => {'ext' => 'wig', 'label' => 'WIG',       'display' => 'graph'},
+    ## Remote only - cannot be uploaded
+    'bam'       => {'ext' => 'bam', 'label' => 'BAM',       'display' => 'graph', 'remote' => 1},
+    'bigwig'    => {'ext' => 'bw',  'label' => 'BigWig',    'display' => 'graph', 'remote' => 1},
+    'bigbed'    => {'ext' => 'bb',  'label' => 'BigBed',    'display' => 'graph', 'remote' => 1},
+    'bigpsl'    => {'ext' => 'bb',  'label' => 'BigPsl',    'display' => 'graph', 'remote' => 1},
+    'bigint'    => {'ext' => 'bb',  'label' => 'BigInteract',    'display' => 'graph', 'remote' => 1},
+    'cram'      => {'ext' => 'cram','label' => 'CRAM',      'display' => 'graph', 'remote' => 1},
+    'trackhub'  => {'ext' => 'txt', 'label' => 'Track Hub', 'display' => 'graph', 'remote' => 1},
+    ## Export only
+    'fasta'     => {'ext' => 'fa',   'label' => 'FASTA'},
+    'clustalw'  => {'ext' => 'aln',  'label' => 'CLUSTALW'},
+    'msf'       => {'ext' => 'msf',  'label' => 'MSF'},
+    'mega'      => {'ext' => 'meg',  'label' => 'Mega'},
+    'newick'    => {'ext' => 'nh',   'label' => 'Newick'},
+    'nexus'     => {'ext' => 'nex',  'label' => 'Nexus'},
+    'nhx'       => {'ext' => 'nhx',  'label' => 'NHX'},
+    'orthoxml'  => {'ext' => 'xml',  'label' => 'OrthoXML'},
+    'phylip'    => {'ext' => 'phy',  'label' => 'Phylip'},
+    'phyloxml'  => {'ext' => 'xml',  'label' => 'PhyloXML'},
+    'pfam'      => {'ext' => 'pfam', 'label' => 'Pfam'},
+    'psi'       => {'ext' => 'psi',  'label' => 'PSI'},
+    'rtf'       => {'ext' => 'rtf',  'label' => 'RTF'},
+    'stockholm' => {'ext' => 'stk',  'label' => 'Stockholm'},
+    'text'      => {'ext' => 'txt',  'label' => 'Text'},
+    'emboss'    => {'ext' => 'txt',  'label' => 'EMBOSS'},
+    ## WashU formats
+    'pairwise'  => {'ext' => 'txt', 'label' => 'Pairwise interactions', 'display' => 'feature'},
+    'pairwise_tabix' => {'ext' => 'txt', 'label' => 'Pairwise interactions (indexed)', 'display' => 'feature', 'indexed' => 1},
+  );
+
+  ## Munge into something useful to this website
+  while (my ($format, $details) = each (%formats)) {
+    my $uc_name = uc($format);
+    if ($unsupported{$uc_name}) {
+      delete $formats{$format};
+      next;
+    }
+    if ($details->{'remote'}) {
+      push @remote, $format;
+    }
+    elsif ($details->{'display'}) {
+      push @upload, $format;
+    }
+  }
+
+  return {
+          'upload' => \@upload,
+          'remote' => \@remote,
+          'formats' => \%formats
+          };
+}
 
 sub _munge_colours {
   my $self = shift;

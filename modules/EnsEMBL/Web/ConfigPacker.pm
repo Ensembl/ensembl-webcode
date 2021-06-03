@@ -109,7 +109,6 @@ sub munge_config_tree {
 sub munge_config_tree_multi {
   my $self = shift;
   $self->_munge_website_multi;
-  $self->_munge_file_formats;
   $self->_munge_species_url_map;
 }
 
@@ -795,7 +794,22 @@ sub _summarise_funcgen_db {
       full_name => $row->[4]
     };
   }
-  
+
+  ## Finally, save the peak calling ids for all regulatory tracks 
+  my $p_aref = $dbh->selectall_arrayref('
+    select pc.peak_calling_id, eg.short_name, ft.name
+    from 
+        peak_calling as pc,
+        epigenome as eg,
+        feature_type as ft
+    where 
+        pc.epigenome_id = eg.epigenome_id
+        and pc.feature_type_id = ft.feature_type_id
+  ');
+  foreach (@$p_aref) {
+    $self->db_details($db_name)->{'peak_calling'}{$_->[1]}{$_->[2]} = $_->[0];
+  }
+ 
 #---------- Additional queries - by type...
 
 #
@@ -1661,8 +1675,8 @@ sub _munge_meta {
   while (my ($species_id, $meta_hash) = each (%$meta_info)) {
     next unless $species_id && $meta_hash && ref($meta_hash) eq 'HASH';
     
-    my $species  = $meta_hash->{'species.url'}[0];
-    my $bio_name = $meta_hash->{'species.scientific_name'}[0];
+    my $species         = $meta_hash->{'species.url'}[0];
+    my $production_name = $meta_hash->{'species.production_name'}[0];
     
     ## Put other meta info into variables
     while (my ($meta_key, $key) = each (%keys)) {
@@ -1676,11 +1690,11 @@ sub _munge_meta {
                   ? $self->db_tree->{'ASSEMBLY_VERSION'} : $value;
       }
 
-      $self->tree->{$key} = $value;
+      $self->tree($production_name)->{$key} = $value;
     }
 
     ## Uppercase first part of common name, for consistency
-    $self->tree->{'SPECIES_COMMON_NAME'} = ucfirst($self->tree->{'SPECIES_COMMON_NAME'});
+    $self->tree($production_name)->{'SPECIES_COMMON_NAME'} = ucfirst($self->tree->{'SPECIES_COMMON_NAME'});
 
     ## Do species group
     my $taxonomy = $meta_hash->{'species.classification'};
@@ -1688,9 +1702,9 @@ sub _munge_meta {
     if ($taxonomy && scalar(@$taxonomy)) {
       my %valid_taxa = map {$_ => 1} @{ $self->tree->{'TAXON_ORDER'} };
       my @matched_groups = grep {$valid_taxa{$_}} @$taxonomy;
-      $self->tree->{'TAXONOMY'} = $taxonomy;
-      $self->tree->{'SPECIES_GROUP'} = $matched_groups[0] if @matched_groups;
-      $self->tree->{'SPECIES_GROUP_HIERARCHY'} = \@matched_groups;
+      $self->tree($production_name)->{'TAXONOMY'} = $taxonomy;
+      $self->tree($production_name)->{'SPECIES_GROUP'} = $matched_groups[0] if @matched_groups;
+      $self->tree($production_name)->{'SPECIES_GROUP_HIERARCHY'} = \@matched_groups;
     }
 
     ## create lookup hash for species aliases
@@ -1702,40 +1716,40 @@ sub _munge_meta {
     $self->full_tree->{'MULTI'}{'SPECIES_ALIASES'}{$species} = $species;
 
     ## Used mainly in <head> links
-    ($self->tree->{'SPECIES_BIO_SHORT'} = $self->tree->{'SPECIES_URL'}) =~ s/^([A-Z])[a-z]+_([a-z]+)$/$1.$2/;
+    ($self->tree($production_name)->{'SPECIES_BIO_SHORT'} = $self->tree->{'SPECIES_URL'}) =~ s/^([A-Z])[a-z]+_([a-z]+)$/$1.$2/;
     
-    if ($self->tree->{'ENSEMBL_SPECIES'}) {
+    push @{$self->tree($production_name)->{'DB_SPECIES'}}, $species;
+    ## Also add it to the main tree for collection dbs
+    if ($self->is_collection('DATABASE_CORE')) {
       push @{$self->tree->{'DB_SPECIES'}}, $species;
-    } else {
-      $self->tree->{'DB_SPECIES'} = [ $species ];
     }
     
-    $self->tree->{'SPECIES_META_ID'} = $species_id;
+    $self->tree($production_name)->{'SPECIES_META_ID'} = $species_id;
 
     ## fall back to 'strain' if no strain type set
-    if (!$self->tree->{'STRAIN_TYPE'}) {
-      $self->tree->{'STRAIN_TYPE'} = 'strain';
+    if (!$self->tree($production_name)->{'STRAIN_TYPE'}) {
+      $self->tree($production_name)->{'STRAIN_TYPE'} = 'strain';
     }
 
     ## Munge genebuild info
     my @A = split '-', $meta_hash->{'genebuild.start_date'}[0];
     
-    $self->tree->{'GENEBUILD_START'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
+    $self->tree($production_name)->{'GENEBUILD_START'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
 
     @A = split '-', $meta_hash->{'genebuild.initial_release_date'}[0];
     
-    $self->tree->{'GENEBUILD_RELEASE'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
+    $self->tree($production_name)->{'GENEBUILD_RELEASE'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
     
     @A = split '-', $meta_hash->{'genebuild.last_geneset_update'}[0];
 
-    $self->tree->{'GENEBUILD_LATEST'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
+    $self->tree($production_name)->{'GENEBUILD_LATEST'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
     
     @A = split '-', $meta_hash->{'assembly.date'}[0];
     
-    $self->tree->{'ASSEMBLY_DATE'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
+    $self->tree($production_name)->{'ASSEMBLY_DATE'} = $A[1] ? "$months[$A[1]] $A[0]" : undef;
     
 
-    $self->tree->{'HAVANA_DATAFREEZE_DATE'} = $meta_hash->{'genebuild.havana_datafreeze_date'}[0];
+    $self->tree($production_name)->{'HAVANA_DATAFREEZE_DATE'} = $meta_hash->{'genebuild.havana_datafreeze_date'}[0];
 
     ## check if there are sample search entries from the ini file
     my $ini_hash = $self->tree->{'SAMPLE_DATA'};
@@ -1809,10 +1823,17 @@ sub _munge_meta {
       $dedupe->{$v}++;
     }
 
-    $self->tree->{'SAMPLE_DATA'} = $sample_hash if scalar keys %$sample_hash;
+    $self->tree($production_name)->{'SAMPLE_DATA'} = $sample_hash if scalar keys %$sample_hash;
 
     # check if the karyotype/list of toplevel regions ( normally chroosomes) is defined in meta table
-    @{$self->tree->{'TOPLEVEL_REGIONS'}} = @{$meta_hash->{'regions.toplevel'}} if $meta_hash->{'regions.toplevel'};
+    @{$self->tree($production_name)->{'TOPLEVEL_REGIONS'}} = @{$meta_hash->{'regions.toplevel'}} if $meta_hash->{'regions.toplevel'};
+
+    ## need to explicitly define as empty array by default
+    ## SpeciesDefs looks for a value at collection level
+    if ($self->is_collection('DATABASE_CORE')) {
+      @{$self->tree($production_name)->{'ENSEMBL_CHROMOSOMES'}} = ();
+      @{$self->tree($production_name)->{'ENSEMBL_CHROMOSOMES'}} = @{$meta_hash->{'region.toplevel'}} if $meta_hash->{'region.toplevel'};
+    }
   }
 
 }
@@ -1847,71 +1868,6 @@ sub _munge_website_multi {
   $self->tree->{'ENSEMBL_GLOSSARY'} = $self->db_tree->{'ENSEMBL_GLOSSARY'};
 }
 
-sub _munge_file_formats {
-  my $self = shift;
-
-  my %unsupported = map {uc($_) => 1} @{$self->tree->{'UNSUPPORTED_FILE_FORMATS'}||[]};
-  my (@upload, @remote);
-
-  ## Get info on all formats
-  my %formats = (
-    'bed'       => {'ext' => 'bed', 'label' => 'BED',       'display' => 'feature'},
-    'bedgraph'  => {'ext' => 'bed', 'label' => 'bedGraph',  'display' => 'graph'},
-    'gff'       => {'ext' => 'gff', 'label' => 'GFF',       'display' => 'feature'},
-    'gtf'       => {'ext' => 'gtf', 'label' => 'GTF',       'display' => 'feature'},
-    'psl'       => {'ext' => 'psl', 'label' => 'PSL',       'display' => 'feature'},
-    'vcf'       => {'ext' => 'vcf', 'label' => 'VCF',       'display' => 'graph'},
-    'vep_input' => {'ext' => 'txt', 'label' => 'VEP',       'display' => 'feature'},
-    'wig'       => {'ext' => 'wig', 'label' => 'WIG',       'display' => 'graph'},
-    ## Remote only - cannot be uploaded
-    'bam'       => {'ext' => 'bam', 'label' => 'BAM',       'display' => 'graph', 'remote' => 1},
-    'bigwig'    => {'ext' => 'bw',  'label' => 'BigWig',    'display' => 'graph', 'remote' => 1},
-    'bigbed'    => {'ext' => 'bb',  'label' => 'BigBed',    'display' => 'graph', 'remote' => 1},
-    'bigpsl'    => {'ext' => 'bb',  'label' => 'BigPsl',    'display' => 'graph', 'remote' => 1},
-    'bigint'    => {'ext' => 'bb',  'label' => 'BigInteract',    'display' => 'graph', 'remote' => 1},
-    'cram'      => {'ext' => 'cram','label' => 'CRAM',      'display' => 'graph', 'remote' => 1},
-    'trackhub'  => {'ext' => 'txt', 'label' => 'Track Hub', 'display' => 'graph', 'remote' => 1},
-    ## Export only
-    'fasta'     => {'ext' => 'fa',   'label' => 'FASTA'},
-    'clustalw'  => {'ext' => 'aln',  'label' => 'CLUSTALW'},
-    'msf'       => {'ext' => 'msf',  'label' => 'MSF'},
-    'mega'      => {'ext' => 'meg',  'label' => 'Mega'},
-    'newick'    => {'ext' => 'nh',   'label' => 'Newick'},
-    'nexus'     => {'ext' => 'nex',  'label' => 'Nexus'},
-    'nhx'       => {'ext' => 'nhx',  'label' => 'NHX'},
-    'orthoxml'  => {'ext' => 'xml',  'label' => 'OrthoXML'},
-    'phylip'    => {'ext' => 'phy',  'label' => 'Phylip'},
-    'phyloxml'  => {'ext' => 'xml',  'label' => 'PhyloXML'},
-    'pfam'      => {'ext' => 'pfam', 'label' => 'Pfam'},
-    'psi'       => {'ext' => 'psi',  'label' => 'PSI'},
-    'rtf'       => {'ext' => 'rtf',  'label' => 'RTF'},
-    'stockholm' => {'ext' => 'stk',  'label' => 'Stockholm'},
-    'emboss'    => {'ext' => 'txt',  'label' => 'EMBOSS'},
-    ## WashU formats
-    'pairwise'  => {'ext' => 'txt', 'label' => 'Pairwise interactions', 'display' => 'feature'},
-    'pairwise_tabix' => {'ext' => 'txt', 'label' => 'Pairwise interactions (indexed)', 'display' => 'feature', 'indexed' => 1},
-  );
-
-  ## Munge into something useful to this website
-  while (my ($format, $details) = each (%formats)) {
-    my $uc_name = uc($format);
-    if ($unsupported{$uc_name}) {
-      delete $formats{$format};
-      next;
-    }
-    if ($details->{'remote'}) {
-      push @remote, $format;
-    }
-    elsif ($details->{'display'}) {
-      push @upload, $format;
-    }
-  }
-
-  $self->tree->{'UPLOAD_FILE_FORMATS'} = \@upload;
-  $self->tree->{'REMOTE_FILE_FORMATS'} = \@remote;
-  $self->tree->{'DATA_FORMAT_INFO'} = \%formats;
-}
-
 sub _munge_species_url_map {
   ## Used by apache handler to redirect requests to correct URLs for species
   my $self        = shift;
@@ -1934,5 +1890,11 @@ sub _munge_species_url_map {
   $multi_tree->{'ENSEMBL_SPECIES_URL_MAP'} = \%species_map;
 }
 
+sub is_collection {
+  my ($self, $db_name) = @_;
+  $db_name ||= 'DATABASE_CORE';
+  my $database_name = $self->tree->{'databases'}->{$db_name}{'NAME'};
+  return $database_name =~ /_collection/;
+}
 
 1;

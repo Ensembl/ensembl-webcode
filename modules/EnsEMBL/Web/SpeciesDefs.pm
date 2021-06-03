@@ -488,9 +488,8 @@ sub _load_in_species_pages {
   return $spp_tree;
 }
 
-sub _load_in_taxonomy_division {
-  my ($self) = @_;
-  my $filename = $SiteDefs::ENSEMBL_TAXONOMY_DIVISION_FILE;
+sub _load_json_config {
+  my ($self, $filename) = @_;
   my $json_text = do {
     open(my $json_fh, "<", $filename)
       or die("Can't open $filename: $!\n");
@@ -819,7 +818,7 @@ sub _parse {
   $self->_info_line('Filesystem', 'Trawled web tree');
   # Load taxonomy division json for species selector
   $self->_info_log('Loading', 'Loading taxonomy division json file');
-  $tree->{'ENSEMBL_TAXONOMY_DIVISION'} = $self->_load_in_taxonomy_division;
+  $tree->{'ENSEMBL_TAXONOMY_DIVISION'} = $self->_load_json_config($SiteDefs::ENSEMBL_TAXONOMY_DIVISION_FILE);
   
   # Load species lists, if not present in SiteDefs
   unless (scalar @{$SiteDefs::PRODUCTION_NAMES||[]}) {
@@ -1065,8 +1064,9 @@ sub _parse {
   $tree->{'MULTI'}{'ENSEMBL_DATASETS'} = $datasets;
   #warn ">>> NEW KEYS: ".Dumper($tree);
 
-  ## New species list - currently only used by rapid release
+  ## Species lists - currently only used by rapid release
   $tree->{'MULTI'}{'NEW_SPECIES'} = $self->_read_species_list_file('NEW_SPECIES');
+  $tree->{'MULTI'}{'REFERENCE_LOOKUP'} = $self->_load_json_config($SiteDefs::REFERENCE_LOOKUP_FILE);
 
   ## File format info
   my $format_info = $self->_get_file_format_info($tree);;

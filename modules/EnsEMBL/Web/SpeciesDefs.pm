@@ -1245,7 +1245,12 @@ sub compara_like_databases {
   my $self = shift;
   if ($self->SINGLE_SPECIES_COMPARA) {
     my $species = shift;
-    return $self->get_config($species, 'compara_like_databases');
+    if ($species) {
+      return $self->get_config($species, 'compara_like_databases');
+    }
+    else {
+      return $self->multi_val('compara_like_databases');
+    }
   }
   else {
     return $self->multi_val('compara_like_databases');

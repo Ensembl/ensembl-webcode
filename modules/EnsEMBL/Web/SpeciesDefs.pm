@@ -855,19 +855,24 @@ sub _parse {
   my $species_to_strains = {};
   my $species_to_assembly = {};
 
+  ## Get favourites from file (rapid release only atm)
+  my $favourites = $self->_read_species_list_file('FAVOURITES'); 
+  ## Also override primary & secondary species
+  if (scalar @$favourites) {
+    $SiteDefs::ENSEMBL_PRIMARY_SPECIES = $favourites->[0];
+    $SiteDefs::ENSEMBL_SECONDARY_SPECIES = $favourites->[1];
+  }
+
   # Loop over each tree and make further manipulations
   foreach my $species (@$SiteDefs::PRODUCTION_NAMES, 'MULTI') {
     $config_packer->species($species);
     $config_packer->munge('config_tree');
     $self->_info_line('munging', "$species config");
 
-    ## Configure favourites if not in DEFAULTS.ini (rapid release)
+    ## Configure favourites if not in DEFAULTS.ini
     unless ($config_packer->tree->{'DEFAULT_FAVOURITES'}) {
-      my $favourites = $self->_read_species_list_file('FAVOURITES'); 
       warn "!!! NO FAVOURITES CONFIGURED" unless scalar @{$favourites||[]};
       $config_packer->tree->{'DEFAULT_FAVOURITES'} = $favourites;
-      $config_packer->tree->{'ENSEMBL_PRIMARY_SPECIES'} = $favourites->[0];
-      $config_packer->tree->{'ENSEMBL_SECONDARY_SPECIES'} = $favourites->[1];
     }
 
     # Replace any placeholder text in sample data

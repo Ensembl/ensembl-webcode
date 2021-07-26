@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2018] EMBL-European Bioinformatics Institute
+Copyright [2016-2021] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package EnsEMBL::Web::Component::Info::HomePage;
 use strict;
 
 use EnsEMBL::Web::Document::HTML::HomeSearch;
+use EnsEMBL::Web::Utils::FormatText;
 
 use parent qw(EnsEMBL::Web::Component::Info);
 
@@ -148,7 +149,7 @@ sub assembly_text {
 
   ## Insert link to strains page 
   if ($strains) {
-    my $strain_text = $species_defs->STRAIN_TYPE.'s';
+    my $strain_text = pluralise($species_defs->STRAIN_TYPE);
     $html .= sprintf '<h3 class="light top-margin">Other %s</h3><p>This species has data on %s additional %s. <a href="%s">View list of %s</a></p>', 
                             $strain_text,
                             scalar @$strains,
@@ -180,7 +181,6 @@ sub genebuild_text {
   my $sp_prod_name = $species_defs->get_config($species, 'SPECIES_PRODUCTION_NAME');
   my $sample_data  = $species_defs->SAMPLE_DATA;
   my $ftp          = $self->ftp_url;
-  my $vega         = $species_defs->SUBTYPE !~ /Archive|Pre/ && $species_defs->get_config('MULTI', 'ENSEMBL_VEGA') || {};
   my $idm_link     = $species_defs->ENSEMBL_IDM_ENABLED
     ? sprintf('<p><a href="%s" class="nodeco">%sUpdate your old Ensembl IDs</a></p>', $hub->url({ type => 'Tools', action => 'IDMapper', __clear => 1 }), sprintf($self->{'icon'}, 'tool'))
     : '';

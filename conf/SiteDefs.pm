@@ -1,5 +1,5 @@
 # Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-# Copyright [2016-2018] EMBL-European Bioinformatics Institute
+# Copyright [2016-2021] EMBL-European Bioinformatics Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,9 +34,9 @@ use Sys::Hostname::Long;
 
 ###############################################################################
 ## Ensembl Version and release dates (these get updated every release)
-our $ENSEMBL_VERSION        = 104;            # Ensembl release number
-our $ARCHIVE_VERSION        = 'May2021';     # Archive site for this version
-our $ENSEMBL_RELEASE_DATE   = 'May 2021'; # As it would appear in the copyright/footer
+our $ENSEMBL_VERSION        = 105;            # Ensembl release number
+our $ARCHIVE_VERSION        = 'Oct2021';     # Archive site for this version
+our $ENSEMBL_RELEASE_DATE   = 'Oct 2021'; # As it would appear in the copyright/footer
 ###############################################################################
 
 
@@ -78,6 +78,8 @@ our $ENSEMBL_PROXY_PORT           = undef;                              # Port u
 our $ENSEMBL_LONGPROCESS_MINTIME  = 10;                                 # Warn extra info to logs if a process takes more than given time in seconds to serve request
 our $ENSEMBL_MAX_PROCESS_SIZE     = 1024 * 1024;                        # Value for Apache2::SizeLimit::MAX_PROCESS_SIZE
 our $ENSEMBL_MAIL_SERVER          = 'mail.mydomain.org';                # Mail server to be used for sending emails from the web server
+our $STORABLE_RECURSION_LIMIT     = 20474;				# see perl5 bug GitHub #16780; those new deafults are too small for ensembl
+our $STORABLE_RECURSION_LIMIT_HASH = 12278;				# see perl5 bug GitHub #16780; those new deafults are too small for ensembl
 ###############################################################################
 
 

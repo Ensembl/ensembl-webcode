@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2018] EMBL-European Bioinformatics Institute
+Copyright [2016-2021] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ use HTML::Entities  qw(encode_entities);
 
 use base qw(Exporter);
 
-our @EXPORT = our @EXPORT_OK = qw(thousandify date_format pretty_date add_links helptip glossary_helptip get_glossary_entry);
+our @EXPORT = our @EXPORT_OK = qw(thousandify date_format pretty_date add_links helptip glossary_helptip get_glossary_entry pluralise);
 
 sub thousandify {
 # Returns comma separated version of number
@@ -105,6 +105,11 @@ sub get_glossary_entry {
   return $hub->glossary_lookup->{$entry} // '';
 }
 
+sub pluralise {
+  my ($arg) = @_;
 
+  return $arg if $arg =~ s/([^aeiou])y$/$1ies/g;
+  return "${arg}s";
+}
 
 1;

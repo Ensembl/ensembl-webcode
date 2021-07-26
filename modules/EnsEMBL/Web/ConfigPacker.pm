@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2018] EMBL-European Bioinformatics Institute
+Copyright [2016-2021] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -78,13 +78,12 @@ sub modify_rest_multi {}
 
 sub munge_databases {
   my $self   = shift;
-  my @tables = qw(core cdna vega vega_update otherfeatures rnaseq);
+  my @tables = qw(core cdna otherfeatures rnaseq);
   $self->_summarise_core_tables($_, 'DATABASE_' . uc $_) for @tables;
   $self->_summarise_xref_types('DATABASE_' . uc $_) for @tables;
   $self->_summarise_variation_db('variation', 'DATABASE_VARIATION');
   $self->_summarise_variation_db('variation_private', 'DATABASE_VARIATION_PRIVATE');
   $self->_summarise_funcgen_db('funcgen', 'DATABASE_FUNCGEN');
-  $self->_compare_update_db('vega_update','DATABASE_VEGA_UPDATE');
 }
 
 sub munge_databases_multi {
@@ -1169,12 +1168,11 @@ sub _summarise_archive_db {
     $self->db_tree->{'ASSEMBLIES'}->{$row->[0]}{$row->[1]}=$row->[2];
   }
 
-  $t_aref = $dbh->selectall_arrayref('select name, common_name, code, vega from species');
+  $t_aref = $dbh->selectall_arrayref('select name, common_name, code from species');
   foreach my $row ( @$t_aref ) {
     $self->db_tree->{'ALL_WEB_SPECIES'}{$row->[0]}    = 1;
     $self->db_tree->{'ALL_WEB_SPECIES'}{lc $row->[1]} = 1;
     $self->db_tree->{'ALL_WEB_SPECIES'}{$row->[2]}    = 1;
-    $self->db_tree->{'ENSEMBL_VEGA'}{$row->[0]}       = $row->[3] eq 'Y' ? 1 : 0;
   }
 
   $dbh->disconnect();
@@ -1316,7 +1314,7 @@ sub _summarise_compara_db {
   }
   
   # if there are intraspecies alignments then get full details of genomic alignments, ie start and stop, constrained by a set defined above (or no constraint for all alignments)
-  $self->_summarise_compara_alignments($dbh, $db_name, \%intra_species_constraints) if scalar keys %intra_species_constraints;
+  $self->_summarise_compara_alignments($dbh, $db_name, \%intra_species_constraints);
   
   # We've done the DB hash... So lets get on with the DNA, SYNTENY and GENE hashes;
   my %sections = (
@@ -1326,7 +1324,9 @@ sub _summarise_compara_db {
   );
   
   ## Store a lookup using genome (species) names
-  $res_aref = $dbh->selectall_arrayref('
+  ## Omit for bacteria as there are too many
+  my $division = $SiteDefs::EG_DIVISION;
+  $res_aref = ($division && $division eq 'bacteria') ? [] : $dbh->selectall_arrayref('
     select ml.type, gd1.name, gd2.name
       from genome_db gd1, genome_db gd2, species_set ss1, species_set ss2,
        method_link ml, method_link_species_set mls1,
@@ -1393,14 +1393,10 @@ sub _homologies_sql {
 
 sub _summarise_compara_alignments {
   my ($self, $dbh, $db_name, $constraint) = @_;
-  my (%config, $lookup_species, @method_link_species_set_ids);
+  return unless keys %{$constraint||{}};
 
-  my $vega = !(defined $constraint);
-
-  if ($constraint) {
-    $lookup_species              = join ',', map $dbh->quote($_), sort keys %$constraint;
-    @method_link_species_set_ids = map keys %$_, values %$constraint;
-  }
+  my $lookup_species              = join ',', map $dbh->quote($_), sort keys %$constraint;
+  my @method_link_species_set_ids = map keys %$_, values %$constraint;
   
   # get details of seq_regions in the database
   my $q = '
@@ -1445,7 +1441,6 @@ sub _summarise_compara_alignments {
   
   # get details of alignments
   my @where;
-  # push @where,"is_reference = 0" unless $vega;
   if(@method_link_species_set_ids) {
     my $mlss = join(',',@method_link_species_set_ids);
     push @where,"ga_ref.method_link_species_set_id in ($mlss)";
@@ -1464,7 +1459,7 @@ sub _summarise_compara_alignments {
   $rv  = $sth->execute || die $sth->errstr;
       
   # parse the data
-  my (@seen_ids, $prev_id, $prev_df_id, $prev_comparison, $prev_method, $prev_start, $prev_end, $prev_sr, $prev_species, $prev_coord_sys);
+  my (%config, @seen_ids, $prev_id, $prev_df_id, $prev_comparison, $prev_method, $prev_start, $prev_end, $prev_sr, $prev_species, $prev_coord_sys);
   
   while (my ($gabid, $mlss_id, $start, $end, $df_id) = $sth->fetchrow_array) {
     my $id = $gabid . $mlss_id;

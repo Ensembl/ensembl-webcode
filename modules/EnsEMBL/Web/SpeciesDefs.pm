@@ -977,7 +977,7 @@ sub _parse {
       }
       my $species_path = $binomial ? sprintf '%s/%s.png', $image_dir, $binomial : '';
       if ($species_path && -e $species_path) {
-        $tree->{$key}{'SPECIES_IMAGE'} = $binomial;
+        $tree->{$url}{'SPECIES_IMAGE'} = $binomial;
       }
       else {
         ## Final attempt! Clade image (rapid release) or default (NV)

@@ -802,6 +802,7 @@ sub _parse {
   # Parse the web tree to create the static content site map
   $tree->{'STATIC_INFO'}  = $self->_load_in_webtree;
   $self->_info_line('Filesystem', 'Trawled web tree');
+
   # Load taxonomy division json for species selector
   $self->_info_log('Loading', 'Loading taxonomy division json file');
   $tree->{'ENSEMBL_TAXONOMY_DIVISION'} = $self->_load_in_taxonomy_division;
@@ -918,7 +919,8 @@ sub _parse {
   ## Merge collection info into the species hash
   foreach my $prodname (@$SiteDefs::PRODUCTION_NAMES) {
     next unless $tree->{$prodname};
-    my @db_species = @{$tree->{$prodname}->{DB_SPECIES}};
+    my @db_species = @{$tree->{$prodname}->{DB_SPECIES}||[]};
+    next unless scalar @db_species;
     my $species_lookup = { map {$_ => 1} @db_species };
     foreach my $sp (@db_species) {
       $self->_merge_species_tree( $tree->{$sp}, $tree->{$prodname}, $species_lookup);
@@ -959,9 +961,30 @@ sub _parse {
         }
       }
     }
+    ## No species-specific or strain image -  make a guess based on URL
     if ($no_image) {
-      my $clade = $tree->{$url}{'SPECIES_GROUP'};
-      $tree->{$url}{'SPECIES_IMAGE'} = $labels->{$clade};
+      ## In theory this could be a trinomial, but we use whatever is set in species.species_name
+      my $binomial = $tree->{$url}{SPECIES_BINOMIAL};
+      if ($binomial) {
+        $binomial =~ s/ /_/g;
+      }
+      else {
+        ## Make a guess based on URL. Note that some fungi have weird URLs bc 
+        ## their taxonomy is uncertain, so this regex doesn't try to include them
+        ## (none of them have images in any case)
+        $url =~ /^([A-Za-z]+_[a-z]+)/;
+        $binomial = $1;
+      }
+      my $species_path = $binomial ? sprintf '%s/%s.png', $image_dir, $binomial : '';
+      if ($species_path && -e $species_path) {
+        $tree->{$key}{'SPECIES_IMAGE'} = $binomial;
+      }
+      else {
+        ## Final attempt! Clade image (rapid release) or default (NV)
+        my $clade = $tree->{$url}{'SPECIES_GROUP'};
+        $species_path = sprintf '%s/%s.png', $image_dir, $labels->{$clade};
+        $tree->{$url}{'SPECIES_IMAGE'} = -e $species_path ? $labels->{$clade} : 'default';
+      }
     }
 
     ## Species-specific munging

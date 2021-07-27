@@ -653,15 +653,6 @@ sub _expand_database_templates {
           $db_name .= sprintf('_%s_%s', $SiteDefs::ENSEMBL_VERSION, $species_version);
         } 
       }
-      if ($_ eq 'COMPARA') {
-        $db_details = {
-                        'HOST'    => 'mysql-ens-compara-prod-9',
-                        'PORT'    => '4647',
-                        'USER'    => 'ensadmin',
-                        'PASS'    => 'ensembl',
-                        'DRIVER'  => $DRIVER,
-                      };
-      }
       ## Does this database exist?
       $db_details->{'NAME'} = $db_name;
       my $db_exists = $config_packer->db_connect($_, $db_details, 1);

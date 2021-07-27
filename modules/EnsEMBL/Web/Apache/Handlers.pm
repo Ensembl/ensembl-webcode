@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2018] EMBL-European Bioinformatics Institute
+Copyright [2016-2021] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -332,10 +332,8 @@ sub childInitHandler {
   ## This handler gets called by Apache when initialising an Apache child process
   ## @param APR::Pool object
   ## @param Apache2::ServerRec server object
-  # Storable defaults are now too small. Ideally these would be configurable,
-  # perhaps in SiteDefs.
-  $Storable::recursion_limit = 20474;
-  $Storable::recursion_limit_hash = 12278;
+  $Storable::recursion_limit = $SiteDefs::STORABLE_RECURSION_LIMIT;
+  $Storable::recursion_limit_hash = $SiteDefs::STORABLE_RECURSION_LIMIT_HASH;
   srand;
   warn sprintf "[%s] Child initialised: %d\n", time_str, $$ if $SiteDefs::ENSEMBL_DEBUG_HANDLER_ERRORS;
 

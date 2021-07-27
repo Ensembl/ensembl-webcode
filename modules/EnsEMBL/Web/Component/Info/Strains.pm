@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2018] EMBL-European Bioinformatics Institute
+Copyright [2016-2021] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ no warnings "uninitialized";
 
 use EnsEMBL::Web::Controller::SSI;
 use EnsEMBL::Web::Document::Table;
+use EnsEMBL::Web::Utils::FormatText;
 
 use base qw(EnsEMBL::Web::Component);
 
@@ -43,7 +44,7 @@ sub content {
 
   my $strain_type = $sd->STRAIN_TYPE;
   my $name = $sd->USE_COMMON_NAMES ? $sd->SPECIES_DISPLAY_NAME : $sd->SPECIES_SCIENTIFIC_NAME;
-  $html .= sprintf '<h1>%s %ss</h1>', $name, $strain_type;
+  $html .= sprintf '<h1>%s %s</h1>', $name, pluralise($strain_type);
 
   $html .= EnsEMBL::Web::Controller::SSI::template_INCLUDE($self, sprintf('/%s_strains.inc', $hub->species), 1);
 

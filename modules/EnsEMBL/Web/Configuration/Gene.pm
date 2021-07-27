@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2018] EMBL-European Bioinformatics Institute
+Copyright [2016-2021] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -135,11 +135,6 @@ sub populate_tree {
     { 'availability'  => 'family not_strain', 'no_menu_entry' => 1 }
   ));
 
-  $fam_node->append($self->create_subnode('Family/Alignments', 'Multiple alignments in this family',
-    [qw( jalview EnsEMBL::Web::Component::Gene::FamilyAlignments )],
-    { 'availability'  => 'family database:compara core not_strain', 'no_menu_entry' => 1 }
-  ));
-  
   $compara_menu->append($fam_node);
   
   # Compara menu for strain (strain menu available on main species but collapse, main menu not available/grey out/collapse on strain page)

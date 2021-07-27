@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2018] EMBL-European Bioinformatics Institute
+Copyright [2016-2021] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -36,8 +36,6 @@ use parent qw(EnsEMBL::Web::Command::UserData);
 sub process {
   my $self = shift;
   my $hub  = $self->hub;
-
-  return $self->set_format if $hub->function eq 'set_format';
 
   my $url_params = $self->upload_or_attach;
 
@@ -161,29 +159,6 @@ sub check_for_index {
     });
   }
   return $index_exists;
-}
-
-sub set_format {
-  my $self    = shift;
-  my $hub     = $self->hub;
-  my $session = $hub->session;
-  my $code    = $hub->param('code');
-  my $format  = $hub->param('format');
-
-  if ($format) {
-    my $record_data = $session->get_record_data({'code' => $code});
-    if (keys %$record_data) {
-      $record_data->{'format'} = $format;
-      $session->set_record_data($record_data);
-    }
-  }
-
-  $self->ajax_redirect($hub->url({
-    action   => $format ? 'UploadFeedback' : 'MoreInput',
-    function => undef,
-    format   => $format,
-    code     => $code
-  }));
 }
 
 1;

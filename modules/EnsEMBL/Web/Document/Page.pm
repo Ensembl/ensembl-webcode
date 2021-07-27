@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2018] EMBL-European Bioinformatics Institute
+Copyright [2016-2021] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -116,11 +116,9 @@ sub ajax_redirect {
   my ($self, $url, $redirect_type, $modal_tab) = @_;
   
   my $r         = $self->renderer->{'r'};
-  my $back      = $self->{'input'}->param('wizard_back');
   my @backtrack = map $url =~ /_backtrack=$_\b/ ? () : $_, $self->{'input'}->param('_backtrack');
   
   $url .= ($url =~ /\?/ ? ';' : '?') . '_backtrack=' . join ';_backtrack=', @backtrack if scalar @backtrack;
-  $url .= ($url =~ /\?/ ? ';' : '?') . "wizard_back=$back" if $back;
   
   if ($self->renderer->{'_modal_dialog_'}) {
     if (!$self->{'ajax_redirect_url'}) {

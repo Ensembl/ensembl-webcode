@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2018] EMBL-European Bioinformatics Institute
+Copyright [2016-2021] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -162,27 +162,6 @@ sub get_module_names {
   }
   
   return wantarray ? @return : $return[0];
-}
-
-# Loops through array of filters and returns the first one that fails
-sub not_allowed {
-  my ($self, $hub, $object) = @_;
-  
-  my $filters = $self->filters || [];
-  
-  foreach my $name (@$filters) {
-    my $class = 'EnsEMBL::Web::Filter::'.$name;
-    
-    if ($self->dynamic_use($class)) {
-      my $filter = $class->new({ hub => $hub , object => $object});
-      $filter->catch;
-      return $filter if $filter->error_code;
-    }  else {
-      warn "COULD NOT USE FILTER MODULE $class";
-    }
-  }
-  
-  return undef;
 }
 
 sub strip_HTML {

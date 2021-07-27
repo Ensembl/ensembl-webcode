@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2018] EMBL-European Bioinformatics Institute
+Copyright [2016-2021] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -58,6 +58,31 @@ sub new {
   bless $self, $class;
 
   return $self;
+}
+
+sub format_to_class {
+  return (
+          'bam'             => 'Bam',
+          'bcf'             => 'BCF',
+          'bed'             => 'Bed',
+          'bedgraph'        => 'Bed',
+          'bigbed'          => 'BigBed',
+          'bigwig'          => 'BigWig',
+          'emf'             => 'EMF',
+          'fasta'           => 'Fasta',
+          'gff'             => 'GTF',
+          'gff3'            => 'GFF3',
+          'gtf'             => 'GTF',
+          'gvf'             => 'GVF',
+          'pairwise'        => 'PairwiseSimple',
+          'pairwisetabix'   => 'PairwiseTabix',
+          'psl'             => 'Psl',
+          'vcf'             => 'VCF4',
+          'vcf4tabix'       => 'VCF4Tabix',
+          'vep_input'       => 'VEP_input',
+          'vep_output'      => 'VEP_output',
+          'wig'             => 'Wig',
+          );
 }
 
 sub parser {

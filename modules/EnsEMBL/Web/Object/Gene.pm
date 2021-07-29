@@ -752,16 +752,13 @@ sub get_homologies {
   $homology_source      = 'ENSEMBL_HOMOLOGUES' unless defined $homology_source;
   $homology_description = 'ortholog' unless defined $homology_description;
   
-  my $geneid   = $self->stable_id;
   my $database = $self->database($compara_db);
-  my %homologues;
-
   return unless $database;
 
-  my $query_member   = $database->get_GeneMemberAdaptor->fetch_by_stable_id($geneid);
-
+  my $query_member   = $database->get_GeneMemberAdaptor->fetch_by_stable_id($self->stable_id);
   return unless defined $query_member;
   
+  my %homologues;
   my $homology_adaptor = $database->get_HomologyAdaptor;
   my $homologies_array = $homology_adaptor->fetch_all_by_Member($query_member); # It is faster to get all the Homologues and discard undesired entries than to do fetch_all_by_Member_method_link_type
 

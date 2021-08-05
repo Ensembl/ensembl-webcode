@@ -53,8 +53,8 @@ sub _count_homologues {
   my $sth   = $dbc->prepare($sql);
   $sth->execute($gmID);
 
-  my @results = @{$sth->fetchall_arrayref||[]};
-  return $results[0]->[0] || 0; 
+  my $results = $sth->fetchall_arrayref;
+  return ($results && scalar @$results) ?  $results->[0][0] : 0; 
 }
 
 sub _count_go {

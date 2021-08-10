@@ -353,18 +353,18 @@ sub short_caption {
 
 sub caption {
   my $self = shift;
-  my $heading = $self->type_name.': ';
   my $subhead;
+  my $heading = $self->type_name.': ';
 
   my( $disp_id ) = $self->display_xref;
   my $version    = $self->version ? ".".$self->version : "";
 
   if( $disp_id && $disp_id ne $self->stable_id ) {
-    $heading .= $disp_id;
-    $subhead = $self->stable_id.$version;
+    $subhead = $disp_id;
+    $heading .= $self->stable_id.$version;
   }
   else {
-    $heading .= $self->stable_id.$version;
+    $heading = $self->stable_id.$version;
   }
 
   return [$heading, $subhead];

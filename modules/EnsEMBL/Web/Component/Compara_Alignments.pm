@@ -328,8 +328,6 @@ sub draw_tree {
   my $species         = $hub->species;
   my $mlss_adaptor            = $compara_db->get_adaptor('MethodLinkSpeciesSet');
   my $method_link_species_set = $mlss_adaptor->fetch_by_dbID($align);
-  my $align_params = $hub->get_alignment_id || '';
-  my ($align)      = split '--', $align_params;
 
   my $highlights;
   my $html;
@@ -687,13 +685,13 @@ sub export_options {
   my $hub = $self->hub;
 
   my $align_params = $hub->get_alignment_id || '';
-  my ($align_id)      = split '--', $align_params;
+  my ($align)      = split '--', $align_params;
   
-  return unless $align_id;  
+  return unless $align;  
 
   return {
           'action'  => 'TextAlignments', 
-          'params'  => [['align', $align_id]], 
+          'params'  => [['align', $align]], 
           'caption' => 'Download alignment',
         }; 
 }

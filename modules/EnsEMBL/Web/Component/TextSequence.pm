@@ -78,21 +78,21 @@ sub buttons {
 
   return unless $options->{'action'};
 
-  my $settings = $self->{'viewconfig'}{$hub->type}->{_user_settings};
-  my $align = $hub->param('align') || $settings->{'align'};
-
-  return unless $align;
-
   my @namespace = split('::', ref($self));
   my $params  = {
     'type' => 'DataExport',
     'action' => $options->{'action'},
     'data_type' => $self->hub->type,
-    'component' => $namespace[-1],
-    'align' => $align
+    'component' => $namespace[-1]
   };
   foreach (@{$options->{'params'} || []}) {
-    $params->{$_} = $self->param($_);
+    if (ref($_) eq 'ARRAY') {
+      $params->{$_->[0]} = $_->[1];
+    }
+    else {
+      $params->{$_} = $self->param($_);
+    }
+
   }
 
   

@@ -328,6 +328,8 @@ sub draw_tree {
   my $species         = $hub->species;
   my $mlss_adaptor            = $compara_db->get_adaptor('MethodLinkSpeciesSet');
   my $method_link_species_set = $mlss_adaptor->fetch_by_dbID($align);
+  my $align_params = $hub->get_alignment_id || '';
+  my ($align)      = split '--', $align_params;
 
   my $highlights;
   my $html;
@@ -421,7 +423,9 @@ sub draw_tree {
   push @$highlights, $low_coverage_species;
 
   my $image = $self->new_image($restricted_tree, $image_config, $highlights);
-  $image->{'export_params'} = ['align'];
+
+  $image->{'export_params'} = [['align', $align]];
+
 
   return if $self->_export_image($image);
 
@@ -681,15 +685,15 @@ sub _get_low_coverage_genome_db_sets {
 sub export_options { 
   my $self = shift;
   my $hub = $self->hub;
-  my @species_options;
-  my $settings = $self->{'viewconfig'}{$hub->type}->{_user_settings};
-  my $align = $hub->param('align') || $settings->{'align'};
+
+  my $align_params = $hub->get_alignment_id || '';
+  my ($align_id)      = split '--', $align_params;
   
-  return unless $align;  
+  return unless $align_id;  
 
   return {
           'action'  => 'TextAlignments', 
-          'params'  => ['align'], 
+          'params'  => [['align', $align_id]], 
           'caption' => 'Download alignment',
         }; 
 }

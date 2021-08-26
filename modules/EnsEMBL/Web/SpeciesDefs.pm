@@ -1603,8 +1603,9 @@ sub production_name_mapping {
   
   foreach ($self->valid_species) {
     if ($self->get_config($_, 'SPECIES_PRODUCTION_NAME') eq lc($production_name)) {
-    $mapping_name = $self->get_config($_, 'SPECIES_URL');
-    last;
+      $mapping_name = $self->get_config($_, 'SPECIES_URL');
+      last;
+    }
   }
 
   return $mapping_name;

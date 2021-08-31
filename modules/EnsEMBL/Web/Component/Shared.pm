@@ -433,7 +433,7 @@ sub transcript_table {
 
   $table->add_row('Location', $location_html);
 
-  if(@proj_attrib && $self->hub->species_defs->IS_STRAIN_OF) {
+  if(@proj_attrib && $hub->is_strain) {
     (my $ref_gene = $proj_attrib[0]->value) =~ s/\.\d+$//;
     my $strain_type = $hub->species_defs->STRAIN_TYPE;
     

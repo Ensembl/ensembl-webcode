@@ -48,7 +48,7 @@ sub _get_all_analysed_species {
     } else {
       $best_pt_mlss = $pt_mlsss->[0];
     }
-    $self->{'_all_analysed_species'} = {map {$self->hub->species_defs->production_name_mapping($_->name) => 1} @{$best_pt_mlss->species_set->genome_dbs}};
+    $self->{'_all_analysed_species'} = {map {$_->name => 1} @{$best_pt_mlss->species_set->genome_dbs}};
   }
   return %{$self->{'_all_analysed_species'}};
 }
@@ -64,8 +64,8 @@ sub content {
   my $availability = $object->availability;
   my $is_ncrna     = ($object->Obj->biotype =~ /RNA/);
   my $species_name = $species_defs->GROUP_DISPLAY_NAME;
-  my $strain_url   = $species_defs->IS_STRAIN_OF ? "Strain_" : "";
-  my $strain_param = $self->is_strain ? ";strain=1" : ""; # initialize variable even if is_strain is falsy to avoid warnings
+  my $strain_url   = $self->is_strain ? "Strain_" : "";
+  my $strain_param = $self->is_strain ? ";strain=1" : ""; # initialize variable even if is_strain is false, to avoid warnings
 
   my @orthologues = (
     $object->get_homology_matches('ENSEMBL_ORTHOLOGUES', undef, undef, $cdb), 
@@ -76,24 +76,17 @@ sub content {
 
   my %not_seen = $self->_get_all_analysed_species($cdb);
 
-  # The %not_seen hash can either have the production name or species url as the code is shared across ensembl and all divisions of e!g.
-  # These use either production name or species url, so difficult to find out what is used by the %not_seen hash.
-  # In some case cases, such as pan compara, there can be a mix of production name and species url.
-  # Therefore, need to have two delete statements to make sure the species (with orthologues) get deleted properly.
-  delete $not_seen{$hub->species}; #deleting current species
-  delete $not_seen{lc($hub->species)};
+  delete $not_seen{$hub->species_defs->SPECIES_PRODUCTION_NAME};
 
   for (keys %not_seen) {
     #do not show non-strain species on strain view
     if ($self->is_strain && !$species_defs->get_config($_, 'RELATED_TAXON')) {
       delete $not_seen{$_};
-      delete $not_seen{lc $_};
     }
 
     #do not show strain species on main species view
-    if (!$self->is_strain && $species_defs->get_config($_, 'IS_STRAIN_OF')) {
+    if (!$self->is_strain && $self->is_strain($_)) {
       delete $not_seen{$_};
-      delete $not_seen{lc $_};
     }
   }
 
@@ -101,16 +94,14 @@ sub content {
     foreach my $species (keys %$homology_type) {
 
       #do not show strain species on main species view
-      if ((!$self->is_strain && $species_defs->get_config($species, 'IS_STRAIN_OF')) || ($self->is_strain && !$species_defs->get_config($species, 'RELATED_TAXON'))) {
-        delete $not_seen{$species};
-        delete $not_seen{lc $species};
+      if ((!$self->is_strain && $self->is_strain($species)) || ($self->is_strain && !$species_defs->get_config($species, 'RELATED_TAXON'))) {
+        delete $not_seen{$species_defs->get_config($species, 'SPECIES_PRODUCTION_NAME')};
         next;
       }
 
       # Skip strains that belongs to a different parent species
       if($self->is_strain && $species_defs->get_config($species, 'RELATED_TAXON') ne $species_defs->RELATED_TAXON){
         delete $not_seen{$species};
-        delete $not_seen{lc $species};
         next;
       } 
 
@@ -120,7 +111,6 @@ sub content {
       }
 
       delete $not_seen{$species};
-      delete $not_seen{lc $species};
     }
   }
 

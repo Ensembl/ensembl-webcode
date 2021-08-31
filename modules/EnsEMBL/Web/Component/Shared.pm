@@ -959,15 +959,15 @@ sub check_for_missing_species {
     next if $_ eq $species;
     if ($align_details->{'class'} !~ /pairwise/
         && ($self->param(sprintf 'species_%d_%s', $align, lc) || 'off') eq 'off') {
-      push @skipped, $species_defs->production_name_mapping($_) unless ($args->{ignore} && $args->{ignore} eq 'ancestral_sequences');
+      push @skipped, $_ unless ($args->{ignore} && $args->{ignore} eq 'ancestral_sequences');
     }
     elsif (defined $slice and !$aligned_species{$_} and $_ ne 'ancestral_sequences') {
-      my $sp_prod = $hub->species_defs->production_name_mapping($_);
+      my $sp_url = $hub->species_defs->production_name_mapping($_);
 
-      my $key = ($species_info->{$sp_prod}{strain_group} && $species_info->{$sp_prod}{strain} !~ /reference/) ? 
-              $species_info->{$sp_prod}{strain_type}.'s' : 'species';
-      push @{$missing_hash->{$key}}, $species_info->{$sp_prod}{common};
-      push @missing, $species_defs->production_name_mapping($_);
+      my $key = ($species_info->{$sp_url}{strain_group} && $species_info->{$sp_url}{strain} !~ /reference/) ? 
+              $species_info->{$sp_url}{strain_type}.'s' : 'species';
+      push @{$missing_hash->{$key}}, $species_info->{$sp_url}{common};
+      push @missing, $_;
     }
   }
 

@@ -307,6 +307,8 @@ sub check_for_align_in_database {
       my $species_defs  = $hub->species_defs;
       my $db_key        = $cdb =~ /pan_ensembl/ ? 'DATABASE_COMPARA_PAN_ENSEMBL' : 'DATABASE_COMPARA';
       my $align_details = $species_defs->multi_hash->{$db_key}->{'ALIGNMENTS'}->{$align};
+      #use Data::Dumper;
+      #warn Dumper($align_details);
   
       if ($align_details) {
         unless (exists $align_details->{'species'}->{$species}) {

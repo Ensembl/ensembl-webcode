@@ -1483,7 +1483,7 @@ sub species_label {
   ###     no_formating    Boolean: omit italics from scientific name  
   my ($self, $key, $no_formatting) = @_;
 
-  my $url = ucfirst $key;
+  my $url = $self->production_name_mapping($key);
   my $display = $self->get_config($url, 'SPECIES_DISPLAY_NAME');
   my $label = '';
 

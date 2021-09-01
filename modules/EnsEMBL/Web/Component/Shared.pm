@@ -29,7 +29,7 @@ use Text::Wrap      qw(wrap);
 use List::Util      qw(first);
 use List::MoreUtils qw(uniq first_index);
 
-use EnsEMBL::Web::Utils::FormatText qw(helptip glossary_helptip get_glossary_entry);
+use EnsEMBL::Web::Utils::FormatText qw(helptip glossary_helptip get_glossary_entry pluralise);
 
 use parent qw(EnsEMBL::Web::Component);
 
@@ -964,8 +964,7 @@ sub check_for_missing_species {
     elsif (defined $slice and !$aligned_species{$_} and $_ ne 'ancestral_sequences') {
       my $sp_url = $hub->species_defs->production_name_mapping($_);
 
-      my $key = ($species_info->{$sp_url}{strain_group} && $species_info->{$sp_url}{strain} !~ /reference/) ? 
-              $species_info->{$sp_url}{strain_type}.'s' : 'species';
+      my $key = $hub->is_strain($sp_url) ? pluralise($species_info->{$sp_url}{strain_type}) : 'species';
       push @{$missing_hash->{$key}}, $species_info->{$sp_url}{common};
       push @missing, $_;
     }
@@ -1000,8 +999,8 @@ sub check_for_missing_species {
       if ($missing_hash->{strains}) {
         $count = scalar @{$missing_hash->{strains}};
         my $strain_type = $hub->species_defs->STRAIN_TYPE || 'strain';
+        $strain_type = pluralise($strain_type) if $count > 1;
         $str .= "$count $strain_type";
-        $str .= 's' if $count > 1;
       }
 
       $str .= ' and ' if ($missing_hash->{strains} && $missing_hash->{species});

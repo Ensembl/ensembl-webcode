@@ -1539,12 +1539,13 @@ sub production_name_lookup {
 
 sub production_name_mapping {
 ### As the name said, the function maps the production name with the species URL, 
-### @param production_name - species production name
+### @param key - species production name (or URL in the case of some compara code) 
 ### Return string = the corresponding species.url name which is the name web uses for URL and other code
-  my ($self, $production_name) = @_;
+  my ($self, $key) = @_;
   
   foreach ($self->valid_species) {
-    return $self->get_config($_, 'SPECIES_URL') if($self->get_config($_, 'SPECIES_PRODUCTION_NAME') eq lc($production_name));
+    return $key if $key eq $_;
+    return $self->get_config($_, 'SPECIES_URL') if ($self->get_config($_, 'SPECIES_PRODUCTION_NAME') eq $key);
   }
 }
 

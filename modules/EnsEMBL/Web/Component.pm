@@ -515,7 +515,7 @@ sub _info_panel {
 
 sub is_strain   { 
 ## TODO - remove this when all components call method on hub directly
-  my $self = shift
+  my $self = shift;
   return $self->hub->is_strain(shift);
 }
 

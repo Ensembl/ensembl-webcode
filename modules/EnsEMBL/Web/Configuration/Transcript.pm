@@ -92,12 +92,12 @@ sub populate_tree {
     { 'availability' => 'either database:variation has_variations translation', 'concise' => 'Variants' }
   ));
 
-  $prot_menu->append($self->create_node('PDB', 'PDB 3D Protein model',
+  $prot_menu->append($self->create_node('PDB', 'PDB 3D protein model',
     [qw( alignment EnsEMBL::Web::Component::Transcript::PDB )],
     { 'availability' => 'transcript translation has_pdbe','concise' => '3D Protein model (PDBe)' }
   ));
 
-  $prot_menu->append($self->create_node('AFDB', 'AFDB 3D Protein model',
+  $prot_menu->append($self->create_node('AFDB', 'AlphaFold predicted model',
     [qw( alignment EnsEMBL::Web::Component::Transcript::AFDB )],
     { 'availability' => 'transcript translation has_afdb','concise' => '3D Protein model (AFDB)' }
   ));

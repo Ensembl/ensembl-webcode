@@ -94,12 +94,12 @@ sub populate_tree {
 
   $prot_menu->append($self->create_node('PDB', 'PDB 3D protein model',
     [qw( alignment EnsEMBL::Web::Component::Transcript::PDB )],
-    { 'availability' => 'transcript translation has_pdbe','concise' => '3D Protein model (PDBe)' }
+    { 'availability' => 'transcript translation has_pdbe','concise' => 'PDB 3D protein model' }
   ));
 
   $prot_menu->append($self->create_node('AFDB', 'AlphaFold predicted model',
     [qw( alignment EnsEMBL::Web::Component::Transcript::AFDB )],
-    { 'availability' => 'transcript translation has_afdb','concise' => '3D Protein model (AFDB)' }
+    { 'availability' => 'transcript translation has_afdb','concise' => 'AlphaFold predicted model' }
   ));
  
   my $var_menu = $self->create_submenu('Variation', 'Genetic Variation');

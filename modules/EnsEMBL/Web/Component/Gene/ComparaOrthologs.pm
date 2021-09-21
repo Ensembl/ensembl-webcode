@@ -74,35 +74,31 @@ sub content {
   my %orthologue_list;
   my %skipped;
 
-  my %not_seen = $self->_get_all_analysed_species($cdb);
+  my %species_to_show = $self->_get_all_analysed_species($cdb);
+  my $this_group      = $species_defs->STRAIN_GROUP;
 
-  delete $not_seen{$hub->species_defs->SPECIES_PRODUCTION_NAME};
-
-  for (keys %not_seen) {
-    #do not show non-strain species on strain view
-    if ($self->is_strain && !$species_defs->get_config($_, 'RELATED_TAXON')) {
-      delete $not_seen{$_};
-    }
-
-    #do not show strain species on main species view
-    if (!$self->is_strain && $self->is_strain($_)) {
-      delete $not_seen{$_};
-    }
-  }
+  ## Skip current species
+  delete $species_to_show{$species_defs->SPECIES_PRODUCTION_NAME};
 
   foreach my $homology_type (@orthologues) {
     foreach my $species (keys %$homology_type) {
+      
+      my $prod_name     = $species_defs->get_config($species, 'SPECIES_PRODUCTION_NAME');
+      my $strain_group  = $species_defs->get_config($species, 'STRAIN_GROUP');
 
-      #do not show strain species on main species view
-      if ((!$self->is_strain && $self->is_strain($species)) || ($self->is_strain && !$species_defs->get_config($species, 'RELATED_TAXON'))) {
-        delete $not_seen{$species_defs->get_config($species, 'SPECIES_PRODUCTION_NAME')};
-        next;
+      ## On a strain-specific page, skip anything that doesn't belong to this group
+      if ($hub->action =~ /^Strain_/) {
+        unless ($strain_group && $strain_group eq $this_group) {
+          delete $species_to_show{$prod_name};
+          next;
+        } 
       }
-
-      # Skip strains that belongs to a different parent species
-      if($self->is_strain && $species_defs->get_config($species, 'RELATED_TAXON') ne $species_defs->RELATED_TAXON){
-        delete $not_seen{$species};
-        next;
+      else {
+        ## Do not show any strain species on main species view
+        if ($strain_group) {
+          delete $species_to_show{$prod_name};
+          next;
+        }
       } 
 
       $orthologue_list{$species} = {%{$orthologue_list{$species}||{}}, %{$homology_type->{$species}}};
@@ -110,7 +106,7 @@ sub content {
         $skipped{$species}        += keys %{$homology_type->{$species}};
       }
 
-      delete $not_seen{$species};
+      delete $species_to_show{$species};
     }
   }
 
@@ -358,14 +354,14 @@ sub content {
     );
   }   
 
-  if (%not_seen) {
+  if (%species_to_show) {
     $html .= '<br /><a name="list_no_ortho"/>' . $self->_info(
       'Species without orthologues',
       sprintf(
         '<p><span class="no_ortho_count">%d</span> species are not shown in the table above because they don\'t have any orthologue with %s.<ul id="no_ortho_species">%s</ul></p> <input type="hidden" class="panel_type" value="ComparaOrtholog" />',
-        scalar(keys %not_seen),
+        scalar(keys %species_to_show),
         $self->object->Obj->stable_id,
-        $self->get_no_ortho_species_html(\%not_seen, $sets_by_species)
+        $self->get_no_ortho_species_html(\%species_to_show, $sets_by_species)
       ),
       undef,
       'no_ortho_message_pad'
@@ -378,11 +374,11 @@ sub content {
 sub export_options { return {'action' => 'Orthologs'}; }
 
 sub get_no_ortho_species_html {
-  my ($self, $not_seen, $sets_by_species) = @_;
+  my ($self, $species_to_show, $sets_by_species) = @_;
   my $hub = $self->hub;
   my $no_ortho_species_html = '';
 
-  foreach (sort {lc $a cmp lc $b} keys %$not_seen) {
+  foreach (sort {lc $a cmp lc $b} keys %$species_to_show) {
     if ($sets_by_species->{$_}) {
       $no_ortho_species_html .= '<li class="'. join(' ', @{$sets_by_species->{$_}}) .'">'. $hub->species_defs->species_label($_) .'</li>';
     }

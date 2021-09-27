@@ -180,12 +180,20 @@ sub htdoc_dir {
   return $file;
 }
 
-#overwritten in public plugins
 sub add_caching_headers {
   my $r = shift;
-  my $thirty_days = 60 * 60 * 24 * 30;
-  $r->headers_out->set('Cache-Control'  => 'max-age=' . $thirty_days);
-  $r->headers_out->set('Expires'        => HTTP::Date::time2str(time + $thirty_days));
+  if (should_skip_caching($r)) {
+    $r->headers_out->set('Cache-Control'  => 'no-store, max-age=0');
+  } else {
+    my $thirty_days = 60 * 60 * 24 * 30;
+    $r->headers_out->set('Cache-Control'  => 'max-age=' . $thirty_days);
+    $r->headers_out->set('Expires'        => HTTP::Date::time2str(time + $thirty_days));
+  }
+}
+
+#overwritten in public plugins
+sub should_skip_caching {
+  return 0;
 }
 
 1;

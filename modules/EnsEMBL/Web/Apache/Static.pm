@@ -180,6 +180,7 @@ sub htdoc_dir {
   return $file;
 }
 
+#overwritten in public plugins
 sub add_caching_headers {
   my $r = shift;
   my $thirty_days = 60 * 60 * 24 * 30;

@@ -64,8 +64,8 @@ sub content {
   my $availability = $object->availability;
   my $is_ncrna     = ($object->Obj->biotype =~ /RNA/);
   my $species_name = $species_defs->GROUP_DISPLAY_NAME;
-  my $strain_url   = $self->is_strain ? "Strain_" : "";
-  my $strain_param = $self->is_strain ? ";strain=1" : ""; # initialize variable even if is_strain is false, to avoid warnings
+  my $strain_url   = $hub->is_strain ? "Strain_" : "";
+  my $strain_param = $hub->is_strain ? ";strain=1" : ""; # initialize variable even if is_strain is false, to avoid warnings
 
   my @orthologues = (
     $object->get_homology_matches('ENSEMBL_ORTHOLOGUES', undef, undef, $cdb), 

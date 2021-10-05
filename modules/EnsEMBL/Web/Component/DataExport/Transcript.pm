@@ -106,7 +106,7 @@ sub default_file_name {
   my $data_object = $self->hub->param('t') ? $self->hub->core_object('transcript') : undef;
   if ($data_object) {
     $name .= '_';
-    my $versioned_stable_id = $data_object->stable_id_version;
+    my $versioned_stable_id = $data_object->stable_id_version || $data_object->stable_id;
     # Replace '.' with '_' to avoid file extention clashes 
     $versioned_stable_id =~ s/\./_/g; 
     $name .= $versioned_stable_id;

@@ -26,6 +26,7 @@ use base qw(EnsEMBL::Web::Component::Gene);
 sub _init {
   my $self = shift;
   $self->cacheable(1);
+  $self->mcacheable(0);
   $self->ajaxable(1);
 }
 

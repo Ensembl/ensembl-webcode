@@ -55,7 +55,10 @@ sub find_ss_in_compara {
     my $gta = $database->get_GeneTreeAdaptor();
 
     my $member = $gma->fetch_by_stable_id($self->component->object->stable_id);
-    if ($member and $member->has_GeneTree) {
+    my $division = $self->sd_config($args,"DIVISION");
+    my $has_gene_tree = $member ? $member->has_GeneTree // $member->has_GeneTree($division) : 0;
+
+    if ($has_gene_tree) {
       my $transcript = $member->get_canonical_SeqMember();
       my $gene_tree  = $gta->fetch_default_for_Member($member);
       if ($gene_tree) {

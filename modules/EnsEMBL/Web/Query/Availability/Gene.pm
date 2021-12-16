@@ -232,13 +232,15 @@ sub get {
   my $member = $self->compara_member($args) if $out->{'database:compara'};
   my $panmember = $self->pancompara_member($args) if $out->{'database:compara_pan_ensembl'};
   my $counts = $self->_counts($args,$member,$panmember);
+  my $division = $self->sd_config($args,"DIVISION");
 
   $out->{'counts'} = $counts;
   $out->{'history'} =
     0+!!($self->table_info($args,'stable_id_event')->{'rows'});
   $out->{'gene'} = 1;
   $out->{'core'} = $args->{'type'} eq 'core';
-  $out->{'has_gene_tree'} = $member ? $member->has_GeneTree : 0;
+
+  $out->{'has_gene_tree'} = $member ? $member->has_GeneTree // $member->has_GeneTree($division) : 0;
   $out->{'can_r2r'} = $self->sd_config($args,'R2R_BIN');
   if($self->sd_config($args,'RELATED_TAXON')) { #gene tree availability check for strain
     $out->{'has_strain_gene_tree'} = $member ? $member->has_GeneTree($self->sd_config($args,'RELATED_TAXON')) : 0; #TODO: replace hardcoded species

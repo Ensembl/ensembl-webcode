@@ -148,6 +148,19 @@ sub content {
     });
  }
 
+  if($transcript->is_mane){
+    my $mane_type = $transcript->mane_transcript->type;
+    my $mane_refseq = $transcript->mane_transcript->refseq;
+    my $link = $hub->get_ExtURL('REFSEQ_DNA', {'ID' => $mane_refseq});
+    if($mane_type && $mane_refseq){
+      $self->add_entry({
+        type  => $mane_type eq 'MANE_Select' ? 'MANE Select' : 'MANE Plus Clinical',
+        label => $mane_refseq,
+        link => $link
+      });
+    }
+  }
+
   $self->add_entry({
     type  => ' ',
     label => "Exons",

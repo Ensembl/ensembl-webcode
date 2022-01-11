@@ -150,11 +150,13 @@ sub content {
 
   if($transcript->is_mane){
     my $mane_type = $transcript->mane_transcript->type;
-    my $mane_refseq = $transcript->mane_transcript->refseq;
+    my $name = $transcript->get_all_Attributes($mane_type)->[0]->name;
+    my $mane_refseq = $transcript->get_all_Attributes($mane_type)->[0]->value;
     my $link = $hub->get_ExtURL('REFSEQ_DNA', {'ID' => $mane_refseq});
+    
     if($mane_type && $mane_refseq){
       $self->add_entry({
-        type  => $mane_type eq 'MANE_Select' ? 'MANE Select' : 'MANE Plus Clinical',
+        type  => $name,
         label => $mane_refseq,
         link => $link
       });

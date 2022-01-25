@@ -141,12 +141,22 @@ sub _fixup_label {
 sub _feature_label {
   my ($self,$args,$gene,$transcript) = @_;
 
+  my $is_gene = 0;
+  if(!$transcript && $gene){
+    $is_gene = 1;
+  }
+
   $transcript ||= $gene;
+
+  use Data::Dumper;
+  warn "-------- ARGS----";
+  warn $self;
+  # warn Dumper($args);
 
 
   my $id = '';
 
-  if( $transcript->external_name && $transcript->stable_id){
+  if( $transcript->external_name && $transcript->stable_id && !$is_gene){
     $id = $transcript->external_name . " - " . $transcript->stable_id;
   } else {
     $id = $transcript->external_name || $transcript->stable_id;

@@ -148,12 +148,6 @@ sub _feature_label {
 
   $transcript ||= $gene;
 
-  use Data::Dumper;
-  warn "-------- ARGS----";
-  warn $self;
-  # warn Dumper($args);
-
-
   my $id = '';
 
   if( $transcript->external_name && $transcript->stable_id && !$is_gene){

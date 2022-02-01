@@ -149,16 +149,32 @@ sub content {
  }
 
   if($transcript->is_mane){
-    my $mane_type = $transcript->mane_transcript->type;
-    my $name = $transcript->get_all_Attributes($mane_type)->[0]->name;
-    my $mane_refseq = $transcript->get_all_Attributes($mane_type)->[0]->value;
-    my $link = $hub->get_ExtURL('REFSEQ_DNA', {'ID' => $mane_refseq});
-    
-    if($mane_type && $mane_refseq){
+
+    my $mane_select = $transcript->get_all_Attributes('MANE_Select')->[0];
+    my $mane_plus_clinical = $transcript->get_all_Attributes('MANE_Plus_Clinical')->[0];
+
+    my $refseq_id = '';
+    if($mane_select){
+      $refseq_id = $mane_select->value;
       $self->add_entry({
-        type  => $name,
-        label => $mane_refseq,
-        link => $link
+        type  => ' ',
+        label => 'MANE Select'
+      });
+    }
+
+    if($mane_plus_clinical){
+      $refseq_id = $mane_plus_clinical->value;
+      $self->add_entry({
+        type  => ' ',
+        label => 'MANE Plus Clinical'
+      });
+    }
+
+    if($refseq_id){
+      $self->add_entry({
+        type  => 'RefSeq Match',
+        label => $refseq_id,
+        link => $hub->get_ExtURL('REFSEQ_DNA', {'ID' => $refseq_id})
       });
     }
   }

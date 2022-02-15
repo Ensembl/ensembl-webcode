@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2022] EMBL-European Bioinformatics Institute
+Copyright [2016-2018] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -100,12 +100,12 @@ sub get_data {
       elsif ($activity eq 'inactive') { ## Only show one generic entry for all inactive features
         $legend_params->{'stripe'}  = $patterncolour;
         $legend_params->{'colour'}  = 'grey80';
-        $legend_params->{'legend'}  = 'Activity in epigenome: Inactive';
+        $legend_params->{'legend'}  = 'activity in epigenome: inactive';
         $activities->{'inactive'}   = $legend_params;
       }
       else {
-        my $label = 'Activity in epigenome: ';
-        $label .= $_ eq 'na' ? 'Insufficient evidence' : ucfirst($activity);
+        my $label = 'activity in epigenome: ';
+        $label .= $_ eq 'na' ? 'insufficient evidence' : $activity;
         $legend_params->{'legend'} = $label; 
         $activities->{$activity} = $legend_params;
       }
@@ -136,8 +136,8 @@ sub get_data {
       my ($extra_blocks, $flank_colour, $has_motifs) = $self->get_structure($rf, $type, $activity, $appearance);
     
       ## Extra legend items as required
-      $entries->{'promoter_flanking'} = {'legend' => 'Promoter Flank', 'colour' => $flank_colour} if $flank_colour;
-      $entries->{'x_motif'} = {'legend' => 'Motif feature', 'colour' => 'black', 'width' => 4} if $has_motifs;
+      $entries->{'promoter_flanking'} = {'legend' => 'promoter flank', 'colour' => 'ff6969'} if $flank_colour;
+      $entries->{'x_motif'} = {'legend' => 'motif feature', 'colour' => 'black', 'width' => 4} if $has_motifs;
       $feature->{extra_blocks}  = $extra_blocks;
     }
 
@@ -245,14 +245,14 @@ sub colour_key {
 
   if($type =~ /CTCF/i) {
     $type = 'ctcf';
-  } elsif($type =~ /Enhancer/i) {
-    $type = 'enhancer';
+  } elsif($type =~ /Enhancer II/i) {
+    $type = 'promoter_flanking';
   } elsif($type =~ /Open chromatin/i) {
     $type = 'open_chromatin';
-  } elsif($type =~ /TF binding site/i) {
-    $type = 'tf_binding_site';
-  } elsif($type =~ /Promoter Flanking Region/i) {
-    $type = 'promoter_flanking';
+  } elsif($type =~ /TF binding/i) {
+    $type = 'tf_binding';
+  } elsif($type =~ /Enhancer/i) {
+    $type = 'enhancer';
   } elsif($type =~ /Promoter/i) {
     $type = 'promoter';
   } else  {

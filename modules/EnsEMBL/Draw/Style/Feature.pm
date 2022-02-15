@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2022] EMBL-European Bioinformatics Institute
+Copyright [2016-2021] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ no warnings 'uninitialized';
 
 use POSIX qw(ceil);
 use List::Util qw(max);
+use List::MoreUtils qw(any);
 
 use EnsEMBL::Draw::Utils::Bump qw(mr_bump do_bump);
 
@@ -143,6 +144,19 @@ sub create_glyphs {
     #$Data::Dumper::Sortkeys = 1;
     #$Data::Dumper::Maxdepth = 2;
     #warn Dumper(\@features);
+    
+    ###################### VARS - REG FEATURES #########################
+    my @reg_features = (
+      'promoter',
+      'enhancer',
+      'open chromatin',
+      'CTCF',
+      'transcription factor binding'
+    );
+    my @reg_features_pos_values = (1, 2, 2, 3, 2);
+    my %reg_features_bump_rows;
+    @reg_features_bump_rows{@reg_features} = @reg_features_pos_values;
+    #####################################################################
 
     ## SECOND LOOP - draw features row by row
     my $count = 0;
@@ -153,7 +167,8 @@ sub create_glyphs {
         my $label_row   = 0;
         ## Work out if we're bumping the whole feature or just the label
         if ($bumped) {
-          my $bump = $track_config->get('flip_vertical') ? $bump_rows - $feature->{'_bump'} : $feature->{'_bump'};
+          #my $bump = $track_config->get('flip_vertical') ? $bump_rows - $feature->{'_bump'} : $feature->{'_bump'};
+          my $bump = $reg_features_bump_rows{$feature->{'label'}} if any {$_ eq $feature->{'label'}} @reg_features;
           $label_row   = $bump unless $bumped eq 'features_only';
           $feature_row = $bump unless $bumped eq 'labels_only';       
         }

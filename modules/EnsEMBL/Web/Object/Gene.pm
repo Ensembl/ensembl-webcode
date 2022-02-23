@@ -819,7 +819,7 @@ sub fetch_homology_species_hash {
 
     ## In case of data bugs, make sure this is a genuine node
     my $species_tree_node = eval { $homology->species_tree_node(); };
-    my $species_url = $name_lookup->{$genome_db_name};
+    my $species_url = $name_lookup->{$genome_db_name} || $genome_db_name;
 
     if ($species_tree_node) {
       push @{$homologues{$species_url}}, [ $target_member, $homology->description, $species_tree_node, $query_perc_id, $target_perc_id, $dnds_ratio, $homology->{_gene_tree_node_id}, $homology->dbID, $goc_score, $goc_threshold, $wgac, $wga_threshold, $highconfidence ];    

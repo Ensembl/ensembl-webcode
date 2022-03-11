@@ -33,10 +33,6 @@ sub _init {
   $self->ajaxable(1);
 }
 
-## Stub - implement in plugin if you want to display a summary table
-## (see public-plugins/ensembl for an example data structure)
-sub _species_sets {}
-
 our %button_set = ('download' => 1, 'view' => 0);
 
 sub content {
@@ -127,12 +123,11 @@ sub content {
     }
   }
 
+  ##--------------------------- SUMMARY TABLE ----------------------------------------
+
   my %orthologue_map = qw(SEED BRH PIP RHS);
   my $alignview      = 0;
- 
   my ($html, $columns, @rows);
-
-  ##--------------------------- SUMMARY TABLE ----------------------------------------
 
   my ($species_sets, $sets_by_species, $set_order) = $self->_species_sets(\%orthologue_list, \%orthologue_map, $cdb);
 
@@ -410,6 +405,22 @@ sub content {
 }
 
 sub export_options { return {'action' => 'Orthologs'}; }
+
+sub _species_sets {
+## Group species into set
+  my ($self, $orthologue_list, $orthologue_map, $cdb) = @_;
+  my $hub             = $self->hub;
+  my $species_defs    = $hub->species_defs;
+
+  return "" if $self->hub->action =~ /^Strain/; #No summary table needed for strains
+
+  my $lookup          = {};
+  my $compara_spp     = {};
+  my $sets_by_species = {};
+  my $set_order       = [];
+  my $is_pan          = $cdb =~/compara_pan_ensembl/;
+
+}
 
 sub get_strain_refs_html {
   my ($self, $strain_refs, $species_not_shown) = @_;

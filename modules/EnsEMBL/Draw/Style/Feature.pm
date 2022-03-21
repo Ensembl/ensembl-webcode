@@ -167,8 +167,8 @@ sub create_glyphs {
         my $label_row   = 0;
         ## Work out if we're bumping the whole feature or just the label
         if ($bumped) {
-          #my $bump = $track_config->get('flip_vertical') ? $bump_rows - $feature->{'_bump'} : $feature->{'_bump'};
-          my $bump = $reg_features_bump_rows{$feature->{'label'}} if any {$_ eq $feature->{'label'}} @reg_features;
+          my $bump = $track_config->get('flip_vertical') ? $bump_rows - $feature->{'_bump'} : $feature->{'_bump'};
+          $bump = $reg_features_bump_rows{$feature->{'label'}} if any {$_ eq $feature->{'label'}} @reg_features;
           $label_row   = $bump unless $bumped eq 'features_only';
           $feature_row = $bump unless $bumped eq 'labels_only';       
         }

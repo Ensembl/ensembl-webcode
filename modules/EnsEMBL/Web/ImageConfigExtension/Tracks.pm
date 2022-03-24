@@ -492,7 +492,7 @@ sub add_genes {
   }
   
   # Adding MANE tracks (Only for Humans)
-  if( $self->species eq 'Homo_sapiens'){
+  if($self->hub->species_defs->SEPARATE_MANE_TRACKS){
     
     # Adding MANE Select track
     $self->add_track('transcript', 'mane_select', "MANE Select Transcripts", '_mane_select', {

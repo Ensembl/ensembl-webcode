@@ -22,14 +22,11 @@ package EnsEMBL::Draw::GlyphSet::_mane_select;
 ### Module for drawing the MANE Select track inheriting from _transcript.pm.
 
 use strict;
-use Carp qw(cluck);
-use List::Util qw(min max);
 
 use base qw(EnsEMBL::Draw::GlyphSet::_transcript);
 
 sub max_label_rows { return $_[0]->my_config('max_label_rows') || 2; }
 
-sub only_attrib { 
-    return 'MANE_Select'; }
+sub only_attrib { return 'MANE_Select'; }
 
 1;

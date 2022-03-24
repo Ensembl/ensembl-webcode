@@ -22,14 +22,11 @@ package EnsEMBL::Draw::GlyphSet::_mane_plus_clinical;
 ### Module for drawing the MANE Plus Clinical track inheriting from _transcript.pm.
 
 use strict;
-use Carp qw(cluck);
-use List::Util qw(min max);
 
 use base qw(EnsEMBL::Draw::GlyphSet::_transcript);
 
 sub max_label_rows { return $_[0]->my_config('max_label_rows') || 2; }
 
-sub only_attrib { 
-    return 'MANE_Plus_Clinical'; }
+sub only_attrib { return 'MANE_Plus_Clinical'; }
 
 1;

@@ -72,17 +72,16 @@ sub get_data {
   my $activities      = $self->{'legend'}{'fg_regulatory_features_legend'}{'activities'} || {};
   
   ## We need to sort features into 3 rows (subtracks) by type
+  my $subtracks = [];
   my $metadata = {
                   force_strand => '-1',
                   default_strand => 1,
                   omit_feature_links => 1,
                   display => 'normal'
                 };
-  my $subtracks = [
-                    {'features' => [], 'metadata' => $metadata},
-                    {'features' => [], 'metadata' => $metadata},
-                    {'features' => [], 'metadata' => $metadata},
-                  ];
+  for (0..2) {
+    push @$subtracks, {'features' => [], 'metadata' => $metadata};
+  }
   my $row_lookup = {
                     'promoter' => 0,
                     'enhancer' => 1,

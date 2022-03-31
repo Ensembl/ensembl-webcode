@@ -68,9 +68,29 @@ sub get_data {
   }
   my $reg_feats = $rfa->fetch_all_by_Slice($self->{'container'}); 
 
-  my $drawable        = []; 
   my $entries         = $self->{'legend'}{'fg_regulatory_features_legend'}{'entries'} || {};
   my $activities      = $self->{'legend'}{'fg_regulatory_features_legend'}{'activities'} || {};
+  
+  ## We need to sort features into 3 rows (subtracks) by type
+  my $metadata = {
+                  force_strand => '-1',
+                  default_strand => 1,
+                  omit_feature_links => 1,
+                  display => 'normal'
+                };
+  my $subtracks = [
+                    {'features' => [], 'metadata' => $metadata},
+                    {'features' => [], 'metadata' => $metadata},
+                    {'features' => [], 'metadata' => $metadata},
+                  ];
+  my $row_lookup = {
+                    'promoter' => 0,
+                    'enhancer' => 1,
+                    'open_chromatin' => 1,
+                    'tf_binding' => 1,
+                    'ctcf' => 2,
+                    }; 
+
   foreach my $rf (@{$reg_feats||[]}) {
     my ($type, $activity)  = $self->colour_key($rf);
 
@@ -142,7 +162,8 @@ sub get_data {
     }
 
     ## OK, done
-    push @$drawable, $feature;
+    my $row = $row_lookup->{$type};
+    push @{$subtracks->[$row]{'features'}}, $feature;
   }
 
 
@@ -151,16 +172,7 @@ sub get_data {
   $self->{'legend'}{'fg_regulatory_features_legend'}{'entries'}     = $entries;
   $self->{'legend'}{'fg_regulatory_features_legend'}{'activities'}  = $activities;
 
-  #use Data::Dumper; warn Dumper($drawable);
-  return [{
-    features => $drawable,
-    metadata => {
-      force_strand => '-1',
-      default_strand => 1,
-      omit_feature_links => 1,
-      display => 'normal'
-    }
-  }];
+  return $subtracks;
 }
 
 sub features {

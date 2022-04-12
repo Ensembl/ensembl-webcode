@@ -23,7 +23,7 @@ use strict;
 use warnings;
 no warnings 'uninitialized';
 
-use base qw(EnsEMBL::Web::Component::Transcript);
+use base qw(EnsEMBL::Web::Component::Transcript EnsEMBL::Web::Component::Summary);
 
 sub _init {
   my $self = shift;

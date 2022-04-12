@@ -25,7 +25,7 @@ no warnings 'uninitialized';
 
 use HTML::Entities qw(encode_entities);
 
-use parent qw(EnsEMBL::Web::Component::Gene);
+use parent qw(EnsEMBL::Web::Component::Summary);
 
 sub _init {
   my $self = shift;

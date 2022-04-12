@@ -31,62 +31,6 @@ use EnsEMBL::Web::Utils::FormatText qw(glossary_helptip pluralise);
 
 use parent qw(EnsEMBL::Web::Component);
 
-sub _add_gene_counts {
-  my ($self,$genome_container,$sd,$cols,$options,$tail,$our_type) = @_;
-
-  my @order           = qw(coding_cnt noncoding_cnt noncoding_cnt/s noncoding_cnt/l noncoding_cnt/m pseudogene_cnt transcript);
-  my @suffixes        = (['','~'], ['r',' (incl ~ '.glossary_helptip($self->hub, 'readthrough', 'Readthrough').')']);
-  my $glossary_lookup = {
-    'coding_cnt'        => 'Protein coding',
-    'noncoding_cnt/s'   => 'Small non coding gene',
-    'noncoding_cnt/l'   => 'Long non coding gene',
-    'pseudogene_cnt'    => 'Pseudogene',
-    'transcript'        => 'Transcript',
-  };
-
-  my @data;
-  foreach my $statistic (@{$genome_container->fetch_all_statistics()}) {
-    my ($name,$inner,$type) = ($statistic->statistic,'','');
-    if($name =~ s/^(.*?)_(r?)(a?)cnt(_(.*))?$/$1_cnt/) {
-      ($inner,$type) = ($2,$3);
-      $name .= "/$5" if $5;
-    }
-
-    # Check if current statistic is alt_transcript and our_type is a (alternative sequence).
-    # If yes, make type to be a so that the loop won't go to next early.
-    # Also, push alt_transcript to order so that the statistic will be included in the table.
-    if ($name eq 'alt_transcript' && $our_type eq 'a') {
-      $type = 'a';
-      push @order, 'alt_transcript';
-    }
-
-    next unless $type eq $our_type;
-    my $i = first_index { $name eq $_ } @order;
-    next if $i == -1;
-    ($data[$i]||={})->{$inner} = $self->thousandify($statistic->value);
-    $data[$i]->{'_key'} = $name;
-    $data[$i]->{'_name'} = $statistic->name if $inner eq '';
-    $data[$i]->{'_sub'} = ($name =~ m!/!);
-  }
-
-  my $counts = $self->new_table($cols, [], $options);
-  foreach my $d (@data) {
-    my $value = '';
-    foreach my $s (@suffixes) {
-      next unless $d->{$s->[0]};
-      $value .= $s->[1];
-      $value =~ s/~/$d->{$s->[0]}/g;
-    }
-    next unless $value;
-    my $class = '';
-    $class = 'row-sub' if $d->{'_sub'};
-    my $key = $d->{'_name'};
-    $key = glossary_helptip($self->hub, "<b>$d->{'_name'}</b>", $glossary_lookup->{$d->{'_key'}});
-    $counts->add_row({ name => $key, stat => $value, options => { class => $class }});
-  } 
-  return "<h3>Gene counts$tail</h3>".$counts->render;
-}
-  
 sub species_stats {
   my $self = shift;
   my $sd = $self->hub->species_defs;
@@ -162,7 +106,8 @@ sub species_stats {
     }
   }
 
-  my $method = $self->_format_genebuild_method($meta_container);
+  my $method  = ucfirst($sd->GENEBUILD_METHOD) || '';
+  $method     =~ s/_/ /g;
   $summary->add_row({
       'name' => '<b>Annotation method</b>',
       'stat' => $method
@@ -240,16 +185,62 @@ sub species_stats {
   return $html;
 }
 
-sub _format_genebuild_method {
-  my ($self, $meta_container) = @_;
+sub _add_gene_counts {
+  my ($self,$genome_container,$sd,$cols,$options,$tail,$our_type) = @_;
 
-  my @A       = @{$meta_container->list_value_by_key('genebuild.method')};
-  my $method  = ucfirst($A[0]) || '';
-  $method     =~ s/_/ /g;
+  my @order           = qw(coding_cnt noncoding_cnt noncoding_cnt/s noncoding_cnt/l noncoding_cnt/m pseudogene_cnt transcript);
+  my @suffixes        = (['','~'], ['r',' (incl ~ '.glossary_helptip($self->hub, 'readthrough', 'Readthrough').')']);
+  my $glossary_lookup = {
+    'coding_cnt'        => 'Protein coding',
+    'noncoding_cnt/s'   => 'Small non coding gene',
+    'noncoding_cnt/l'   => 'Long non coding gene',
+    'pseudogene_cnt'    => 'Pseudogene',
+    'transcript'        => 'Transcript',
+  };
 
-  return $method;
+  my @data;
+  foreach my $statistic (@{$genome_container->fetch_all_statistics()}) {
+    my ($name,$inner,$type) = ($statistic->statistic,'','');
+    if($name =~ s/^(.*?)_(r?)(a?)cnt(_(.*))?$/$1_cnt/) {
+      ($inner,$type) = ($2,$3);
+      $name .= "/$5" if $5;
+    }
+
+    # Check if current statistic is alt_transcript and our_type is a (alternative sequence).
+    # If yes, make type to be a so that the loop won't go to next early.
+    # Also, push alt_transcript to order so that the statistic will be included in the table.
+    if ($name eq 'alt_transcript' && $our_type eq 'a') {
+      $type = 'a';
+      push @order, 'alt_transcript';
+    }
+
+    next unless $type eq $our_type;
+    my $i = first_index { $name eq $_ } @order;
+    next if $i == -1;
+    ($data[$i]||={})->{$inner} = $self->thousandify($statistic->value);
+    $data[$i]->{'_key'} = $name;
+    $data[$i]->{'_name'} = $statistic->name if $inner eq '';
+    $data[$i]->{'_sub'} = ($name =~ m!/!);
+  }
+
+  my $counts = $self->new_table($cols, [], $options);
+  foreach my $d (@data) {
+    my $value = '';
+    foreach my $s (@suffixes) {
+      next unless $d->{$s->[0]};
+      $value .= $s->[1];
+      $value =~ s/~/$d->{$s->[0]}/g;
+    }
+    next unless $value;
+    my $class = '';
+    $class = 'row-sub' if $d->{'_sub'};
+    my $key = $d->{'_name'};
+    $key = glossary_helptip($self->hub, "<b>$d->{'_name'}</b>", $glossary_lookup->{$d->{'_key'}});
+    $counts->add_row({ name => $key, stat => $value, options => { class => $class }});
+  } 
+  return "<h3>Gene counts$tail</h3>".$counts->render;
 }
-
+  
 ########### COMPARA #################################
 
 sub content_pan_compara {
@@ -280,123 +271,6 @@ sub content_ensembl_pan_compara {
 sub content_other_pan_compara {
   my $self = shift;
   return $self->content_other('compara_pan_ensembl');
-}
-
-sub check_for_align_problems {
-  ## Compile possible error messages for a given alignment
-  ## @return HTML
-  my ($self, $args) = @_;
-  my $object = $self->object || $self->hub->core_object(lc($self->hub->param('data_type')));
-
-  my @messages = $object->check_for_align_in_database($args->{align}, $args->{species}, $args->{cdb});
-
-  if (scalar @messages <= 0) {
-    push @messages, $self->check_for_missing_species($args);
-  }
-
-  return $self->show_warnings(\@messages);
-}
-
-sub check_for_missing_species {
-  ## Check what species are not present in the alignment
-  my ($self, $args) = @_;
-
-  my (@skipped, @missing, $title, $warnings, %aligned_species, $missing_hash);
-
-  my $hub           = $self->hub;
-  my $species_defs  = $hub->species_defs;
-  my $species       = $args->{species};
-  my $align         = $args->{align};
-  my $db_key        = $args->{cdb} =~ /pan_ensembl/ ? 'DATABASE_COMPARA_PAN_ENSEMBL' : 'DATABASE_COMPARA';
-  my $align_details = $species_defs->multi_hash->{$db_key}->{'ALIGNMENTS'}->{$align};
-  my $species_info  = $hub->get_species_info;
-  my $url_lookup    = $species_defs->prodnames_to_urls_lookup;
-  my $slice         = $args->{slice} || $self->object->slice;
-  $slice = undef if $slice == 1; # weirdly, we get 1 if feature_Slice is missing
-
-  if(defined $slice) {
-    $args->{slice}   = $slice;
-    my ($slices)     = $self->object->get_slices($args);
-    %aligned_species = map { $_->{'name'} => 1 } @$slices;
-  }
-
-  foreach (keys %{$align_details->{'species'}}) {
-    next if $_ eq $species;
-    my $sp_url = $url_lookup->{$_};
-    if ($align_details->{'class'} !~ /pairwise/
-        && ($self->param(sprintf 'species_%d_%s', $align, lc) || 'off') eq 'off') {
-      push @skipped, $sp_url unless ($args->{ignore} && $args->{ignore} eq 'ancestral_sequences');
-    }
-    elsif (defined $slice and !$aligned_species{$_} and $_ ne 'ancestral_sequences') {
-      my $key = $hub->is_strain($sp_url) ? pluralise($species_info->{$sp_url}{strain_type}) : 'species';
-      push @{$missing_hash->{$key}}, $species_info->{$sp_url}{common};
-      push @missing, $sp_url;
-    }
-  }
-
-  if (scalar @skipped) {
-    $title = 'hidden';
-    $warnings .= sprintf(
-                             '<p>The following %d species in the alignment are not shown. Use "<strong>Select another alignment</strong>" button (above the image) to turn alignments on/off.<ul><li>%s</li></ul></p>',
-                             scalar @skipped,
-                             join "</li>\n<li>", sort map $species_defs->species_label($_), @skipped
-                            );
-  }
-
-  if (scalar @skipped && scalar @missing) {
-    $title .= ' and ';
-  }
-
-  my $not_missing = scalar(keys %{$align_details->{'species'}}) - scalar(@missing);
-  my $ancestral = grep {$_ =~ /ancestral/} keys %{$align_details->{'species'}};
-  my $multi_check = $ancestral ? 2 : 1;
-  if (scalar @missing) {
-    $title .= ' missing species';
-    if ($align_details->{'class'} =~ /pairwise/) {
-      $warnings .= sprintf '<p>%s has no alignment in this region</p>', $species_defs->species_label($missing[0]);
-    } elsif ($not_missing == $multi_check) {
-      $warnings .= sprintf('<p>None of the other species in this set align to %s in this region</p>', $species_defs->SPECIES_DISPLAY_NAME);
-    } else {
-      my $str = '';
-      my $count = 0;
-
-      if ($missing_hash->{strains}) {
-        $count = scalar @{$missing_hash->{strains}};
-        my $strain_type = $hub->species_defs->STRAIN_TYPE || 'strain';
-        $strain_type = pluralise($strain_type) if $count > 1;
-        $str .= "$count $strain_type";
-      }
-
-      $str .= ' and ' if ($missing_hash->{strains} && $missing_hash->{species});
-      
-      if ($missing_hash->{species}) {
-        my $sp_count = @{$missing_hash->{species}};
-        $str .= "$sp_count species";
-        $count += $sp_count;
-      }
-
-      $str .= $count > 1 ? ' have' : ' has';
-
-      $warnings .= sprintf('<p>The following %s no alignment in this region:<ul><li>%s</li></ul></p>',
-                                 $str,
-                                 join "</li>\n<li>", sort map $species_defs->species_label($_), @missing
-                            );
-    }
-  }
-  return $warnings ? ({'severity' => 'info', 'title' => $title, 'message' => $warnings}) : ();
-}
-
-sub show_warnings {
-  my ($self, $messages) = @_;
-  return '' unless defined $messages;
-
-  my $html;
-  my $is_error;
-  foreach (@$messages) {
-    $html .= $self->_info_panel($_->{severity}, ucfirst $_->{title}, $_->{message});
-    $is_error = 1 if $_->{severity} eq 'error';
-  }
-  return ($html, $is_error);
 }
 
 sub get_matches { ## TODO - tidy this

@@ -33,6 +33,21 @@ sub non_coding_error {
   return $self->_error('No protein product', '<p>This transcript does not have a protein product</p>');
 }
 
+sub render_evidence_status {
+  my $self      = shift;
+  my $evidences = shift;
+
+  my $render;
+  foreach my $evidence (sort {$b =~ /1000|hap/i <=> $a =~ /1000|hap/i || $a cmp $b} @$evidences){
+    my $evidence_label = $evidence;
+       $evidence_label =~ s/_/ /g;
+    $render .= sprintf('<img src="%s/val/evidence_%s.png" class="_ht" title="%s"/><div class="hidden export">%s</div>',
+                        $self->img_url, $evidence, $evidence_label, $evidence
+                      );
+  }
+  return $render;
+}
+
 sub get_export_data {
 ## Get data for export
   my $self = shift;

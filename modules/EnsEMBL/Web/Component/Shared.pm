@@ -241,38 +241,6 @@ sub _add_gene_counts {
   return "<h3>Gene counts$tail</h3>".$counts->render;
 }
   
-########### COMPARA #################################
-
-sub content_pan_compara {
-  my $self = shift;
-  return $self->content('compara_pan_ensembl');
-}
-
-sub content_text_pan_compara {
-  my $self = shift;
-  return $self->content_text('compara_pan_ensembl');
-}
-
-sub content_align_pan_compara {
-  my $self = shift;
-  return $self->content_align('compara_pan_ensembl');
-}
-
-sub content_alignment_pan_compara {
-  my $self = shift;
-  return $self->content('compara_pan_ensembl');
-}
-
-sub content_ensembl_pan_compara {
-  my $self = shift;
-  return $self->content_ensembl('compara_pan_ensembl');
-}
-
-sub content_other_pan_compara {
-  my $self = shift;
-  return $self->content_other('compara_pan_ensembl');
-}
-
 sub get_matches { ## TODO - tidy this
   my ($self, $key, $caption, @keys) = @_;
   my $output_as_twocol  = $keys[-1] eq 'RenderAsTwoCol';

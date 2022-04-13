@@ -59,7 +59,7 @@ sub summary {
   my $description = $self->get_description;
   $two_col->add_row('Description', $description) if $description;
   
-  my $synonyms    = $self->get_synonyms($gene);
+  my $synonyms = $self->get_synonym_html($gene);
   $two_col->add_row('Gene Synonyms', $synonyms) if $synonyms;
 
   my $location_html = $self->get_location_html($page_type);
@@ -103,7 +103,7 @@ sub get_description {
   return $description;
 } 
 
-sub get_synonyms {
+sub get_synonym_html {
   my ($self, $gene) = @_;
   my $object = $self->object;
 

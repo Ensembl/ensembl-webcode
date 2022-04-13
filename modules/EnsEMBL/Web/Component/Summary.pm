@@ -354,20 +354,31 @@ sub transcript_table {
       $protein_length = $translation->length;
     }
 
-    
-    my $dblinks = $_->get_all_DBLinks;
-    if (my @CCDS = grep { $_->dbname eq 'CCDS' } @$dblinks) { 
-      my %T = map { $_->primary_id => 1 } @CCDS;
-      @CCDS = sort keys %T;
-      $ccds = join ', ', map $hub->get_ExtURL_link($_, 'CCDS', $_), @CCDS;
+    my ($ccds_string, $dblinks);
+
+    if ($has_ccds) {
+      $dblinks = $_->get_all_DBLinks;
+      if (my @CCDS = grep { $_->dbname eq 'CCDS' } @$dblinks) { 
+        my %T = map { $_->primary_id => 1 } @CCDS;
+        @CCDS = sort keys %T;
+        $ccds = join ', ', map $hub->get_ExtURL_link($_, 'CCDS', $_), @CCDS;
+      }
     }
 
     foreach my $k (keys %extra_links) {
-        
-      my @links = grep {$_->status ne 'PRED' } grep { $_->dbname =~ /$extra_links{$k}->{'first_match'}/i } @$dblinks;
 
-      if(!@links && $extra_links{$k}->{'second_match'}){
-        @links = grep {$_->status ne 'PRED' } grep { $_->dbname =~ /$extra_links{$k}->{'second_match'}/i } @$dblinks;
+      my @links;
+      if ($extra_links{$k}->{'match'}) { 
+        ## Non-vertebrates - use API to filter db links, as faster
+        @links = grep {$_->status ne 'PRED' } @{ $_->get_all_DBLinks($extra_links{$k}->{'match'}) }
+      }
+      else {
+        $dblinks = $_->get_all_DBLinks unless scalar @$dblinks; ## Get links for non-CCDS species
+        @links = grep {$_->status ne 'PRED' } grep { $_->dbname =~ /$extra_links{$k}->{'first_match'}/i } @$dblinks;
+        ## Try second match
+        if(!@links && $extra_links{$k}->{'second_match'}){
+          @links = grep {$_->status ne 'PRED' } grep { $_->dbname =~ /$extra_links{$k}->{'second_match'}/i } @$dblinks;
+        }
       }
 
       if(@links) {
@@ -508,7 +519,7 @@ sub get_extra_links {
       order => 0,
       title => get_glossary_entry($hub, 'UniProt Match')
     },
-  );
+  };
 
   if ($hub->species eq 'Homo_sapiens' && $sub_type eq 'GRCh37' ) {
     $extra_links->{refseq} = { first_match => "^RefSeq", name => "RefSeq", order => 1, title => "RefSeq transcripts with sequence similarity and genomic overlap"};

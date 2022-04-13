@@ -276,7 +276,7 @@ sub transcript_table {
        { key => 'translation',sort => 'html',    label => 'Translation ID', title => 'Protein information', 'hidden' => 1, class => '_ht'},
        { key => 'biotype',    sort => 'html',    label => 'Biotype', title => encode_entities('<a href="/info/genome/genebuild/biotypes.html" target="_blank">Transcript biotype</a>'), align => 'left', class => '_ht'},
   );
-  my $has_ccds = $hub->species eq 'Homo_sapiens' || $hub->species eq 'Mus_musculus';
+  my $has_ccds = $hub->species eq 'Homo_sapiens' || $hub->species =~ /^Mus_musculus/;
   push @columns, { key => 'ccds', sort => 'html', label => 'CCDS', class => '_ht' } if $has_ccds;
 
   my @rows;

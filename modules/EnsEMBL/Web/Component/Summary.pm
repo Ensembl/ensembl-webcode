@@ -81,7 +81,6 @@ sub get_description {
     my ($url, $xref) = $self->get_gene_display_link($object->gene, $description);
 
     if ($xref) {
-      $xref        = $xref->primary_id;
       $description =~ s|$xref|<a href="$url" class="constant">$xref</a>|;
     }
   }
@@ -324,21 +323,8 @@ sub transcript_table {
       type   => 'Transcript',
       action => $page_type eq 'gene' ? 'Summary' : $action,
   );
-    
-  my %extra_links = (
-    uniprot => { 
-      first_match => "Uniprot_isoform", 
-      second_match => "^UniProt/[SWISSPROT|SPTREMBL]", 
-      name => "UniProt Match", 
-      order => 0,
-      title => get_glossary_entry($hub, 'UniProt Match')
-    },
-  );
-
-  if ($hub->species eq 'Homo_sapiens' && $sub_type eq 'GRCh37' ) {
-    $extra_links{refseq} = { first_match => "^RefSeq", name => "RefSeq", order => 1, title => "RefSeq transcripts with sequence similarity and genomic overlap"};
-  }
-
+   
+  my %extra_links = %{$self->get_extra_links}; 
   my %any_extras;
   foreach (@$transcripts) {
     my $transcript_length = $_->length;
@@ -368,6 +354,7 @@ sub transcript_table {
       $protein_length = $translation->length;
     }
 
+    
     my $dblinks = $_->get_all_DBLinks;
     if (my @CCDS = grep { $_->dbname eq 'CCDS' } @$dblinks) { 
       my %T = map { $_->primary_id => 1 } @CCDS;
@@ -507,6 +494,27 @@ sub colour_biotype {
   my $hex     = $self->hub->colourmap->hex_by_name($colour);
 
   return $self->coltab($text, $hex, $title);
+}
+
+sub get_extra_links {
+  my ($self, $sub_type) = @_; 
+  my $hub  = $self->hub;
+
+  my $extra_links = {
+    uniprot => { 
+      first_match => "Uniprot_isoform", 
+      second_match => "^UniProt/[SWISSPROT|SPTREMBL]", 
+      name => "UniProt Match", 
+      order => 0,
+      title => get_glossary_entry($hub, 'UniProt Match')
+    },
+  );
+
+  if ($hub->species eq 'Homo_sapiens' && $sub_type eq 'GRCh37' ) {
+    $extra_links->{refseq} = { first_match => "^RefSeq", name => "RefSeq", order => 1, title => "RefSeq transcripts with sequence similarity and genomic overlap"};
+  }
+
+  return $extra_links;
 }
 
 sub get_CDS_text {
@@ -681,7 +689,7 @@ sub get_gene_display_link {
 
   my $url = $hub->get_ExtURL($xref->dbname, $xref->primary_id);
 
-  return $url ? ($url, $xref) : ();
+  return $url ? ($url, $xref->primary_id) : ();
 }
 
 sub get_synonyms {

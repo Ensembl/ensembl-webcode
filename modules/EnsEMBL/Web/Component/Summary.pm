@@ -59,7 +59,7 @@ sub summary {
   my $about_count = $gene ? $self->about_feature : 0; 
   $two_col->add_row( $page_type eq 'gene' ? 'About this gene' : 'About this transcript', $about_count) if $about_count;
 
-  ## Gene info with button to toggle table (below)
+  ## Add button to toggle table (below)
   my $show        = $hub->get_cookie_value('toggle_transcripts_table') eq 'open';
   my $button_html = $self->get_button_html($gene, $page_type, $show);
   $two_col->add_row($page_type eq 'gene' ? 'Transcripts' : 'Gene', $button_html) if $button_html;
@@ -278,7 +278,6 @@ sub transcript_table {
   );
   my $has_ccds = $hub->species eq 'Homo_sapiens' || $hub->species eq 'Mus_musculus';
   push @columns, { key => 'ccds', sort => 'html', label => 'CCDS', class => '_ht' } if $has_ccds;
-  $table->add_columns(@columns);
 
   my @rows;
 
@@ -490,6 +489,8 @@ sub transcript_table {
   # Add rows to transcript table
   push @rows, @{$biotype_rows{$_}} for sort keys %biotype_rows; 
     
+  ## Add everything to the table
+  $table->add_columns(@columns);
   $table->add_rows(@rows);
   return $table;
 }

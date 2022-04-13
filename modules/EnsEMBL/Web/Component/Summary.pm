@@ -31,20 +31,6 @@ use EnsEMBL::Web::Utils::FormatText qw(helptip get_glossary_entry);
 
 use parent qw(EnsEMBL::Web::Component);
 
-sub colour_biotype {
-  my ($self, $text, $transcript, $title) = @_;
-
-  $title ||= get_glossary_entry($self->hub, $text);
-
-  my $colours = $self->hub->species_defs->colour('gene');
-  my $key     = $transcript->biotype;
-     $key     = 'merged' if $transcript->analysis->logic_name =~ /ensembl_havana/;
-  my $colour  = ($colours->{lc($key)} || {})->{'default'};
-  my $hex     = $self->hub->colourmap->hex_by_name($colour);
-
-  return $self->coltab($text, $hex, $title);
-}
-
 sub summary {
   my ($self, $page_type) = @_;
 
@@ -506,6 +492,20 @@ sub transcript_table {
     
   $table->add_rows(@rows);
   return $table;
+}
+
+sub colour_biotype {
+  my ($self, $text, $transcript, $title) = @_;
+
+  $title ||= get_glossary_entry($self->hub, $text);
+
+  my $colours = $self->hub->species_defs->colour('gene');
+  my $key     = $transcript->biotype;
+     $key     = 'merged' if $transcript->analysis->logic_name =~ /ensembl_havana/;
+  my $colour  = ($colours->{lc($key)} || {})->{'default'};
+  my $hex     = $self->hub->colourmap->hex_by_name($colour);
+
+  return $self->coltab($text, $hex, $title);
 }
 
 sub get_CDS_text {

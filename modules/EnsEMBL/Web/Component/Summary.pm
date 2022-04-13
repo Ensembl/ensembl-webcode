@@ -267,16 +267,8 @@ sub transcript_table {
       exportable        => 1
   });
 
-  my @columns = (
-       { key => 'transcript', sort => 'html',    label => 'Transcript ID', title => 'Stable ID', class => '_ht'},
-       { key => 'name',       sort => 'string',  label => 'Name', title => 'Transcript name', class => '_ht'},
-       { key => 'bp_length',  sort => 'numeric', label => 'bp', title => 'Transcript length in base pairs', class => '_ht'},
-       { key => 'protein',sort => 'html_numeric',label => 'Protein', title => 'Protein length in amino acids', class => '_ht'},
-       { key => 'translation',sort => 'html',    label => 'Translation ID', title => 'Protein information', 'hidden' => 1, class => '_ht'},
-       { key => 'biotype',    sort => 'html',    label => 'Biotype', title => encode_entities('<a href="/info/genome/genebuild/biotypes.html" target="_blank">Transcript biotype</a>'), align => 'left', class => '_ht'},
-  );
   my $has_ccds = $hub->species eq 'Homo_sapiens' || $hub->species =~ /^Mus_musculus/;
-  push @columns, { key => 'ccds', sort => 'html', label => 'CCDS', class => '_ht' } if $has_ccds;
+  my @columns = $self->set_columns($has_ccds);
 
   my @rows;
 
@@ -491,6 +483,22 @@ sub transcript_table {
   $table->add_columns(@columns);
   $table->add_rows(@rows);
   return $table;
+}
+
+sub set_columns {
+  my ($self, $has_ccds) = @_;
+
+  my @columns = (
+       { key => 'transcript', sort => 'html',    label => 'Transcript ID', title => 'Stable ID', class => '_ht'},
+       { key => 'name',       sort => 'string',  label => 'Name', title => 'Transcript name', class => '_ht'},
+       { key => 'bp_length',  sort => 'numeric', label => 'bp', title => 'Transcript length in base pairs', class => '_ht'},
+       { key => 'protein',sort => 'html_numeric',label => 'Protein', title => 'Protein length in amino acids', class => '_ht'},
+       { key => 'translation',sort => 'html',    label => 'Translation ID', title => 'Protein information', 'hidden' => 1, class => '_ht'},
+       { key => 'biotype',    sort => 'html',    label => 'Biotype', title => encode_entities('<a href="/info/genome/genebuild/biotypes.html" target="_blank">Transcript biotype</a>'), align => 'left', class => '_ht'},
+  );
+  push @columns, { key => 'ccds', sort => 'html', label => 'CCDS', class => '_ht' } if $has_ccds;
+
+  return @columns;
 }
 
 sub colour_biotype {

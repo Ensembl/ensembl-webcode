@@ -58,7 +58,8 @@ sub content {
     $html .= $self->_hint($hints[2],$hints[0],$hints[1]);
   }
   
-  $html .= $self->transcript_table;
+  ## Summary content used by both genes and transcripts
+  $html .= $self->summary('gene');
 
   return $html;
 }

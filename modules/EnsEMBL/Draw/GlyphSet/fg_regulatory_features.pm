@@ -155,7 +155,7 @@ sub get_data {
       my ($extra_blocks, $flank_colour, $has_motifs) = $self->get_structure($rf, $type, $activity, $appearance);
     
       ## Extra legend items as required
-      $entries->{'promoter_flanking'} = {'legend' => 'promoter Flank', 'colour' => $flank_colour} if $flank_colour;
+      $entries->{'promoter_flanking'} = {'legend' => 'promoter flank', 'colour' => $flank_colour} if $flank_colour;
       $entries->{'x_motif'} = {'legend' => 'motif feature', 'colour' => 'black', 'width' => 4} if $has_motifs;
       $feature->{extra_blocks}  = $extra_blocks;
     }

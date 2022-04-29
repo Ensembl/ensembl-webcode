@@ -807,7 +807,7 @@ sub new_location {
   ## Adjust for small genomes (typical of NV) 
   my $start = $slice->start;
   my $end   = $slice->end;
-  if $self->species_defs->EG_DIVISION) {
+  if ($self->species_defs->EG_DIVISION) {
     $type ||= '';
     if (lc($type) =~ /contig/) {
       my $threshold   = 1000100 * ($self->species_defs->ENSEMBL_GENOME_SIZE||1);

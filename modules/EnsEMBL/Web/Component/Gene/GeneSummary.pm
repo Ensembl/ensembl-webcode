@@ -256,6 +256,19 @@ sub content {
   my $type = $object->gene_type;
   $table->add_row('Gene type', $type) if $type;
 
+  if ($gene->biotype =~ /artifact/) {
+    foreach my $attr (@{$gene->get_all_Attributes}) {
+      if ($attr->code eq 'artef_dupl') {
+        my $label = 'Artefactural duplication';
+        my $prepended_str_in_value = $label . '. ';
+        my $text = $attr->value;
+        $text =~ s/$prepended_str_in_value//g;
+
+        $table->add_row($label, $text);
+      }
+    }
+  }
+
   eval {
     # add prediction method
     my $label = 'Annotation method';

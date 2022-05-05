@@ -38,10 +38,9 @@ sub init {
   # retrieve existing session cookie or create a new one
   my $cookie        = $hub->get_cookie($SiteDefs::ENSEMBL_SESSION_COOKIE, 1);
   my $cookie_host   = $SiteDefs::ENSEMBL_SESSION_COOKIEHOST;
-  my $header_host   = $hub->r->headers_in->{'X-Forwarded-Host'} || $hub->r->headers_in->{'Host'};
-  my ($actual_host) = $header_host ? split(/\s*\,\s*/, $header_host) : undef;
+  my ($actual_host) = split /\s*\,\s*/, ($hub->r->headers_in->{'X-Forwarded-Host'} || $hub->r->headers_in->{'Host'});
 
-  if ($cookie_host && $actual_host && $actual_host =~ /$cookie_host$/) { # only use ENSEMBL_SESSION_COOKIEHOST if it's same or a subdomain of the actual domain
+  if ($cookie_host && $actual_host =~ /$cookie_host$/) { # only use ENSEMBL_SESSION_COOKIEHOST if it's same or a subdomain of the actual domain
     $cookie->domain($cookie_host);
     $cookie->bake if $cookie->value;
   }

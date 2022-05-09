@@ -269,7 +269,7 @@ sub content {
         my $prepended_str_in_link_text = 'Real copy of this gene is ';
         $link_text =~ s/$prepended_str_in_link_text//g;
 
-        my $full_link = sprintf('<a href="/Homo_sapiens/Gene/Summary?db=%s;g=%s;">%s</a>', $hub->param('db'), $link_text, $link_text);
+        my $full_link = sprintf('<a href="%s/Gene/Summary?db=%s;g=%s">%s</a>', $hub->species_path, $hub->param('db'), $link_text, $link_text);
         $text =~ s/$link_text/$full_link/g;
 
         $table->add_row($label, $text);

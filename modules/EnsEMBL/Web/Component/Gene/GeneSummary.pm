@@ -259,20 +259,23 @@ sub content {
   if ($gene->biotype =~ /artifact/) {
     foreach my $attr (@{$gene->get_all_Attributes}) {
       if ($attr->code eq 'artef_dupl') {
-        my $label = 'Artefactural duplication';
-        my $prepended_str_in_value = $label . '. ';
+        my $prepended_str_in_value = 'Artefactural duplication. '; # NOTE: need to change this once UK spelling is used in DB
 
         my $text = $attr->value;
         $text =~ s/$prepended_str_in_value//g;
 
-        my $link_text = $text;
-        my $prepended_str_in_link_text = 'Real copy of this gene is ';
-        $link_text =~ s/$prepended_str_in_link_text//g;
+        if ($text eq 'Artefactural duplication') { # NOTE: need to change this once UK spelling is used in DB
+          $text = '-';
+        } else {
+          my $link_text = $text;
+          my $prepended_str_in_link_text = 'Real copy of this gene is ';
+          $link_text =~ s/$prepended_str_in_link_text//g;
 
-        my $full_link = sprintf('<a href="%s/Gene/Summary?db=%s;g=%s">%s</a>', $hub->species_path, $hub->param('db'), $link_text, $link_text);
-        $text =~ s/$link_text/$full_link/g;
+          my $full_link = sprintf('<a href="%s/Gene/Summary?db=%s;g=%s">%s</a>', $hub->species_path, $hub->param('db'), $link_text, $link_text);
+          $text =~ s/$link_text/$full_link/g;
+        }
 
-        $table->add_row($label, $text);
+        $table->add_row('Artifactural duplication', $text);
       }
     }
   }

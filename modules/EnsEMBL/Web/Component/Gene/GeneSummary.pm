@@ -275,7 +275,7 @@ sub content {
           $text =~ s/$link_text/$full_link/g;
         }
 
-        $table->add_row('Artifactural duplication', $text);
+        $table->add_row('Artifactual duplication', $text);
       }
     }
   }

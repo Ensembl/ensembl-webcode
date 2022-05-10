@@ -259,12 +259,13 @@ sub content {
   if ($gene->biotype =~ /artifact/) {
     foreach my $attr (@{$gene->get_all_Attributes}) {
       if ($attr->code eq 'artef_dupl') {
-        my $prepended_str_in_value = 'Artefactural duplication. '; # NOTE: need to change this once UK spelling is used in DB
+        my $label = 'Artefactual duplication';
+        my $prepended_str_in_value = $label . '. ';
 
         my $text = $attr->value;
         $text =~ s/$prepended_str_in_value//g;
 
-        if ($text eq 'Artefactural duplication') { # NOTE: need to change this once UK spelling is used in DB
+        if ($text eq $label) {
           $text = '-';
         } else {
           my $link_text = $text;
@@ -275,7 +276,7 @@ sub content {
           $text =~ s/$link_text/$full_link/g;
         }
 
-        $table->add_row('Artifactual duplication', $text);
+        $table->add_row($label, $text);
       }
     }
   }

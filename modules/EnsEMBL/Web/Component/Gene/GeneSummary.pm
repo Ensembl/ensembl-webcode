@@ -259,14 +259,15 @@ sub content {
   if ($gene->biotype =~ /artifact/) {
     foreach my $attr (@{$gene->get_all_Attributes}) {
       if ($attr->code eq 'artef_dupl') {
-        my $label = 'Artefactual duplication';
-        my $prepended_str_in_value = $label . '. ';
+        my $american_spelling_label = 'Artifactual duplication'; # NOTE: change this part of the code when the DB has US spelling
+        my $british_spelling_label = 'Artefactual duplication';  
+        my $prepended_str_in_value = $british_spelling_label . '. ';
 
         my $text = $attr->value;
         $text =~ s/$prepended_str_in_value//g;
 
-        if ($text eq $label) {
-          $text = '-';
+        if ($text eq $british_spelling_label) {
+          $text = '&nbsp;';
         } else {
           my $link_text = $text;
           my $prepended_str_in_link_text = 'Real copy of this gene is ';
@@ -276,7 +277,7 @@ sub content {
           $text =~ s/$link_text/$full_link/g;
         }
 
-        $table->add_row($label, $text);
+        $table->add_row($american_spelling_label, $text);
       }
     }
   }

@@ -316,7 +316,7 @@ sub transcript_table {
       action => $page_type eq 'gene' ? 'Summary' : $action,
   );
    
-  my %extra_links = %{$self->get_extra_links}; 
+  my %extra_links = %{$self->get_extra_links($sub_type)}; 
   my %any_extras;
   foreach (@$transcripts) {
     my $transcript_length = $_->length;

@@ -48,8 +48,8 @@ sub get_motif_features_by_epigenome {
   my $motifs = {};
 
   foreach my $mf (@motif_features) {
-    my $peak = $mf->get_all_overlapping_Peaks_by_Epigenome($cell_line);
-    if ($peak) {
+    my $peak_callings = $mf->get_overlapping_Peak_Callings_by_Epigenome_and_Regulatory_Feature($cell_line, $reg_feat);
+    if ($peak_callings) {
       my $mf_info = $self->_format_mf_info($mf);
       $motifs->{$mf->start .':'. $mf->end} = $mf_info if $mf_info;
     }

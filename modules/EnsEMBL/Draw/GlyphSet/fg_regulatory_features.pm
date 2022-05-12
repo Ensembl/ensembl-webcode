@@ -233,8 +233,8 @@ sub get_structure {
 
     ## Get peaks that overlap this epigenome
     foreach (@$mfs) {
-      my $peaks = $_->get_all_overlapping_Peaks_by_Epigenome($epigenome);
-      if (scalar @{$peaks||[]}) {
+      my $peak_callings = $_->get_overlapping_Peak_Callings_by_Epigenome_and_Regulatory_Feature($epigenome, $f);
+      if (scalar @{$peak_callings||[]}) {
         push @$extra_blocks, {
                               start   => $_->start - $slice->start, 
                               end     => $_->end - $slice->start,

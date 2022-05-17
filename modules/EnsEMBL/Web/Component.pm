@@ -23,7 +23,11 @@ package EnsEMBL::Web::Component;
 ###
 ### Note: should only contain functionality that is generic enough to be used 
 ### in any component. If you have an output method that needs to be shared
-### between components descended from different object types, put it into 
+### between components descended from DIFFERENT OBJECT TYPES, there are two
+### ways to handle it:
+### 1. If it is just a matter of formatting and requires no database access,
+### add the method to one of the Utils modules (or create a new one)
+### 2. If it requires some data munging, it may be best to add it to 
 ### EnsEMBL::Web::Component::Shared, which has been set up for this usage
 
 use strict;

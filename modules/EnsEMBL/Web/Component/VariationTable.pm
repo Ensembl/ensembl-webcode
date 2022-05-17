@@ -26,8 +26,8 @@ use List::Util qw(max min);
 use Bio::EnsEMBL::Variation::Utils::Config qw(%ATTRIBS);
 use Bio::EnsEMBL::Variation::Utils::Constants qw(%VARIATION_CLASSES);
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw($UPSTREAM_DISTANCE $DOWNSTREAM_DISTANCE);
+use EnsEMBL::Web::Utils::Variation qw(predictions_classes);
 use EnsEMBL::Web::NewTable::NewTable;
-use EnsEMBL::Web::Constants;
 
 use Bio::EnsEMBL::Variation::Utils::VariationEffect;
 
@@ -169,7 +169,7 @@ sub content {
 sub sift_poly_classes {
   my ($self,$table) = @_;
 
-  my $sp_classes = EnsEMBL::Web::Constants::PREDICTIONS_CLASSES;
+  my $sp_classes = predictions_classes; 
 
   foreach my $column_name (qw(sift polyphen cadd revel meta_lr mutation_assessor)) {
     my $value_column = $table->column("${column_name}_value");

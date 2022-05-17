@@ -25,7 +25,7 @@ use EnsEMBL::Web::Utils::FormatText qw(coltab);
 
 use base qw(Exporter);
 
-our @EXPORT = our @EXPORT_OK = qw(vep_icon render_sift_polyphen render_consequence_type);
+our @EXPORT = our @EXPORT_OK = qw(vep_icon render_sift_polyphen render_consequence_type predictions_classes);
 
 
 sub vep_icon {
@@ -115,5 +115,34 @@ sub render_consequence_type {
       
   return ($type) ? qq{<span class="hidden">$rank</span>$type} : '-';
 } 
+
+sub predictions_classes {
+  return {
+    '-'                 => '',
+    'probably damaging' => 'bad',
+    'possibly damaging' => 'ok',
+    'benign'            => 'good',
+    'unknown'           => 'neutral',
+    'tolerated'         => 'good',
+    'deleterious'       => 'bad',
+
+    'likely deleterious'     => 'bad',
+    'likely benign'          => 'good',
+    'likely disease causing' => 'bad',
+    'damaging'               => 'bad',
+    'high'                   => 'bad',
+    'medium'                 => 'ok',
+    'low'                    => 'good',
+    'neutral'                => 'neutral',
+
+    # slightly different format for SIFT low confidence states
+    # depending on whether they come direct from the API
+    # or via the VEP's no-whitespace processing
+    'tolerated - low confidence'   => 'neutral',
+    'deleterious - low confidence' => 'neutral',
+    'tolerated low confidence'     => 'neutral',
+    'deleterious low confidence'   => 'neutral',
+  };
+}
 
 1;

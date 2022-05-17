@@ -595,40 +595,6 @@ sub classify_score_prediction {
   return [$rank,$pred,$rank_str];
 }
 
-# Common list of variant protein prediction results with their corresponding CSS classes
-sub _predictions_classes {
-  my $self = shift;
-
-  my %classes = (
-    '-'                 => '',
-    'probably damaging' => 'bad',
-    'possibly damaging' => 'ok',
-    'benign'            => 'good',
-    'unknown'           => 'neutral',
-    'tolerated'         => 'good',
-    'deleterious'       => 'bad',
-
-    'likely deleterious'     => 'bad',
-    'likely benign'          => 'good',
-    'likely disease causing' => 'bad',
-    'damaging'               => 'bad',
-    'high'                   => 'bad',
-    'medium'                 => 'ok',
-    'low'                    => 'good',
-    'neutral'                => 'neutral',
-
-    # slightly different format for SIFT low confidence states
-    # depending on whether they come direct from the API
-    # or via the VEP's no-whitespace processing
-    'tolerated - low confidence'   => 'neutral',
-    'deleterious - low confidence' => 'neutral',
-    'tolerated low confidence'     => 'neutral',
-    'deleterious low confidence'   => 'neutral',
-  );
-
-  return \%classes;
-}
-
 sub render_p_value {
   my $self = shift;
   my $pval = shift;

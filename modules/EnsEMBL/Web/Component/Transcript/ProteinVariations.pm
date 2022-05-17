@@ -24,7 +24,7 @@ use strict;
 use Bio::EnsEMBL::Variation::Utils::Config qw(%ATTRIBS);
 use Bio::EnsEMBL::Variation::Utils::Constants qw(%VARIATION_CLASSES);
 use EnsEMBL::Web::NewTable::NewTable;
-use EnsEMBL::Web::Constants;
+use EnsEMBL::Web::Utils::Variation qw(predictions_classes);
 
 use base qw(EnsEMBL::Web::Component::Transcript EnsEMBL::Web::Component::Variation);
 
@@ -382,7 +382,7 @@ sub snptype_classes {
 sub sift_poly_classes {
   my ($self,$table) = @_;
 
-  my $sp_classes = EnsEMBL::Web::Constants::PREDICTIONS_CLASSES;
+  my $sp_classes = predictions_classes; 
 
   foreach my $column_name (qw(sift polyphen cadd revel meta_lr mutation_assessor)) {
     my $value_column = $table->column("${column_name}_value");

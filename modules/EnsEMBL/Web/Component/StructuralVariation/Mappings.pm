@@ -21,6 +21,8 @@ package EnsEMBL::Web::Component::StructuralVariation::Mappings;
 
 use strict;
 
+use EnsEMBL::Web::Utils::Variation qw(render_consequence_type);
+
 use base qw(EnsEMBL::Web::Component::StructuralVariation);
 
 sub _init {
@@ -187,7 +189,7 @@ sub gene_transcript_table {
       
     $trans_name .= ".".$t->version if($t->version); #transcript version
     foreach my $tsva(@{$tsv->get_all_StructuralVariationOverlapAlleles}) {
-      my $type = $self->render_consequence_type($tsva);
+      my $type = render_consequence_type($hub, $tsva);
       
       my %row = (
         gene      => qq{<a href="$gene_url">$gene_name</a><br/><span class="small" style="white-space:nowrap;">$gene_hgnc</span>},
@@ -241,7 +243,7 @@ sub regfeat_table {
     });
      
     foreach my $rsva(@{$rsv->get_all_StructuralVariationOverlapAlleles}) {
-      my $type = $self->render_consequence_type($rsva);
+      my $type = render_consequence_type($hub, $rsva);
       my %row = (
         rf       => sprintf('<a href="%s">%s</a>', $url, $rf),
         ftype    => $ftype,

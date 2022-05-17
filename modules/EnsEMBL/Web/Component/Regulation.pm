@@ -100,6 +100,7 @@ sub all_evidences {
 sub buttons { return @{$_[0]->{'buttons'}||[]}; }
 
 sub button_portal {
+## Override standard layout
   my ($self, $buttons, $class) = @_;
   $class ||= '';
   my $html;

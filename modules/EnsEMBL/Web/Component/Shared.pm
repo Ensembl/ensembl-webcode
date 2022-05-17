@@ -629,34 +629,6 @@ sub _predictions_classes {
   return \%classes;
 }
 
-
-sub render_consequence_type {
-  my $self        = shift;
-  my $tva         = shift;
-  my $most_severe = shift;
-  my $var_styles  = $self->hub->species_defs->colour('variation');
-  my $colourmap   = $self->hub->colourmap;
-
-  my $overlap_consequences = ($most_severe) ? [$tva->most_severe_OverlapConsequence] || [] : $tva->get_all_OverlapConsequences || [];
-
-  # Sort by rank, with only one copy per consequence type
-  my @consequences = sort {$a->rank <=> $b->rank} (values %{{map {$_->label => $_} @{$overlap_consequences}}});
-
-  my $type = join ' ',
-    map {
-      my $hex = $var_styles->{lc $_->SO_term}
-        ? $colourmap->hex_by_name(
-            $var_styles->{lc $_->SO_term}->{'default'}
-          )
-        : $colourmap->hex_by_name($var_styles->{'default'}->{'default'});
-      $self->coltab($_->label, $hex, $_->description);
-    }
-    @consequences;
-  my $rank = @consequences ? $consequences[0]->rank : undef;
-      
-  return ($type) ? qq{<span class="hidden">$rank</span>$type} : '-';
-}
-
 sub render_p_value {
   my $self = shift;
   my $pval = shift;
@@ -731,25 +703,6 @@ sub render_var_coverage {
   }
 
   return $render;
-}
-
-sub button_portal {
-  my ($self, $buttons, $class) = @_;
-  $class ||= '';
-  my $html;
-
-  my $img_url = $self->img_url;
-
-  foreach (@{$buttons || []}) {
-    if ($_->{'url'}) {
-      my $counts = qq(<span class="counts">$_->{'count'}</span>) if $_->{'count'};
-      $html .= qq(<div><a href="$_->{'url'}" title="$_->{'title'}" class="_ht"><img src="$img_url$_->{'img'}" alt="$_->{'title'}" />$counts</a></div>);
-    } else {
-      $html .= qq|<div><img src="$img_url$_->{'img'}" class="_ht unavailable" alt="$_->{'title'} (Not available)" title="$_->{'title'} (Not available)" /></div>|;
-    }
-  }
-
-  return qq{<div class="portal $class">$html</div><div class="invisible"></div>};
 }
 
 sub vep_icon {

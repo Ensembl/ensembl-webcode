@@ -40,7 +40,7 @@ use EnsEMBL::Draw::DrawableContainer;
 use EnsEMBL::Draw::VDrawableContainer;
 
 use EnsEMBL::Web::Attributes;
-use EnsEMBL::Web::Utils::FormatText qw(helptip glossary_helptip get_glossary_entry);
+use EnsEMBL::Web::Utils::FormatText qw(coltab helptip glossary_helptip get_glossary_entry);
 use EnsEMBL::Web::Document::Image::GD;
 use EnsEMBL::Web::Document::Table;
 use EnsEMBL::Web::Document::TwoCol;
@@ -98,10 +98,29 @@ sub button_style {
   return {};
 }
 
-sub coltab {
-  my ($self, $text, $colour, $title) = @_;
+sub button_portal {
+  my ($self, $buttons, $class) = @_;
+  $class ||= '';
+  my $html;
 
-  return sprintf(qq(<div class="coltab"><span class="coltab-tab" style="background-color:%s;">&nbsp;</span><div class="coltab-text">%s</div></div>), $colour, helptip($text, $title));
+  my $img_url = $self->img_url;
+
+  foreach (@{$buttons || []}) {
+    if ($_->{'url'}) {
+      my $counts = qq(<span class="counts">$_->{'count'}</span>) if $_->{'count'};
+      $html .= qq(<div><a href="$_->{'url'}" title="$_->{'title'}" class="_ht"><img src="$img_url$_->{'img'}" alt="$_->{'title'}" />$counts</a></div>);
+    } else {
+      $html .= qq|<div><img src="$img_url$_->{'img'}" class="_ht unavailable" alt="$_->{'title'} (Not available)" title="$_->{'title'} (Not available)" /></div>|;
+    }
+  }
+
+  return qq{<div class="portal $class">$html</div><div class="invisible"></div>};
+}
+
+sub coltab {
+## Simple wrapper around utility method, to save lots of refactoring!
+  my $self = shift;
+  return coltab(@_);
 }
 
 sub param {

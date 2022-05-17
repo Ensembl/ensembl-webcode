@@ -21,9 +21,11 @@ package EnsEMBL::Web::Utils::Variation;
 
 ## Handy methods for formatting variation content
 
+use EnsEMBL::Web::Utils::FormatText qw(coltab);
+
 use base qw(Exporter);
 
-our @EXPORT = our @EXPORT_OK = qw(render_sift_polyphen);
+our @EXPORT = our @EXPORT_OK = qw(render_sift_polyphen render_consequence_type);
 
 sub render_sift_polyphen {
   ## render a sift or polyphen prediction with colours and a hidden span with a rank for sorting
@@ -75,5 +77,31 @@ sub render_sift_polyphen {
   );
 }
 
+sub render_consequence_type {
+  my $hub         = shift;
+  my $tva         = shift;
+  my $most_severe = shift;
+  my $var_styles  = $hub->species_defs->colour('variation');
+  my $colourmap   = $hub->colourmap;
+  
+  my $overlap_consequences = ($most_severe) ? [$tva->most_severe_OverlapConsequence] || [] : $tva->get_all_OverlapConsequences || [];
+
+  # Sort by rank, with only one copy per consequence type
+  my @consequences = sort {$a->rank <=> $b->rank} (values %{{map {$_->label => $_} @{$overlap_consequences}}});
+
+  my $type = join ' ',
+    map {
+      my $hex = $var_styles->{lc $_->SO_term}
+        ? $colourmap->hex_by_name(
+            $var_styles->{lc $_->SO_term}->{'default'}
+          ) 
+        : $colourmap->hex_by_name($var_styles->{'default'}->{'default'});
+      coltab($_->label, $hex, $_->description);
+    } 
+    @consequences;
+  my $rank = @consequences ? $consequences[0]->rank : undef;
+      
+  return ($type) ? qq{<span class="hidden">$rank</span>$type} : '-';
+} 
 
 1;

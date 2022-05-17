@@ -21,7 +21,7 @@ package EnsEMBL::Web::Component::Regulation;
 
 use strict;
 
-use base qw(EnsEMBL::Web::Component::Shared);
+use base qw(EnsEMBL::Web::Component);
 
 sub shown_cells {
   my ($self,$image_config) = @_;

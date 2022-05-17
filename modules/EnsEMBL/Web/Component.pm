@@ -44,7 +44,7 @@ use EnsEMBL::Draw::DrawableContainer;
 use EnsEMBL::Draw::VDrawableContainer;
 
 use EnsEMBL::Web::Attributes;
-use EnsEMBL::Web::Utils::FormatText qw(coltab helptip glossary_helptip get_glossary_entry);
+use EnsEMBL::Web::Utils::FormatText qw(helptip glossary_helptip get_glossary_entry);
 use EnsEMBL::Web::Document::Image::GD;
 use EnsEMBL::Web::Document::Table;
 use EnsEMBL::Web::Document::TwoCol;
@@ -119,12 +119,6 @@ sub button_portal {
   }
 
   return qq{<div class="portal $class">$html</div><div class="invisible"></div>};
-}
-
-sub coltab {
-## Simple wrapper around utility method, to save lots of refactoring!
-  my $self = shift;
-  return coltab(@_);
 }
 
 sub param {

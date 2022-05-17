@@ -25,7 +25,7 @@ use EnsEMBL::Web::Utils::FormatText qw(coltab);
 
 use base qw(Exporter);
 
-our @EXPORT = our @EXPORT_OK = qw(vep_icon render_sift_polyphen render_consequence_type render_p_value render_var_coverage predictions_classes classify_sift_polyphen classify_score_prediction);
+our @EXPORT = our @EXPORT_OK = qw(vep_icon render_sift_polyphen render_consequence_type render_p_value render_var_coverage predictions_classes classify_sift_polyphen classify_score_prediction display_items_list);
 
 
 sub vep_icon {
@@ -190,7 +190,7 @@ sub render_var_coverage {
   return $render;
 }
 
-sub predictions_classes i
+sub predictions_classes {
   return {
     '-'                 => '',
     'probably damaging' => 'bad',
@@ -284,6 +284,33 @@ sub classify_score_prediction {
     $rank_str = $pred;
   }
   return [$rank,$pred,$rank_str];
+}
+
+sub display_items_list {
+  my ($div_id, $title, $label, $display_data, $export_data, $no_count_label, $specific_count) = @_;
+
+  my $html = "";
+  my @sorted_data = ($display_data->[0] =~ /^<a/i) ? @{$display_data} : sort { lc($a) cmp lc($b) } @{$display_data};
+  my $count = scalar(@{$display_data});
+  my $count_threshold = ($specific_count) ? $specific_count : 5;
+  if ($count >= $count_threshold) {
+    $html = sprintf(qq{
+        <a title="Click to show the list of %s" rel="%s" href="#" class="toggle_link toggle closed _slide_toggle _no_export">%s</a>
+        <div class="%s"><div class="toggleable" style="display:none"><span class="hidden export">%s</span><ul class="_no_export">%s</ul></div></div>
+      },
+      $title,
+      $div_id,
+      ($no_count_label) ? $label : "$count $label",
+      $div_id,
+      join(",", sort { lc($a) cmp lc($b) } @{$export_data}),
+      '<li>'.join("</li><li>", @sorted_data).'</li>'
+    );
+  }
+  else {
+    $html = join(", ", @sorted_data);
+  }
+
+  return $html;
 }
 
 

@@ -22,7 +22,7 @@ package EnsEMBL::Web::Component::LRG::LRGPhenotypeVariation;
 use strict;
 
 use Bio::EnsEMBL::Variation::Utils::Constants;
-use EnsEMBL::Web::Utils::Variation qw(render_p_value);
+use EnsEMBL::Web::Utils::Variation qw(render_p_value display_items_list);
 
 use base qw(EnsEMBL::Web::Component::LRG);
 
@@ -382,7 +382,7 @@ sub variation_table {
         my $div_id = 'src_'.$var_name.'_'.$source;
            $div_id =~ s/ //g;
         my @export_data = $source_exp_list{$source};
-        my $source_content = $self->display_items_list($div_id,"$source entries",$source,$sources_list{$source},\@export_data,1,$max_items_per_source);
+        my $source_content = display_items_list($div_id,"$source entries",$source,$sources_list{$source},\@export_data,1,$max_items_per_source);
 
         $source_data .= ', ' if ($source_data ne "");
         if (scalar(@{$sources_list{$source}}) < $max_items_per_source ) {

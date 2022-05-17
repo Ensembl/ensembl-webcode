@@ -22,6 +22,7 @@ package EnsEMBL::Web::Component::LRG::LRGPhenotypeVariation;
 use strict;
 
 use Bio::EnsEMBL::Variation::Utils::Constants;
+use EnsEMBL::Web::Utils::Variation qw(render_p_value);
 
 use base qw(EnsEMBL::Web::Component::LRG);
 
@@ -374,7 +375,7 @@ sub variation_table {
       # Sort by the lowest p-value first
       @pvalues_list = sort { $b =~ /e-0?$max_exp$/ <=> $a =~ /e-0?$max_exp$/ } @pvalues_list if (scalar @pvalues_list);
 
-      @pvalues_list = map { $self->render_p_value($_, 1) } @pvalues_list;
+      @pvalues_list = map { render_p_value($_, 1) } @pvalues_list;
 
       my $source_data = "";
       foreach my $source (sort(keys(%sources_list))) {

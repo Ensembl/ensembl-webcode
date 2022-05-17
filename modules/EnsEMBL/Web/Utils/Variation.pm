@@ -25,7 +25,7 @@ use EnsEMBL::Web::Utils::FormatText qw(coltab);
 
 use base qw(Exporter);
 
-our @EXPORT = our @EXPORT_OK = qw(vep_icon render_sift_polyphen render_consequence_type predictions_classes);
+our @EXPORT = our @EXPORT_OK = qw(vep_icon render_sift_polyphen render_consequence_type render_p_value render_var_coverage predictions_classes classify_sift_polyphen classify_score_prediction);
 
 
 sub vep_icon {
@@ -116,7 +116,81 @@ sub render_consequence_type {
   return ($type) ? qq{<span class="hidden">$rank</span>$type} : '-';
 } 
 
-sub predictions_classes {
+sub render_p_value {
+  my $pval = shift;
+  my $bold = shift;
+
+  my $render = $pval;
+  # Only display 2 decimals
+  if ($pval =~ /^(\d\.\d+)e-0?(\d+)$/) {
+    # Only display 2 decimals
+    my $val = sprintf("%.2f", $1);
+    # Superscript
+    my $exp = "<sup>-$2</sup>";
+    $exp = "<b>$exp</b>" if ($bold);
+
+    $render = $val.'e'.$exp;
+  }
+  return $render;
+}
+
+# Rectangular glyph displaying the location and coverage of the variant
+# on a given feature (transcript, protein, regulatory element, ...)
+sub render_var_coverage {
+  my ($f_s, $f_e, $v_s, $v_e, $color) = @_;
+
+  my $render;
+  my $var_render;
+
+  $color ||= 'red';
+
+  my $total_width = 100;
+  my $left_width  = 0;
+  my $right_width = 0;
+  my $small_var   = 0;
+
+  my $scale = $total_width / ($f_e - $f_s + 1);
+
+  # middle part
+  if ($v_s <= $f_e && $v_e >= $f_s) {
+    my $s = (sort {$a <=> $b} ($v_s, $f_s))[-1];
+    my $e = (sort {$a <=> $b} ($v_e, $f_e))[0];
+
+    my $bp = ($e - $s) + 1;
+
+    $right_width = sprintf("%.0f", $bp * $scale);
+    if (($right_width <= 2) || $left_width == $total_width) {
+      $right_width = 3;
+      $small_var   = 1;
+    }
+    $var_render = sprintf(qq{<div class="var_trans_pos_sub" style="width:%ipx;background-color:%s"></div>}, $right_width, $color);
+  }
+
+  # left part
+  if($v_s > $f_s) {
+    $left_width = sprintf("%.0f", ($v_s - $f_s) * $scale);
+    if ($left_width == $total_width)  {
+      $left_width -= $right_width;
+    }
+    elsif (($left_width + $right_width) > $total_width) {
+      $left_width = $total_width - $right_width;
+    }
+    elsif ($small_var && $left_width > 0) {
+      $left_width--;
+    }
+    $left_width = 0 if ($left_width < 0);
+    $render .= '<div class="var_trans_pos_sub" style="width:'.$left_width.'px"></div>';
+  }
+  $render .= $var_render if ($var_render);
+
+  if ($render) {
+    $render = qq{<div class="var_trans_pos">$render</div>};
+  }
+
+  return $render;
+}
+
+sub predictions_classes i
   return {
     '-'                 => '',
     'probably damaging' => 'bad',
@@ -144,5 +218,73 @@ sub predictions_classes {
     'deleterious low confidence'   => 'neutral',
   };
 }
+
+sub classify_sift_polyphen {
+  ## render a sift or polyphen prediction with colours and a hidden span with a rank for sorting
+  my ($pred, $score) = @_;
+
+  return [undef,'-','','-'] unless defined($pred) || defined($score);
+
+  my %ranks = (
+    '-'                 => 0,
+    'probably damaging' => 4,
+    'possibly damaging' => 3,
+    'benign'            => 1,
+    'unknown'           => 2,
+    'tolerated'         => 1,
+    'deleterious'       => 2,
+  );
+
+  my ($rank, $rank_str);
+
+  if(defined($score)) {
+    $rank = int(1000 * $score) + 1;
+    $rank_str = "$score";
+  }
+  else {
+    $rank = $ranks{$pred};
+    $rank_str = $pred;
+  }
+
+  # 0 -- a value to use for sorting
+  # 1 -- a value to use for exporting
+  # 2 -- a class to use for styling
+  # 3 -- a value for display
+  return [$rank,$pred,$rank_str];
+}
+
+
+sub classify_score_prediction {
+  ## render a sift or polyphen prediction with colours and a hidden span with a rank for sorting
+  my ($pred, $score) = @_;
+
+  return [undef,'-','','-'] unless defined($pred) || defined($score);
+
+  my %ranks = (
+    '-'                 => 0,
+    'likely deleterious' => 4,
+    'likely benign' => 2,
+    'likely disease causing' => 4,
+    'tolerated' => 2,
+    'damaging'   => 4,
+    'high'    => 4,
+    'medium'  => 3,
+    'low'     => 2,
+    'neutral' => 2,
+  );
+
+  my ($rank, $rank_str);
+
+  if(defined($score)) {
+    $rank = int(1000 * $score) + 1;
+    $rank_str = "$score";
+  }
+  else {
+    $rank = $ranks{$pred};
+    $rank_str = $pred;
+  }
+  return [$rank,$pred,$rank_str];
+}
+
 
 1;

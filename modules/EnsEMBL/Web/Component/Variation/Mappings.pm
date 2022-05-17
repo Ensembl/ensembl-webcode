@@ -24,7 +24,7 @@ use strict;
 use base qw(EnsEMBL::Web::Component::Variation);
 use Bio::EnsEMBL::Variation::Utils::VariationEffect qw(overlap);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
-use EnsEMBL::Web::Utils::Variation qw(render_sift_polyphen render_consequence_type);
+use EnsEMBL::Web::Utils::Variation qw(render_sift_polyphen render_consequence_type render_var_coverage);
 
 sub _init {
   my $self = shift;
@@ -1128,7 +1128,7 @@ sub _overlap_glyph {
   my $var_pos  = ($v_s == $v_e) ? $v_s : "$v_s-$v_e";
      $var_pos  = 1 if ((!$var_pos || $var_pos eq '') && ($v_s || $v_e));
 
-  my $glyph = $self->render_var_coverage($f_s, $f_e, $v_s, $v_e, $colour);
+  my $glyph = render_var_coverage($f_s, $f_e, $v_s, $v_e, $colour);
   $html .= $glyph if ($glyph);
 
   my $desc = "Variant position: $var_pos | $f_label length: $f_length";

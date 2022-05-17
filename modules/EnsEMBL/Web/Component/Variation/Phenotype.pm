@@ -24,6 +24,7 @@ use strict;
 use HTML::Entities qw(encode_entities);
 use Bio::EnsEMBL::Utils::Sequence qw(reverse_comp);
 use EnsEMBL::Web::Utils::FormatText qw(helptip);
+use EnsEMBL::Web::Utils::Variation qw(render_p_value);
 use base qw(EnsEMBL::Web::Component::Variation);
 
 sub _init {
@@ -294,7 +295,7 @@ sub table_data {
     foreach my $attr (@stats_col) {
       if ($attributes->{$attr}) {
         my $attr_label = ($attr eq 'beta_coef') ? 'beta_coefficient' : (($attr eq 'p_value') ? 'p-value' : $attr);
-        push @stats, "$attr_label:".(($attr eq 'p_value') ? $self->render_p_value($attributes->{$attr}) : $attributes->{$attr});
+        push @stats, "$attr_label:".(($attr eq 'p_value') ? render_p_value($attributes->{$attr}) : $attributes->{$attr});
         $column_flags{'stats'} = 1;
       }
     }

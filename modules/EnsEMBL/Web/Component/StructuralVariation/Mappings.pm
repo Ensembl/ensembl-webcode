@@ -21,7 +21,7 @@ package EnsEMBL::Web::Component::StructuralVariation::Mappings;
 
 use strict;
 
-use EnsEMBL::Web::Utils::Variation qw(render_consequence_type);
+use EnsEMBL::Web::Utils::Variation qw(render_consequence_type render_var_coverage);
 
 use base qw(EnsEMBL::Web::Component::StructuralVariation);
 
@@ -294,7 +294,7 @@ sub _coverage_glyph {
     $pc = sprintf("%.2f", 100 * ($bp / ($f->feature_Slice->length)));
   }
   
-  my $glyph = $self->render_var_coverage($f_s, $f_e, $v_s, $v_e, $self->object->get_class_colour($v->class_SO_term));
+  my $glyph = render_var_coverage($f_s, $f_e, $v_s, $v_e, $self->object->get_class_colour($v->class_SO_term));
   $html .= $glyph if ($glyph);
   
   return

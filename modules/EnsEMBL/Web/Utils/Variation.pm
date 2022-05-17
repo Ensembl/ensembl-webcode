@@ -25,7 +25,19 @@ use EnsEMBL::Web::Utils::FormatText qw(coltab);
 
 use base qw(Exporter);
 
-our @EXPORT = our @EXPORT_OK = qw(render_sift_polyphen render_consequence_type);
+our @EXPORT = our @EXPORT_OK = qw(vep_icon render_sift_polyphen render_consequence_type);
+
+
+sub vep_icon {
+  my ($hub, $inner_html) = @_;
+  return '' unless $hub->species_defs->ENSEMBL_VEP_ENABLED;
+
+  $inner_html   ||= 'Test your own variants with the <span>Variant Effect Predictor</span>';
+  my $vep_link    = $hub->url({'__clear' => 1, qw(type Tools action VEP)});
+
+  return qq(<a class="vep-icon" href="$vep_link">$inner_html</a>);
+}
+
 
 sub render_sift_polyphen {
   ## render a sift or polyphen prediction with colours and a hidden span with a rank for sorting

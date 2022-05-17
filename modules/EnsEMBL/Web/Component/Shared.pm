@@ -705,17 +705,6 @@ sub render_var_coverage {
   return $render;
 }
 
-sub vep_icon {
-  my ($self, $inner_html) = @_;
-  my $hub         = $self->hub;
-  return '' unless $hub->species_defs->ENSEMBL_VEP_ENABLED;
-
-  $inner_html   ||= 'Test your own variants with the <span>Variant Effect Predictor</span>';
-  my $vep_link    = $hub->url({'__clear' => 1, qw(type Tools action VEP)});
-
-  return qq(<a class="vep-icon" href="$vep_link">$inner_html</a>);
-}
-
 sub display_items_list {
   my ($self, $div_id, $title, $label, $display_data, $export_data, $no_count_label, $specific_count) = @_;
 

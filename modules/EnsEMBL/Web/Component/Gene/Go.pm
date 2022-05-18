@@ -127,10 +127,10 @@ sub process_data {
  
   my $use_karyotype;
   if ($is_nv) {
-    $use_karyotype = scalar @{$self->hub->species_defs->ENSEMBL_CHROMOSOMES} && $hub->species_defs->MAX_CHR_LENGTH;
+    $use_karyotype = scalar @{$self->hub->species_defs->ENSEMBL_CHROMOSOMES||[]} && $hub->species_defs->MAX_CHR_LENGTH;
   }
   else {
-    $use_karyotype = scalar @{$self->hub->species_defs->ENSEMBL_CHROMOSOMES};
+    $use_karyotype = scalar @{$self->hub->species_defs->ENSEMBL_CHROMOSOMES||[]};
   }
  
   foreach my $go (sort keys %$data) {

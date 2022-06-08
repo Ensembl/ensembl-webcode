@@ -48,13 +48,6 @@ sub content {
   my $html = sprintf '<a href="%s"><div class="logo-header print_hide" title="%s">&nbsp;</div></a>', 
               $url, $self->alt; 
 
-  my $species = $self->hub->{'_species'};
-  $species = '' if ($species eq 'Multi');
-
-  $html .= sprintf '<span class="mobile-only species-header">%s</span>',
-              $species ? $self->species_defs->SPECIES_DISPLAY_NAME 
-                       : $self->species_defs->ENSEMBL_SITETYPE; 
-
   $html .= $self->logo_print;
 
   return $html;

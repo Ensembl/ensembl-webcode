@@ -166,7 +166,7 @@ sub mime_type {
   return $mimeobj ? $mimeobj->type : 'text/plain';
 }
 
-#overwritten in mobile plugin
+#can be overwritten in other plugins
 sub htdoc_dir { 
   my ($file, $r) = @_;
   

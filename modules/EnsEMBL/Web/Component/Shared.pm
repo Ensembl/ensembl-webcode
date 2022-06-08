@@ -89,8 +89,6 @@ sub transcript_table {
 
   my $gene = $page_type eq 'gene' ? $object->Obj : $object->gene;
 
-  $self->add_phenotype_link($gene, $table); #function in mobile plugin
-
   my %unique_synonyms;
   my $c=0;
   foreach (@{$object->get_similarity_hash(0, $gene)}) {
@@ -112,7 +110,7 @@ sub transcript_table {
   my $seq_region_end   = $object->seq_region_end;
 
   my $location_html = sprintf(
-    '<a href="%s" class="constant mobile-nolink dynamic-link">%s: %s-%s</a> %s.',
+    '<a href="%s" class="constant dynamic-link">%s: %s-%s</a> %s.',
     $hub->url({
       type   => 'Location',
       action => 'View',
@@ -144,7 +142,7 @@ sub transcript_table {
         my ($altchr, $altstart, $altend, $altseqregion) = @$loc;
         
         $location_html .= sprintf('
-          <li><a href="/%s/Location/View?l=%s:%s-%s" class="constant mobile-nolink">%s : %s-%s</a></li>', 
+          <li><a href="/%s/Location/View?l=%s:%s-%s" class="constant">%s : %s-%s</a></li>', 
           $species, $altchr, $altstart, $altend, $altchr,
           $self->thousandify($altstart),
           $self->thousandify($altend)
@@ -411,9 +409,7 @@ sub transcript_table {
 
     # Add rows to transcript table
     push @rows, @{$biotype_rows{$_}} for sort keys %biotype_rows; 
-    
-    @columns = $self->table_removecolumn(@columns); # implemented in mobile plugin
-    
+        
     $transc_table = $self->new_table(\@columns, \@rows, {
       data_table        => 1,
       data_table_config => { bPaginate => 'false', asStripClasses => [ '', '' ], oSearch => { sSearch => '', bRegex => 'false', bSmart => 'false' } },
@@ -487,18 +483,6 @@ sub get_CDS_text {
   else {
     return undef;
   }
-}
-
-# return the same columns; implemented in mobile plugin to remove some columns
-sub table_removecolumn { 
-  my ($self, @columns) = @_;
-  
-  return @columns;
-}
-
-#implemented in mobile plugin (having this as  a separate function so that we dont have to overwrite transcript_table function in the plugin)
-sub add_phenotype_link {
-  return "";
 }
 
 # since counts form left nav is gone, we are adding it in the description  (called in transcript_table function)

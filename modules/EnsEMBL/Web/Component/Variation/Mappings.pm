@@ -481,10 +481,16 @@ sub gene_action {
 sub render_tables {
   my ($self, $table, $reg_table, $motif_table, $flag) = @_;
 
+  my $reg_overlap = '';
+  if ($self->hub->database('funcgen')) {
+    $reg_overlap .= "\n";
+    $reg_overlap .= $reg_table->has_rows && $flag ? '<h2>Regulatory feature consequences</h2>'.$reg_table->render : '<h3>No overlap with Ensembl Regulatory features</h3>';
+    $reg_overlap .= "\n";
+    $reg_overlap .= $motif_table->has_rows && $flag ? '<h2>Motif feature consequences</h2>'.$motif_table->render : '<h3>No overlap with Ensembl Motif features</h3>';
+  }
+
   my $table_html =  ($table->has_rows && $flag ? '<h2>Gene and Transcript consequences</h2>'.$table->render : '<h3>No Gene or Transcript consequences</h3>').
-                    $self->_render_eqtl_table.
-                    ($reg_table->has_rows && $flag ? '<h2>Regulatory feature consequences</h2>'.$reg_table->render : '<h3>No overlap with Ensembl Regulatory features</h3>').
-                    ($motif_table->has_rows && $flag ? '<h2>Motif feature consequences</h2>'.$motif_table->render : '<h3>No overlap with Ensembl Motif features</h3>');
+                    $self->_render_eqtl_table.$reg_overlap;
                     
   return $table_html;
 }

@@ -655,40 +655,63 @@ sub _expand_database_templates {
   my $PASS   = $tree->{'general'}{'DATABASE_DBPASS'};    
   my $DRIVER = $tree->{'general'}{'DATABASE_DRIVER'} || 'mysql'; 
   
-  ## Autoconfigure databases
-  unless (exists $tree->{'databases'} && exists $tree->{'databases'}{'DATABASE_CORE'}) {
-    my @db_types = qw(CORE CDNA OTHERFEATURES RNASEQ FUNCGEN VARIATION);
-    push @db_types, 'COMPARA' if $SiteDefs::SINGLE_SPECIES_COMPARA;
-    my $db_details = {
-                      'HOST'    => $HOST,
-                      'PORT'    => $PORT,
-                      'USER'    => $USER,
-                      'PASS'    => $PASS,
-                      'DRIVER'  => $DRIVER,
-                      };
-    $self->_info_line('DBserver', sprintf 'DBs at %s:%s', $db_details->{'HOST'}, $db_details->{'PORT'} ) if $SiteDefs::ENSEMBL_WARN_DATABASES;
-    foreach (@db_types) {
+  ## Configure databases
+  my @db_types = qw(CORE CDNA OTHERFEATURES RNASEQ FUNCGEN VARIATION);
+  push @db_types, 'COMPARA' if $SiteDefs::SINGLE_SPECIES_COMPARA;
+  foreach my $type (@db_types) {
+    ## Configure any hardcoded values
+    if (exists $tree->{'databases'} && exists $tree->{'databases'}{'DATABASE_'.$type}) {
+      my $db_settings = $tree->{'DATABASE_'.$type} || {};
+      my $db_details = {
+                        'HOST'    => $db_settings->{'HOST'} || $HOST,
+                        'PORT'    => $db_settings->{'PORT'} || $PORT,
+                        'USER'    => $db_settings->{'USER'} || $USER,
+                        'PASS'    => $db_settings->{'PASS'} || $PASS,
+                        'DRIVER'  => $DRIVER,
+                        };
+      $self->_info_line('DBserver', sprintf 'DBs at %s:%s', $db_details->{'HOST'}, $db_details->{'PORT'} ) if $SiteDefs::ENSEMBL_WARN_DATABASES;
+      my $db_name = $tree->{'databases'}{'DATABASE_'.$type};
+      $db_details->{'NAME'} = $db_name;
+      my $db_exists = $config_packer->db_connect($type, $db_details, 1);
+      if ($db_exists) {
+        $self->_info_line('Databases', "$type: $db_name - configured") if $SiteDefs::ENSEMBL_WARN_DATABASES;
+        $tree->{'databases'}{'DATABASE_'.$type} = $db_name;
+      }
+      else {
+        delete $tree->{'databases'}{'DATABASE_'.$type};
+      }
+    }
+    else {
+      ## Autoconfigure any dbs not mentioned in ini file - assumes they are all on the main server
+      my $db_details = {
+                        'HOST'    => $HOST,
+                        'PORT'    => $PORT,
+                        'USER'    => $USER,
+                        'PASS'    => $PASS,
+                        'DRIVER'  => $DRIVER,
+                        };
+      $self->_info_line('DBserver', sprintf 'DBs at %s:%s', $db_details->{'HOST'}, $db_details->{'PORT'} ) if $SiteDefs::ENSEMBL_WARN_DATABASES;
       my $species_version = $tree->{'general'}{'SPECIES_RELEASE_VERSION'} || 1;
-      my $db_name = $tree->{'databases'}{'DATABASE_'.$_};
+      my $db_name = $tree->{'databases'}{'DATABASE_'.$type};
       unless ($db_name) {
         my $non_vert_version = $SiteDefs::SITE_RELEASE_VERSION;
-        $db_name = sprintf('%s_%s', $filename, lc($_));
+        $db_name = sprintf('%s_%s', $filename, lc($type));
         $db_name .= '_'.$non_vert_version if $non_vert_version;                                 
         $db_name .= $_ eq 'COMPARA' ? sprintf('_%s', $SiteDefs::ENSEMBL_VERSION)
                                     : sprintf('_%s_%s', $SiteDefs::ENSEMBL_VERSION, $species_version);
       }
       ## Does this database exist?
       $db_details->{'NAME'} = $db_name;
-      my $db_exists = $config_packer->db_connect($_, $db_details, 1);
+      my $db_exists = $config_packer->db_connect($type, $db_details, 1);
       if ($db_exists) {
-        $self->_info_line('Databases', "$_: $db_name - autoconfigured") if $SiteDefs::ENSEMBL_WARN_DATABASES;
-        $tree->{'databases'}{'DATABASE_'.$_} = $db_name;
+        $self->_info_line('Databases', "$type: $db_name - autoconfigured") if $SiteDefs::ENSEMBL_WARN_DATABASES;
+        $tree->{'databases'}{'DATABASE_'.$type} = $db_name;
       }
       else {
         ## Ignore this step for MULTI, as it may not have a core db
         unless ($filename eq 'MULTI') {
           my $db_string = sprintf '%s@%s:%s', $db_name, $db_details->{'HOST'}, $db_details->{'PORT'};
-          print STDERR "\t  [WARN] CORE DATABASE NOT FOUND - looking for '$db_string'\n" if $_ eq 'CORE';
+          print STDERR "\t  [WARN] CORE DATABASE NOT FOUND - looking for '$db_string'\n" if $type eq 'CORE';
           $self->_info_line('Databases', "-- database $db_name not available") if $SiteDefs::ENSEMBL_WARN_DATABASES;
         }
       }

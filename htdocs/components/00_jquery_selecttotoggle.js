@@ -32,7 +32,10 @@
       // go through all the selectors in the toggleMap and hide them except the one that corresponds to current element's value
       for (var val in toggleMap) {
         if (val !== currValue) {
-          wrapper.find(toggleMap[val]).hide().removeAttr('checked').filter('option').each(function() { // if hiding an option element, also disable it to make it work in webkit
+          var elemClass = '[class="' + toggleMap[val] + '"]'; // jQuery doesn't like class names with a dot in the middle so need to get elem using class attr e.g. _stt_Gallus_gallus_GCA_000002315.5
+          elemClass = elemClass.replace('.', ''); // replace the first dot in the string since we now need the class attr's value rather than the csss class name 
+
+          wrapper.find(elemClass).hide().removeAttr('checked').filter('option').each(function() { // if hiding an option element, also disable it to make it work in webkit
             var option = $(this);
 
             if (typeof option.data('sttDisabled') === 'undefined') {

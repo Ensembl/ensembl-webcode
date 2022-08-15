@@ -355,7 +355,7 @@ sub get_cell_line_data_closure {
 }
 
 sub get_cell_line_data {
-  my ($self, $image_config, $filter) = @_;
+  my ($self, $image_config) = @_;
 
   ## Check for cached data
   if ($image_config && $image_config->{'data_by_cell_line'} 
@@ -401,20 +401,13 @@ sub get_cell_line_data {
     }
   }
 
-  if ($image_config) {
-    return $self->get_data($data, $filter);
-  }
-  else {
-    return $self->get_table_data($data);
-  }
+  return $self->get_data($data);
 }
 
 sub get_data {
-  my ($self, $data, $filter) = @_;
+  my ($self, $data) = @_;
   return $data unless scalar keys %$data;
 
-  $filter ||= {};
-  my $is_image = keys %$filter ? 0 : 1;
   my $hub = $self->hub;
 
   ## Get only the data we need
@@ -424,9 +417,7 @@ sub get_data {
   my %feature_sets_on;
 
   while (my($cell_line, $ftypes) = each(%$data)) {
-    next if ($is_image && ($ftypes eq 'off' || !keys %{$ftypes||{}}));
-    next if $filter->{'cell'} and !grep { $_ eq $cell_line } @{$filter->{'cell'}};
-    next if $filter->{'cells_only'};
+    next if ($ftypes eq 'off' || !keys %{$ftypes||{}});
     next unless exists $data->{$cell_line};
     my $count = 0;
 
@@ -443,11 +434,10 @@ sub get_data {
       $count++;
 
       my $unique_id = sprintf '%s:%s', $cell_line, $ftype_name;
-      my $display_style = $is_image ? $info->{'renderer'} : '';
+      my $display_style = $info->{'renderer'};
       $feature_sets_on{$ftype_name} = 1;
     
-      if ($filter->{'block_features'}
-          || grep { $display_style eq $_ } qw(compact tiling_feature signal_feature)) {
+      if (grep { $display_style eq $_ } qw(compact tiling_feature signal_feature)) {
         my $key = $unique_id.':'.$count;
         my $block_features = $peak_adaptor->fetch_all_by_Slice_PeakCalling($self->Obj, $peak_calling);
         $data->{$cell_line}{$ftype_name}{'block_features'}{$key} = $block_features || [];
@@ -481,27 +471,6 @@ sub get_data_file_species_name {
   my $self = shift;
   my $hub  = $self->hub;
   return $hub->species_defs->SPECIES_PRODUCTION_NAME;
-}
-
-sub get_table_data {
-  my ($self, $data, $filter) = @_;
-  return $data unless scalar keys %$data;
-
-  my $hub                   = $self->hub;
-  my $peak_calling_adaptor  = $hub->get_adaptor('get_PeakCallingAdaptor', 'funcgen');
-  my $all_peak_calling      = $peak_calling_adaptor->fetch_all;
-
-  foreach my $peak_calling (@{$all_peak_calling||[]}) {
-
-    my $ftype       = $peak_calling->get_FeatureType;
-    my $ftype_name  = $ftype->name;
-
-    my $epigenome   = $peak_calling->get_Epigenome;
-    my $cell_line   = $epigenome->short_name;
-
-    $data->{$cell_line}{$ftype_name} = $peak_calling;
-  }
-  return $data;
 }
 
 1;

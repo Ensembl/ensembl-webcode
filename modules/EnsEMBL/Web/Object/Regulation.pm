@@ -295,10 +295,6 @@ sub get_evidence_data {
     $active_epigenomes->{$epigenome->short_name} = 1;
   }
 
-  ## Do we have a bigBed file for this?
-  
-  ## If not, get info from database
-
   my $peak_calling_adaptor  = $hub->get_adaptor('get_PeakCallingAdaptor', 'funcgen');
   my $all_peak_calling      = $peak_calling_adaptor->fetch_all;
 

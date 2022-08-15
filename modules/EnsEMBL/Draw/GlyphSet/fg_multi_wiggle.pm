@@ -26,6 +26,8 @@ use strict;
 
 use EnsEMBL::Draw::Style::Extra::Header;
 
+use Data::Dumper;
+
 use parent qw(EnsEMBL::Draw::GlyphSet::bigwig);
 
 sub label { return undef; }
@@ -57,6 +59,10 @@ sub data_by_cell_line {
 
   my $config  = $self->{'config'};
   my $data    = $config->{'data_by_cell_line'};
+
+  $Data::Dumper::Maxdepth = 5;
+  warn "FG MULTI WIGGLE!!!!!" . Dumper($data);
+
   ## Lazy evaluation
   if (ref($data) eq 'CODE') {
     $data       = $data->() if ref($data) eq 'CODE';

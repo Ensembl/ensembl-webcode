@@ -34,6 +34,7 @@ use strict;
 
 use Bio::EnsEMBL::Variation::Utils::Constants;
 use EnsEMBL::Web::Utils::Sanitize qw(clean_id);
+use Data::Dumper;
 
 use base qw(EnsEMBL::Web::Object);
 
@@ -419,8 +420,10 @@ sub get_data {
 
   ## Get only the data we need
   my $lookup        = $self->hub->species_defs->databases->{'DATABASE_FUNCGEN'}{'peak_calling'};
+  my $bigbed_lookup = $self->hub->species_defs->databases->{'DATABASE_FUNCGEN'}{'tables'}{'epigenome_track'};
   my $pc_adaptor    = $hub->get_adaptor('get_PeakCallingAdaptor', 'funcgen');
   my $peak_adaptor  = $hub->get_adaptor('get_PeakAdaptor', 'funcgen');
+  my $data_file_adaptor  = $hub->get_adaptor('get_DataFileAdaptor', 'funcgen');
   my %feature_sets_on;
 
   while (my($cell_line, $ftypes) = each(%$data)) {
@@ -446,11 +449,25 @@ sub get_data {
       my $display_style = $is_image ? $info->{'renderer'} : '';
       $feature_sets_on{$ftype_name} = 1;
     
-      if ($filter->{'block_features'}
-          || grep { $display_style eq $_ } qw(compact tiling_feature signal_feature)) {
+      if ($filter->{'block_features'} || grep { $display_style eq $_ } qw(compact tiling_feature signal_feature)) {
+        my $bigbed_file_id = $bigbed_lookup->{$cell_line}{$ftype_name}{'peaks'};
         my $key = $unique_id.':'.$count;
-        my $block_features = $peak_adaptor->fetch_all_by_Slice_PeakCalling($self->Obj, $peak_calling);
-        $data->{$cell_line}{$ftype_name}{'block_features'}{$key} = $block_features || [];
+
+        if ($bigbed_file_id) {
+          my $bigbed_file = $data_file_adaptor->fetch_by_dbID($bigbed_file_id);
+          my $bigbed_file_subpath = $bigbed_file->path if $bigbed_file;
+
+          my $full_bigbed_file_path = join '/',
+            $hub->species_defs->DATAFILE_BASE_PATH,
+            $self->get_data_file_species_name(),
+            $hub->species_defs->ASSEMBLY_VERSION,
+            $bigbed_file_subpath;
+
+          $data->{$cell_line}{$ftype_name}{'block_features'}{$key} = $full_bigbed_file_path if $bigbed_file_subpath;
+        } else {
+          my $block_features = $peak_adaptor->fetch_all_by_Slice_PeakCalling($self->Obj, $peak_calling);
+          $data->{$cell_line}{$ftype_name}{'block_features'}{$key} = $block_features || [];
+        }
       }
 
       ## Get path to bigWig file

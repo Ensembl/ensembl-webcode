@@ -28,7 +28,7 @@ use EnsEMBL::Draw::Style::Extra::Header;
 
 use Data::Dumper;
 
-use parent qw(EnsEMBL::Draw::GlyphSet::bigwig);
+use parent qw(EnsEMBL::Draw::GlyphSet::bigwig EnsEMBL::Draw::GlyphSet::bigbed);
 
 sub label { return undef; }
 
@@ -275,22 +275,27 @@ sub get_features {
     if ($args->{'feature_type'} eq 'block_features') {
       $subtrack->{'metadata'}{'feature_height'} = 8;
       my $features = $tracks->{$key};
-      foreach my $f (@$features) {
-        my $href = $self->_block_zmenu($f);
-        my $hash = {
-                    start     => $f->start,
-                    end       => $f->end,
-                    midpoint  => $f->summit,
-                    label     => $label,
-                    href      => $href,
-                    };
-        push @{$subtrack->{'features'}}, $hash; 
-      }
+
+      my $bigbed_data = $self->EnsEMBL::Draw::GlyphSet::bigbed::get_data($features);
+
+      warn "FEATURES:  " . Dumper $bigbed_data;
+
+      # foreach my $f (@$features) {
+      #   my $href = $self->_block_zmenu($f);
+      #   my $hash = {
+      #               start     => $f->start,
+      #               end       => $f->end,
+      #               midpoint  => $f->summit,
+      #               label     => $label,
+      #               href      => $href,
+      #               };
+      #   push @{$subtrack->{'features'}}, $hash; 
+      # }
     }
     elsif ($args->{'feature_type'} eq 'wiggle_features') {
       my $bins                    = $self->bins;
       my $url                     = $tracks->{$key};
-      my $wiggle                  = $self->get_data($bins, $url);
+      my $wiggle                  = $self->EnsEMBL::Draw::GlyphSet::bigwig::get_data($bins, $url);
       $subtrack->{'features'}     = $wiggle->[0]{'features'};
 
       ## Don't override values that we've already set!

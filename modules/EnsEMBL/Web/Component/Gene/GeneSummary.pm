@@ -96,7 +96,7 @@ sub content {
       my $mane_plus_clinical_translation_url = $hub->url({ type => 'Transcript', action => 'ProteinSummary', t => $mane_plus_clinical_translation });
       my $mane_plus_clinical_translation_link = sprintf('<a href="%s">%s</a>', $mane_plus_clinical_translation_url, $mane_plus_clinical_translation);
 
-      $mane_description .= sprintf(' and MANE Plus Clinical %s, %s', $mane_plus_clinical_translation_link, $mane_plus_clinical_translation_link);
+      $mane_description .= sprintf(' and MANE Plus Clinical %s, %s', $mane_plus_clinical_link, $mane_plus_clinical_translation_link);
     }
 
     $table->add_row('MANE', $mane_description);

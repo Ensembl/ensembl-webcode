@@ -64,17 +64,25 @@ sub content {
   if ($transcript->is_mane) {
     my $mane_select = $transcript->get_all_Attributes('MANE_Select')->[0];
     my $mane_plus_clinical = $transcript->get_all_Attributes('MANE_Plus_Clinical')->[0];
-    my $mane_type = $mane_select ? 'MANE Select' : 'MANE Plus Clinical';
+    my $mane_type = $mane_select ? 'MANE_Select' : 'MANE_Plus_Clinical';
+    my $mane_type_str = $mane_select ? 'MANE Select' : 'MANE Plus Clinical';
 
-    my $refseq_id = $mane_select ? $mane_select->value : $mane_plus_clinical->value;
-    my $refseq_url = $hub->get_ExtURL('REFSEQ_DNA', {'ID' => $refseq_id});
-    my $refseq_link = sprintf('<a href="%s">%s</a>', $refseq_url, $refseq_id);
+    my $transcript_refseq_id = $mane_select ? $mane_select->value : $mane_plus_clinical->value;
+    my $transcript_refseq_url = $hub->get_ExtURL('REFSEQ_DNA', { 'ID' => $transcript_refseq_id });
+    my $refseq_links = sprintf('<a href="%s">%s</a>', $transcript_refseq_url, $transcript_refseq_id);
 
-    my $mane_transcript_translation = $transcript->translation->stable_id;
-    my $mane_transcript_translation_url = $hub->url({ type => 'Transcript', action => 'ProteinSummary', t => $mane_transcript_translation });
-    my $mane_transcript_translation_link = sprintf('<a href="%s">%s</a>', $mane_transcript_translation_url, $mane_transcript_translation);
+    my $mane_transcript_translation_url = $hub->url({ type => 'Transcript', action => 'ProteinSummary', t => $transcript->translation->stable_id });
+    my $mane_transcript_translation_link = sprintf('<a href="%s">%s</a>', $mane_transcript_translation_url, $transcript->translation->stable_id);
 
-    $table->add_row('MANE', sprintf('<p>This %s transcript contains %s and matches to %s</p>', $mane_type, $mane_transcript_translation_link, $refseq_link));
+    my $translation_refseq_id = $transcript->translation->get_all_Attributes($mane_type)->[0]->value;
+
+    if ($translation_refseq_id) {
+      my $translation_refseq_url = $hub->get_ExtURL('REFSEQ_RNA', { 'ID' => $translation_refseq_id });
+
+      $refseq_links .= sprintf(' and <a href="%s">%s</a>', $translation_refseq_url, $translation_refseq_id);
+    }
+
+    $table->add_row('MANE', sprintf('<p>This %s transcript contains %s and matches to %s</p>', $mane_type_str, $mane_transcript_translation_link, $refseq_links));
   }
 
   ## add Uniprot info

@@ -37,7 +37,9 @@ sub content {
   my $hub         = $self->hub;
 
   ## View retired for human genes
-  return if ($hub->species =~ /^Homo_sapiens/ && $ic_type eq 'gene_variation');
+  if ($hub->species =~ /^Homo_sapiens/ && $ic_type eq 'gene_variation') {
+    return $self->info_panel('View retired', 'This view has been retired in Human, as the large amount of data makes it impossible to render the image without timing out.');
+  }
 
   my $object      = $self->object || $hub->core_object(lc($hub->param('data_type')));
   my $image_width = $self->image_width     || 800;  

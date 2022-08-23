@@ -23,11 +23,17 @@ use strict;
 
 use base qw(EnsEMBL::Web::ZMenu);
 
+use Data::Dumper;
+
 sub content {
   my $self                = shift;
   my $hub                 = $self->hub;
   my ($chr, $start, $end) = split /\:|\-/, $hub->param('pos'); 
   my $length              = $end - $start + 1;
+
+
+  warn "CALLING CONTENT FROM FILE!";
+  $self->content_from_file($hub);
   
   $self->caption('CAPTION!');
   
@@ -55,6 +61,33 @@ sub content {
     type        => 'bp',
     label_html  => $loc_link,
   });
+
+}
+
+
+sub content_from_file {
+  my ($self, $hub) = @_;
+
+  my $click_data = $self->click_data;
+
+  return unless $click_data;
+  $click_data->{'display'}  = 'text';
+  $click_data->{'strand'}   = $hub->param('fake_click_strand');
+
+  my $strand = $hub->param('fake_click_strand') || 1;
+  my $glyphset = 'EnsEMBL::Draw::GlyphSet::bigbed';
+  my $slice    = $click_data->{'container'};
+
+  if ($self->dynamic_use($glyphset)) {
+    warn "INSIDE IF!";
+    $Data::Dumper::Maxdepth = 2;
+    warn Dumper $click_data;
+
+    $glyphset = $glyphset->new($click_data);
+    # my $data = $glyphset->get_data('/nfs/public/rw/ensweb/andrey_test_regulation_data_files/gallus_gallus_gca000002315v5/GRCg6a//funcgen/108/peaks/atac-seq/atac_seq_lung_female_1_d.bb');
+
+    warn 'ZMENU!' . Dumper $glyphset->{'data'};
+  }
 
 }
 

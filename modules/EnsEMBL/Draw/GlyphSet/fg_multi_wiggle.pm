@@ -292,6 +292,7 @@ sub get_features {
         }
       } else {
         # features are a path to the bigbed file
+        $self->{'my_config'}->set('zmenu_action', 'BigbedPeak');
         my $bigbed_data = $self->EnsEMBL::Draw::GlyphSet::bigbed::get_data($features);
         $drawing_style = 'EnsEMBL::Draw::Style::Feature';
         my $bigbed_metadata = $bigbed_data->[0]{'metadata'};
@@ -299,7 +300,6 @@ sub get_features {
         while (my ($key, $value) = each %{$bigbed_metadata || {}}) {
           $subtrack->{'metadata'}{$key} = $value;
         }
-        $subtrack->{'metadata'}{'zmenu_action'} = 'BigbedPeak';
       }
     }
     elsif ($args->{'feature_type'} eq 'wiggle_features') {

@@ -25,6 +25,8 @@ use base qw(EnsEMBL::Web::ZMenu);
 
 use Data::Dumper;
 
+use Bio::EnsEMBL::IO::Parser;
+
 sub content {
   my $self                = shift;
   my $hub                 = $self->hub;
@@ -73,20 +75,38 @@ sub content_from_file {
   return unless $click_data;
   $click_data->{'display'}  = 'text';
   $click_data->{'strand'}   = $hub->param('fake_click_strand');
+  #warn Dumper $click_data;
 
   my $strand = $hub->param('fake_click_strand') || 1;
-  my $glyphset = 'EnsEMBL::Draw::GlyphSet::bigbed';
   my $slice    = $click_data->{'container'};
 
-  if ($self->dynamic_use($glyphset)) {
-    warn "INSIDE IF!";
-    $Data::Dumper::Maxdepth = 2;
-    warn Dumper $click_data;
+  my $bigbed_lookup = $hub->species_defs->databases->{'DATABASE_FUNCGEN'}{'tables'}{'epigenome_track'};
+  my $bigbed_file_id = $bigbed_lookup->{$hub->param('cell_line')}{$hub->param('feat_name')}{'peaks'};;
 
-    $glyphset = $glyphset->new($click_data);
-    # my $data = $glyphset->get_data('/nfs/public/rw/ensweb/andrey_test_regulation_data_files/gallus_gallus_gca000002315v5/GRCg6a//funcgen/108/peaks/atac-seq/atac_seq_lung_female_1_d.bb');
+  if ($bigbed_file_id) {
+    my $data_file_adaptor   = $hub->get_adaptor('get_DataFileAdaptor', 'funcgen');
+    my $bigbed_file         = $data_file_adaptor->fetch_by_dbID($bigbed_file_id);
+    my $bigbed_file_subpath = $bigbed_file->path if $bigbed_file;
 
-    warn 'ZMENU!' . Dumper $glyphset->{'data'};
+    my $full_bigbed_file_path = join '/',
+            $hub->species_defs->DATAFILE_BASE_PATH,
+            $hub->species_defs->SPECIES_PRODUCTION_NAME,
+            $hub->species_defs->ASSEMBLY_VERSION,
+            $bigbed_file_subpath;
+
+    my $parser = Bio::EnsEMBL::IO::Parser::open_as('BigBed', $full_bigbed_file_path);
+    my ($chr, $start, $end) = split /\:|\-/, $hub->param('pos'); 
+    $parser->seek($slice->seq_region_name, $slice->start, $slice->end);
+    my $columns = $parser->{'column_map'};
+    warn "### COLUMNS ".Dumper($columns);
+    while ($parser->next) {
+      my $start = $parser->get_start;
+      my $end = $parser->get_end;
+      my $r = sprintf('%s:%s-%s', $slice->seq_region_name, $start, $end);
+      my $score = $parser->get_score;
+      warn ">>> $r SCORE $score";
+    }
+
   }
 
 }

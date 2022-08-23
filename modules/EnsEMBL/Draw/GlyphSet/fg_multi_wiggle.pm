@@ -60,8 +60,8 @@ sub data_by_cell_line {
   my $config  = $self->{'config'};
   my $data    = $config->{'data_by_cell_line'};
 
-  $Data::Dumper::Maxdepth = 5;
-  warn "FG MULTI WIGGLE!!!!!" . Dumper($data);
+  #$Data::Dumper::Maxdepth = 5;
+  #warn "FG MULTI WIGGLE!!!!!" . Dumper($data);
 
   ## Lazy evaluation
   if (ref($data) eq 'CODE') {
@@ -293,6 +293,10 @@ sub get_features {
       } else {
         # features are a path to the bigbed file
         $self->{'my_config'}->set('zmenu_action', 'BigbedPeak');
+        $self->{'my_config'}->set('zmenu_extras', {
+                                                    'cell_line' => $cell_line,
+                                                    'feat_name' => $feature_name,
+                                                  });
         my $bigbed_data = $self->EnsEMBL::Draw::GlyphSet::bigbed::get_data($features);
         $drawing_style = 'EnsEMBL::Draw::Style::Feature';
         my $bigbed_metadata = $bigbed_data->[0]{'metadata'};

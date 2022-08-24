@@ -99,7 +99,7 @@
             if (this.value) {
               var filters = $.map(this.className.match(/(\s+|^)_stt__([^\s]+)/g) || [], function(str) { return str.replace('_stt__', '._stt_') });
                   filters.push('._stt_' + this.value);
-              tMap[this.value] = this.className.match(/(\s+|^)_sttmulti($|\s+)/) ? filters.join(',') : filters[0];
+              tMap[this.value] = this.className.match(/(\s+|^)_sttmulti($|\s+)/) ? (filters[1] || filters.join(',')) : filters[0];
             }
           });
         }

@@ -815,7 +815,8 @@ sub fetch_homology_species_hash {
 
   return {} unless $database;
 
-  my $query_member = $database->get_GeneMemberAdaptor->fetch_by_stable_id($geneid);
+  my $genome_db    = $database->get_GenomeDBAdaptor->fetch_by_name_assembly($self->hub->species_defs->SPECIES_PRODUCTION_NAME);
+  my $query_member = $database->get_GeneMemberAdaptor->fetch_by_stable_id_GenomeDB($geneid, $genome_db);
 
   return {} unless defined $query_member ;
 
@@ -907,7 +908,7 @@ sub get_GeneTree {
 
   unless( defined( $self->{$cachekey} ) ){ # Look in cache
     # Fetch the objects
-    my $args = {'stable_id' => $stable_id, 'cdb' => $compara_db};
+    my $args = {'stable_id' => $self->stable_id, 'cdb' => $compara_db};
     my $member = $self->get_compara_Member($args)
         || &$error( "No compara member for this gene" );
     my $tree_adaptor = $member->adaptor->db->get_adaptor('GeneTree')

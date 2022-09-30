@@ -756,7 +756,8 @@ sub get_homologies {
   my $database = $self->database($compara_db);
   return unless $database;
 
-  my $query_member   = $database->get_GeneMemberAdaptor->fetch_by_stable_id($self->stable_id);
+  my $args = {'stable_id' => $self->stable_id, 'cdb' => $compara_db};
+  my $query_member   = $self->get_compara_Member($args); 
   return unless defined $query_member;
   
   my $homology_adaptor = $database->get_HomologyAdaptor;

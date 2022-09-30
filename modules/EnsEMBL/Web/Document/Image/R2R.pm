@@ -60,7 +60,6 @@ sub find_ss_in_compara {
       'cdb'       => 'compara'
     };
     my $member = $self->component->object->get_compara_Member($args);
-    warn ">>> MEMBER $member";
 
     if ($member and $member->has_GeneTree) {
       my $transcript = $member->get_canonical_SeqMember();

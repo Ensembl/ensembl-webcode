@@ -172,7 +172,7 @@ sub get_homologies {
 
   my $database     = $hub->database($cdb);
   my $args         = {'stable_id' => $gene_id, 'cdb' => $cdb};
-  my $qm           = $self->object->get_compara_Member($args);;
+  my $qm           = $self->object->get_compara_Member($args);
   my $homologies;
   my $ok_homologies = [];
   my $action        = $hub->param('data_action') || $hub->action;

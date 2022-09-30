@@ -888,30 +888,6 @@ sub get_disease_matches{
   return \%omim_disease ;
 }
 
-sub get_compara_Member{
-  # Returns the Bio::EnsEMBL::Compara::Member object
-  # corresponding to this gene 
-  my $self = shift;
-  my $compara_db = shift || 'compara';
-
-  # Catch coderef
-  my $cachekey = "_compara_member_$compara_db";
-  my $error = sub{ warn($_[0]); $self->{$cachekey}=0; return 0};
-
-  unless( defined( $self->{$cachekey} ) ){ # Look in cache
-    # Prepare the adaptors
-    my $compara_dba = $self->database( $compara_db )           || &$error( "No compara db" );
-    my $genemember_adaptor = $compara_dba->get_adaptor('GeneMember') || &$error( "Cannot COMPARA->get_adaptor('GeneMember')" );
-    # Fetch the object
-    my $id = $self->stable_id;
-    my $member = $genemember_adaptor->fetch_by_stable_id($id) || &$error( "<h3>No compara ENSEMBLGENE member for $id</h3>" );
-    # Update the cache
-    $self->{$cachekey} = $member;
-  }
-  # Return cached value
-  return $self->{$cachekey};
-}
-
 sub get_ProteinTree {
   # deprecated, use get_GeneTree
   return get_GeneTree(@_);
@@ -931,7 +907,8 @@ sub get_GeneTree {
 
   unless( defined( $self->{$cachekey} ) ){ # Look in cache
     # Fetch the objects
-    my $member = $self->get_compara_Member($compara_db)
+    my $args = {'stable_id' => $stable_id, 'cdb' => $compara_db};
+    my $member = $self->get_compara_Member($args)
         || &$error( "No compara member for this gene" );
     my $tree_adaptor = $member->adaptor->db->get_adaptor('GeneTree')
         || &$error( "Cannot COMPARA->get_adaptor('GeneTree')" );

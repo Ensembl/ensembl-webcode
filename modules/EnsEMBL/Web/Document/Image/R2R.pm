@@ -51,10 +51,6 @@ sub render {
 sub find_ss_in_compara {
     my ($self, $database) = @_;
 
-    my $gma = $database->get_GeneMemberAdaptor();
-    my $gta = $database->get_GeneTreeAdaptor();
-    my $gda = $database->get_GenomeDBAdaptor();
-
     my $args = {
       'stable_id' => $self->component->object->stable_id,
       'cdb'       => 'compara'
@@ -62,6 +58,7 @@ sub find_ss_in_compara {
     my $member = $self->component->object->get_compara_Member($args);
 
     if ($member and $member->has_GeneTree) {
+      my $gta = $database->get_GeneTreeAdaptor();
       my $transcript = $member->get_canonical_SeqMember();
       my $gene_tree  = $gta->fetch_default_for_Member($member);
       if ($gene_tree) {

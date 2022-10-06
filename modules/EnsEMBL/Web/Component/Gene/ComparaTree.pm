@@ -183,7 +183,7 @@ sub content {
   my $gene_to_highlight = $hub->param('g1');
   my $current_gene_display_name;
 
-  if (defined $gene->Obj->display_xref) {
+  if ($gene && defined $gene->Obj->display_xref) {
     $current_gene_display_name = $gene->Obj->display_xref->display_id;
   } else {
     $current_gene_display_name = $hub->param('g'); 

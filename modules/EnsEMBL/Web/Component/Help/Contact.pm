@@ -38,6 +38,10 @@ sub content {
   my $self  = shift;
   my $hub   = $self->hub;
 
+  ## Emergency disable of form bc spammers!
+  my $html = qq(<p>Sorry, our contact form is not available right now. You can message us via <a href="http://www.ensembl.org/info/about/contact/index.html">our social media</a> or our <a href="https://www.ensembl.info/contact-us/">blog</a> and we will respond within UK office hours.</p>);
+  return $html;
+
   ## Where did the user come from?
   my ($path, $query) = split('\?', $ENV{'HTTP_REFERER'});
   my @A = split('/', $path);

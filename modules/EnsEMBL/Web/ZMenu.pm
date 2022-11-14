@@ -24,6 +24,7 @@ use strict;
 use HTML::Entities qw(encode_entities decode_entities);
 
 use Bio::EnsEMBL::Variation::Utils::Constants;
+use Data::Dumper;
 
 use base qw(EnsEMBL::Web::Root);
 

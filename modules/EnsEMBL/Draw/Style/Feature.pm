@@ -18,6 +18,7 @@ limitations under the License.
 =cut
 
 package EnsEMBL::Draw::Style::Feature;
+use Data::Dumper;
 
 =pod
 Renders a track as a series of simple rectangular blocks
@@ -106,7 +107,7 @@ sub create_glyphs {
       ## but doesn't need to have both. However we do set join and label colours,
       ## because other configuration options determine whether they are used
       if (!$feature->{'bordercolour'}) {
-        $feature->{'colour'} ||= $track_config->get('default_colour') || $subtrack->{'metadata'}{'colour'} || 'black';
+        $feature->{'colour'} ||= $subtrack->{'metadata'}{'colour'} || $track_config->get('default_colour') || 'black';
       }
       $feature->{'join_colour'}   ||= $feature->{'colour'} || $feature->{'bordercolour'};
       $feature->{'label_colour'}  ||= $feature->{'colour'} || $feature->{'bordercolour'};

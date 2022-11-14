@@ -255,6 +255,7 @@ sub get_features {
   my $drawing_style = '';
 
   foreach my $key (sort { $a cmp $b } keys %$tracks) {
+    warn "What is my dollar key? $key";
     my $subtrack = {'metadata' => {},
                     'features' => [],
                     };
@@ -297,8 +298,8 @@ sub get_features {
                                                     'cell_line' => $cell_line,
                                                     'feat_name' => $feature_name,
                                                   });
-        my $bigbed_data = $self->EnsEMBL::Draw::GlyphSet::bigbed::get_data($features);
-        $drawing_style = 'EnsEMBL::Draw::Style::Feature';
+        my $bigbed_data = $self->EnsEMBL::Draw::GlyphSet::bigbed::get_data($features, $subtrack->{'metadata'});
+        $drawing_style = 'EnsEMBL::Draw::Style::Feature::MultiBlocks';
         my $bigbed_metadata = $bigbed_data->[0]{'metadata'};
         $subtrack->{'features'} = $bigbed_data->[0]{'features'};
         while (my ($key, $value) = each %{$bigbed_metadata || {}}) {

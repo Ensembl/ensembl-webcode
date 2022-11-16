@@ -441,7 +441,7 @@ sub get_data {
       $feature_sets_on{$ftype_name} = 1;
     
       if (grep { $display_style eq $_ } qw(compact tiling_feature signal_feature)) {
-        my $bigbed_file_id = $bigbed_lookup->{$cell_line}{$ftype_name}{'peaks'};
+        my $bigbed_file_id = $bigbed_lookup->{$cell_line}{$ftype_name}{'peaks'}{'data_file_id'};
         my $key = $unique_id.':'.$count;
 
         if ($bigbed_file_id) {

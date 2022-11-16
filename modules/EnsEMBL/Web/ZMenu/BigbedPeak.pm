@@ -35,18 +35,19 @@ sub content {
   my ($chr, $start, $end) = split /\:|\-/, $hub->param('pos'); 
   my $length              = $end - $start + 1;
 
-  my $content_from_file = $self->content_from_file($hub);
+  my $content_from_file = $self->content_from_file($hub);  # FIXME: this method can return an undefined
   my $chromosome = $content_from_file->{'chromosome'};
   my $start = $content_from_file->{'chromStart'};
   my $end = $content_from_file->{'chromEnd'};
   my $name = $content_from_file->{'name'};
   my $epigenome_track_source = $content_from_file->{'epigenome_track_source'};
+  my $caption = $content_from_file->{'caption'};
 
   # DECISIONS:
   # - no Feature label names
   # - no Peak summit
 
-  $self->caption('Hists & Pols');
+  $self->caption($caption);
   
   $self->add_entry({
     type  => 'Feature',
@@ -97,6 +98,13 @@ sub content {
 sub content_from_file {
   my ($self, $hub) = @_;
 
+
+  my $pc_adaptor    = $hub->get_adaptor('get_PeakCallingAdaptor', 'funcgen');
+  my $peak_calling_lookup = $hub->species_defs->databases->{'DATABASE_FUNCGEN'}{'peak_calling'};
+
+  my $peak_calling_id = $peak_calling_lookup->{$hub->param('cell_line')}{$hub->param('feat_name')};
+  my $peak_calling  = $pc_adaptor->fetch_by_dbID($peak_calling_id);
+
   my $click_data = $self->click_data;
 
   return unless $click_data;
@@ -108,7 +116,9 @@ sub content_from_file {
   my $slice    = $click_data->{'container'};
 
   my $bigbed_lookup = $hub->species_defs->databases->{'DATABASE_FUNCGEN'}{'tables'}{'epigenome_track'};
-  my $bigbed_file_id = $bigbed_lookup->{$hub->param('cell_line')}{$hub->param('feat_name')}{'peaks'};;
+  my $peaks_lookup = $bigbed_lookup->{$hub->param('cell_line')}{$hub->param('feat_name')}{'peaks'};
+  my $bigbed_file_id = $peaks_lookup->{'data_file_id'};
+  my $epigenome_track_id = $peaks_lookup->{'track_id'};
 
   if ($bigbed_file_id) {
     my $data_file_adaptor   = $hub->get_adaptor('get_DataFileAdaptor', 'funcgen');
@@ -117,7 +127,7 @@ sub content_from_file {
 
     my $epigenome_track_adaptor   = $hub->get_adaptor('get_EpigenomeTrackAdaptor', 'funcgen');
     # my $epigenome_track = $epigenome_track_adaptor->fetch_by_data_file_id($bigbed_file_id)); # This is undefined
-    my $epigenome_track = $epigenome_track_adaptor->fetch_by_dbID(4087);  # FIXME -- use dynamic data
+    my $epigenome_track = $epigenome_track_adaptor->fetch_by_dbID($epigenome_track_id);
     my $epigenome_track_source_label = $epigenome_track->get_source_label();
 
     warn "BIGBED FILE ID: " . $bigbed_file_id;
@@ -156,8 +166,9 @@ sub content_from_file {
       'chromosome' => $slice->seq_region_name,
       'chromStart' => $start,
       'chromEnd' => $end,
-      'name' => $feature_name,
-      'epigenome_track_source' => $epigenome_track_source_label
+      'name' => $peak_calling->display_label,
+      'epigenome_track_source' => $epigenome_track_source_label,
+      'caption' => $peak_calling->get_FeatureType->evidence_type_label
     };
 
   }

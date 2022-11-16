@@ -29,6 +29,7 @@ use EnsEMBL::Web::File::Utils::URL qw(read_file);
 
 use JSON qw(from_json);
 use URI::Escape;
+use Data::Dumper;
 
 sub munge {
   my ($self, $func) = @_;
@@ -979,7 +980,7 @@ sub _summarise_funcgen_db {
 
   ## Save epigenome track ids for all regulatory tracks
   my $et_aref = $dbh->selectall_arrayref('
-    select et.data_file_id, eg.short_name, ft.name, et.track_type
+    select et.epigenome_track_id, et.data_file_id, eg.short_name, ft.name, et.track_type
     from
       epigenome_track as et,
       epigenome as eg,
@@ -990,7 +991,10 @@ sub _summarise_funcgen_db {
   ');
 
   foreach (@$et_aref) {
-    $self->db_details($db_name)->{'tables'}{'epigenome_track'}{$_->[1]}{$_->[2]}{$_->[3]} = $_->[0];
+    $self->db_details($db_name)->{'tables'}{'epigenome_track'}{$_->[2]}{$_->[3]}{$_->[4]} = {
+      track_id => $_->[0],
+      data_file_id => $_->[1]
+    };
   }
 
   $dbh->disconnect();

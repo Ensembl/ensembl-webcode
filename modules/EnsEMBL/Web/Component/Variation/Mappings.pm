@@ -721,8 +721,8 @@ sub detail_panel {
         my $isAFDB = $domain_src =~ '^AFDB-ENSP' && $consequence && $consequence eq 'missense variant';
         if ( $isPDB || $isAFDB ) {
           my $button_url = $hub->url({
-            type    => 'Tools',
-            action  => $isPDB ? 'VEP/PDB' : 'VEP/AFDB',
+            type    => $isPDB ? 'Variation' : 'Tools',
+            action  => $isPDB ? 'PDB' : 'VEP/AFDB',
             var     => $object->name,
             pos     => $tv->translation_start,
             cons    => $consequence,

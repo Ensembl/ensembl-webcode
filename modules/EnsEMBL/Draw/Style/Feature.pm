@@ -18,7 +18,6 @@ limitations under the License.
 =cut
 
 package EnsEMBL::Draw::Style::Feature;
-use Data::Dumper;
 
 =pod
 Renders a track as a series of simple rectangular blocks

@@ -29,7 +29,6 @@ use EnsEMBL::Web::File::Utils::URL qw(read_file);
 
 use JSON qw(from_json);
 use URI::Escape;
-use Data::Dumper;
 
 sub munge {
   my ($self, $func) = @_;

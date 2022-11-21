@@ -34,7 +34,6 @@ use strict;
 
 use Bio::EnsEMBL::Variation::Utils::Constants;
 use EnsEMBL::Web::Utils::Sanitize qw(clean_id);
-use Data::Dumper;
 
 use base qw(EnsEMBL::Web::Object);
 

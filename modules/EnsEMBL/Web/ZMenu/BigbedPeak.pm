@@ -17,15 +17,12 @@ limitations under the License.
 
 =cut
 
+# This ZMenu was modelled after EnsEMBL::Web::ZMenu::FeatureEvidence
 package EnsEMBL::Web::ZMenu::BigbedPeak;
-
-# See the original ZMenu that we are modelling this on in EnsEMBL::Web::ZMenu::FeatureEvidence
 
 use strict;
 
 use base qw(EnsEMBL::Web::ZMenu);
-
-use Data::Dumper;
 
 use Bio::EnsEMBL::IO::Parser;
 
@@ -35,17 +32,15 @@ sub content {
   my ($chr, $start, $end) = split /\:|\-/, $hub->param('pos'); 
   my $length              = $end - $start + 1;
 
-  my $content_from_file = $self->content_from_file($hub);  # FIXME: this method can return an undefined
+  my $content_from_file = $self->content_from_file($hub);
+  return unless $content_from_file;
+
   my $chromosome = $content_from_file->{'chromosome'};
   my $start = $content_from_file->{'chromStart'};
   my $end = $content_from_file->{'chromEnd'};
   my $name = $content_from_file->{'name'};
   my $epigenome_track_source = $content_from_file->{'epigenome_track_source'};
   my $caption = $content_from_file->{'caption'};
-
-  # DECISIONS:
-  # - no Feature label names
-  # - no Peak summit
 
   $self->caption($caption);
   
@@ -57,7 +52,6 @@ sub content {
   my $source_label = $epigenome_track_source;
 
   if(defined $source_label){
-
     $self->add_entry({
       type        => 'Source',
       label_html  =>  sprintf '<a href="%s">%s</a> ',
@@ -65,11 +59,6 @@ sub content {
                       $source_label
                      });
   }
-
-  # Below is an example of the url that is generated for this Zmenu. It doesn't have the pos parameter. Why? How did it get generated?
-  # /Homo_sapiens/ZMenu/Regulation/View?cl=A549;config=contigviewbottom;db=core;fdb=funcgen;r=17:63992802-64038237;rf=ENSR00000096873;track=reg_feats_A549&click_chr=17&click_start=63998666&click_end=63998752&click_y=8.375
-  # Compare this with the url for FeatureEvidence Zmenu:
-  # /Homo_sapiens/ZMenu/Location/FeatureEvidence?act=ViewBottom;config=contigviewbottom;db=core;evidence=1;fdb=funcgen;fs=IHECRE00001860_H3K27me3_ccat_histone_ENCODE;pos=17:63997640-63998420;ps=63998130;r=17:63992802-64038237;track=reg_feats_core_DND-41&click_chr=17&click_start=63997968&click_end=63998053&click_y=3.375
 
   my $loc_link = sprintf '<a href="%s">%s</a>', 
                           $hub->url({'type'=>'Location','action'=>'View','r'=> "${chromosome}:${start}-${end}"}),
@@ -94,7 +83,7 @@ sub content {
 
 }
 
-
+# Notice that this subroutine has a potential of returning an undef, if things go wrong (which they shouldn't).
 sub content_from_file {
   my ($self, $hub) = @_;
 
@@ -110,7 +99,6 @@ sub content_from_file {
   return unless $click_data;
   $click_data->{'display'}  = 'text';
   $click_data->{'strand'}   = $hub->param('fake_click_strand');
-  #warn Dumper $click_data;
 
   my $strand = $hub->param('fake_click_strand') || 1;
   my $slice    = $click_data->{'container'};
@@ -130,10 +118,6 @@ sub content_from_file {
     my $epigenome_track = $epigenome_track_adaptor->fetch_by_dbID($epigenome_track_id);
     my $epigenome_track_source_label = $epigenome_track->get_source_label();
 
-    warn "BIGBED FILE ID: " . $bigbed_file_id;
-    $Data::Dumper::Maxdepth = 5;
-    warn "EPIGENOME TRACK?  " . Dumper($epigenome_track);
-
     my $full_bigbed_file_path = join '/',
             $hub->species_defs->DATAFILE_BASE_PATH,
             $hub->species_defs->SPECIES_PRODUCTION_NAME,
@@ -150,16 +134,12 @@ sub content_from_file {
     my $region;
     my $feature_name;
 
-    warn "### COLUMNS ".Dumper($columns);
-    # It's really odd to access this data in a while loop!
-    while ($parser->next) {
-      warn "RECORD!!!" . Dumper($parser->{'record'});
+    if ($parser->next) {
+      # At this point, bigbed parser reads the first match that it finds, and the parsed data can be accessed off it.
+      # Although, in theory, there may be more than one match, we only know how to handle one.
       $feature_name = $parser->{'record'}[$feature_name_column_index];
       $start = $parser->get_start;
       $end = $parser->get_end;
-    #   my $r = sprintf('%s:%s-%s', $slice->seq_region_name, $start, $end);
-    #   my $score = $parser->get_score;
-    #   warn ">>> $r SCORE $score";
     }
 
     return {
@@ -172,7 +152,6 @@ sub content_from_file {
     };
 
   }
-
 }
 
 1;

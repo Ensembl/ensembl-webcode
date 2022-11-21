@@ -26,8 +26,6 @@ use strict;
 
 use EnsEMBL::Draw::Style::Extra::Header;
 
-use Data::Dumper;
-
 use parent qw(EnsEMBL::Draw::GlyphSet::bigwig EnsEMBL::Draw::GlyphSet::bigbed);
 
 sub label { return undef; }
@@ -59,9 +57,6 @@ sub data_by_cell_line {
 
   my $config  = $self->{'config'};
   my $data    = $config->{'data_by_cell_line'};
-
-  #$Data::Dumper::Maxdepth = 5;
-  #warn "FG MULTI WIGGLE!!!!!" . Dumper($data);
 
   ## Lazy evaluation
   if (ref($data) eq 'CODE') {
@@ -255,7 +250,6 @@ sub get_features {
   my $drawing_style = '';
 
   foreach my $key (sort { $a cmp $b } keys %$tracks) {
-    warn "What is my dollar key? $key";
     my $subtrack = {'metadata' => {},
                     'features' => [],
                     };
@@ -276,9 +270,10 @@ sub get_features {
 
     if ($args->{'feature_type'} eq 'block_features') {
       $subtrack->{'metadata'}{'feature_height'} = 8;
-      my $features = $tracks->{$key}; # $features can either be an array of Peak Objects or a string of a path to a bigbed file
+      my $features_or_file_path = $tracks->{$key}; # this can either be an array of Peak objects retrieved from the database, or a string of a path to a bigbed file
 
-      if (ref $features eq 'ARRAY') {
+      if (ref $features_or_file_path eq 'ARRAY') {
+        my $features = $features_or_file_path; # this branch deals with an array of Peak objects
         $drawing_style = 'EnsEMBL::Draw::Style::Feature::Peaks';
         foreach my $f (@$features) {
           my $href = $self->_block_zmenu($f);
@@ -292,13 +287,14 @@ sub get_features {
           push @{$subtrack->{'features'}}, $hash;
         }
       } else {
-        # features are a path to the bigbed file
+        # this branch deals with retrieving the data from a bigbed file
+        my $bigbed_file_path = $features_or_file_path;
         $self->{'my_config'}->set('zmenu_action', 'BigbedPeak');
         $self->{'my_config'}->set('zmenu_extras', {
                                                     'cell_line' => $cell_line,
                                                     'feat_name' => $feature_name,
                                                   });
-        my $bigbed_data = $self->EnsEMBL::Draw::GlyphSet::bigbed::get_data($features, $subtrack->{'metadata'});
+        my $bigbed_data = $self->EnsEMBL::Draw::GlyphSet::bigbed::get_data($bigbed_file_path, $subtrack->{'metadata'});
         $drawing_style = 'EnsEMBL::Draw::Style::Feature::MultiBlocks';
         my $bigbed_metadata = $bigbed_data->[0]{'metadata'};
         $subtrack->{'features'} = $bigbed_data->[0]{'features'};

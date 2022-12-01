@@ -750,6 +750,7 @@ sub detail_panel {
             ( $value_url ) = $value =~ /(.+)\./;
           } elsif ($key =~ '^AFDB-ENSP') {
             $key = "ALPHAFOLD";
+            ( $value ) = $value =~ /(.+)\./; # remove chain from AlphaFold ID
             ( $value_url ) = $value =~ /-(.+)-/;
           } elsif ($key eq 'GENE3D') {
             $value_url = "G3DSA:$value" unless $value =~ /^G3DSA:/;

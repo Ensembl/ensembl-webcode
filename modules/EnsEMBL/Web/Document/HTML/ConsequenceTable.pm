@@ -277,7 +277,7 @@ sub render {
       'colour'  => '7f7f7f', 
       'desc'    => 'A sequence variant that causes the extension of a genomic feature, with regard to the reference sequence', 
       'acc'     => '0001907', 
-      'impact'  => 'MODIFIER',
+      'impact'  => 'HIGH',
     },
     {
       'term'    => 'regulatory_region_variant', 
@@ -291,7 +291,7 @@ sub render {
       'colour'  => '7f7f7f', 
       'desc'    => 'A sequence variant that causes the reduction of a genomic feature, with regard to the reference sequence', 
       'acc'     => '0001906', 
-      'impact'  => 'MODIFIER',
+      'impact'  => 'HIGH',
     },
     {
       'term'    => 'intergenic_variant', 

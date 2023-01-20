@@ -140,6 +140,27 @@ sub render {
       'impact'  => 'LOW',
     },
     {
+      'term'    => 'splice_donor_5th_base_variant',
+      'colour'  => 'ff7f50',
+      'desc'    => 'A sequence variant that causes a change at the 5th base pair after the start of the intron in the orientation of the transcript',
+      'acc'     => '0001787',
+      'impact'  => 'LOW',
+    },
+    {
+      'term'    => 'splice_donor_region_variant',
+      'colour'  => 'ff7f50',
+      'desc'    => 'A sequence variant that falls in the region between the 3rd and 6th base after splice junction (5\' end of intron)',
+      'acc'     => '0002170',
+      'impact'  => 'LOW',
+    },
+    {
+      'term'    => 'splice_polypyrimidine_tract_variant',
+      'colour'  => 'ff7f50',
+      'desc'    => 'A sequence variant that falls in the polypyrimidine tract at 3\' end of intron between 17 and 3 bases from the end (acceptor -3 to acceptor -17)',
+      'acc'     => '0002169',
+      'impact'  => 'LOW',
+    },
+    {
       'term'    => 'incomplete_terminal_codon_variant', 
       'colour'  => 'ff00ff', 
       'desc'    => 'A sequence variant where at least one base of the final codon of an incompletely annotated transcript is changed', 
@@ -224,6 +245,13 @@ sub render {
       'impact'  => 'MODIFIER',
     },
     {
+      'term'    => 'coding_transcript_variant', 
+      'colour'  => '458b00', 
+      'desc'    => 'A transcript variant of a protein coding gene', 
+      'acc'     => '0001968', 
+      'impact'  => 'MODIFIER',
+    },
+    {
       'term'    => 'upstream_gene_variant', 
       'colour'  => 'a2b5cd', 
       'desc'    => "A sequence variant located 5' of a gene", 
@@ -263,7 +291,7 @@ sub render {
       'colour'  => 'a52a2a', 
       'desc'    => 'A feature ablation whereby the deleted region includes a regulatory region', 
       'acc'     => '0001894', 
-      'impact'  => 'MODIFIER',
+      'impact'  => 'MODERATE',
     },
     {
       'term'    => 'regulatory_region_amplification', 

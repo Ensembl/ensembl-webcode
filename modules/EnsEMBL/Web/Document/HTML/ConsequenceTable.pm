@@ -147,13 +147,6 @@ sub render {
       'impact'  => 'MODERATE',
     },
     {
-      'term'    => 'regulatory_region_ablation', 
-      'colour'  => 'a52a2a', 
-      'desc'    => 'A feature ablation whereby the deleted region includes a regulatory region', 
-      'acc'     => '0001894', 
-      'impact'  => 'MODERATE',
-    },
-    {
       'term'    => 'splice_region_variant', 
       'colour'  => 'ff7f50', 
       'desc'    => 'A sequence variant in which a change has occurred within the region of the splice site, either within 1-3 bases of the exon or 3-8 bases of the intron', 
@@ -298,6 +291,13 @@ sub render {
       'colour'  => 'a52a2a', 
       'desc'    => 'A sequence variant located within a transcription factor binding site', 
       'acc'     => '0001782', 
+      'impact'  => 'MODIFIER',
+    },
+    {
+      'term'    => 'regulatory_region_ablation', 
+      'colour'  => 'a52a2a', 
+      'desc'    => 'A feature ablation whereby the deleted region includes a regulatory region', 
+      'acc'     => '0001894', 
       'impact'  => 'MODIFIER',
     },
     {

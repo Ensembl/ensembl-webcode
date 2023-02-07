@@ -39,14 +39,11 @@
           }) : '';
         };
 
-        if (/\s/g.test(className)) {
-          var classList = className.split(',');
-          return classList.map(function (className) {
-            return escapeDot(className);
-          }).join(',');
-        } else {
-          escapeDot(className);
-        }
+        var classList = className.split(',');
+
+        return classList.map(function (className) {
+          return escapeDot(className);
+        }).join(',');
       };
 
       // go through all the selectors in the toggleMap and hide them except the one that corresponds to current element's value

@@ -30,12 +30,23 @@
       var currValue = this.nodeName === 'INPUT' && this.type === 'checkbox' && !this.checked ? false : this.value; // if checkbox is not ticked, ignore it's value
 
       var escapeDotInClassName = function (className) {
-        var i = 0;
+        var escapeDot = function (str) {
+          var i = 0;
+          
+          return str ? str.replace(/[.]/g, function (match) {
+            i += 1;
+            return i > 1 ? '\\\.' : '.';
+          }) : '';
+        };
 
-        return className ? className.replace(/[.]/g, function (match) {
-           i += 1;
-           return i > 1 ? '\\\.' : '.';
-        }) : '';
+        if (/\s/g.test(className)) {
+          var classList = className.split(',');
+          return classList.map(function (className) {
+            return escapeDot(className);
+          }).join(',');
+        } else {
+          escapeDot(className);
+        }
       };
 
       // go through all the selectors in the toggleMap and hide them except the one that corresponds to current element's value

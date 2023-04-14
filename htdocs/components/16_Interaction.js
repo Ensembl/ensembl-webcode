@@ -23,7 +23,6 @@ Ensembl.Panel.Interaction = Ensembl.Panel.extend({
 
   init: function () {
     var panel = this;
-    
     this.base();
     var data = $('input[name="intr_metadata"]', this.el).val();
     this.elLk.metadataLink = $('.interactions-right .label a');
@@ -34,7 +33,15 @@ Ensembl.Panel.Interaction = Ensembl.Panel.extend({
 
     this.elLk.metadataLink.click(function() {
       panel.displayMetadata();
-    })
+    });
+
+    // Add more info near the page caption
+    var sub_title = "Cross-species interactions imported from PHI-base, HPIDB and PlasticDB with exact matches to proteins in Ensembl.";
+    var subtitleHtml = $('<span />').addClass('interactionsSubTitle').html(sub_title);
+    var navHeading = $(this.el).parent().siblings('.nav-heading').addClass('interactionsNavHeading')
+    var navHeadingCaption = navHeading.find('.caption'); 
+    console.log(navHeadingCaption);
+    navHeadingCaption.after(subtitleHtml);
   },
 
   displayMetadata: function() {

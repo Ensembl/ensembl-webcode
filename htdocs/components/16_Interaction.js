@@ -40,7 +40,6 @@ Ensembl.Panel.Interaction = Ensembl.Panel.extend({
     var subtitleHtml = $('<span />').addClass('interactionsSubTitle').html(sub_title);
     var navHeading = $(this.el).parent().siblings('.nav-heading').addClass('interactionsNavHeading')
     var navHeadingCaption = navHeading.find('.caption'); 
-    console.log(navHeadingCaption);
     navHeadingCaption.after(subtitleHtml);
   },
 

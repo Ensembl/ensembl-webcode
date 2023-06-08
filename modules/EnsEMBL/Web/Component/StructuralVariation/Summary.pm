@@ -110,8 +110,6 @@ sub get_allele_types {
   my $self   = shift;
   my $source = shift;
   
-  return if $source ne 'DGVa';
-  
   my $object = $self->object;
   my $ssvs   = $object->supporting_sv;
   my (@allele_types, $html);

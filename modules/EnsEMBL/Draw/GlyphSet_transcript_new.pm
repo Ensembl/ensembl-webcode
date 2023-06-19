@@ -253,7 +253,6 @@ sub get_gene_connections {
   my $ma = $compara_db->get_GeneMemberAdaptor;
   return unless $ma;
   
-  my $qy_member = $ma->fetch_by_stable_id($gene->stable_id);
   my $species_prod_name = $gene->adaptor->db->get_MetaContainer->get_production_name();
   my $genome_db = $compara_db->get_GenomeDBAdaptor->fetch_by_name_assembly($species_prod_name);
   

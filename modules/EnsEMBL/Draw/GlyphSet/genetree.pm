@@ -73,7 +73,7 @@ sub _init {
   if ($is_nv) {
     $highlight_gene         = $Config->get_parameter('highlight_gene');
     $highlight_annotations  = $self->{highlights}->[8];
-    foreach (split(';',$highlight_annotations)) {
+    foreach (@$highlight_annotations) {
       my ($acc,$colour,@genes_to_highlight) = split(',',$_);
       push(@hiterms,$acc);
       foreach my $gth (@genes_to_highlight){

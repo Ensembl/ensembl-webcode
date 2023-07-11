@@ -67,6 +67,7 @@ sub _init {
   my $synteny_data          = $self->{'container'}->{'synteny'};
   my $other_species         = $self->{'container'}->{'other_species'};
   my $other_species_text    = $species_defs->get_config($other_species, 'SPECIES_SCIENTIFIC_NAME');
+  my $self_production_name = $species_defs->production_name();
   my $other_production_name = $species_defs->get_config($other_species, 'SPECIES_PRODUCTION_NAME');
   my %other_chrs            = map {( $_, 1 )} @{$species_defs->get_config($other_species, 'ENSEMBL_CHROMOSOMES')}; # This is the list of chromosomes we will be drawing
   my $chr_length            = $sa->fetch_by_region('toplevel', $chr)->length; 
@@ -102,9 +103,12 @@ sub _init {
 
   foreach my $synteny_region (@$synteny_data) {
     my ($main_dfr, $other_dfr);
-    
+
     foreach my $dfr (@{$synteny_region->get_all_DnaFragRegions}) {
-      if ($dfr->dnafrag->genome_db->name eq $other_production_name) {
+      if (lc($self_production_name) eq lc($dfr->dnafrag->genome_db->name) and $dfr->dnafrag->genome_db->name eq $other_production_name) {
+        $main_dfr = $dfr;
+        $other_dfr = $dfr;
+      } elsif ($dfr->dnafrag->genome_db->name eq $other_production_name) {
         $other_dfr = $dfr;
       } else {
         $main_dfr = $dfr;

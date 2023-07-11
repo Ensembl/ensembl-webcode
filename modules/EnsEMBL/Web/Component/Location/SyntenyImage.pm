@@ -151,7 +151,7 @@ sub species_form {
   my @values;
 
   foreach my $next (@sorted) {
-    next if $next->{'name'} eq $hub->species;
+    next if $next->{'name'} eq $hub->species and $next->{'name'} ne $hub->param('otherspecies');
     push @values, { caption => $next->{'display'}, value => $next->{'name'} };
   }
 

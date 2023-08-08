@@ -151,7 +151,7 @@ sub species_form {
   my @values;
 
   foreach my $next (@sorted) {
-    next if $next->{'name'} eq $hub->species and $next->{'name'} ne 'Homo_sapiens'; # Homo sapiens is the only vertebrate that has self-synteny
+    next if ($next->{'name'} eq $hub->species and $next->{'name'} ne 'Homo_sapiens'); # Homo sapiens has self-synteny, so should be visible in the species dropdown even when already on the Human page
     push @values, { caption => $next->{'display'}, value => $next->{'name'} };
   }
 

@@ -67,11 +67,13 @@ sub _run_phase {
 
 sub run_miss {
   my ($self,$args,$build) = @_;
+
+  my $context = $self->{_context};
       
   my %a_gen = %$args;
-  $self->_run_phase(\%a_gen,undef,'pre_generate');
+  $self->_run_phase(\%a_gen, $context, 'pre_generate');
   my $part = $self->{'impl'}->get(\%a_gen);
-  $self->_run_phase($part,undef,'post_generate',[\%a_gen]);
+  $self->_run_phase($part, $context, 'post_generate',[\%a_gen]);
   $self->_check_unblessed($part);
   $self->{'store'}->_set_cache(ref($self->{'impl'}),$args,$part,$build);
   return $part;
@@ -79,6 +81,7 @@ sub run_miss {
 
 sub go {
   my ($self,$context,$args) = @_;
+  $self->{_context} = $context;
 
   my $orig_args = {%$args};
   $args = {%$args};

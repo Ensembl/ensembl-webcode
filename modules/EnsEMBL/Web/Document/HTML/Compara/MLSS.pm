@@ -524,17 +524,19 @@ sub render_cactus_multiple {
 
   my $hub     = $self->hub;
   my $site    = $hub->species_defs->ENSEMBL_SITETYPE;
+  my $division = $hub->species_defs->DIVISION;
   my $version = $hub->species_defs->ENSEMBL_VERSION;
   my $html;
   my ($species_order, $info) = $self->mlss_species_info($mlss);
 
   if ($species_order && scalar(@{$species_order||[]})) {
     my $rel = $mlss->first_release;
+    $rel   -= 53 if $division; ## Filthy hack as Compara doesn't store EG release
     my $count = scalar(@$species_order);
     my $n = $mlss->name;
     $n =~ s/cactus_hal/Cactus alignment/;
     $html .= sprintf('<h1>%s</h1>', $n);
-    $html .= qq{<p>This alignment of $count genomes has been imported from UCSC since release $rel.</p>};
+    $html .= qq{<p>This alignment has been generated in $site release $rel.</p>};
     $html .= $self->error_message('API access', sprintf(
         '<p>This alignment set can be accessed using the Compara API via the Bio::EnsEMBL::DBSQL::MethodLinkSpeciesSetAdaptor using the <em>method_link_type</em> "<b>%s</b>" and the <em>species_set_name</em> "<b>%s</b>".</p>', $mlss->method->type, $mlss->species_set->name), 'info');
     if ($mlss->method->type =~ /CACTUS_HAL/) {
@@ -543,16 +545,34 @@ sub render_cactus_multiple {
     }
 
     my $table = EnsEMBL::Web::Document::Table->new([
-        { key => 'species', title => 'Species',         width => '50%', align => 'left', sort => 'string' },
-        { key => 'asm',     title => 'Assembly',        width => '50%', align => 'left', sort => 'string' },
+        { key => 'species', title => 'Species',         width => '33%', align => 'left', sort => 'string' },
+        { key => 'asm',     title => 'Assembly',        width => '33%', align => 'left', sort => 'string' },
+        { key => 'gl',      title => 'Genome length (bp)', width => '12%', align => 'center', sort => 'string' },
+        { key => 'gc',      title => 'Genome coverage (bp)', width => '12%', align => 'center', sort => 'string' },
+        { key => 'gcp',     title => 'Genome coverage (%)', width => '10%', align => 'center', sort => 'numeric' },
       ], [], {data_table => 1, exportable => 1, id => sprintf('%s_%s', $mlss->method->type, $mlss->species_set->name), sorting => ['species asc']});
+    my @colors = qw(#402 #a22 #fc0 #8a2);
     foreach my $sp (@$species_order) {
+      my $gl = $info->{$sp}{'genome_length'};
+      my $gc = $info->{$sp}{'genome_coverage'};
+      my $gcp = defined $gl && defined $gc ? ($gc/$gl * 100) : undef;
       $table->add_row({
           'species' => $self->combine_names($info->{$sp}{'common_name'}, $info->{$sp}{'long_name'}),
           'asm'     => $info->{$sp}{'assembly'},
+          'gl'      => (defined $gl ? $self->thousandify($gl) : 'NA'),
+          'gc'      => (defined $gc ? $self->thousandify($gc) : 'NA'),
+          'gcp'     => (defined $gcp ? sprintf(q{<span style="color: %s">%.2f</span}, $colors[int($gcp/25)], $gcp) : 'NA'),
         });
     }
     $html .= $table->render;
+
+    $html .= q{
+      <br>
+      <h2 id="cactuscoveragecalculation">Cactus coverage calculation</h2>
+      <p>Cactus coverage values are obtained from the output of halAlignmentDepth
+         (<a href="https://europepmc.org/article/MED/23505295">Hickey et al. 2013</a>), then aggregated per genome.
+      </p>
+    };
   }
 
   return $html;

@@ -57,17 +57,6 @@ sub populate_tree {
     { 'availability' => 'regulation', 'concise' => 'Activity' }
   );
 
-  # $self->create_node('Cell_line', 'Details by cell type',
-  #   [qw( buttons    EnsEMBL::Web::Component::Regulation::Buttons
-  #        cell_line EnsEMBL::Web::Component::Regulation::FeaturesByCellLine )],
-  #   { 'availability' => 'regulation', 'concise' => 'Details by cell type' }
-  # );
-
-  # $self->create_node('Context', 'Feature Context',
-  #   [qw( feature_summary EnsEMBL::Web::Component::Regulation::FeatureSummary )],
-  #   { 'availability' => 'regulation', 'concise' => 'Feature context' }
-  # );
-  
   $self->create_node('Evidence', 'Source Data',
     [qw( evidence EnsEMBL::Web::Component::Regulation::Evidence )],
     { 'availability' => 'regulation', 'concise' => 'Source data' }

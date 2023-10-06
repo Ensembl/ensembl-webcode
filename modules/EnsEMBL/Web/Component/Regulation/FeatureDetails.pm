@@ -41,25 +41,25 @@ sub content {
   my $object = $self->object || $self->hub->core_object('regulation'); 
   my ($html, $Configs);
 
-  my $context      = $self->param( 'context' ) || 200; 
-  my $object_slice = $object->get_bound_context_slice($context);
-     $object_slice = $object_slice->invert if $object_slice->strand < 1;
+  # my $context      = $self->param( 'context' ) || 200;
+  # my $object_slice = $object->get_bound_context_slice($context);
+  #    $object_slice = $object_slice->invert if $object_slice->strand < 1;
 
-  my $wuc = $object->get_imageconfig( 'reg_summary_page' );
-  $wuc->set_parameters({
-    'container_width'   => $object_slice->length,
-    'image_width',      => $self->image_width || 800,
-    'slice_number',     => '1|1',
-    'opt_highlight'     => $self->param('opt_highlight') || 0,
-  });
+  # my $wuc = $object->get_imageconfig( 'reg_summary_page' );
+  # $wuc->set_parameters({
+  #   'container_width'   => $object_slice->length,
+  #   'image_width',      => $self->image_width || 800,
+  #   'slice_number',     => '1|1',
+  #   'opt_highlight'     => $self->param('opt_highlight') || 0,
+  # });
 
-  my $image    = $self->new_image( $object_slice, $wuc,[$object->stable_id] );
-      $image->imagemap           = 'yes';
-      $image->{'panel_number'} = 'top';
-      $image->set_button( 'drag', 'title' => 'Drag to select region' );
-  return if $self->_export_image( $image );
+  # my $image    = $self->new_image( $object_slice, $wuc,[$object->stable_id] );
+  #     $image->imagemap           = 'yes';
+  #     $image->{'panel_number'} = 'top';
+  #     $image->set_button( 'drag', 'title' => 'Drag to select region' );
+  # return if $self->_export_image( $image );
 
-  $html .= $image->render;
+  # $html .= $image->render;
 
   my $reg_feat = $object->fetch_by_stable_id;
   my $active_epigenomes = $reg_feat->get_epigenomes_by_activity('ACTIVE');

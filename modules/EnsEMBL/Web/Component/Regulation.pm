@@ -142,19 +142,9 @@ sub nav_buttons {
   my @buttons = (
     {
       img => "navb-reg-summary.png",
-      title => "Summary",
+      title => "Activity",
       action => 'Summary',
-      text => "Summary",
-    },{
-      img => "navb-reg-details.png",
-      title => "Details by cell type",
-      action => 'Cell_line',
-      text => "Details by\ncell type",
-    },{
-      img => "navb-reg-context.png",
-      title => "Feature context",
-      action => 'Context',
-      text => "Feature\ncontext",
+      text => "Activity",
     },{
       img => "navb-reg-sourcedata.png",
       title => "Source Data",

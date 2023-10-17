@@ -38,7 +38,7 @@ sub init_cacheable {
     map {( "opt_ft_$_" => 'on' )} keys %$analyses
   });
 
-  $self->image_config_type('reg_summary_page');
+  $self->image_config_type('contigviewbottom');
   $self->title('Summary');
 }
 

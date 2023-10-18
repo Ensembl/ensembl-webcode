@@ -34,7 +34,7 @@ use Sys::Hostname::Long;
 
 ###############################################################################
 ## Ensembl Version and release dates (these get updated every release)
-our $ENSEMBL_VERSION        = 110;            # Ensembl release number
+our $ENSEMBL_VERSION        = 111;            # Ensembl release number
 our $ARCHIVE_VERSION        = 'Nov2023';     # Archive site for this version
 our $ENSEMBL_RELEASE_DATE   = 'November 2023'; # As it would appear in the copyright/footer
 ###############################################################################

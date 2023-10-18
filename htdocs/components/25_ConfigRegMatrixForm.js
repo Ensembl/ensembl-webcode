@@ -1886,7 +1886,7 @@ Ensembl.Panel.ConfigRegMatrixForm = Ensembl.Panel.ConfigMatrixForm.extend({
             }
 
             if(panel.disableYdim) {
-              if(dyItem === ''){
+              if(dyItem === 'epigenomic_activity' || dyItem === 'segmentation_features'){
                 rowContainer += '<div class="xBoxes '+boxState+' '+matrixClass+' '+boxRenderClass+' '+dataClass+' '+cellName+' '+dyItem+'" data-track-x="'+dyItem+'" data-track-y="'+cellName+'" data-popup-type="'+popupType+'"></div>';
               }
             } else {

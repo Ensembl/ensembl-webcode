@@ -26,8 +26,8 @@ Ensembl.Panel.ConfigRegMatrixForm = Ensembl.Panel.ConfigMatrixForm.extend({
     Ensembl.EventManager.register('updateFromTrackLabel', this, this.updateFromTrackLabel);
     Ensembl.EventManager.register('modalOpen', this, this.modalOpen);
 
-    this.disableYdim = window.location.href.match("Regulation/Summary") ? 1 : 0;
-
+    this.disableYdim = 0;
+    this.submitButtonText = window.location.href.match("Regulation/Summary") ? 'Save configs' : 'View tracks';
     this.elLk.dx        = {};
     this.elLk.dx.container = $('div#dx-content', this.el);
 
@@ -1385,7 +1385,7 @@ Ensembl.Panel.ConfigRegMatrixForm = Ensembl.Panel.ConfigMatrixForm.extend({
     var panel = this;
 
     if(panel.el.find('div.track-configuration:visible').length){
-      panel.el.find('button.showMatrix').addClass("_edit").outerWidth("100px").html("View tracks");
+      panel.el.find('button.showMatrix').addClass("_edit").outerWidth("100px").html(panel.submitButtonText);
     } else {
       panel.el.find('button.showMatrix').outerWidth(panel.buttonOriginalWidth).html(panel.buttonOriginalHTML).removeClass("_edit");
     }

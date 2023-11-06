@@ -35,6 +35,14 @@ sub _init {
 
 sub content {
   my $self  = shift;
+  my $form = $self->prepare_form();
+
+  return $form->render;
+}
+
+# A subroutine to separate the preparation of the form object from the rendering of the form
+sub prepare_form {
+  my $self  = shift;
   my $hub   = $self->hub;
   my $cdb   = $hub->param('cdb') || 'compara';
 
@@ -76,7 +84,7 @@ sub content {
   ## Create settings form (comes with some default fields - see parent)
   my $form = $self->create_form($settings, $fields_by_format, 1);
 
-  return $form->render;
+  return $form;
 }
 
 sub default_file_name {

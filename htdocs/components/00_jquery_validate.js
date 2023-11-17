@@ -123,7 +123,7 @@ $.extend($.validator, {
     validClass:    'valid',
     invalidClass:  'invalid',
     requiredClass: 'required',
-    trim: [ 'int', 'nonnegint', 'posint', 'float', 'nonnegfloat', 'posfloat', 'email', 'url','name','required' ],
+    trim: [ 'int', 'nonnegint', 'posint', 'float', 'nonnegfloat', 'posfloat', 'email', 'url','name'],
     tests: {
       'int':    new RegExp(/^[\-+]?\d+$/),
       'float':  new RegExp(/^([\-+]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([\-+]?\d+))?$/),

@@ -876,7 +876,8 @@ sub features {
     $f->{_subtree_ref} = 1 if exists $tree->{_subtree}->{_supertree};
   } elsif ($tree->is_leaf  && $tree->isa('Bio::EnsEMBL::Compara::GenomicAlignTree')) {
     my $genomic_align = $tree->get_all_genomic_aligns_for_node->[0];
-    my $name = $genomic_align->genome_db->name;
+    my $leaf_genome_db = $tree->get_genome_db_for_node;
+    my $name = $leaf_genome_db->name;
 
     #Get the cigar_line for the GenomicAlignGroup (passed in via highlights structure)
     my $cigar_line = shift @$slice_cigar_lines;
@@ -885,7 +886,11 @@ sub features {
     if ($cigar_line =~ /M/) {
       $f->{'_cigar_line'} = $cigar_line;
     }
-    $f->{'label'} = $species_defs->get_config($lookup->{$name}, 'SPECIES_DISPLAY_NAME');
+    if ($leaf_genome_db->genome_component) {
+      $f->{'label'} = $leaf_genome_db->display_name;
+    } else {
+      $f->{'label'} = $species_defs->get_config($lookup->{$name}, 'SPECIES_DISPLAY_NAME');
+    }
     if ($low_coverage_species && $low_coverage_species->{$genomic_align->genome_db->dbID}) {
      $f->{'_gat'}{'colour'} = 'brown';
     }

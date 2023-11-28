@@ -705,6 +705,18 @@ sub _create_from_sub_align_slice {
     my $sub_align_slices = $align_slice->sub_AlignSlice($align_start, $align_end)->get_all_Slices($species);
     
     foreach (@$sub_align_slices) {
+      my $sub_align_slice_genome_component = $_->get_genome_component();
+      if (defined $sub_align_slice_genome_component) {
+        # If a given AlignSlice::Slice from the sub-AlignSlice has a genome component,
+        # then it represents the subgenome component of a polyploid genome, in which
+        # case the slices of the given genome have been grouped per subgenome component.
+        # Since AlignSlice::get_all_Slices filters by $species, we need to additionally
+        # filter by component here, to avoid including slices from other components.
+        my $slice_genome_component = $slice->get_genome_component();
+        unless (defined $slice_genome_component && $slice_genome_component eq $sub_align_slice_genome_component) {
+          next;
+        }
+      }
       foreach (@{$_->get_all_underlying_Slices}) {
         $gap = 1, next if $_->seq_region_name eq 'GAP';
         

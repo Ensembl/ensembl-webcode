@@ -51,7 +51,11 @@ sub format_gene_tree_stats {
 
   my $mlss_adaptor    = $compara_db->get_adaptor('MethodLinkSpeciesSet');
   my $all_mlsss       = $mlss_adaptor->fetch_all_by_method_link_type($method);
-  my ($mlss)          = sort {$b->species_set->size <=> $a->species_set->size} @$all_mlsss;  # The mouse-strains trees are not very interesting. Take the largest set instead
+  # Give preference to default gene-tree collection(s), if available.
+  my @default_mlsss   = grep { $_->species_set->name  =~ /^(collection-)?default$/ } @$all_mlsss;
+  $all_mlsss          = \@default_mlsss if (@default_mlsss);
+  # Take the largest relevant gene-tree collection.
+  my ($mlss)          = sort {$b->species_set->size <=> $a->species_set->size} @$all_mlsss;
   return unless $mlss;
 
   my $species_tree_adaptor = $compara_db->get_adaptor('SpeciesTree');

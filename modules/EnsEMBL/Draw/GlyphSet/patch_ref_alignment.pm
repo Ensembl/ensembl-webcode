@@ -36,12 +36,8 @@ sub _init {
   my $join_colour   = $self->my_colour(lc $self->{'container'}->assembly_exception_type, 'join'); 
 
   if (scalar @$features) {
-    my $patch_start   = $self->{'container'}->get_all_AssemblyExceptionFeatures->[0]->start; 
-    my $patch_end     = $self->{'container'}->get_all_AssemblyExceptionFeatures->[0]->end; 
-    $patch_start      = 1 if $patch_start < 1;
-    my $patch_length  = $patch_end - $patch_start +1;
-    $patch_length     = $length if $patch_length > $length;
-
+    my $patch_start   = 1; # Patch start should always be 1
+    my $patch_length  = $self->{'container'}->seq_region_length;
     foreach (0, 8) {
       $self->push($self->Rect({
         x         => $patch_start -1,

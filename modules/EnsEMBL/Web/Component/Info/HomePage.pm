@@ -365,8 +365,8 @@ sub funcgen_text {
         %s
       </div>
       <h2>Regulation</h2>
-      <p><strong>What can I find?</strong> DNA methylation, transcription factor binding sites, histone modifications, and regulatory features such as enhancers and repressors, and microarray annotations.</p>
-      <p><a href="/info/genome/funcgen/" class="nodeco">%sMore about the %s regulatory build</a> and <a href="/info/genome/microarray_probe_set_mapping.html" class="nodeco">microarray annotation</a></p>
+      <p><strong>What can I find?</strong> Regulatory features like enhancers and promoters, and regulatory activity including ATAC-seq and ChIP-seq tracks.</p>
+      <p><a href="/info/genome/funcgen/" class="nodeco">%sMore about the %s regulatory annotation</a></p>
       <p><a href="%s" class="nodeco">%sExperimental data sources</a></p>
       %s %s',
       
@@ -384,13 +384,6 @@ sub funcgen_text {
         '<p><a href="%s/regulation/%s/" class="nodeco">%sDownload all regulatory features</a> (GFF)</p>', ## Link to FTP site
         $ftp, $species_prod_name, sprintf($self->{'icon'}, 'download')
       ) : '',
-    );
-  } else {
-    return sprintf('
-      <h2>Regulation</h2>
-      <p><strong>What can I find?</strong> Microarray annotations.</p>
-      <p><a href="/info/genome/microarray_probe_set_mapping.html" class="nodeco">%sMore about the %s microarray annotation strategy</a></p>',
-      sprintf($self->{'icon'}, 'info'), $species_defs->ENSEMBL_SITETYPE
     );
   }
 }

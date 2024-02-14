@@ -1078,7 +1078,7 @@ sub add_regulation_features {
   my ($keys_2, $data_2) = $self->_merge($hashref->{'alignment'});
   my %fg_data           = (%$data_1, %$data_2);
 
-  foreach my $key_2 (sort grep { !/Regulatory_Build|seg_/ } @$keys_1, @$keys_2) {
+  foreach my $key_2 (sort grep { !/Regulatory_Build/ } @$keys_1, @$keys_2) {
     my $type = $fg_data{$key_2}{'type'};
 
     next if !$type || $type eq 'ctcf';
@@ -1242,7 +1242,6 @@ sub add_regulation_builds {
 
 
   my $reg_feats     = $menu->append_child($self->create_menu_node('reg_features', 'Epigenomic activity'));
-  my $reg_segs      = $menu->append_child($self->create_menu_node('seg_features', 'Segmentation features'));
 
   my (@renderers, %matrix_tracks);
 
@@ -1282,37 +1281,6 @@ sub add_regulation_builds {
         }
       }
     }
-  }
-
-  # Segmentation tracks
-  my $segs = $hashref->{'segmentation'};
-
-  # Skip the rows property as it throws an exception
-  my @seg_keys = grep { $_ ne 'rows' } keys %$segs;
-
-  foreach my $key (sort { lc $segs->{$a}{'name'} cmp lc $segs->{$b}{'name'} } @seg_keys) {
-    my $name = $segs->{$key}{'name'};
-    my $cell_line = $key;
-    my $epi_desc = $segs->{$key}{'epi_desc'} ? " ($segs->{$key}{'epi_desc'})" : "";
-    $reg_segs->append_child($self->create_track_node("seg_$key", $name, {
-      db            => $key,
-      glyphset      => 'fg_segmentation_features',
-      sources       => 'undef',
-      strand        => 'r',
-      labels        => 'on',
-      depth         => 0,
-      colourset     => 'fg_segmentation_features',
-      display       => 'off',
-      description   => $segs->{$key}{'desc'} . $epi_desc,
-      renderers     => [qw(off Off compact On)],
-      celltype      => $segs->{$key}{'web'}{'celltype'},
-      seg_name      => $segs->{$key}{'web'}{'seg_name'},
-      caption       => "Segmentation features",
-      section_zmenu => { type => 'regulation', cell_line => $cell_line, _id => "regulation:$cell_line" },
-      section       => $segs->{$key}{'web'}{'celltypename'},
-      matrix_cell   => 1,
-      height        => 4,
-    }));
   }
 
   foreach my $cell_line (@cell_lines) {
@@ -1391,7 +1359,6 @@ sub add_regulation_builds {
 
   if ($db_tables->{'cell_type'}{'ids'}) {
     $self->add_track('information', 'fg_regulatory_features_legend',      'Regulation Legend',              'fg_regulatory_features_legend',   { strand => 'r', colourset => 'fg_regulatory_features'   });
-    $self->add_track('information', 'fg_segmentation_features_legend',    'Segmentation Legend',            'fg_segmentation_features_legend', { strand => 'r', colourset => 'fg_segmentation_features' });
     $self->add_track('information', 'fg_multi_wiggle_legend',             'Cell/Tissue Regulation Legend',  'fg_multi_wiggle_legend',          { strand => 'r', display => 'off' });
   }
 }

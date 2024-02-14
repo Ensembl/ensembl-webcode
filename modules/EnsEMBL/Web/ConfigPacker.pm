@@ -861,44 +861,6 @@ sub _summarise_funcgen_db {
   }
   $sth->finish;
 
-  ## Segmentations are stored differently, now they are in flat-files
-  my $res_cell = $dbh->selectall_arrayref(
-      qq(
-	        select 
-	          logic_name,
-	          epigenome_id,
-	          epigenome.short_name,
-            epigenome.description,
-            displayable,
-            segmentation_file.name
-	        from segmentation_file
-	          join epigenome using (epigenome_id)
-	          join analysis using (analysis_id)
-            join analysis_description using (analysis_id)
-      )
-  );
-
-  foreach my $C (@$res_cell) {
-    my $key = $C->[0].':'.$C->[2];
-    my $value = {
-      name => qq($C->[2]),
-      desc => qq(Genome segmentation in $C->[2]),
-      epi_desc => qq($C->[3]),
-      disp => $C->[4],
-      'web' => {
-          celltype      => $C->[1],
-          celltypename  => $C->[2],
-          'colourset'   => 'fg_segmentation_features',
-          'display'     => 'off',
-          'key'         => "seg_$key",
-          'seg_name'    => $C->[5],
-          'type'        => 'fg_segmentation_features'
-      },
-      count => 1,
-    };
-    $self->db_details($db_name)->{'tables'}{'segmentation'}{$key} = $value;
-  }
-
   ## Methylation tracks - now in files
   my $m_aref = $dbh->selectall_arrayref(qq(
     select

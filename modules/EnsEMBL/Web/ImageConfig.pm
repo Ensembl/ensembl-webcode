@@ -251,7 +251,7 @@ sub reset_user_settings {
     }
 
     foreach my $node_key (keys %node_keys) {
-      if ($node_key =~/^reg_feats|^seg_Segmentation|^trackhub_/) {
+      if ($node_key =~/^reg_feats|^trackhub_/) {
         if (my $node = $self->get_node($node_key)) {
           # For trackhubs we turn off all tracks and then update the selected ones.
           # If you do a reset it will reset to default renderers which makes it turn on.

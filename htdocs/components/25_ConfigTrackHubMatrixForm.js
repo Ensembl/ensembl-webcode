@@ -735,11 +735,7 @@ Ensembl.Panel.ConfigTrackHubMatrixForm = Ensembl.Panel.ConfigMatrixForm.extend({
       section   = 'epigenomic_activity';
       epigenome = trackKey.split(/_/).pop();
     }
-    // or a segmentation feature?
-    else if (panel.localStoreObj.segmentation_features && trackKey.match(/^seg_Segmentation/)) {
-      section   = 'segmentation_features';
-      epigenome = trackKey.split(/_/).pop();
-    }
+
     var trackName = section + '_sep_' + epigenome;
 
     // Update localStore with new settings
@@ -2498,7 +2494,7 @@ return;
         }
 
         if(panel.disableYdim) {
-          if(dyItem === 'epigenomic_activity' || dyItem === 'segmentation_features'){
+          if(dyItem === 'epigenomic_activity'){
             // xContainer += '<div class="positionFix"><div class="rotate"><div class="overflow xLabel '+dyItem+'"><span class="_ht _ht_delay" title="'+ dyLabel +'">'+dyLabel+'</span></div></div></div>'; 
           }
         } else {
@@ -2609,7 +2605,7 @@ return;
               }
 
               if(panel.disableYdim) {
-                if(dyItem === 'epigenomic_activity' || dyItem === 'segmentation_features'){
+                if(dyItem === 'epigenomic_activity'){
                   rowContainer += '<div class="xBoxes '+boxState+' '+matrixClass+' '+boxRenderClass+' '+format+' '+dataClass+' '+cellName+' '+dyItem+'" data-track-x="'+dyItem+'" data-track-y="'+cellName+'" data-popup-type="column-cell" data-format="'+format+'"></div>';
                 }
               } else {

@@ -46,7 +46,7 @@ sub json_data {
   my $evidence_info = $adaptor->get_regulatory_evidence_info; #get all experiment  
   my ($evidence, $cell_types, %all_types); 
 
-  $final->{extra_dimensions} = ['epigenomic_activity', 'segmentation_features'];
+  $final->{extra_dimensions} = ['epigenomic_activity'];
   
   $final->{data}->{epigenomic_activity} = {
     label => 'Epigenomic activity',
@@ -56,13 +56,6 @@ sub json_data {
     defaultState => "track-off"
   };
 
-  $final->{data}->{segmentation_features} = {
-    label => 'Segmentation features',
-    set => 'seg_Segmentation',
-    renderer => "peak",
-    popupType => "column-cell",
-    defaultState => "track-off"
-  };
 
   # evidence is the other name for experiment on the web interface
   # get all evidence and their corresponding evidence_type as a hash
@@ -113,20 +106,6 @@ sub json_data {
         val => $epigenomic_activity->{label},
         set => $epigenomic_activity->{set},
         defaultState => $epigenomic_activity->{defaultState} || "track-off"
-      };
-      push @$cell_evidence, $hash;
-    }
-
-    # Add segmentation features if available
-    my ($segmentation_lookup_key) = split(":", $id_key); # the id_key here is a colon-separated epigenome short name and epigenome id; see ConfigPacker for details
-    $segmentation_lookup_key = "Segmentation:$segmentation_lookup_key";
-    if ($db_tables->{'segmentation'}{$segmentation_lookup_key}) { # i.e. if the cell line actually has segmentation features
-      my $segmentation_features = $final->{data}->{segmentation_features};
-      my $hash = {
-        dimension => "segmentation_features",
-        val => $segmentation_features->{label},
-        set => $segmentation_features->{set},
-        defaultState => $segmentation_features->{defaultState} || "track-off"
       };
       push @$cell_evidence, $hash;
     }

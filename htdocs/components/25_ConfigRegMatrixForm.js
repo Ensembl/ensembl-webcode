@@ -527,11 +527,7 @@ Ensembl.Panel.ConfigRegMatrixForm = Ensembl.Panel.ConfigMatrixForm.extend({
       section   = 'epigenomic_activity';
       epigenome = trackKey.split(/_/).pop();
     }
-    // or a segmentation feature?
-    else if (panel.localStoreObj.segmentation_features && trackKey.match(/^seg_Segmentation/)) {
-      section   = 'segmentation_features';
-      epigenome = trackKey.split(/_/).pop();
-    }
+
     var trackName = section + '_sep_' + epigenome;
 
     // Update localStore with new settings
@@ -608,6 +604,12 @@ Ensembl.Panel.ConfigRegMatrixForm = Ensembl.Panel.ConfigMatrixForm.extend({
     if (!Object.keys(this.localStoreObj).length) {
       this.loadingState = false;
       return;
+    }
+
+    // Remove any previously stored segmentation features entry from local storage
+    if (this.localStoreObj.segmentation_features) {
+      delete this.localStoreObj.segmentation_features
+      this.setLocalStorage();
     }
 
     // Apply cell first so that filter happens and then select all experiment types
@@ -1786,7 +1788,7 @@ Ensembl.Panel.ConfigRegMatrixForm = Ensembl.Panel.ConfigMatrixForm.extend({
         }
 
         if(panel.disableYdim) {
-          if(dyItem === 'epigenomic_activity' || dyItem === 'segmentation_features'){
+          if(dyItem === 'epigenomic_activity'){
             xContainer += '<div class="positionFix"><div class="rotate"><div class="overflow xLabel '+dyItem+'"><span class="_ht _ht_delay" title="'+ dyLabel +'">'+dyLabel+'</span></div></div></div>'; 
           }
         } else {
@@ -1886,7 +1888,7 @@ Ensembl.Panel.ConfigRegMatrixForm = Ensembl.Panel.ConfigMatrixForm.extend({
             }
 
             if(panel.disableYdim) {
-              if(dyItem === 'epigenomic_activity' || dyItem === 'segmentation_features'){
+              if(dyItem === 'epigenomic_activity'){
                 rowContainer += '<div class="xBoxes '+boxState+' '+matrixClass+' '+boxRenderClass+' '+dataClass+' '+cellName+' '+dyItem+'" data-track-x="'+dyItem+'" data-track-y="'+cellName+'" data-popup-type="'+popupType+'"></div>';
               }
             } else {

@@ -69,7 +69,7 @@ sub init_cacheable {
   );
 
   $self->modify_configs(
-    [qw(gene_legend seg_features reg_feats_core reg_feats_non_core functional_dna_methylation)],
+    [qw(gene_legend reg_feats_core reg_feats_non_core functional_dna_methylation)],
     { display => 'off', menu => 'no' }
   );
 

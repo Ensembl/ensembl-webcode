@@ -29,7 +29,7 @@ sub init_cacheable {
 
   $self->SUPER::init_cacheable(@_);
 
-  foreach my $type (qw(reg_features seg_features reg_feats_core reg_feats_non_core)) {
+  foreach my $type (qw(reg_features reg_feats_core reg_feats_non_core)) {
     my $submenu = $self->get_node($type);
     next unless $submenu;
     foreach my $node (@{$submenu->child_nodes}) {

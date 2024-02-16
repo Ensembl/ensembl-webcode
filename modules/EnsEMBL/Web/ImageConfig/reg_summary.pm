@@ -81,11 +81,6 @@ sub init_cacheable {
     [ 'transcript_core_ensembl' ],
     { display => 'transcript_nolabel' }
   );
-
-  my $menu = $self->get_node('seg_features');
-  foreach my $node (@{$self->get_node('seg_features')->child_nodes}) {
-    $self->modify_configs([$node->id],{ display => 'off' });
-  }
 }
 
 1;

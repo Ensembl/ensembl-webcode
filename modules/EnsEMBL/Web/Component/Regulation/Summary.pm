@@ -69,7 +69,7 @@ sub content {
 
   my $region_table = $self->new_twocol;
   $region_table->add_row('Location', $location_html);
-  $region_table->add_row('Bound region',$bound_html) if ($location_html ne $bound_html);
+  $region_table->add_row('Extended region',$bound_html) if ($location_html ne $bound_html);
 
   my $region_wrapper = sprintf('<div class="reg_region">%s</div>',$region_table->render);
 

@@ -48,12 +48,18 @@ sub content {
   });
   
   $self->add_entry({
+    type  => 'Activity',
+    label => 'Regulatory activity',
+    link  => $object->get_summary_page_url
+  });
+  
+  $self->add_entry({
     type  => 'Type',
     label => $object->feature_type->name
   });
   
   $self->add_entry({
-    type        => 'Core bp',
+    type        => 'Location',
     label       => sprintf(
       '%s: %s-%s',
       $self->neat_sr_name($object->seq_region_type, $object->seq_region_name),
@@ -66,7 +72,7 @@ sub content {
 
   unless ($object->bound_start == $object->seq_region_start && $object->bound_end == $object->seq_region_end) {
     $self->add_entry({
-      type        => 'Bounds bp',
+      type        => 'Extended region',
       label       => sprintf(
         '%s: %s-%s',
         $self->neat_sr_name($object->seq_region_type, $object->seq_region_name),

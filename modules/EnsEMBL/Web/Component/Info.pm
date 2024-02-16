@@ -211,7 +211,7 @@ sub include_bioschema_datasets {
     my $reg_url   = sprintf '%s/regulation/%s/', $self->ftp_url, $species_defs->SPECIES_PRODUCTION_NAME;
     my $regulation = {
         '@type'                 => 'Dataset',
-        'name'                  => sprintf('%s %s Regulatory Build', $sitename, $display_name),
+        'name'                  => sprintf('%s %s Regulatory features', $sitename, $display_name),
         'includedInDataCatalog' => $catalog_id,
         'url'                   => sprintf('%s/info/genome/funcgen/accessing_regulation.html', $server),
         'description'           => sprintf('Annotation of regulatory regions on the %s genome', $long_name),

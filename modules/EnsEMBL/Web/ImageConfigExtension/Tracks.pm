@@ -1186,8 +1186,8 @@ sub add_regulation_builds {
 
   if ($type){ #Only shows Regulatory Build menu if there is a Regulatory Build
   	## Main regulation track - replaces 'MultiCell'
-  	my $build_menu  = $reg_menu->append_child($self->create_menu_node('regbuild', 'Regulatory Build'));
-  	$build_menu->append_child($self->create_track_node("regulatory_build", "Regulatory Build", {
+  	my $build_menu  = $reg_menu->append_child($self->create_menu_node('regbuild', 'Regulatory features'));
+  	$build_menu->append_child($self->create_track_node("regulatory_build", "Regulatory features", {
     		glyphset    => 'fg_regulatory_features',
     		sources     => 'undef',
     		strand      => 'r',
@@ -1197,7 +1197,7 @@ sub add_regulation_builds {
     		display     => 'normal',
     		description => $self->databases->{'DATABASE_FUNCGEN'}{'tables'}{'regulatory_build'}{'analyses'}{'Regulatory_Build'}{'desc'}{'reg_feats'},
     		renderers   => [qw(off Off normal On)],
-    		caption     => 'Regulatory Build',
+    		caption     => 'Regulatory features',
   	}));
   }
 
@@ -1221,7 +1221,7 @@ sub add_regulation_builds {
   
   return unless @cell_lines;
 
-  my $menu_title = 'Features by Cell/Tissue';
+  my $menu_title = 'Activity by Cell/Tissue';
   
   if (!$type){ #if there is no regulatory build menu it creates a cell/tissue menu 
 	my $cell_type_menu  = $reg_menu->append_child($self->create_menu_node('', ''));

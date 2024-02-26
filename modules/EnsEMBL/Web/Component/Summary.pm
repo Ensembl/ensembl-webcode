@@ -310,6 +310,17 @@ sub transcript_table {
     }
   }
 
+  # Stopgap fix: recover canonical transcript attribute if missing.
+  my @transcripts_tagged_canonical = grep {
+    exists $trans_attribs->{$_}{'is_canonical'} && $trans_attribs->{$_}{'is_canonical'}
+  } keys %$trans_attribs;
+  if (scalar(@transcripts_tagged_canonical) == 0) {
+    my $canonical_transcript = $gene->canonical_transcript;
+    if (defined $canonical_transcript) {
+      $trans_attribs->{$canonical_transcript->stable_id}{'is_canonical'} = 1;
+    }
+  }
+
   my %url_params = (
       type   => 'Transcript',
       action => $page_type eq 'gene' ? 'Summary' : $action,

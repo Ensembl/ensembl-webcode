@@ -390,7 +390,9 @@ sub MARKUP_OPTIONS {
                      { 'value' => -0.0001, 'caption' => 'Hide common, MAF &gt; 0.01%' },
                      { 'value' => -0.001, 'caption' => 'Hide common, MAF &gt; 0.1%' },
                      { 'value' => -0.01, 'caption' => 'Hide common, MAF &gt; 1%' },
-                     { 'value' => -0.1, 'caption' => 'Hide common, MAF &gt; 10%' }]
+                     { 'value' => -0.1, 'caption' => 'Hide common, MAF &gt; 10%' }],
+      'shortnote'=> 'This option is currently unavailable. Please use <a target="_blank" href="e110.ensembl.org">Ensembl version 110</a>',
+      'disabled' => 1
     },
     ### GENE-SPECIFIC TEXT SEQUENCE
     'flank5_display' => {

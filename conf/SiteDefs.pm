@@ -148,6 +148,11 @@ our $GDPR_POLICY_URL              = 'https://www.ebi.ac.uk/data-protection/ensem
 our $GDPR_TERMS_URL               = 'https://www.ebi.ac.uk/about/terms-of-use';
 
 ###############################################################################
+## Data preservation variables
+###############################################################################
+our $DATA_PRESERVATION_URL        = 'https://www.ebi.ac.uk/long-term-data-preservation';
+
+###############################################################################
 ## Cookies and cookie encryption
 our $ENSEMBL_USER_COOKIE          = 'ENSEMBL_WWW_USER';     # Cookie name for User cookie (if user plugin is enabled)
 our $ENSEMBL_USER_COOKIEHOST      = '';                     # Cookie host for User cookie

@@ -336,9 +336,17 @@ sub content {
       });
 
 
+      my $tree_links = $self->create_gene_tree_links({
+        species => $species, # the species parameter only becomes relevant in the Metazoa plugin 
+        cdb => $cdb,
+        stable_id => $stable_id,
+        orthologue => $orthologue
+      });
+
+
       my $table_details = {
         'Species'    => join('<br />(', split(/\s*\(/, $species_label)),
-        'Type'       => $self->html_format ? glossary_helptip($hub, ucfirst $orthologue_desc, ucfirst "$orthologue_desc orthologues").qq{<p class="top-margin"><a href="$tree_url">View Gene Tree</a></p>} : glossary_helptip($hub, ucfirst $orthologue_desc, ucfirst "$orthologue_desc orthologues") ,
+        'Type'       => $self->html_format ? glossary_helptip($hub, ucfirst $orthologue_desc, ucfirst "$orthologue_desc orthologues"). $tree_links : glossary_helptip($hub, ucfirst $orthologue_desc, ucfirst "$orthologue_desc orthologues") ,
         'identifier' => $self->html_format ? $id_info : $stable_id,
         'Target %id' => qq{<span class="$target_class">}.sprintf('%.2f&nbsp;%%', $target).qq{</span>},
         'Query %id'  => qq{<span class="$query_class">}.sprintf('%.2f&nbsp;%%', $query).qq{</span>},
@@ -407,6 +415,30 @@ sub content {
   }
 
   return $html;
+}
+
+# The name of the method says "links" (plural), although for most sites it will generate a single link,
+# because on the Metazoa website (which overrides this method), links to more than one gene tree are possible
+sub create_gene_tree_links {
+  my $self = shift;
+  my $params = shift;
+
+  my $cdb = $params->{cdb};
+  my $stable_id = $params->{stable_id};
+  my $orthologue = $params->{orthologue};
+
+  my $hub          = $self->hub;
+  my $strain_url   = $hub->is_strain ? "Strain_" : "";
+
+  my $tree_url = $hub->url({
+    type   => 'Gene',
+    action => $strain_url . ($cdb =~ /pan/ ? 'PanComparaTree' : 'Compara_Tree'),
+    g1     => $stable_id,
+    anc    => $orthologue->{'gene_tree_node_id'},
+    r      => undef
+  });
+
+  return qq{<p class="top-margin"><a href="$tree_url">View Gene Tree</a></p>};
 }
 
 sub export_options { return {'action' => 'Orthologs'}; }

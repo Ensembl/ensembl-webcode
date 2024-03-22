@@ -162,7 +162,12 @@ sub content {
     container_width => $slice->length,
     slice_number    => '1|1',
   });
-  
+
+  # Add data by cell lines into image_config and
+  if ( $hub->species_defs->databases->{'DATABASE_FUNCGEN'} ) {
+    $image_config->{'data_by_cell_line'} = $self->new_object('Slice', $slice, $object->__data)->get_cell_line_data_closure($image_config) if keys %{$hub->species_defs->databases->{'DATABASE_FUNCGEN'}{'tables'}{'cell_type'}{'ids'}};
+  }
+
   my $image = $self->new_image($slice, $image_config, [ $object->name ]);
   
   return if $self->_export_image($image);

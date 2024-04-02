@@ -337,7 +337,7 @@ sub content {
 
 
       my $tree_links = $self->create_gene_tree_links({
-        species => $species, # the species parameter only becomes relevant in the Metazoa plugin 
+        gene_availability => $availability, # the gene_availability parameter only becomes relevant in the Metazoa plugin
         cdb => $cdb,
         stable_id => $stable_id,
         orthologue => $orthologue

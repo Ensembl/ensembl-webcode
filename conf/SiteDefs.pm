@@ -35,8 +35,8 @@ use Sys::Hostname::Long;
 ###############################################################################
 ## Ensembl Version and release dates (these get updated every release)
 our $ENSEMBL_VERSION        = 112;            # Ensembl release number
-our $ARCHIVE_VERSION        = 'Feb2024';     # Archive site for this version
-our $ENSEMBL_RELEASE_DATE   = 'February 2024'; # As it would appear in the copyright/footer
+our $ARCHIVE_VERSION        = 'Apr2024';     # Archive site for this version
+our $ENSEMBL_RELEASE_DATE   = 'April 2024'; # As it would appear in the copyright/footer
 ###############################################################################
 
 
@@ -215,7 +215,7 @@ our $DEFAULT_SPECIES_URL             = '/i/species/';
 ## Genomic data served from files
 our $DATAFILE_ROOT        = defer { $ENSEMBL_SERVERROOT };                                  ## Base path for ro data files
 our $DATAFILE_BASE_PATH   = defer { "$DATAFILE_ROOT/data_files" };                          ## Path to ro data files
-our $COMPARA_HAL_DIR      = defer { "$DATAFILE_BASE_PATH/multi/" };                         ## Path for Compara HAL files
+our $COMPARA_HAL_DIR      = defer { "$DATAFILE_BASE_PATH/" };                         ## Path for Compara HAL files
 ###############################################################################
 
 

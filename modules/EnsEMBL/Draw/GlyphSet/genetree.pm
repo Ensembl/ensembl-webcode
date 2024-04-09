@@ -211,8 +211,6 @@ sub _init {
       if( $other_gene && $f->{_genes}->{$other_gene} ){
         $bold = 1;
         $label_colour = "ff6666";
-      } elsif( $other_genome_db_id && $f->{_genome_dbs}->{$other_genome_db_id} ){
-        $bold = 1;
       } elsif( $f->{_genes}->{$current_gene} ){
         $label_colour     = 'red';
         $collapsed_colour = 'red';
@@ -222,6 +220,8 @@ sub _init {
         $label_colour     = 'blue';
         $collapsed_colour = 'blue';
         $bold = defined($other_genome_db_id);
+      } elsif( $other_genome_db_id && $f->{_genome_dbs}->{$other_genome_db_id} ){
+        $bold = 1;
       }
     }
 

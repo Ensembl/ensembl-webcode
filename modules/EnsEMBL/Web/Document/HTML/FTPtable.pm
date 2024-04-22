@@ -222,7 +222,7 @@ Each directory on <a href="$ftp" rel="external">$ftp_domain</a> contains a
       mysql   => sprintf('<a rel="external" title="%s" href="%s/mysql/">MySQL</a>',          $title{'mysql'},  $ftp_base),
       var2    => $has_vcf ? sprintf('<a rel="external" title="%s" href="%s/variation/gvf/%s/">GVF</a>', $title{'gvf'}, $ftp_base, $sp_dir) : '-',
       var4    => $has_vcf ? sprintf('<a rel="external" title="%s" href="%s/variation/vcf/%s/">VCF</a>', $title{'vcf'}, $ftp_base, $sp_dir) : '-',
-      var3    => sprintf('<a rel="external" title="%s" href="%s/variation/vep/">VEP</a>',    $title{'vep'}, $ftp_base),
+      var3    => sprintf('<a rel="external" title="%s" href="%s/variation/indexed_vep_cache/">VEP</a>',    $title{'vep'}, $ftp_base),
       funcgen => $required_lookup->{'funcgen'}{$sp_dir} ? sprintf('<a rel="external" title="%s" href="%s/regulation/%s/">Regulation</a> (GFF)',      $title{'funcgen'}, $ftp_base, $sp_dir) : '-',
       bam     => $databases->{'DATABASE_RNASEQ'}        ? sprintf('<a rel="external" title="%s" href="%s/bamcov/%s/genebuild/">BAM/BigWig</a>',      $title{'bam'},    $ftp_base, $sp_dir) : '-',
       files   => $required_lookup->{'files'}{$sp_dir}   ? sprintf('<a rel="external" title="%s" href="%s/data_files/%s/">Regulation data files</a>', $title{'files'}, $ftp_base, $sp_dir) : '-',

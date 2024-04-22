@@ -279,3 +279,19 @@ div.cookie-message div.agree-button a.button.clicked{
   padding: 6px 15px 2px 32px!important;
   background-position-x: 8px;
 }
+
+div.reg_region {
+  padding-left: 24px;
+}
+
+div.reg_region div.twocol .row .lhs{
+  width: 200px;
+}
+
+div.reg_region div.twocol .row .rhs{
+  margin-left: 216px;
+}
+
+div.classification_wrapper div.twocol div.row div.rhs {
+  font-weight: bold;
+}

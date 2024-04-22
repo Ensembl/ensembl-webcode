@@ -285,7 +285,13 @@ sub FAMILY_EXTERNAL {
 
 
 sub MARKUP_OPTIONS {
-### Configuration for text sequence displays
+  ### Configuration for text sequence displays
+
+  my $MAF_shortnote_string = 'This option is currently unavailable. Please use <a target="_blank" href="http://e110.ensembl.org">Ensembl version 110</a>';
+  if ($SiteDefs::SUBDOMAIN_DIR =~ /grch37/) {
+    $MAF_shortnote_string = 'This option is currently unavailable';
+  }
+
   return {
   ### TEXT SEQUENCE MARKUP
     'exons' => {
@@ -390,7 +396,9 @@ sub MARKUP_OPTIONS {
                      { 'value' => -0.0001, 'caption' => 'Hide common, MAF &gt; 0.01%' },
                      { 'value' => -0.001, 'caption' => 'Hide common, MAF &gt; 0.1%' },
                      { 'value' => -0.01, 'caption' => 'Hide common, MAF &gt; 1%' },
-                     { 'value' => -0.1, 'caption' => 'Hide common, MAF &gt; 10%' }]
+                     { 'value' => -0.1, 'caption' => 'Hide common, MAF &gt; 10%' }],
+      'shortnote'=> $MAF_shortnote_string,
+      'disabled' => 1
     },
     ### GENE-SPECIFIC TEXT SEQUENCE
     'flank5_display' => {

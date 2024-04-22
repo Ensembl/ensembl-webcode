@@ -522,7 +522,12 @@ sub get_export_data {
     unless ($cdb) {
       $cdb = $hub->function =~ /pan_compara/ ? 'compara_pan_ensembl' : 'compara';
     }
-    my ($homologies) = $object->get_homologies('ENSEMBL_ORTHOLOGUES', undef, undef, $cdb);
+    my $homologies;
+    if ($flag eq 'genetree') {
+      ($homologies) = $object->get_homologies('ENSEMBL_ORTHOLOGUES', undef, $cdb, 'restrict_to_gene_tree');
+    } else {
+      ($homologies) = $object->get_homologies('ENSEMBL_ORTHOLOGUES', undef, $cdb);
+    }
 
     my %ok_species;
 

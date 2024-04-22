@@ -758,6 +758,7 @@ sub get_homologies {
   my $homology_source      = shift;
   my $homology_description = shift;
   my $compara_db           = shift || 'compara';
+  my $restrict_to_gene_tree = shift;
   
   $homology_source      = 'ENSEMBL_HOMOLOGUES' unless defined $homology_source;
   $homology_description = 'ortholog' unless defined $homology_description;
@@ -770,7 +771,24 @@ sub get_homologies {
   return unless defined $query_member;
   
   my $homology_adaptor = $database->get_HomologyAdaptor;
-  my $homologies_array = $homology_adaptor->fetch_all_by_Member($query_member); # It is faster to get all the Homologues and discard undesired entries than to do fetch_all_by_Member_method_link_type
+  # It is faster to get all the Homologues and discard undesired entries than to do fetch_all_by_Member_method_link_type
+  my $homologies_array = [grep { $_->description =~ /$homology_description/ } @{$homology_adaptor->fetch_all_by_Member($query_member)}];
+
+  if ($restrict_to_gene_tree) {
+    my $hub = $self->hub;
+    my $strain_tree = $hub->species_defs->get_config($hub->species,'RELATED_TAXON') if($hub->param('data_action') =~ /strain_/i);
+    my $tree = $self->get_GeneTree($compara_db, 1, $strain_tree);
+    my %members_to_keep = map { $_->dbID => 1 } @{$tree->get_all_Members()};
+
+    my @gene_tree_homologies;
+    foreach my $homology (@$homologies_array) {
+      my $hom_member = $homology->get_all_Members()->[1];
+      my $hom_member_id = $hom_member->isa('Bio::EnsEMBL::Compara::GeneMember') ? $hom_member->canonical_member_id : $hom_member->dbID;
+      next unless $members_to_keep{$hom_member_id};
+      push @gene_tree_homologies, $homology;
+    }
+    $homologies_array = \@gene_tree_homologies;
+  }
 
   # Strategy: get the root node (this method gets the whole lineage without getting sister nodes)
   # We use right - left indexes to get the order in the hierarchy.
@@ -790,11 +808,7 @@ sub get_homologies {
     }
   }
 
-  my $ok_homologies = [];
-  foreach my $homology (@$homologies_array) {
-    push @$ok_homologies, $homology if $homology->description =~ /$homology_description/;
-  }
-  return ($ok_homologies, \%classification, $query_member);
+  return ($homologies_array, \%classification, $query_member);
 }
     
 sub fetch_homology_species_hash {

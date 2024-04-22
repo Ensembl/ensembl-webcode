@@ -180,6 +180,11 @@ sub fixup_alignslice {
         ass_start => $ass->start,
         ass_end => $ass->end
       };
+      # We need the distinct_Slice_name only in cases where it's different from the display_Slice_name,
+      # such as for an AlignSlice::Slice on a polyploid subgenome component (e.g. 'triticum_aestivum_A').
+      if ($ass->can('distinct_Slice_name') and $ass->distinct_Slice_name ne $ass->display_Slice_name) {
+        $data->{$key}{'ass_distinct_slice_name'} = $ass->distinct_Slice_name;
+      }
     }
   } elsif($self->phase eq 'pre_generate') {
     my $data = $self->data;
@@ -197,8 +202,13 @@ sub fixup_alignslice {
       # try an exact match first then match except for start/end (which we fix)
       foreach my $approx ((0,1)) {
         foreach my $sl (@{$as->get_all_Slices}) {
-          if($sl->coord_system->version eq $data->{$key}{'ass_coord'} and
-	     $sl->genome_db->name eq $data->{$key}{'ass_species'}) {
+          my $ass_coord_match = $sl->coord_system->version eq $data->{$key}{'ass_coord'};
+          my $ass_slice_match = exists $data->{$key}{'ass_distinct_slice_name'}
+                              ? $sl->distinct_Slice_name eq $data->{$key}{'ass_distinct_slice_name'}
+                              : $sl->genome_db->name eq $data->{$key}{'ass_species'}
+                              ;
+
+          if($ass_coord_match and $ass_slice_match) {
             if($sl->start == $data->{$key}{'ass_start'} and
                $sl->end   == $data->{$key}{'ass_end'}) {
               $data->{$key} = $sl;

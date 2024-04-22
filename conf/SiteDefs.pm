@@ -35,8 +35,8 @@ use Sys::Hostname::Long;
 ###############################################################################
 ## Ensembl Version and release dates (these get updated every release)
 our $ENSEMBL_VERSION        = 111;            # Ensembl release number
-our $ARCHIVE_VERSION        = 'Nov2023';     # Archive site for this version
-our $ENSEMBL_RELEASE_DATE   = 'November 2023'; # As it would appear in the copyright/footer
+our $ARCHIVE_VERSION        = 'Jan2024';     # Archive site for this version
+our $ENSEMBL_RELEASE_DATE   = 'January 2024'; # As it would appear in the copyright/footer
 ###############################################################################
 
 
@@ -146,6 +146,11 @@ our $GDPR_VERSION                 = '';
 our $GDPR_COOKIE_NAME             = '';
 our $GDPR_POLICY_URL              = 'https://www.ebi.ac.uk/data-protection/ensembl/privacy-notice';
 our $GDPR_TERMS_URL               = 'https://www.ebi.ac.uk/about/terms-of-use';
+
+###############################################################################
+## Data preservation variables
+###############################################################################
+our $DATA_PRESERVATION_URL        = 'https://www.ebi.ac.uk/long-term-data-preservation';
 
 ###############################################################################
 ## Cookies and cookie encryption

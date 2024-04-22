@@ -24,6 +24,7 @@ package EnsEMBL::Web::Document::HTML::Compara;
 
 use strict;
 
+use List::Util qw(uniqstr);
 use Math::Round;
 use EnsEMBL::Web::Document::Table;
 use Bio::EnsEMBL::Compara::Utils::SpeciesTree;
@@ -328,6 +329,7 @@ sub get_species_info {
     foreach my $this_leaf (@$all_leaves) {
       my $name = $this_leaf->genome_db->name;
       push @$species_order, $lookup->{$name} if $lookup->{$name};
+      @$species_order = uniqstr(@$species_order);  # polyploid genomes may be represented multiple times in the species-order list
     }
   }
 
@@ -361,7 +363,11 @@ sub get_species_info {
       my $id = $gdb->dbID;
       my @stats = qw(genome_coverage genome_length coding_exon_coverage coding_exon_length);
       foreach (@stats) {
-        $info->{$sp}{$_} = $genome_db_id_2_node_hash && exists $genome_db_id_2_node_hash->{$id} ? $genome_db_id_2_node_hash->{$id}->get_value_for_tag($_) : $mlss->get_value_for_tag($_.'_'.$id);
+        if ($genome_db_id_2_node_hash && exists $genome_db_id_2_node_hash->{$id} && defined $genome_db_id_2_node_hash->{$id}->get_value_for_tag($_)) {
+            $info->{$sp}{$_} = $genome_db_id_2_node_hash->{$id}->get_value_for_tag($_);
+        } else {
+            $info->{$sp}{$_} = $mlss->get_value_for_tag($_.'_'.$id);
+        }
       }
     }
   }

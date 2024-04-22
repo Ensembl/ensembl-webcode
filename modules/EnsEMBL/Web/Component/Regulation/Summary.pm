@@ -52,7 +52,7 @@ sub _location_url {
 sub content {
   my $self    = shift;
   my $object  = $self->object;
-  my $summary = $self->new_twocol;
+  my $classification_table = $self->new_twocol;
 
   $self->nav_buttons;
   my $location_html = $self->_location_url($object->seq_region_start,
@@ -62,12 +62,19 @@ sub content {
 
   my @class = ($object->feature_type->name);
 
-  $summary->add_row('Classification',join(', ',@class));
-  $summary->add_row('Location', $location_html);
-  $summary->add_row('Bound region', $bound_html) if $location_html ne $bound_html;
+  $classification_table->add_row('Classification',join(', ',@class));
+  $classification_table->add_row('To view the configured tracks visit:');
+
+  my $classification_wrapper = sprintf('<div class="classification_wrapper">%s</div>',$classification_table->render);
+
+  my $region_table = $self->new_twocol;
+  $region_table->add_row('Location', $location_html);
+  $region_table->add_row('Bound region',$bound_html) if ($location_html ne $bound_html);
+
+  my $region_wrapper = sprintf('<div class="reg_region">%s</div>',$region_table->render);
 
   my $nav_buttons = $self->nav_buttons;
-  return $nav_buttons.$summary->render;
+  return $nav_buttons.$classification_wrapper.$region_wrapper;
 }
 
 1;

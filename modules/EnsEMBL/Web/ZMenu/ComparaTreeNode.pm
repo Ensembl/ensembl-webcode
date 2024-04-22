@@ -379,14 +379,19 @@ sub content {
       order       => 15,
     }); 
 
-    # FIXME - Quick hack to hide Wasabi for all strains trees. This should be removed once we have the HAL ready
-    if ($hub->referer->{ENSEMBL_ACTION} ne 'Strain_Compara_Tree') {
+    {  # <-- These braces were placed here only to minimise Git noise; please feel free to remove them.
+
+      # The $compara_div helps to unambiguously identify a gene
+      # sharing a stable ID with a gene in another division.
+      my $compara_div = $cdb =~/compara_pan_ensembl/ ? 'pan_homology' : ($hub->species_defs->EG_DIVISION || 'multi');
+
+      my $gene_tree_stable_id = $node->tree->stable_id;
+      my $gt_id  = defined $gene_tree_stable_id
+                 ? $gene_tree_stable_id
+                 : $compara_div . "_" . $hub->species_defs->SPECIES_PRODUCTION_NAME . "_" . $gene->stable_id
+                 ;
 
       # Get wasabi files if found in session store
-      my $is_strain           = $hub->is_strain ? 1 : 0; ## work this out here, as we use it in several places and it's a bit heavy
-      my $gt_id               = $is_strain ? $gene->stable_id : $node->tree->stable_id;
-      my $is_ncrna            = ($node->tree->member_type eq 'ncrna');
-      $gt_id = $is_ncrna ? $hub->param('g') : $gt_id;
       my $wasabi_session_key  = $gt_id . "_" . $node_id;
       my $wasabi_session_data = $hub->session->get_data(type=>'tree_files', code => 'wasabi');
 
@@ -409,11 +414,17 @@ sub content {
 
         my $is_success = head($rest_url);
         if ($is_success) {
-          $rest_url .= sprintf('/genetree/%sid/%s?content-type=text/javascript&aligned=1&subtree_node_id=%s&%s',
-                        ($is_strain or $is_ncrna) ? 'member/' : '',
-                        $gt_id,
+
+          my $rest_path = defined $gene_tree_stable_id
+                        ? sprintf('/genetree/id/%s', $gene_tree_stable_id)
+                        : sprintf('/genetree/member/id/%s/%s', $hub->species_defs->SPECIES_PRODUCTION_NAME, $gene->stable_id)
+                        ;
+
+          $rest_url .= sprintf('%s?content-type=text/javascript&aligned=1&subtree_node_id=%s&compara=%s&clusterset_id=%s',
+                        $rest_path,
                         $node_id,
-                        $is_strain ? 'clusterset_id=murinae' : '');
+                        $compara_div,
+                        $node->tree->clusterset_id);
 
           if ($hub->wasabi_status) {
             $link = $hub->get_ExtURL('WASABI_ENSEMBL', {

@@ -68,20 +68,26 @@ sub content {
   }
 
   my $tagvalues       = $node->get_tagvalue_hash;
-  my $speciesTreeNode = $node->species_tree_node();
-  my $taxon_name      = $speciesTreeNode->get_scientific_name;
-  my $taxon_mya       = $speciesTreeNode->get_divergence_time;
-  my $taxon_alias     = $speciesTreeNode->get_common_name;
 
   my $caption         = 'Taxon: ';
-  
-  if (defined $taxon_alias) {
-    $caption .= $taxon_alias;
-    $caption .= sprintf ' ~%d MYA', $taxon_mya if defined $taxon_mya;
-    $caption .= " ($taxon_name)";
+  my $speciesTreeNode = $node->species_tree_node();
+  if (defined $speciesTreeNode) {
+
+    my $taxon_name      = $speciesTreeNode->get_scientific_name;
+    my $taxon_mya       = $speciesTreeNode->get_divergence_time;
+    my $taxon_alias     = $speciesTreeNode->get_common_name;
+
+    if (defined $taxon_alias) {
+      $caption .= $taxon_alias;
+      $caption .= sprintf ' ~%d MYA', $taxon_mya if defined $taxon_mya;
+      $caption .= " ($taxon_name)";
+    } else {
+      $caption .= $taxon_name;
+      $caption .= sprintf ' ~%d MYA', $taxon_mya if defined $taxon_mya;
+    }
+
   } else {
-    $caption .= $taxon_name;
-    $caption .= sprintf ' ~%d MYA', $taxon_mya if defined $taxon_mya;
+    $caption .= 'unknown';
   }
   
   $self->caption($caption);

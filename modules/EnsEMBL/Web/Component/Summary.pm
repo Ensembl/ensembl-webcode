@@ -196,15 +196,19 @@ sub get_extra_rows {
       if ($species) { #needed because some attributes are not valid e! stable IDs
         my $ga = Bio::EnsEMBL::Registry->get_adaptor($species,$db_type,'gene');
         my $gene = $ga->fetch_by_stable_id($ref_gene);
-        my $ref_gene_name = $gene->display_xref->display_id;
+        if ($gene) {  # needed because some projection parents may not exist in the current ref core database
+          my $ref_gene_name = $gene->display_xref->display_id;
 
-        my $ref_url  = $hub->url({
-          species => $species,
-          type    => 'Gene',
-          action  => 'Summary',
-          g       => $ref_gene
-        });
-        push @rows, ["Reference $strain_type equivalent", qq{<a href="$ref_url">$ref_gene_name</a>}];
+          my $ref_url  = $hub->url({
+            species => $species,
+            type    => 'Gene',
+            action  => 'Summary',
+            g       => $ref_gene
+          });
+          push @rows, ["Reference $strain_type equivalent", qq{<a href="$ref_url">$ref_gene_name</a>}];
+        } else {
+          push @rows, ["Reference $strain_type equivalent","None"];
+        }
       }
       else {
         push @rows, ["Reference $strain_type equivalent","None"];

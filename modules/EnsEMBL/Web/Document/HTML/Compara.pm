@@ -26,6 +26,7 @@ use strict;
 
 use List::Util qw(uniqstr);
 use Math::Round;
+use EnsEMBL::Web::ConfigPacker;
 use EnsEMBL::Web::Document::Table;
 use Bio::EnsEMBL::Compara::Utils::SpeciesTree;
 
@@ -99,6 +100,8 @@ sub format_wga_table {
   foreach my $method_link_type (qw(PECAN EPO EPO_LOW_COVERAGE CACTUS_HAL)) {
     push @all_mlss, sort {$a->dbID <=> $b->dbID} @{ $compara_db->get_adaptor('MethodLinkSpeciesSet')->fetch_all_by_method_link_type($method_link_type) };
   }
+
+  @all_mlss = grep { !EnsEMBL::Web::ConfigPacker->_alignment_mlss_is_suppressed($_->dbID) } @all_mlss;
 
   unless (@all_mlss) {
     return $self->error_message('No alignments found', qq{<p>This Compara database doesn't contain any multiple-genome alignments.</p>}, 'info');
@@ -226,6 +229,7 @@ sub pairwise_mlss_data {
   my $lookup = $self->hub->species_defs->prodnames_to_urls_lookup;
   foreach my $method (@{$methods||[]}) {
     my $mlss_sets  = $mlss_adaptor->fetch_all_by_method_link_type($method);
+    @$mlss_sets = grep { !EnsEMBL::Web::ConfigPacker->_alignment_mlss_is_suppressed($_->dbID) } @$mlss_sets;
     if (@$mlss_sets and ($mlss_sets->[0]->method->class =~ /SyntenyRegion.synteny/)) {
       $synt_methods{$method} = 1;
     }
@@ -264,6 +268,7 @@ sub mlss_data {
   foreach my $method (@{$methods||[]}) {
     my $mls_sets  = $mlss_adaptor->fetch_all_by_method_link_type($method);
 
+    @$mls_sets = grep { !EnsEMBL::Web::ConfigPacker->_alignment_mlss_is_suppressed($_->dbID) } @$mls_sets;
 
     foreach my $mlss (@$mls_sets) {
       ## MLSS have a special tag to indicate the reference species

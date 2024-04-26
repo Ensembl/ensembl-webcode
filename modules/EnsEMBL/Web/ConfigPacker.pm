@@ -1178,6 +1178,7 @@ sub _build_compara_default_aligns {
     $sth->bind_param(2,$species);
     $sth->execute;
     my ($mlss_id)= $sth->fetchrow_array;
+    die "MLSS $mlss_id cannot be a default Compara alignment, it is suppressed" if $self->_alignment_mlss_is_suppressed($mlss_id);
     push @defaults,[$mlss_id,$species,$method];
     $sth->execute;
     $sth->finish;
@@ -1202,6 +1203,7 @@ sub _build_compara_mlss {
   $sth->execute;
   my %mlss;
   while (my ($mlss_id, $ss_id, $ml_id, $url) = $sth->fetchrow_array) {
+    next if $self->_alignment_mlss_is_suppressed($mlss_id);
     $mlss{$mlss_id} = { SPECIES_SET => $ss_id, METHOD_LINK => $ml_id, URL => $url };
   }
   $dest->{'MLSS_IDS'} = \%mlss;
@@ -1254,6 +1256,8 @@ sub _summarise_compara_db {
   foreach my $row (@$res_aref) { 
     my ($class, $type, $species, $name, $id, $species_set_id) = ($row->[0], uc $row->[1], $row->[2], $row->[3], $row->[4], $row->[5]);
     my $key = 'ALIGNMENTS';
+
+    next if $self->_alignment_mlss_is_suppressed($id);
     
     if ($class =~ /ConservationScore/ || $type =~ /CONSERVATION_SCORE/) {
       $key  = 'CONSERVATION_SCORES';
@@ -1290,6 +1294,7 @@ sub _summarise_compara_db {
   foreach my $row (@$res_aref) {
     my ($conservation_score_id, $alignment_id) = ($row->[0], $row->[1]);
     
+    next if $self->_alignment_mlss_is_suppressed($alignment_id);
     next unless $conservation_score_id;
     
     $self->db_tree->{$db_name}{'ALIGNMENTS'}{$alignment_id}{'conservation_score'} = $conservation_score_id;
@@ -1463,6 +1468,7 @@ sub _summarise_compara_alignments {
   my (%config, @seen_ids, $prev_id, $prev_df_id, $prev_comparison, $prev_method, $prev_start, $prev_end, $prev_sr, $prev_species, $prev_coord_sys);
   
   while (my ($gabid, $mlss_id, $start, $end, $df_id) = $sth->fetchrow_array) {
+    next if $self->_alignment_mlss_is_suppressed($mlss_id);
     my $id = $gabid . $mlss_id;
     
     if ($id eq $prev_id) {
@@ -1563,6 +1569,11 @@ sub _summarise_compara_alignments {
   }
   
   $self->db_tree->{$db_name}{$key}{'REGION_SUMMARY'} = $region_summary;
+}
+
+sub _alignment_mlss_is_suppressed {
+    my ($self, $mlss_id) = @_;
+    return 0;
 }
 
 sub _get_regions {

@@ -163,8 +163,8 @@ sub pancompara_member {
   ## Pass species in case this site has single-species compara
   my $gda = $self->_get_adaptor('get_GenomeDBAdaptor', $compara, $species);
   return undef unless $gda;
-  #my $prod_name = $self->{_sd}->get_config($species_url, 'SPECIES_PRODUCTION_NAME');
-  my $genome_db = $gda->fetch_by_name_assembly($species);
+  my $prod_name = $self->{_sd}->get_config($species, 'SPECIES_PRODUCTION_NAME');
+  my $genome_db = $gda->fetch_by_name_assembly($prod_name);
   return undef unless $genome_db;
 
   my $gma = $self->_get_adaptor('get_GeneMemberAdaptor', $compara, $species);

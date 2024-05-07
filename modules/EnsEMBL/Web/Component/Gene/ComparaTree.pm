@@ -623,7 +623,8 @@ sub get_export_data {
   
   ## First, get tree
   if ($gene && $type && $type eq 'genetree') { 
-    $tree = $gene->get_GeneTree($cdb, 1);
+    my $strain_tree  = $hub->species_defs->get_config($hub->species,'RELATED_TAXON') if $hub->param('strain');
+    $tree = $gene->get_GeneTree($cdb, 1, $strain_tree);
   }
   elsif ($hub->species eq 'Multi' && $self->param('gt')) {
     my $gene_tree = $hub->builder->create_object('GeneTree');

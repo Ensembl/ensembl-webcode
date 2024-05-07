@@ -496,7 +496,7 @@ sub write_orthoxml {
   my ($data)  = $component->get_export_data('genetree');
 
   my $method_type;
-  if (ref($component) =~ /ComparaTree/) {
+  if (ref($component) =~ /Tree/) {  # e.g. ComparaTree
     $method_type = ref($data) =~ /Node/ ? 'subtrees' : 'trees';     
   }
   else {

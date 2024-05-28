@@ -62,18 +62,19 @@ sub content {
 
   ## Get species info
   my $compara_species   = {};
-  my $lookup            = {};
-  my $pan_info          = {};
+  my $lookup            = $species_defs->prodnames_to_urls_lookup($cdb);
+  my $pan_lookup        = {};
+  my $rev_lookup        = {};
   if ($is_pan) {
-    $pan_info      = $species_defs->multi_val('PAN_COMPARA_LOOKUP');
-    foreach (keys %$pan_info) {
-      $compara_species->{$_}  = 1;
-      $lookup->{$_}           = $pan_info->{$_}{'species_url'};
-    } 
+    $pan_lookup = $hub->species_defs->multi_val('PAN_COMPARA_LOOKUP');
+    while (my($prod_name, $info) = each(%$pan_lookup)) {
+      $rev_lookup->{$info->{'species_url'}} = $prod_name;
+      $compara_species->{$prod_name} = 1;
+    }
   }
   else {
-    $compara_species  = $species_defs->multi_hash->{'DATABASE_COMPARA'}{'COMPARA_SPECIES'};;
-    $lookup           = $species_defs->prodnames_to_urls_lookup;
+    $compara_species = { %{$species_defs->multi_hash->{'DATABASE_COMPARA'}{'COMPARA_SPECIES'}} };
+    delete $compara_species->{'ancestral_sequences'};
   }
 
   ## Work out which species we want to skip over, based on page type  and user's configuration
@@ -86,8 +87,9 @@ sub content {
   foreach my $prod_name (keys %$compara_species) {
     ## Use URL as hash key
     my $species = $lookup->{$prod_name};
+    next unless $species; ## Skip species absent from URL lookup (e.g. Human in Ensembl Plants)
     next if $species eq $hub->species; ## Ignore current species
-    my $label = $species_defs->species_label($species);
+    my $label = $is_pan ? $pan_lookup->{$prod_name}{'display_name'} : $species_defs->species_label($species);
 
     ## Should we be showing this orthologue on this pagpe by default?
     my $strain_group  = $species_defs->get_config($species, 'STRAIN_GROUP');
@@ -193,14 +195,6 @@ sub content {
   push @$columns, { key => 'Gene name(Xref)',  align => 'left', width => '15%', sort => 'html', title => 'Gene name(Xref)'} if(!$self->html_format);
   
   @rows = ();
-
-  my $pan_lookup = $hub->species_defs->multi_val('PAN_COMPARA_LOOKUP') || {};
-  my $rev_lookup;
-  if (keys %$pan_lookup) {
-    while (my($prod_name, $info) = each(%$pan_lookup)) {
-      $rev_lookup->{$info->{'species_url'}} = $prod_name;
-    }
-  } 
   
   foreach my $species (sort { ($a =~ /^<.*?>(.+)/ ? $1 : $a) cmp ($b =~ /^<.*?>(.+)/ ? $1 : $b) } keys %orthologue_list) {
     next unless $species;
@@ -448,20 +442,32 @@ sub species_sets {
   my ($self, $orthologue_list, $orthologue_map, $cdb) = @_;
   my $hub             = $self->hub;
   my $species_defs    = $hub->species_defs;
+  my $is_pan          = $cdb =~ /compara_pan_ensembl/;
 
   return "" if $self->hub->action =~ /^Strain/; #No summary table needed for strains
 
-  my ($set_order, $species_sets, $set_mappings) = $self->species_set_config;
+  my ($set_order, $species_sets, $set_mappings) = $self->species_set_config($cdb);  #setting $cdb enables us to fetch Pan species sets
+
   return "" unless $set_order;
 
-  my $compara_spp     = $species_defs->multi_hash->{'DATABASE_COMPARA'}{'COMPARA_SPECIES'};
-  my $lookup          = $species_defs->prodnames_to_urls_lookup;
+  my $compara_spp     = {};
+  my $lookup          = $species_defs->prodnames_to_urls_lookup($cdb);
+  my $pan_info        = {};
+  if ($is_pan) {
+    $pan_info = $species_defs->multi_val('PAN_COMPARA_LOOKUP');
+    $compara_spp = {map { $_ => 1} keys %$pan_info};
+  }
+  else {
+    $compara_spp = { %{$species_defs->multi_hash->{'DATABASE_COMPARA'}{'COMPARA_SPECIES'}} };
+    delete $compara_spp->{'ancestral_sequences'};
+  }
   my %orthologue_map  = qw(SEED BRH PIP RHS);
   my $sets_by_species = {};
   my $ortho_type      = {};
 
   foreach (keys %$compara_spp) {
     my $species = $lookup->{$_};
+    next unless $species; #skip species absent from URL lookup (e.g. Human in Ensembl Plants)
     next if $self->hub->is_strain($species); #skip strain species
 
     my $orthologues = $orthologue_list->{$species} || {};
@@ -484,6 +490,9 @@ sub species_sets {
     my $taxon_group     = $species_defs->get_config($species, 'SPECIES_GROUP');
     my @compara_groups  = $set_mappings ? @{$set_mappings->{$taxon_group}||[]}
                                         : ($taxon_group);
+    if ($is_pan) {
+      @compara_groups = ($pan_info->{$_}{'subdivision'} || $pan_info->{$_}{'division'});
+    }
     my $sets = [];
 
     foreach my $ss_name ('all', @compara_groups) {

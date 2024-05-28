@@ -1627,11 +1627,21 @@ sub species_label {
 sub prodnames_to_urls_lookup {
 ## Maps all species' production names to their URLs
   my $self = shift;
+  my $compara_db = shift || 'compara';
   my $names = {'ancestral_sequences' => 'Ancestral sequences'};
-  
-  foreach ($self->valid_species) {
-    $names->{$self->get_config($_, 'SPECIES_PRODUCTION_NAME')} = $_;
+
+  if ($compara_db eq 'compara_pan_ensembl') {
+    my $pan_info = $self->multi_val('PAN_COMPARA_LOOKUP');
+    foreach (keys %$pan_info) {
+      $names->{$_} = $pan_info->{$_}{'species_url'};
+    }
   }
+  else {
+    foreach ($self->valid_species) {
+      $names->{$self->get_config($_, 'SPECIES_PRODUCTION_NAME')} = $_;
+    }
+  }
+
   return $names;
 }
 

@@ -196,6 +196,7 @@ sub content {
   
   @rows = ();
   
+  my $anc_node_ids = $self->fetch_anc_node_ids($cdb);
   foreach my $species (sort { ($a =~ /^<.*?>(.+)/ ? $1 : $a) cmp ($b =~ /^<.*?>(.+)/ ? $1 : $b) } keys %orthologue_list) {
     next unless $species;
     next if $species_not_shown->{$species};
@@ -289,14 +290,6 @@ sub content {
         $alignview = 1;
       }      
      
-      my $tree_url = $hub->url({
-        type   => 'Gene',
-        action => $strain_url . ($cdb =~ /pan/ ? 'PanComparaTree' : 'Compara_Tree'),
-        g1     => $stable_id,
-        anc    => $orthologue->{'gene_tree_node_id'},
-        r      => undef
-      });
-
       # External ref and description
       my $description = encode_entities($orthologue->{'description'});
          $description = 'No description' if $description eq 'NULL';
@@ -331,7 +324,7 @@ sub content {
 
 
       my $tree_links = $self->create_gene_tree_links({
-        gene_availability => $availability, # the gene_availability parameter only becomes relevant in the Metazoa plugin
+        anc_node_ids => $anc_node_ids, # the anc_node_ids parameter only becomes relevant in the Metazoa plugin
         cdb => $cdb,
         stable_id => $stable_id,
         orthologue => $orthologue
@@ -511,6 +504,8 @@ sub species_sets {
 }
 
 sub species_set_config {} # Stub, as it's clade-specific - implement in plugins
+
+sub fetch_anc_node_ids {}  # Another stub, only for specific divisions (e.g. Metazoa)
 
 sub get_strain_refs_html {
   my ($self, $strain_refs, $species_not_shown) = @_;

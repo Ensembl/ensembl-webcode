@@ -253,6 +253,7 @@ sub _init {
         action      => "ComparaTreeNode$skey",
         node        => $f->{'_id'},
         genetree_id => $Config->get_parameter('genetree_id'),
+        strain      => $Config->get_parameter('strain'),
         collapse    => $collapsed_nodes_str
       });
     }

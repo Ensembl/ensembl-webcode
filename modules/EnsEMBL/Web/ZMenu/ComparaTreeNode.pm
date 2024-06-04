@@ -33,7 +33,8 @@ sub content {
   my $cdb    = shift || 'compara';
   my $hub    = $self->hub;
   my $object = $self->object;
-  my $tree   = $object->isa('EnsEMBL::Web::Object::GeneTree') ? $object->tree : $object->get_GeneTree($cdb);
+  my $strain_tree = $hub->species_defs->get_config($self->hub->species,'RELATED_TAXON') if $hub->param('strain');
+  my $tree   = $object->isa('EnsEMBL::Web::Object::GeneTree') ? $object->tree : $object->get_GeneTree($cdb, "", $strain_tree);
   
   die 'No tree for gene' unless $tree;
   
@@ -46,6 +47,9 @@ sub content {
   unless ($node) {
     $node = $tree->adaptor->fetch_node_by_node_id($node_id);
     die "No node_id $node_id in ProteinTree" unless $node;
+    # If we reach this point, we have the correct $node, but not the
+    # correct $tree, so let's fetch the tree root via the node.
+    $tree = $node->tree->root;
   }
   
   my %collapsed_ids   = map { $_ => 1 } grep /\d/, split ',', $hub->param('collapse');
@@ -55,8 +59,10 @@ sub content {
   my $is_supertree    = ($node->tree->tree_type eq 'supertree');
   my $parent_distance = $node->distance_to_parent || 0;
 
+  my $tree_stable_id;
   if ($is_leaf and $is_supertree) {
     my $child = $node->children->[0] || $node->adaptor->fetch_node_by_node_id($node->{_subtree}->root_id);
+    $tree_stable_id = $tree->tree->adaptor->fetch_by_root_id($child->node_id)->stable_id;
     $node->add_tag('species_tree_node_id', $child->get_tagvalue('species_tree_node_id'));
     my $members = $node->adaptor->fetch_all_AlignedMember_by_root_id($child->node_id);
     $node->{_sub_leaves_count} = scalar(@$members);
@@ -64,7 +70,7 @@ sub content {
     foreach my $g (@$members) {
       $link_gene = $g if ($g->genome_db->name eq $hub->species_defs->SPECIES_PRODUCTION_NAME);
     }
-    $node->{_sub_reference_gene} = $link_gene->gene_member;
+    $node->{_sub_reference_gene} = $link_gene->gene_member if defined $link_gene;
   }
 
   my $tagvalues       = $node->get_tagvalue_hash;
@@ -168,36 +174,56 @@ sub content {
         label => $node->{_sub_leaves_count},
         order => 2,
       });
-    
+
       my $link_gene = $node->{_sub_reference_gene};
-      ## Strain trees and pon-compara trees are very different!
-      my ($species, $action, $base_url);  
-      if ($hub->action =~ /Strain/) {
-        $species = $lookup->{$link_gene->genome_db->name};
-        $action = $hub->action;
-      }
-      else {
-        my $pan_lookup = $hub->species_defs->multi_val('PAN_COMPARA_LOOKUP', $link_gene->genome_db->name);
-        $species = $pan_lookup->{'species_url'};
-        my $site = $pan_lookup->{'division'};
-        if ($site) {
-          $site = 'www' if $site eq 'vertebrates';
-          $base_url = sprintf 'https://%s.ensembl.org', $site;
+
+      ## Strain trees and other trees are very different!
+      my $action = $hub->param('strain') ? 'Strain_Compara_Tree' : 'Compara_Tree';
+
+      my $that_subtree_link;
+      if ($tree_stable_id) {
+        $that_subtree_link = $hub->url({
+          species  => 'Multi',
+          type     => 'GeneTree',
+          action   => 'Image',
+          __clear  => 1,
+          gt       => $tree_stable_id,
+        });
+      } else {
+        my $link_gene = $node->{_sub_reference_gene};
+        my $species = $lookup->{$link_gene->genome_db->name};
+
+        # This is not the most elegant approach, but it will change the $action
+        # only where gene-tree constants are available (e.g. Metazoa),
+        # and only for non-default protein trees that lack a stable ID.
+        require EnsEMBL::Web::Component::Gene::ComparaOrthologs;
+        if (defined $EnsEMBL::Web::Component::Gene::ComparaOrthologs::GENE_TREE_CONSTANTS) {
+          my $gene_tree_constants = $EnsEMBL::Web::Component::Gene::ComparaOrthologs::GENE_TREE_CONSTANTS;
+          if (defined $gene_tree_constants) {
+            my $clusterset_id = $tree->tree->clusterset_id;
+            if (exists $gene_tree_constants->{$clusterset_id}) {
+              my $clusterset_specific_action = $gene_tree_constants->{$clusterset_id}{url_part};
+              if (defined $clusterset_specific_action) {
+                $action = $clusterset_specific_action;
+              }
+            }
+          }
         }
-        $action = 'Compara_Tree';
+
+        $that_subtree_link = $hub->url({
+          species  => $species,
+          type     => 'Gene',
+          action   => $action,
+          __clear  => 1,
+          g        => $link_gene->stable_id,
+        });
       }
 
       $self->add_entry({
         type  => 'Gene',
         label => 'Switch to that tree',
         order => 11,
-        link  => $base_url.$hub->url({
-          species  => $species,
-          type     => 'Gene',
-          action   => $action,
-          __clear  => 1,
-          g        => $link_gene->stable_id,
-        })
+        link  => $that_subtree_link,
       }); 
 
   } elsif ($is_leaf) {

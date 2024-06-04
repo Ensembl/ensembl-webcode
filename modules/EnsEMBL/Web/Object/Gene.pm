@@ -961,12 +961,45 @@ sub get_GeneTree {
 
     my $parent      = $adaptor->fetch_parent_tree($tree);
     if ($parent->tree_type ne 'clusterset') {
+
+      # To get the full supertree, we need to keep fetching
+      # the next parent up until we reach the clusterset.
+      my $next_parent = $parent;
+      do {
+        $parent = $next_parent;
+        $next_parent = $adaptor->fetch_parent_tree($parent);
+      } until ($next_parent->tree_type eq 'clusterset');
+
       my %subtrees;
       my $total_leaves = 0;
-      foreach my $subtree (@{$adaptor->fetch_subtrees($parent)}) {
+      $parent->preload;
+
+      # Getting the complete supertree also requires "unfurling" it, so that any subtrees that
+      # are themselves supertrees are expanded and grafted onto the supertree. The end result
+      # of this process is a supertree in which every leaf node represents a regular tree.
+      my @unfurled_subtrees = ($parent);
+      while ($unfurled_subtrees[0]->tree_type eq 'supertree') {
+        my $subtree = shift @unfurled_subtrees;
+        $subtree->preload;
+
+        my %id_to_leaf = map { $_->node_id => $_ } @{$subtree->root->get_all_leaves};
+        foreach my $sub_subtree (@{$adaptor->fetch_subtrees($subtree)}) {
+          # Supertrees to the left, trees to the right ...
+          if ($sub_subtree->tree_type eq 'supertree') {
+            my $leaf = $id_to_leaf{$sub_subtree->root->_parent_id};
+            $leaf->parent->add_child($sub_subtree->root);
+            $leaf->disavow_parent;
+            unshift(@unfurled_subtrees, $sub_subtree);
+          } else {  # $sub_subtree->tree_type eq 'tree'
+            push(@unfurled_subtrees, $sub_subtree);
+          }
+        }
+      }
+
+      foreach my $subtree (@unfurled_subtrees) {
         $subtrees{$subtree->{_parent_id}} = ($tree->root_id eq $subtree->root_id ? $tree : $subtree);
       }
-      $parent->preload;
+
       foreach my $leaf (@{$parent->root->get_all_leaves}) {
         my $subtree = $subtrees{$leaf->node_id};
         $leaf->{'_subtree'} = $subtree;

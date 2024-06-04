@@ -71,7 +71,8 @@ sub content_sub_supertree {
     container_width => 400,
     image_width     => 400,
     slice_number    => '1|1',
-    cdb             => $cdb
+    cdb             => $cdb,
+    strain          => $self->param('strain'),
   });
   my $image = $self->new_image($parent->root, $super_image_config, []);
   $image->image_type       = 'genetree';
@@ -94,6 +95,7 @@ sub content {
   my $hub         = $self->hub;
   my $object      = $self->object || $self->hub->core_object('gene');
   my $is_genetree = $object && $object->isa('EnsEMBL::Web::Object::GeneTree') ? 1 : 0;
+  my $is_strain   = $hub->is_strain || $hub->param('strain') || $hub->action =~ /Strain_/;
   my ($gene, $member, $tree, $node, $test_tree);
 
   my $type   = $self->param('data_type') || $hub->type;
@@ -146,7 +148,7 @@ sub content {
   if (defined $parent) {
 
     if ($vc->get('super_tree') eq 'on' || $self->param('super_tree') eq 'on') {
-      my $super_url = $self->ajax_url('sub_supertree',{ cdb => $cdb, update_panel => undef });
+      my $super_url = $self->ajax_url('sub_supertree',{ cdb => $cdb, update_panel => undef, strain => $is_strain });
       $html .= qq(<div class="ajax"><input type="hidden" class="ajax_load" value="$super_url" /></div>);
     } else {
       $html .= $self->_info(
@@ -273,7 +275,8 @@ sub content {
     container_width => $image_width,
     image_width     => $image_width,
     slice_number    => '1|1',
-    cdb             => $cdb
+    cdb             => $cdb,
+    strain          => $is_strain,
   });
   
   # Keep track of collapsed nodes

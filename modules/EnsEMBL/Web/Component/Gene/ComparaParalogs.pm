@@ -101,9 +101,11 @@ sub content {
       my @seq_region_split_array = split(/:/, $paralogue->{'location'});
       my $paralogue_seq_region = $seq_region_split_array[0];
 
-      my $links = ($availability->{'has_pairwise_alignments'}) ?
+      my @compare_link_parts;
+      if ($availability->{'has_pairwise_alignments'}) {
+        my $region_comparison_link =
         sprintf (
-        '<ul class="compact"><li class="first"><a href="%s" class="notext">Region Comparison</a></li>',
+        '<li class="first"><a href="%s" class="notext">Region Comparison</a></li>',
         $hub->url({
           type   => 'Location',
           action => 'Multi',
@@ -112,8 +114,10 @@ sub content {
           r      => undef,
           config => 'opt_join_genes_bottom=on',
         })
-      ) : '';
-      
+        );
+        push(@compare_link_parts, $region_comparison_link);
+      }
+
       my ($target, $query);
       
       if ($paralogue_desc ne 'DWGA') {          
@@ -125,17 +129,19 @@ sub content {
         });
 
         if ($is_ncrna) {
-          $links .= sprintf '<li><a href="%s" class="notext">Alignment</a></li>', $align_url;
+          push(@compare_link_parts, sprintf('<li><a href="%s" class="notext">Alignment</a></li>', $align_url));
         } else {
-          $links .= sprintf '<li><a href="%s" class="notext">Alignment (protein)</a></li>', $align_url;
-          $links .= sprintf '<li><a href="%s" class="notext">Alignment (cDNA)</a></li>', $align_url.';seq=cDNA';
+          push(@compare_link_parts, (
+            sprintf('<li><a href="%s" class="notext">Alignment (protein)</a></li>', $align_url),
+            sprintf('<li><a href="%s" class="notext">Alignment (cDNA)</a></li>', $align_url.';seq=cDNA'),
+          );
         }
         
         ($target, $query) = ($paralogue->{'target_perc_id'}, $paralogue->{'query_perc_id'});
         $alignview = 1;
       }
 
-      $links .= '</ul>';
+      my $compare_links = '<ul class="compact">' . join(' ', @compare_link_parts) . '</ul>';
 
       my $ancestral_taxonomy;
       my $lca_desc;
@@ -158,7 +164,7 @@ sub content {
         'Type'                => glossary_helptip($hub, ucfirst $paralogue_desc, $lookup->{ucfirst $paralogue_desc}),
         'Ancestral taxonomy'  => helptip($ancestral_taxonomy, $lca_desc),
         'identifier'          => $self->html_format ? $id_info : $stable_id,
-        'Compare'             => $self->html_format ? qq(<span class="small">$links</span>) : '',
+        'Compare'             => $self->html_format ? qq(<span class="small">$compare_links</span>) : '',
         'Location'            => qq(<a href="$location_link">$paralogue->{'location'}</a>),
         'Target %id'          => sprintf('%.2f&nbsp;%%', $target),
         'Query %id'           => sprintf('%.2f&nbsp;%%', $query),

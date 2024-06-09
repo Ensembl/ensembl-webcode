@@ -134,7 +134,7 @@ sub content {
           push(@compare_link_parts, (
             sprintf('<li><a href="%s" class="notext">Alignment (protein)</a></li>', $align_url),
             sprintf('<li><a href="%s" class="notext">Alignment (cDNA)</a></li>', $align_url.';seq=cDNA'),
-          );
+          ));
         }
         
         ($target, $query) = ($paralogue->{'target_perc_id'}, $paralogue->{'query_perc_id'});

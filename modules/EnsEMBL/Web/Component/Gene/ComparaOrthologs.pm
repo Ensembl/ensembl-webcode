@@ -299,18 +299,18 @@ sub content {
         $description   .= sprintf '[Source: %s; acc: %s]', $edb, $hub->get_ExtURL_link($acc, $edb, $acc) if $acc;
       }
       
-      my $id_info;
+      my @id_info_parts;
       if ($orthologue->{'display_id'}) {
         if ($orthologue->{'display_id'} eq 'Novel Ensembl prediction') {
-          $id_info = qq{<p class="space-below"><a href="$link_url">$stable_id</a></p>};
+          push(@id_info_parts, qq{<p class="space-below"><a href="$link_url">$stable_id</a></p>});
         } else {
-          $id_info = qq{<p class="space-below">$orthologue->{'display_id'}&nbsp;&nbsp;<a href="$link_url">($stable_id)</a></p>};
+          push(@id_info_parts, qq{<p class="space-below">$orthologue->{'display_id'}&nbsp;&nbsp;<a href="$link_url">($stable_id)</a></p>});
         }
       } else {
- 	$id_info = qq{<p class="space-below"><a href="$link_url">$stable_id</a></p>};	
+        push(@id_info_parts, qq{<p class="space-below"><a href="$link_url">$stable_id</a></p>});
       }
  
-      $id_info .= qq{<p class="space-below">$region_link</p><p class="space-below">$alignment_link</p>};
+      push(@id_info_parts, (qq{<p class="space-below">$region_link</p>}, qq{<p class="space-below">$alignment_link</p>}));
 
       ##Location - split into elements to reduce horizonal space
       my $location_link = $hub->url({
@@ -330,11 +330,13 @@ sub content {
         orthologue => $orthologue
       });
 
+      my @homology_type_parts = (glossary_helptip($hub, ucfirst $orthologue_desc, ucfirst "$orthologue_desc orthologues"));
+      push(@homology_type_parts, $tree_links) if $self->html_format;
 
       my $table_details = {
         'Species'    => join('<br />(', split(/\s*\(/, $species_label)),
-        'Type'       => $self->html_format ? glossary_helptip($hub, ucfirst $orthologue_desc, ucfirst "$orthologue_desc orthologues"). $tree_links : glossary_helptip($hub, ucfirst $orthologue_desc, ucfirst "$orthologue_desc orthologues") ,
-        'identifier' => $self->html_format ? $id_info : $stable_id,
+        'Type'       => join(' ', @homology_type_parts),
+        'identifier' => $self->html_format ? join(' ', @id_info_parts) : $stable_id,
         'Target %id' => qq{<span class="$target_class">}.sprintf('%.2f&nbsp;%%', $target).qq{</span>},
         'Query %id'  => qq{<span class="$query_class">}.sprintf('%.2f&nbsp;%%', $query).qq{</span>},
         'goc_score'  => qq{<span class="$goc_class">$goc_score</span>},

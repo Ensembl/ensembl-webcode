@@ -33,7 +33,7 @@ sub content {
   $self->caption('Motif Feature');
   my $id = $hub->param('feature_id');
   $self->add_entry({
-                    type        => 'Stable ID',
+                    type        => 'ID',
                     label       => $id, 
                   });
 
@@ -62,12 +62,6 @@ sub content {
   $self->add_entry({
                     type        => 'Transcription factors',
                     label       => join (', ', @transcription_factors), 
-                  });
-  my @epigenomes = split(',', $hub->param('epigenomes'));
-  @epigenomes = ('none') unless scalar @epigenomes;
-  $self->add_entry({
-                    type        => 'Experimentally verified in',
-                    label       => join(', ', @epigenomes), 
                   });
 }
 

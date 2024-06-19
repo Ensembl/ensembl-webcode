@@ -70,6 +70,7 @@ our %pretty_method = (
   EPO                 => 'EPO',
   EPO_LOW_COVERAGE    => 'EPO-Low-coverage',
   CACTUS_HAL          => 'Progressive Cactus',
+  CACTUS_DB           => 'Progressive Cactus',
 );
 
 our $references = {

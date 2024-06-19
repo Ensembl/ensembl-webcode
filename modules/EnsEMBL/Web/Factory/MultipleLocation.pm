@@ -348,7 +348,7 @@ sub best_guess {
   
   my $width = $slice->end - $slice->start + 1;
 
-  my @methods = qw(BLASTZ_NET LASTZ_NET TRANSLATED_BLAT TRANSLATED_BLAT_NET BLASTZ_RAW LASTZ_RAW BLASTZ_CHAIN CACTUS_HAL_PW);
+  my @methods = qw(BLASTZ_NET LASTZ_NET TRANSLATED_BLAT TRANSLATED_BLAT_NET BLASTZ_RAW LASTZ_RAW BLASTZ_CHAIN CACTUS_HAL_PW CACTUS_DB_PW);
   unshift @methods, 'ATAC' if $self->species_defs->EG_DIVISION;
   unshift @methods, 'LASTZ_PATCH' if ($seq_region_name && $species eq $self->species);
  

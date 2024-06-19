@@ -41,6 +41,7 @@ sub init {
     opt_pairwise_lpatch        => 'normal',
     opt_join_genes_bottom      => 'off',
     opt_pairwise_cactus_hal_pw => 'compact'
+    opt_pairwise_cactus_db_pw  => 'compact'
   });
 }
 
@@ -64,7 +65,7 @@ sub init_form {
 
   $self->add_fieldset('Comparative features');
 
-  foreach ([ 'blastz', 'BLASTz/LASTz net pairwise alignments' ], [ 'tblat', 'Translated BLAT net pairwise alignments' ], [ 'lpatch', 'LASTz patch alignments' ], ['cactus_hal_pw', 'Cactus HAL alignments']) {
+  foreach ([ 'blastz', 'BLASTz/LASTz net pairwise alignments' ], [ 'tblat', 'Translated BLAT net pairwise alignments' ], [ 'lpatch', 'LASTz patch alignments' ], ['cactus_hal_pw', 'Cactus HAL alignments'], ['cactus_db_pw', 'Cactus DB alignments']) {
     $self->add_form_element({
       type   => 'DropDown',
       select => 'select',

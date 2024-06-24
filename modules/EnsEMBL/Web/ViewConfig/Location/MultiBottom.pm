@@ -40,8 +40,8 @@ sub init {
     opt_pairwise_tblat         => 'normal',
     opt_pairwise_lpatch        => 'normal',
     opt_join_genes_bottom      => 'off',
-    opt_pairwise_cactus_hal_pw => 'compact'
-    opt_pairwise_cactus_db_pw  => 'compact'
+    opt_pairwise_cactus_hal_pw => 'compact',
+    opt_pairwise_cactus_db_pw  => 'compact',
   });
 }
 

@@ -65,7 +65,7 @@ sub content {
                           TRANSLATED_BLAT_NET => $self->param('opt_pairwise_tblat') || '',
                           LASTZ_PATCH => $self->param('opt_pairwise_lpatch') || '',
                           LASTZ_RAW => $self->param('opt_pairwise_raw') || '',
-                          CACTUS_HAL_PW => $self->param('opt_pairwise_cactus_hal_pw') || '',
+                          CACTUS_HAL_PW => $self->param('opt_pairwise_cactus_hal_pw') || ''
                         };
   if ($hub->species_defs->EG_DIVISION) {
     $methods->{'ATAC'} = 1; 

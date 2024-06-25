@@ -65,7 +65,7 @@ sub content {
     $orient = '[-]';
   }
 
-  if ($disp_method eq 'CACTUS_HAL_PW' || $disp_method eq 'CACTUS_DB_PW') {
+  if ($disp_method eq 'CACTUS_HAL_PW') {
     ## Keep things simple for CACTUS
     $self->add_subheader("This region maps to:");
     my $display = $hub->species_defs->get_config($sp1, 'SPECIES_DISPLAY_NAME');

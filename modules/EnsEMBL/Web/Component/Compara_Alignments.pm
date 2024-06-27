@@ -114,6 +114,14 @@ sub content {
           $is_low_coverage_species = !scalar( grep {($_->{type} eq 'EPO') && $_->{species}->{$object->species}}
                                               values %{$hub->species_defs->multi_hash->{'DATABASE_COMPARA'}{'ALIGNMENTS'}}
                                             );
+      } elsif ($target_slice && $method_type eq 'CACTUS_DB') {
+          my $target_dnafrag = $compara_db->get_adaptor('DnaFrag')->fetch_by_Slice($target_slice);
+          my $locus_data = {
+            'dnafrag_id'    => $target_dnafrag->dbID,
+            'dnafrag_start' => $target_slice->seq_region_start,
+            'dnafrag_end'   => $target_slice->seq_region_end,
+          };
+          @$align_blocks = grep { $_->_overlaps_Locus($locus_data) } @$align_blocks;
       }
 
       #Group alignments together by group_id and/or dbID

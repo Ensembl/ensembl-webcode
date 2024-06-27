@@ -657,7 +657,7 @@ sub _get_target_slice_table {
     $other_species = $gabs->[0]->get_all_non_reference_genomic_aligns->[0]->genome_db->name;
   } elsif ($type eq 'CACTUS_DB') {
     #Find the MAF reference genome for CACTUS_DB alignments, to distinguish the overlapping blocks that may occur in non-reference genomes
-    my $maf_ref_genome = $method_link_species_set->get_value_for_tag('reference_genome');
+    my $maf_ref_genome = $method_link_species_set->get_value_for_tag('reference_species');
     $other_species = $maf_ref_genome if ($ref_species ne $maf_ref_genome);
   }
 

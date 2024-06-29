@@ -132,7 +132,7 @@ sub render {
     return $self->render_pairwise($mlss);
   } elsif ($mlss->method->class eq 'SyntenyRegion.synteny') {
     return $self->render_pairwise($mlss);
-  } elsif ($mlss->method->type =~ /CACTUS/) {
+  } elsif ($mlss->method->type =~ /CACTUS_HAL/) {
     return $self->render_cactus_multiple($mlss);
   } elsif ($mlss->method->class =~ /^GenomicAlign/) {
     return $self->render_multiple($mlss);

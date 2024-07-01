@@ -133,6 +133,7 @@ sub json_data {
   $final->{data}->{epigenome}->{'data'} = $cell_types;
   $final->{data}->{epigenome}->{'listType'} = 'alphabetRibbon';
   $final->{dimensions} = ['epigenome', 'evidence'];
+  $final->{version} = $SiteDefs::REGULATION_MATRIX_VERSION;
 
   return $final;
 }

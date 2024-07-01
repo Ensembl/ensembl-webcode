@@ -95,6 +95,9 @@ Ensembl.Panel.ConfigRegMatrixForm = Ensembl.Panel.ConfigMatrixForm.extend({
               panel.elLk.ajaxError.hide();
             }
             Object.assign(this.json, json);
+            if (json.version) {
+              this.localStorageKey += '-' + json.version
+            }
             $(this.el).find('div.spinner').remove();
             this.trackTab();
             this.populateLookUp();

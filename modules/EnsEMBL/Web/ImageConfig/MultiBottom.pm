@@ -170,7 +170,7 @@ sub multi {
       foreach my $align (sort { $a->{'type'} cmp $b->{'type'} } @{$alignments{$_}}) {
         my ($other_species) = grep $_ ne $prodname, keys %{$align->{'species'}};
 
-        my $glyphset = $align->{'type'} =~ /CACTUS/ ? 'cactus_hal' : '_alignment_pairwise';
+        my $glyphset = $align->{'type'} =~ /CACTUS_HAL/ ? 'cactus_hal' : '_alignment_pairwise';
 
         $decorations->before(
           $self->create_track("$align->{'id'}:$align->{'type'}:$_", $align->{'name'}, {

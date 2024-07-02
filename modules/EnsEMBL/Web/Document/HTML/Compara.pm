@@ -96,7 +96,7 @@ sub format_wga_table {
   }
 
   my @all_mlss;
-  foreach my $method_link_type (qw(PECAN EPO EPO_LOW_COVERAGE CACTUS_HAL)) {
+  foreach my $method_link_type (qw(PECAN EPO EPO_LOW_COVERAGE CACTUS_HAL CACTUS_DB)) {
     push @all_mlss, sort {$a->dbID <=> $b->dbID} @{ $compara_db->get_adaptor('MethodLinkSpeciesSet')->fetch_all_by_method_link_type($method_link_type) };
   }
 

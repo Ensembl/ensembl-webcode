@@ -114,6 +114,14 @@ sub content {
           $is_low_coverage_species = !scalar( grep {($_->{type} eq 'EPO') && $_->{species}->{$object->species}}
                                               values %{$hub->species_defs->multi_hash->{'DATABASE_COMPARA'}{'ALIGNMENTS'}}
                                             );
+      } elsif ($target_slice && $method_type eq 'CACTUS_DB') {
+          my $target_dnafrag = $compara_db->get_adaptor('DnaFrag')->fetch_by_Slice($target_slice);
+          my $locus_data = {
+            'dnafrag_id'    => $target_dnafrag->dbID,
+            'dnafrag_start' => $target_slice->seq_region_start,
+            'dnafrag_end'   => $target_slice->seq_region_end,
+          };
+          @$align_blocks = grep { $_->_overlaps_Locus($locus_data) } @$align_blocks;
       }
 
       #Group alignments together by group_id and/or dbID
@@ -655,6 +663,10 @@ sub _get_target_slice_table {
     #Find the non-reference species for pairwise alignments
     #get the non_ref name from the first block
     $other_species = $gabs->[0]->get_all_non_reference_genomic_aligns->[0]->genome_db->name;
+  } elsif ($type eq 'CACTUS_DB') {
+    #Find the MAF reference genome for CACTUS_DB alignments, to distinguish the overlapping blocks that may occur in non-reference genomes
+    my $maf_ref_genome = $method_link_species_set->get_value_for_tag('reference_species');
+    $other_species = $maf_ref_genome if ($ref_species ne $maf_ref_genome);
   }
 
   my $merged_blocks = $self->object->build_features_into_sorted_groups($groups);
@@ -685,11 +697,13 @@ sub _get_target_slice_table {
     my $num_species = 0;
 
     #Find min and max start and end for ref and non-ref
-    #Will not have $non_ref_ga for multiple alignments which are not low coverage
+    #Will not have $non_ref_ga for EPO-class alignments which are not low coverage
     my ($ref_start, $ref_end, $non_ref_start, $non_ref_end);
     if ($class =~ /pairwise/) { 
       ($ref_start, $ref_end, $non_ref_start, $non_ref_end, $non_ref_ga) = $self->object->get_start_end_of_slice($gab_group);
     } elsif ($type =~ /EPO_LOW_COVERAGE/ && $is_low_coverage_species) {
+      ($ref_start, $ref_end, $non_ref_start, $non_ref_end, $non_ref_ga, $num_species) = $self->object->get_start_end_of_slice($gab_group, $other_species);
+    } elsif ($type eq 'CACTUS_DB' && $other_species) {
       ($ref_start, $ref_end, $non_ref_start, $non_ref_end, $non_ref_ga, $num_species) = $self->object->get_start_end_of_slice($gab_group, $other_species);
     } else {
       #want num_species but not non_ref details
@@ -726,7 +740,7 @@ sub _get_target_slice_table {
                              r      => $ref_string,
                             });
 
-    #Other species - ref species used for mapping (EPO_LOW_COVERAGE) or non_ref species (pairwise)
+    #Other species - ref species used for mapping (EPO_LOW_COVERAGE), loading via MAF (CACTUS_DB) or non_ref species (pairwise)
     my ($other_string, $other_link);
     if ($other_species) {
       $other_string = $non_ref_ga->dnafrag->name.":".$non_ref_start."-".$non_ref_end;

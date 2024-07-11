@@ -46,13 +46,15 @@ sub content {
     label => $object->stable_id,
     link  => $object->get_summary_page_url
   });
-  
-  $self->add_entry({
-    type  => 'Activity',
-    label => 'Regulatory activity',
-    link  => $object->get_summary_page_url
-  });
-  
+
+  if (!($reg_feature->feature_type->name =~ /^EMAR/)  && !($reg_feature->feature_type->name =~ /^CTCF/)) {
+    $self->add_entry({
+      type  => 'Activity',
+      label => 'Regulatory activity',
+      link  => $object->get_summary_page_url
+    });
+  }
+    
   $self->add_entry({
     type  => 'Type',
     label => $object->feature_type->name

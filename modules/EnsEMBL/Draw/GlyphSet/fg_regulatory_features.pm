@@ -256,6 +256,8 @@ sub colour_key {
 
   if($type =~ /CTCF/i) {
     $type = 'ctcf';
+  } elsif($type =~ /EMAR/i) {
+    $type = 'emar';
   } elsif($type =~ /Enhancer/i) {
     $type = 'enhancer';
   } elsif($type =~ /Open chromatin/i) {
@@ -267,7 +269,7 @@ sub colour_key {
   } elsif($type =~ /Enhancer II/i) {
     $type = 'promoter_flanking';
   } else  {
-    $type = 'Unclassified';
+    $type = 'unclassified';
   }
 
   my $activity  = 'active';

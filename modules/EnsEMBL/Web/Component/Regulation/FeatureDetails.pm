@@ -50,6 +50,11 @@ sub content {
     $epigenome_count = grep { $_ > 0 } values %{$self->hub->species_defs->databases->{'DATABASE_FUNCGEN'}->{'tables'}{'cell_type'}{'ids'}};
   }
 
+  if (($object->feature_type->name =~ /^EMAR/) || ($object->feature_type->name =~ /^CTCF/)) {
+    $html .= sprintf('<p>Activity is not available for regulatory features of type <strong>%s.</strong></p>', $object->feature_type->name);
+    return $html;
+  }
+
   ## Now that we have so many cell lines, it's quicker to show activity in a table
   $html .= '<h3>Summary of Regulatory Activity
               <a title="Click to show or hide the table" rel="celltype_regfeature_table" href="#" class="toggle_link toggle new_icon open _slide_toggle">Hide</a>

@@ -41,6 +41,7 @@ sub content {
   my $availability   = $self->object->availability;
   my $cdb            = shift || $hub->param('cdb') || 'compara';
   my $is_ncrna       = ($self->object->Obj->biotype =~ /RNA/);
+  my $strain_url     = $hub->is_strain ? 'Strain_' : '';
   my %paralogue_list = %{$self->object->get_homology_matches('ENSEMBL_PARALOGUES', 'paralog|gene_split', undef, $cdb)};
 
   return '<p>No paralogues have been identified for this gene</p>' unless keys %paralogue_list;
@@ -122,7 +123,7 @@ sub content {
       
       if ($paralogue_desc ne 'DWGA') {          
         my $align_url = $hub->url({
-            action   => 'Compara_Paralog', 
+            action   => $strain_url . 'Compara_Paralog',
             function => "Alignment". ($cdb=~/pan/ ? '_pan_compara' : ''),, 
             hom_id   => $paralogue->{'dbID'},
             g1       => $stable_id

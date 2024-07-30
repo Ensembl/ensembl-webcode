@@ -1351,6 +1351,25 @@ sub _summarise_compara_db {
     $sth->execute;
     my ($clusterset_id) = $sth->fetchrow_array;
     $self->db_tree->{$db_name}{'CLUSTERSETS'}{$sp} = $clusterset_id;
+
+    my $sth2 = $dbh->prepare('
+      select distinct sst.value
+        from method_link_species_set mlss
+          join method_link ml using(method_link_id)
+          join species_set ss using(species_set_id)
+          join genome_db gd using(genome_db_id)
+          join species_set_tag sst ON sst.species_set_id = ss.species_set_id
+        where ml.type in ("PROTEIN_TREES", "NC_TREES")
+          and sst.tag = "strain_type"
+          and gd.name = ?
+        limit 1;
+    ');
+    $sth2->bind_param(1,$sp);
+    $sth2->execute;
+    my ($strain_type) = $sth2->fetchrow_array;
+    if ($strain_type) {
+      $self->db_tree->{$db_name}{'STRAIN_TYPES'}{$sp} = $strain_type;
+    }
   }
 
   ###################################################################

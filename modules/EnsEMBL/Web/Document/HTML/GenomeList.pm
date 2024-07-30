@@ -282,7 +282,7 @@ sub get_featured_genomes {
             'url'   => 'Sus_scrofa/Info/Breeds/',
             'img'   => 'Sus_scrofa.png',
             'name'  => 'Pig breeds',
-            'more'  => qq(<a href="/Sus_scrofa/" class="nodeco">Pig reference genome</a> and <a href="Sus_scrofa/Info/Breeds/" class="nodeco">12 additional breeds</a>),
+            'more'  => qq(<a href="/Sus_scrofa/" class="nodeco">Pig reference genome</a> and <a href="Sus_scrofa/Info/Breeds/" class="nodeco">20 additional breeds</a>),
            },
           );
 }

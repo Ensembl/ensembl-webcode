@@ -84,9 +84,10 @@ sub get_data {
   }
   my $row_lookup = {
                     'promoter' => 0,
-                    'enhancer' => 1,
-                    'open_chromatin' => 1,
-                    'tf_binding' => 1,
+                    'enhancer' => 0,
+                    'open_chromatin' => 0,
+                    'tf_binding' => 0,
+                    'emar' => 1,
                     'ctcf' => 2,
                     }; 
 

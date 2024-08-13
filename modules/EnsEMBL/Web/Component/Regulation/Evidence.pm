@@ -77,7 +77,7 @@ sub content {
 
   if(scalar keys %$evidence_data) {
     my $source_url = sprintf("https://regulation.ensembl.org/%s/source_data/%s", $object->species_defs->ENSEMBL_VERSION, $object->species);
-    return '<p>More details can be found <a href="https://regulation.ensembl.org/' . $source_url . '">here</a>.</p>' . $table->render;
+    return '<p>More details can be found <a href="' . $source_url . '">here</a>.</p>' . $table->render;
   } else {
     return "<p>There is no evidence for this regulatory feature in the selected cell lines</p>";
   }

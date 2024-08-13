@@ -57,7 +57,6 @@ sub content {
 
   ## Now that we have so many cell lines, it's quicker to show activity in a table
   $html .= '<p>A feature is <i>Active</i> if an open chromatin peak overlaps the feature in that epigenome.</p>
-            <br />
             <h3>Summary of Regulatory Activity
               <a title="Click to show or hide the table" rel="celltype_regfeature_table" href="#" class="toggle_link toggle new_icon open _slide_toggle">Hide</a>
             </h3>';

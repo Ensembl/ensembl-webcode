@@ -92,13 +92,13 @@ sub feature_summary {
  
   my @str_array;
   
-  push @str_array, sprintf('overlaps <a class="dynamic-link" href="%s">%s %s</a>', 
+  push @str_array, sprintf('has predicted consequences for <a class="dynamic-link" href="%s">%s %s</a>', 
                       $transcript_url, 
                       $avail->{has_uniq_transcripts}, 
                       $avail->{has_uniq_transcripts} eq "1" ? "transcript" : "transcripts"
                   ) if($avail->{has_uniq_transcripts});
   push @str_array, sprintf('%s<a class="dynamic-link" href="%s">%s %s</a>',
-                      $avail->{has_uniq_transcripts} ? '' : 'overlaps ',
+                      $avail->{has_uniq_transcripts} ? '' : 'has predicted consequences for ',
                       $transcript_url,
                       $avail->{has_regfeats},
                       $avail->{has_regfeats} eq "1" ? "regulatory feature" : "regulatory features"

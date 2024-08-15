@@ -1334,42 +1334,23 @@ sub _summarise_compara_db {
     $self->db_tree->{$db_name}{$key}{$species1}{$species2} = $valid_species{$species2};
   }             
   
-  ## Store clustersets for strains
-  foreach my $sp (keys %{$self->db_tree->{$db_name}{'COMPARA_SPECIES'}}) {
-    my $sth = $dbh->prepare('
-      select clusterset_id 
-        from gene_tree_root as gtr, 
-          method_link_species_set as mlss, 
-          species_set as ss, 
-          genome_db as gd 
-        where gtr.method_link_species_set_id = mlss.method_link_species_set_id 
-          and mlss.species_set_id = ss.species_set_id 
-          and ss.genome_db_id = gd.genome_db_id 
-          and gd.name = ? limit 1;
-    ');
-    $sth->bind_param(1,$sp);
-    $sth->execute;
-    my ($clusterset_id) = $sth->fetchrow_array;
-    $self->db_tree->{$db_name}{'CLUSTERSETS'}{$sp} = $clusterset_id;
+  ## Store strain gene-tree collection metadata
+  my $sth = $dbh->prepare('
+    select distinct gd.name, trim(leading "collection-" from ssh.name), sst.value
+      from method_link_species_set mlss
+        join method_link ml using(method_link_id)
+        join species_set ss using(species_set_id)
+        join species_set_header ssh using(species_set_id)
+        join species_set_tag sst using(species_set_id)
+        join genome_db gd using(genome_db_id)
+      where ml.type IN ("PROTEIN_TREES", "NC_TREES")
+        and sst.tag = "strain_type";
+  ');
+  $sth->execute;
 
-    my $sth2 = $dbh->prepare('
-      select distinct sst.value
-        from method_link_species_set mlss
-          join method_link ml using(method_link_id)
-          join species_set ss using(species_set_id)
-          join genome_db gd using(genome_db_id)
-          join species_set_tag sst ON sst.species_set_id = ss.species_set_id
-        where ml.type in ("PROTEIN_TREES", "NC_TREES")
-          and sst.tag = "strain_type"
-          and gd.name = ?
-        limit 1;
-    ');
-    $sth2->bind_param(1,$sp);
-    $sth2->execute;
-    my ($strain_type) = $sth2->fetchrow_array;
-    if ($strain_type) {
-      $self->db_tree->{$db_name}{'STRAIN_TYPES'}{$sp} = $strain_type;
-    }
+  while (my ($sp, $clusterset_id, $strain_type) = $sth->fetchrow_array) {
+    $self->db_tree->{$db_name}{'CLUSTERSETS'}{$sp} = $clusterset_id;
+    $self->db_tree->{$db_name}{'STRAIN_TYPES'}{$sp} = $strain_type;
   }
 
   ###################################################################

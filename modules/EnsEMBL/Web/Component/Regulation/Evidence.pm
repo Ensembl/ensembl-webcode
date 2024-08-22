@@ -75,12 +75,13 @@ sub content {
   
   $table->add_rows(@rows);
 
+  my $text = '<p>More details can be found <a href="' . sprintf("https://regulation.ensembl.org/%s/source_data/%s", $object->species_defs->ENSEMBL_VERSION, $object->species) . '">here</a>.</p>';
+
   if(scalar keys %$evidence_data) {
-    return $table->render;
+    return $text . $table->render;
   } else {
-    return "<p>There is no evidence for this regulatory feature in the selected cell lines</p>";
+    return $text;
   }
 }
-
 
 1;

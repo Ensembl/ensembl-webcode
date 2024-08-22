@@ -280,6 +280,8 @@ sub colour_key {
     my $regact = $f->regulatory_activity_for_epigenome($epigenome);
     if ($regact) {
       $activity  = $regact->activity;
+    } else {
+      $activity = 'na';
     }
   }
 

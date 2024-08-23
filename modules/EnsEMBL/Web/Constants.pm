@@ -398,7 +398,6 @@ sub MARKUP_OPTIONS {
                      { 'value' => -0.01, 'caption' => 'Hide common, MAF &gt; 1%' },
                      { 'value' => -0.1, 'caption' => 'Hide common, MAF &gt; 10%' }],
       'shortnote'=> $MAF_shortnote_string,
-      'disabled' => 1
     },
     ### GENE-SPECIFIC TEXT SEQUENCE
     'flank5_display' => {

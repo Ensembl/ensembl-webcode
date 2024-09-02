@@ -1343,7 +1343,7 @@ sub _summarise_compara_db {
         join species_set_header ssh using(species_set_id)
         join species_set_tag sst using(species_set_id)
         join genome_db gd using(genome_db_id)
-      where ml.type IN ("PROTEIN_TREES", "NC_TREES")
+      where ml.type in ("PROTEIN_TREES", "NC_TREES")
         and sst.tag = "strain_type";
   ');
   $sth->execute;

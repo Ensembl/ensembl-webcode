@@ -414,7 +414,6 @@ sub get_data {
   my $lookup        = $self->hub->species_defs->databases->{'DATABASE_FUNCGEN'}{'peak_calling'};
   my $bigbed_lookup = $self->hub->species_defs->databases->{'DATABASE_FUNCGEN'}{'tables'}{'epigenome_track'};
   my $pc_adaptor    = $hub->get_adaptor('get_PeakCallingAdaptor', 'funcgen');
-  my $peak_adaptor  = $hub->get_adaptor('get_PeakAdaptor', 'funcgen');
   my $data_file_adaptor  = $hub->get_adaptor('get_DataFileAdaptor', 'funcgen');
   my %feature_sets_on;
 
@@ -454,9 +453,6 @@ sub get_data {
             $bigbed_file_subpath;
 
           $data->{$cell_line}{$ftype_name}{'block_features'}{$key} = $full_bigbed_file_path if $bigbed_file_subpath;
-        } else {
-          my $block_features = $peak_adaptor->fetch_all_by_Slice_PeakCalling($self->Obj, $peak_calling);
-          $data->{$cell_line}{$ftype_name}{'block_features'}{$key} = $block_features || [];
         }
       }
 

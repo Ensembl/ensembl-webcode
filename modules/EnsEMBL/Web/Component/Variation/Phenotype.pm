@@ -45,6 +45,7 @@ sub content {
   return $self->_info('A unique location can not be determined for this variant', $object->not_unique_location) if $object->not_unique_location;
 
   my $data = $object->get_external_data();
+  my $somatic_clin_impact = $object->get_external_somatic_data();
 
   return 'We do not have any external data for this variant' unless (scalar @$data);
 
@@ -56,20 +57,40 @@ sub content {
     my $end   = $vf_object->seq_region_end;
     my @new_data = grep {$_->seq_region_name eq $chr && $_->seq_region_start == $start && $_->seq_region_end == $end} @$data;
     $data = \@new_data;
+
+    # Do the same for the somatic clinical impact
+    if(scalar @$somatic_clin_impact) {
+      my @new_somatic_data = grep {$_->seq_region_name eq $chr && $_->seq_region_start == $start && $_->seq_region_end == $end} @$somatic_clin_impact;
+      $somatic_clin_impact = \@new_somatic_data;
+    }
   }
 
   my ($table_rows, $column_flags) = $self->table_data($data, $has_freq);
   my $table      = $self->new_table([], [], { data_table => 1, sorting => [ 'disease asc' ] });
-     
+ 
+  my ($somatic_table_rows, $somatic_column_flags, $table_somatic); 
+  if(scalar @$somatic_clin_impact) {
+    ($somatic_table_rows, $somatic_column_flags) = $self->table_data_somatic($somatic_clin_impact);
+    $table_somatic = $self->new_table([], [], { data_table => 1, sorting => [ 'tumor_type asc' ] });
+  }
+ 
   if (scalar keys(%$table_rows) != 0) {
     $self->add_table_columns($table, $column_flags);
     $table->add_rows(@$_) for values %$table_rows;
     $html .= sprintf qq{<h3>Significant association(s)</h3>};
     $html .= $table->render;
   }
-  
+
+  # Somatic clinical impact from ClinVar
+  if (scalar keys(%$somatic_table_rows) != 0) {
+    $self->add_table_columns($table_somatic, $somatic_column_flags);
+    $table_somatic->add_rows(@$_) for values %$somatic_table_rows;
+    $html .= sprintf qq{<h3>Other significant association(s): Somatic conditions from ClinVar</h3>};
+    $html .= $table_somatic->render;
+  }
+
   return $html;
-};
+}
 
 # Description : Simple function to just add the columns in the table (can be overwritten in other plugins)
 # Arg1        : $table hash
@@ -80,10 +101,27 @@ sub add_table_columns {
   my $is_somatic = $self->object->Obj->is_somatic;
   my $study      = ($is_somatic && $self->object->Obj->source =~ /COSMIC/i) ? 'Tumour site' : 'External reference';
   
-  $table->add_columns(
-    { key => 'disease', title => 'Phenotype, disease and trait', align => 'left', sort => 'html' },
-    { key => 'source',  title => 'Source(s)',                    align => 'left', sort => 'html' },
-  );
+  if ($column_flags->{'tumor_type'}) {
+    $table->add_columns({ key => 'tumor_type',  title => 'Tumour type', align => 'left', sort => 'none' });
+  }
+
+  if ($column_flags->{'oncogenicity'}) {
+    $table->add_columns({ key => 'oncogenicity',  title => 'Oncogenicity', align => 'left', sort => 'none' });
+  }
+
+  if (!$column_flags->{'tumor_type'} && !$column_flags->{'oncogenicity'}) {
+    $table->add_columns({ key => 'disease', title => 'Phenotype, disease and trait', align => 'left', sort => 'html' });
+  }
+
+  if ($column_flags->{'classification'}) {
+    $table->add_columns({ key => 'classification',  title => 'Clinical impact', align => 'left', sort => 'none' });
+  }
+
+  if ($column_flags->{'review_status'}) {
+    $table->add_columns({ key => 'review_status',  title => 'Review status', align => 'left', sort => 'none' });
+  }
+  
+  $table->add_columns({ key => 'source',  title => 'Source(s)', align => 'left', sort => 'html' });
 
   if ($column_flags->{'ontology'}) {
     $table->add_columns(
@@ -95,8 +133,10 @@ sub add_table_columns {
   if ($column_flags->{'s_evidence'}) {
     $table->add_columns({ key => 's_evidence', title => 'Supporting evidence', align => 'left', sort => 'html' });
   }
-  
-  $table->add_columns({ key => 'study', title => $study, align => 'left', sort => 'html' });
+
+  if (!$column_flags->{'tumor_type'} && !$column_flags->{'oncogenicity'}) {  
+    $table->add_columns({ key => 'study', title => $study, align => 'left', sort => 'html' });
+  }
 
   if ($column_flags->{'clin_sign'}) {
     $table->add_columns({ key => 'clin_sign', title => 'Clinical significance', align => 'left', sort => 'html' });
@@ -115,6 +155,122 @@ sub add_table_columns {
   }
 
   return $table;
+}
+
+sub table_data_somatic {
+  my ($self, $external_data) = @_;
+
+  my $hub        = $self->hub;
+  my $object     = $self->object;
+  my %rows;
+  my %column_flags;
+
+  my %clin_review_status = (
+                            'no assertion criteria provided' => 0,
+                            'single submitter'            => 1,
+                            'multiple submitters'         => 2,
+                           );
+
+  my $inner_table_open  = qq{<table style="border-spacing:0px"><tr><td style="padding:1px 2px"><b>};
+  my $inner_table_row   = qq{</td></tr>\n<tr><td style="padding:1px 2px"><span class="hidden export">;</span><b>};
+  my $inner_table_close = qq{</td></tr>\n</table>};
+
+  my $variation_names = 'variation_names';
+  my $submitter_max_length = 20;
+
+  foreach my $pf (@$external_data) {
+    my $phenotype = $pf->phenotype->description;
+    my $tumor_type = $phenotype;
+
+    my @data_row;
+
+    if (exists $rows{lc $tumor_type}) { 
+      @data_row = @{$rows{lc $tumor_type}};
+    }
+
+    my $pf_id                = $pf->dbID;
+    my $study_name           = $pf->study ? $pf->study->name : '';
+    my $source_name          = $pf->source_name;
+    my $external_id          = ($pf->external_id) ? $pf->external_id : $study_name;
+    my $attributes           = $pf->get_all_attributes();
+    my $submitter_names_list = $pf->submitter_names;
+
+    my $source = $self->source_link($source_name, $external_id, $pf->external_reference, 1);
+    if ($submitter_names_list && $source_name =~ /clinvar/i) {
+      my $submitter_names = join('|',@$submitter_names_list);
+      my $submitter_label = $submitter_names;
+         $submitter_label = substr($submitter_names,0,$submitter_max_length).'...' if (length($submitter_names) > $submitter_max_length);
+      my $submitter_prefix  = 'Submitter';
+         $submitter_prefix .= 's' if (scalar(@$submitter_names_list) > 1);
+      $source .= " [$submitter_label]";
+      $source = qq{<span class="hidden export">$source_name [$submitter_names]</span><span class="_ht _no_export" title="$submitter_prefix: $submitter_names">$source</span>}; 
+    }
+
+    my $classification = defined($pf->somatic_classification) ? $pf->somatic_classification : "-";
+    $classification = qq{<b>$classification</b>};
+
+    my $oncogenicity = defined($pf->oncogenicity_classification) ? $pf->oncogenicity_classification : "-";
+    $oncogenicity = qq{<b>$oncogenicity</b>};
+
+    # Review status
+    my $stars = "";
+    my $review_status = defined $attributes->{'somatic_status'} ? 'somatic_status' : 'oncogenic_status';
+    if ($attributes->{$review_status}) {
+        my $clin_status = $attributes->{$review_status};
+        my $count_stars = 0;
+        foreach my $status (keys(%clin_review_status)) {
+          if ($clin_status =~ /$status/g) {
+            $count_stars = $clin_review_status{$status};
+            last;
+          }
+        }
+        for (my $i=1; $i<5; $i++) {
+          my $star_color = ($i <= $count_stars) ? 'gold' : 'grey';
+           $stars .= qq{<img class="review_status" src="/i/val/$star_color\_star.png" alt="$star_color" title="$clin_status" />};
+        }
+    }
+
+    my $gene         = $self->gene_links($pf->associated_gene);
+    my $allele       = $self->allele_link($pf->external_reference, $pf->risk_allele) || $pf->risk_allele;
+
+    my $evidence_list;
+    if ($attributes->{'pubmed_id'}) {
+      my @data = split(',',$attributes->{'pubmed_id'});
+      $evidence_list = $self->other_supporting_evidence_link(\@data, 'pubmed_id', $evidence_list);
+    }
+
+    $column_flags{'oncogenicity'} = 1;
+    $column_flags{'classification'} = 1;
+    $column_flags{'review_status'} = 1;     
+    $column_flags{'tumor_type'} = 1;
+
+    my $row = {
+      tumor_type => $tumor_type,
+      source     => $source,
+      review_status  => ($stars ne "") ? $stars : '-',
+      classification => ($classification) ? $classification : '-',
+      oncogenicity   => $oncogenicity,
+      genes     => ($gene) ? $gene : '-',
+      allele    => ($allele) ? $allele : '-',
+    };
+
+    if ($evidence_list){
+      my $div_id = $pf_id."_evidence";
+      my @url_data = values(%$evidence_list);
+      my @export_data = keys(%$evidence_list);
+      my $ev_html = display_items_list($div_id, 'evidence', 'Evidence', \@url_data, \@export_data, 1);
+      $row->{s_evidence} = $ev_html;
+      $column_flags{s_evidence} = 1;
+    }
+    else {
+      $row->{s_evidence} = '-';
+    }
+
+    push @data_row, $row;
+    $rows{lc $pf->phenotype->description} = \@data_row;
+  }
+
+  return \%rows,\%column_flags;
 }
 
 sub table_data { 

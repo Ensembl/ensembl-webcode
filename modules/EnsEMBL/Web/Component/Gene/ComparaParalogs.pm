@@ -40,7 +40,8 @@ sub content {
   my $hub            = $self->hub;
   my $availability   = $self->object->availability;
   my $cdb            = shift || $hub->param('cdb') || 'compara';
-  my $is_ncrna       = ($self->object->Obj->biotype =~ /RNA/);
+  my $biotype        = $self->object->Obj->get_Biotype;  # We expect a Biotype object, though it could be a biotype name.
+  my $is_ncrna       = ( ref $biotype eq 'Bio::EnsEMBL::Biotype' ? $biotype->biotype_group =~ /noncoding$/ : $biotype =~ /RNA/ );
   my $strain_url     = $hub->is_strain ? 'Strain_' : '';
   my %paralogue_list = %{$self->object->get_homology_matches('ENSEMBL_PARALOGUES', 'paralog|gene_split', undef, $cdb)};
 

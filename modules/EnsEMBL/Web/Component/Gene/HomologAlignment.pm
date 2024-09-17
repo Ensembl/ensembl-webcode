@@ -46,7 +46,8 @@ sub content {
   my $text_format  = $hub->param('text_format');
   my (%skipped, $html);
 
-  my $is_ncrna       = ($self->object->Obj->biotype =~ /RNA/);
+  my $biotype        = $self->object->Obj->get_Biotype;  # We expect a Biotype object, though it could be a biotype name.
+  my $is_ncrna       = ( ref $biotype eq 'Bio::EnsEMBL::Biotype' ? $biotype->biotype_group =~ /noncoding$/ : $biotype =~ /RNA/ );
   my $gene_product   = $is_ncrna ? 'Transcript' : 'Peptide';
   my $unit           = $is_ncrna ? 'nt' : 'aa';
   my $identity_title = '% identity'.(!$is_ncrna ? " ($seq)" : '');

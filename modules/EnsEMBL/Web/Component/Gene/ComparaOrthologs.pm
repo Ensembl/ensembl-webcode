@@ -43,7 +43,8 @@ sub content {
   my $cdb          = shift || $self->param('cdb') || 'compara';
   my $is_pan       = $cdb =~/compara_pan_ensembl/;
   my $availability = $object->availability;
-  my $is_ncrna     = ($object->Obj->biotype =~ /RNA/);
+  my $biotype      = $object->Obj->get_Biotype;  # We expect a Biotype object, though it could be a biotype name.
+  my $is_ncrna     = ( ref $biotype eq 'Bio::EnsEMBL::Biotype' ? $biotype->biotype_group =~ /noncoding$/ : $biotype =~ /RNA/ );
   my $species_name = $species_defs->GROUP_DISPLAY_NAME;
   my $strain_url   = $hub->is_strain ? "Strain_" : "";
   my $strain_param = $hub->is_strain ? ";strain=1" : ""; # initialize variable even if is_strain is false, to avoid warnings

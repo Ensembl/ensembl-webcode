@@ -236,7 +236,7 @@ sub get_tracks {
       # Deal with key=value attributes.
       # These are in the form key1=value1 key2=value2, but values can be quotes strings with spaces in them.
       # Short and long labels may contain =, but in these cases the value is just a single string
-      if ($value =~ /=/ && $key !~ /^(short|long)Label$/) {
+      if ($value =~ /=/ && $key ne 'url' && $key !~ /^(short|long)Label$/) {
         my ($k, $v);
         my @pairs = split /\s([^=]+)=/, " $value";
         shift @pairs;

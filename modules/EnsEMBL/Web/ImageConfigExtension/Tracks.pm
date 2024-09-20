@@ -454,6 +454,7 @@ sub add_genes {
         colours   => $colours,
         strand    => $t eq 'gene' ? 'r' : 'b',
         label_key => '[biotype]',
+        display     => "off",
         renderers => ($t eq 'transcript' || $t eq 'longreads') ? $renderers : $t eq 'rnaseq' ? [
          'off',                'Off',
          'transcript_nolabel', 'Expanded without labels',
@@ -472,7 +473,7 @@ sub add_genes {
   if (my $gencode_version = $self->species_defs->GENCODE_VERSION || "") {
     $self->add_track('transcript', 'gencode', "Basic Gene Annotations from $gencode_version", '_gencode', {
       labelcaption  => "Genes (Basic set from $gencode_version)",
-      display       => 'off',
+      display       => 'on',
       description   => 'The GENCODE set is the gene set for human and mouse. <a href="/Help/Glossary?id=500" class="popup">GENCODE Basic</a> is a subset of representative transcripts (splice variants).',
       sortable      => 1,
       colours       => $colours,

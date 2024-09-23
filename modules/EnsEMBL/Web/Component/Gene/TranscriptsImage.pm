@@ -51,9 +51,8 @@ sub content {
     slice_number    => '1|1',
   });
 
-  my $key  = $image_config->get_track_key('transcript', $object);
-  my $node = $image_config->get_node(lc $key);
-  
+  # Enable gencode basic track
+  my $node = $image_config->get_node('gencode');
   $node->set('display', 'transcript_label') if $node && $node->get('display') eq 'off';
 
   if ( $self->hub->species_defs->databases->{'DATABASE_FUNCGEN'} ) {

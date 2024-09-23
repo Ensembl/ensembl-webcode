@@ -1018,7 +1018,7 @@ sub get_GeneTree {
                 # If minimising the supertree results in a
                 # non-branching structure, disavow it altogether.
                 my $num_supertree_nodes = scalar(@{$parent_root->get_all_nodes()});
-                $disavowing_supertree = 1 if ($num_supertree_nodes <= 3);
+                $disavowing_supertree = 1 if ($num_supertree_nodes < 3);
             } else {
                 warn "Cannot find subtree for supertree leaf node $leaf_node_id, skipping\n";
             }

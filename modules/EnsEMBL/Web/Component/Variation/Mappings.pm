@@ -366,9 +366,11 @@ sub content {
         };
 
         my @epigenomes = @{$rf->get_epigenomes_by_activity('ACTIVE')||[]};
+        my $epi_notfound_str = $rf->feature_so_term eq 'CTCF_binding_site' ?
+                          'Activity is not available for features of this type' : 'Not active in any cell lines';
         my $epi_string = scalar @epigenomes 
-                          ? join ', ', map { $_->name} @epigenomes 
-                          : 'Not active in any cell lines';
+                          ? join ', ', map { $_->short_name} @epigenomes
+                          : $epi_notfound_str;
 
         $row->{'cell_type'} = $epi_string;
 

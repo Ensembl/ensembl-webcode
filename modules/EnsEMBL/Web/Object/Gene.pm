@@ -1000,14 +1000,37 @@ sub get_GeneTree {
         $subtrees{$subtree->{_parent_id}} = ($tree->root_id eq $subtree->root_id ? $tree : $subtree);
       }
 
-      foreach my $leaf (@{$parent->root->get_all_leaves}) {
-        my $subtree = $subtrees{$leaf->node_id};
+      my $disavowing_supertree = 0;
+      my $parent_root = $parent->root;
+      foreach my $leaf (@{$parent_root->get_all_leaves}) {
+        my $leaf_node_id = $leaf->node_id;
+        my $subtree;
+        if (exists $subtrees{$leaf_node_id}) {
+            $subtree = $subtrees{$leaf_node_id};
+        } else {
+            if ($leaf->is_supertree
+                    && $leaf->get_child_count() == 1
+                    && $leaf->children->[0]->tree->root_id == $parent_root->node_id) {
+                # This is a unary internal supertree node;
+                # we can mend the supertree by removing it.
+                $leaf->minimize_node();
+
+                # If minimising the supertree results in a
+                # non-branching structure, disavow it altogether.
+                my $num_supertree_nodes = scalar(@{$parent_root->get_all_nodes()});
+                $disavowing_supertree = 1 if ($num_supertree_nodes <= 3);
+            } else {
+                warn "Cannot find subtree for supertree leaf node $leaf_node_id, skipping\n";
+            }
+            next;
+        }
+
         $leaf->{'_subtree'} = $subtree;
         $leaf->{'_subtree_size'} = $subtree->get_tagvalue('gene_count');
         $total_leaves += $leaf->{'_subtree_size'};
       }
       $parent->{'_total_num_leaves'} = $total_leaves;
-      $tree->{'_supertree'} = $parent;
+      $tree->{'_supertree'} = $parent unless $disavowing_supertree;
     }
   }
   return $self->{$cache_key};

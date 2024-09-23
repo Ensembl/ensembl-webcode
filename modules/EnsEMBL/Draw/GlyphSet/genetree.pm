@@ -870,7 +870,10 @@ sub features {
     $f->{'_name'}       = $tree->name;
     $f->{'_cigar_line'}   = $tree->tree->{_consensus_cigar_line_hash}->{$tree->node_id};
     $f->{'_cigar_line'} ||= $tree->consensus_cigar_line if UNIVERSAL::can($tree, 'consensus_cigar_line');   # Until all the EG divisions have updated their database
-  } elsif ($tree->is_leaf && $tree->isa('Bio::EnsEMBL::Compara::GeneTreeNode')) {
+  } elsif ($tree->is_leaf
+      && $tree->isa('Bio::EnsEMBL::Compara::GeneTreeNode')
+      && exists $tree->{_subtree}
+      && defined $tree->{_subtree}) {
     my $name = $tree->{_subtree}->stable_id;
     $name = $tree->{_subtree}->get_tagvalue('model_id') unless $name;
     $f->{label} =  $f->{'_display_id'} = sprintf('%s (%d genes)', $name, $tree->{_subtree_size});

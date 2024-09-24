@@ -74,9 +74,18 @@ sub init_cacheable {
     { display => 'off' }
   );
 
-  $self->modify_configs(
-    [$self->_transcript_types], { display => 'off' }
-  );
+  # Disable comprehensive genesets for gencode
+  if ($self->species_defs->GENCODE_VERSION) {
+    $self->modify_configs(
+      [$self->_transcript_types], { display => 'off' }
+    );
+  }
+  else {
+    $self->modify_configs(
+      [ 'transcript_core_ensembl', 'transcript_core_sg' ],
+      { display => 'transcript_label' }
+    )
+  }
 }
 
 1;

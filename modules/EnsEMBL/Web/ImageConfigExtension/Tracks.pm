@@ -454,15 +454,15 @@ sub add_genes {
         colours   => $colours,
         strand    => $t eq 'gene' ? 'r' : 'b',
         label_key => '[biotype]',
-        display     => "off",
+        display     => $self->species_defs->GENCODE_VERSION ? "off" : "transcript_label",
         renderers => ($t eq 'transcript' || $t eq 'longreads') ? $renderers : $t eq 'rnaseq' ? [
          'off',                'Off',
          'transcript_nolabel', 'Expanded without labels',
          'transcript_label',   'Expanded with labels',
         ] : [
-         'off',          'Off',
-         'gene_nolabel', 'No labels',
-	 'gene_label', 'With labels'
+          'off',          'Off',
+          'gene_nolabel', 'No labels',
+	        'gene_label',   'With labels'
         ]
       });
       $flag = 1;

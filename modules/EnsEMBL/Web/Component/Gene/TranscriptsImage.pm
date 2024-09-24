@@ -51,9 +51,15 @@ sub content {
     slice_number    => '1|1',
   });
 
-  # Enable gencode basic track
-  my $node = $image_config->get_node('gencode');
+  my $key  = $image_config->get_track_key('transcript', $object);
+  my $node = $image_config->get_node(lc $key);
   $node->set('display', 'transcript_label') if $node && $node->get('display') eq 'off';
+
+  # Enable gencode basic track
+  if ($self->hub->species_defs->GENCODE_VERSION) {
+    $node = $image_config->get_node('gencode');
+    $node->set('display', 'transcript_label') if $node && $node->get('display') eq 'off';
+  }
 
   if ( $self->hub->species_defs->databases->{'DATABASE_FUNCGEN'} ) {
     $image_config->{'data_by_cell_line'} = $self->new_object('Slice', $gene_slice, $object->__data)->get_cell_line_data_closure($image_config) if keys %{$self->hub->species_defs->databases->{'DATABASE_FUNCGEN'}{'tables'}{'cell_type'}{'ids'}};

@@ -454,7 +454,6 @@ sub add_genes {
         colours   => $colours,
         strand    => $t eq 'gene' ? 'r' : 'b',
         label_key => '[biotype]',
-        display     => $self->species_defs->GENCODE_VERSION ? "off" : "transcript_label",
         renderers => ($t eq 'transcript' || $t eq 'longreads') ? $renderers : $t eq 'rnaseq' ? [
          'off',                'Off',
          'transcript_nolabel', 'Expanded without labels',
@@ -473,7 +472,7 @@ sub add_genes {
   if (my $gencode_version = $self->species_defs->GENCODE_VERSION || "") {
     $self->add_track('transcript', 'gencode', "Basic Gene Annotations from $gencode_version", '_gencode', {
       labelcaption  => "Genes (Basic set from $gencode_version)",
-      display       => 'on',
+      display       => 'off',
       description   => 'The GENCODE set is the gene set for human and mouse. <a href="/Help/Glossary?id=500" class="popup">GENCODE Basic</a> is a subset of representative transcripts (splice variants).',
       sortable      => 1,
       colours       => $colours,
@@ -535,8 +534,15 @@ sub add_genes {
   # Need to add the gene menu track here
   $self->add_track('information', 'gene_legend', 'Gene Legend', 'gene_legend', { strand => 'r' }) if $flag;
 
-  # overwriting Genes comprehensive track description to not be the big concatenation of many description (only gencode gene track)
-  $self->modify_configs(['transcript_core_ensembl'],{ description => 'The <a class="popup" href="/Help/Glossary?id=487">GENCODE Comprehensive</a> set is the gene set for human and mouse' }) if($self->species_defs->GENCODE_VERSION);
+  if($self->species_defs->GENCODE_VERSION) {
+    # Disable comprehensive geneset track and enable basic gencode ones
+    $self->modify_configs(['transcript_core_ensembl'],{ 'display' => 'off' });
+    $self->modify_configs(['gencode'], { 'display' => 'transcript_label' });
+
+    # overwriting Genes comprehensive track description to not be the big concatenation of many description (only gencode gene track)
+    $self->modify_configs(['transcript_core_ensembl'],{ description => 'The <a class="popup" href="/Help/Glossary?id=487">GENCODE Comprehensive</a> set is the gene set for human and mouse' });
+  }
+
 }
 
 sub add_trans_associated {

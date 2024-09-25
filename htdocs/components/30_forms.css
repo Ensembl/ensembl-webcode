@@ -453,3 +453,9 @@ form.freeform-stt label { font-weight:bold; }
 
 form.gallery-header label { font-size: 120%; width:40%!important; }
 form.gallery-header div.ff-right { padding-left: 40%; }
+form#registration:has(input.invalid) input[type="button"] {
+  background-color: #999999;
+  cursor: default;
+  pointer-events: none;
+} 
+

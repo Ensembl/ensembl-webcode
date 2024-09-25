@@ -114,6 +114,7 @@ sub map_element_class {
     'form-element-div'              => 'EnsEMBL::Web::Form::Element::Div',
     'form-element-dropdown'         => 'EnsEMBL::Web::Form::Element::Dropdown',
     'form-element-email'            => 'EnsEMBL::Web::Form::Element::Email',
+    'form-element-name'            => 'EnsEMBL::Web::Form::Element::Name',
     'form-element-file'             => 'EnsEMBL::Web::Form::Element::File',
     'form-element-filterable'       => 'EnsEMBL::Web::Form::Element::Filterable',
     'form-element-float'            => 'EnsEMBL::Web::Form::Element::Float',

@@ -459,9 +459,9 @@ sub add_genes {
          'transcript_nolabel', 'Expanded without labels',
          'transcript_label',   'Expanded with labels',
         ] : [
-         'off',          'Off',
-         'gene_nolabel', 'No labels',
-	 'gene_label', 'With labels'
+          'off',          'Off',
+          'gene_nolabel', 'No labels',
+	        'gene_label',   'With labels'
         ]
       });
       $flag = 1;
@@ -534,8 +534,15 @@ sub add_genes {
   # Need to add the gene menu track here
   $self->add_track('information', 'gene_legend', 'Gene Legend', 'gene_legend', { strand => 'r' }) if $flag;
 
-  # overwriting Genes comprehensive track description to not be the big concatenation of many description (only gencode gene track)
-  $self->modify_configs(['transcript_core_ensembl'],{ description => 'The <a class="popup" href="/Help/Glossary?id=487">GENCODE Comprehensive</a> set is the gene set for human and mouse' }) if($self->species_defs->GENCODE_VERSION);
+  if($self->species_defs->GENCODE_VERSION) {
+    # Disable comprehensive geneset track and enable basic gencode ones
+    $self->modify_configs(['transcript_core_ensembl'],{ 'display' => 'off' });
+    $self->modify_configs(['gencode'], { 'display' => 'transcript_label' });
+
+    # overwriting Genes comprehensive track description to not be the big concatenation of many description (only gencode gene track)
+    $self->modify_configs(['transcript_core_ensembl'],{ description => 'The <a class="popup" href="/Help/Glossary?id=487">GENCODE Comprehensive</a> set is the gene set for human and mouse' });
+  }
+
 }
 
 sub add_trans_associated {

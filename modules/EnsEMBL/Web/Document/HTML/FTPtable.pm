@@ -457,12 +457,16 @@ both coding and non-coding genes. This file format is
 described <a href="http://www.gencodegenes.org/pages/data_format.html">here</a>.
 </dd>
 
-<dt class="bg1">GFF3</dt>
-<dd class="bg1">GFF3 provides access to all annotated transcripts which make
+<dt class="bg2">GFF3</dt>
+<dd class="bg2">GFF3 provides access to all annotated transcripts which make
 up an Ensembl gene set. This file format is
 described <a href="http://www.sequenceontology.org/gff3.shtml">here</a>.
 </dd>
 
+<dt class="bg1">JSON</dt>
+<dd class="bg1">Genome and annotation data in JSON format for each species.
+This file format is described <a href="https://www.json.org/">here</a>.
+</dd>
   );
 
   unless ($sd->NO_COMPARA) {
@@ -485,8 +489,8 @@ directory</a>.
 </p>
 </dd>
 
-<dt class="bg2">MAF (comparative data)</dt>
-<dd class="bg2">
+<dt class="bg1">MAF (comparative data)</dt>
+<dd class="bg1">
 <p>
 MAF files are provided for all pairwise alignments containing human
 (GRCh38), and all multiple alignments.
@@ -498,24 +502,24 @@ The MAF file format is described <a href="http://genome.ucsc.edu/FAQ/FAQformat.h
 
   unless ($sd->NO_VARIATION) {
     $html .= qq(
-<dt class="bg1">GVF (variation data)</dt>
-<dd class="bg1">GVF (Genome Variation Format) is a simple tab-delimited format derived
+<dt class="bg2">GVF (variation data)</dt>
+<dd class="bg2">GVF (Genome Variation Format) is a simple tab-delimited format derived
 from GFF3 for variation positions across the genome.
 There are GVF files for different types of variation data (e.g.
 somatic variants, structural variants etc). For more information see
 the "README" files in the GVF directory.</dd>
 
-<dt class="bg2">VCF (variation data)</dt>
-<dd class="bg2">VCF (Variant Call Format) is a text file format containing meta-information lines, a header
+<dt class="bg1">VCF (variation data)</dt>
+<dd class="bg1">VCF (Variant Call Format) is a text file format containing meta-information lines, a header
 line, and then data lines each containing information about a position in the genome. This file format can also contain genotype information on samples for each position.
 More details about the format and its specifications are available <a href="http://www.1000genomes.org/wiki/Analysis/Variant%20Call%20Format/vcf-variant-call-format-version-41">here</a>.</dd>
 
 
-<dt class="bg1">VEP (variation data)</dt>
-<dd class="bg1">Compressed text files (called "cache files") used by the <a href="/VEP">Variant Effect Predictor</a> tool. More information about these files is available <a href="https://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html">here</a>.</dd>
+<dt class="bg2">VEP (variation data)</dt>
+<dd class="bg2">Compressed text files (called "cache files") used by the <a href="/VEP">Variant Effect Predictor</a> tool. More information about these files is available <a href="https://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html">here</a>.</dd>
 
-<dt class="bg2">BED format files (comparative data)</dt>
-<dd class="bg2">
+<dt class="bg1">BED format files (comparative data)</dt>
+<dd class="bg1">
 <p>
 Constrained elements calculated using GERP are available in BED
 format. For more information see the accompanying README file.
@@ -541,8 +545,8 @@ are:
 
   if ($sd->HAS_API_DOCS) {
     $html .= qq(
-<dt class="bg1">Tarball</dt>
-<dd class="bg1">
+<dt class="bg2">Tarball</dt>
+<dd class="bg2">
 <p>
 The entire Ensembl API is gzipped and concatenated into a single TAR file. This is updated daily.</p>
 </dd>

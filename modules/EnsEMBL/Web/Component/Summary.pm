@@ -275,7 +275,8 @@ sub transcript_table {
   my @columns = $self->set_columns($has_ccds);
   my @rows;
 
-  my $gencode_desc    = qq(The GENCODE set is the gene set for human and mouse. <a href="/Help/Glossary?id=500" class="popup">GENCODE Basic</a> is a subset of representative transcripts (splice variants).);
+  my $gencode_desc    = qq(A subset of the GENCODE transcript set, containing only 5' and 3' complete transcripts at protein-coding genes.);
+  my $gencode_primary_desc = qq(GENCODE Primary represents a minimal set that contains MANE Select, MANE Plus Clinical and Ensembl Canonical transcripts and transcripts containing any conserved exons and common alternative splicing events (including exons skips) that are absent from the MANE and Ensembl Canonical transcripts for protein-coding genes. Other biotypes will have the GENCODE Primary flag added to the Ensembl Canonical transcript and for lncRNA genes only this will be the transcripts with the longest genomic span.);
 
   my $version     = $object->version ? ".".$object->version : "";
   my $transcript  = $page_type eq 'transcript' ? $object->stable_id : $hub->param('t');
@@ -290,13 +291,14 @@ sub transcript_table {
     MANE_Plus_Clinical   => 'MANE Plus Clinical');
 
   my $trans_attribs = {};
-  my @attrib_types = ('is_canonical','gencode_basic','appris','TSL','CDS_start_NF','CDS_end_NF');
+  my @attrib_types = ('is_canonical','gencode_primary','gencode_basic','appris','TSL','CDS_start_NF','CDS_end_NF');
   push(@attrib_types, keys %MANE_attrib_codes);
 
   foreach my $trans (@$transcripts) {
     foreach my $attrib_type (@attrib_types) {
       (my $attrib) = @{$trans->get_all_Attributes($attrib_type)};
       next unless $attrib && $attrib->value;
+
       if ($attrib_type eq 'appris') {
         ## Assume there is only one APPRIS attribute per transcript
         my $short_code = $attrib->value;
@@ -330,7 +332,7 @@ sub transcript_table {
       action => $page_type eq 'gene' ? 'Summary' : $action,
   );
    
-  my %extra_links = %{$self->get_extra_links}; 
+  my %extra_links = %{$self->get_extra_links};
   my %any_extras;
   foreach (@$transcripts) {
     my $transcript_length = $_->length;
@@ -423,8 +425,12 @@ sub transcript_table {
         }
       }
 
+      if ($trans_attribs->{$tsi}{'gencode_primary'}) {
+        push @flags, helptip('GENCODE Primary', $gencode_primary_desc);
+      }
+
       if ($trans_attribs->{$tsi}{'gencode_basic'}) {
-        push @flags, helptip('GENCODE basic', $gencode_desc);
+        push @flags, helptip('GENCODE Basic', $gencode_desc);
       }
 
       if ($trans_attribs->{$tsi}{'appris'}) {

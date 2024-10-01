@@ -31,18 +31,7 @@ sub content {
   my ($chr, $start, $end) = split /\:|\-/, $hub->param('pos'); 
   my $length              = $end - $start + 1;
   my $slice               = $hub->database('core')->get_SliceAdaptor->fetch_by_region('toplevel', $chr, $start, $end);
-  my @peaks               = @{$db_adaptor->get_PeakAdaptor->fetch_all_by_Slice($slice)};
-  my $peak;
-  
-  foreach (@peaks) { 
-    if ($_->peak_calling_id eq $peak_calling->dbID && $_->start == 1 && $_->end == $length) {
-      $peak = $_;
-      last;
-    }
-  }
-
-  my $summit   = $peak->summit || 'undetermined';
-  
+   
   $self->caption($peak_calling->get_FeatureType->evidence_type_label);
   
   $self->add_entry({
@@ -78,8 +67,6 @@ sub content {
   }
 
   $self->_add_nav_entries($hub->param('evidence')||0);
-
-  $self->_add_motif_feature_table($self->get_motif_features_by_peak($peak));
 
 }
 

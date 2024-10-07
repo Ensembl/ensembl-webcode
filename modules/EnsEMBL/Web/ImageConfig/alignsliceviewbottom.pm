@@ -80,6 +80,8 @@ sub init_cacheable {
     ]}
   );
 
+  $self->_modify_cactus_db_transcript_tracks();
+
   $self->modify_configs(
     [ 'conservation' ],
     { menu => 'no' }
@@ -132,5 +134,8 @@ sub species_list {
 
   return $self->{'species_list'};
 }
+
+
+sub _modify_cactus_db_transcript_tracks {}  # Stub for specific divisions (e.g. Plants)
 
 1;

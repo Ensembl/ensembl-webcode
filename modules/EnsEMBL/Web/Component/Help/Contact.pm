@@ -83,6 +83,13 @@ sub content {
     'name'    => 'attachment',
     'label'   => 'Include a file or screenshot (optional)',
     'value'   => '',
+  },
+  {
+    'type'      => 'String',
+    'name'      => 'logic',
+    'label'     => 'What is 5 + 4? ',
+    'value'     => '',
+    'required'  => 1,
   }]);
   
   $fieldset->add_hidden({

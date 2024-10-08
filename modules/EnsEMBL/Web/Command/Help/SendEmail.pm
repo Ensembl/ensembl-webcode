@@ -25,6 +25,7 @@ use strict;
 use warnings;
 
 use EnsEMBL::Web::Mailer::Help;
+use EnsEMBL::Web::Exceptions;
 
 use base qw(EnsEMBL::Web::Command);
 
@@ -32,6 +33,10 @@ sub process {
   my $self    = shift;
   my $hub     = $self->hub;
   my $url;
+
+  if ($hub->param('logic') != '9') {
+    throw exception('Form validation error', 'Answer to the logical question is wrong');
+  }
 
   if ($hub->param('submit') eq 'Back') {
 

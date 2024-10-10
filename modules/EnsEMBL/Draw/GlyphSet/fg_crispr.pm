@@ -27,13 +27,8 @@ use parent qw(EnsEMBL::Draw::GlyphSet::fg_bigbed);
 sub supports_subtitles { 0; }
 
 sub get_filename {
-  my $self  = shift;
-  my $slice = $self->{'container'};
+  return "funcgen/external_feature_file/wge_crispr_sites/101/wge_crisprs_grch38.20200529.bb";
 
-  my $fgh     = $slice->adaptor->db->get_db_adaptor('funcgen');
-  my $csa     = $fgh->get_CrisprSitesFileAdaptor;
-  my $crispr  = $csa->fetch_file;
-  return $crispr->file;
 }
 
 sub extra_metadata {

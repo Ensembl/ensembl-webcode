@@ -90,7 +90,7 @@ sub content {
     'label'     => 'What is 5 + 4? ',
     'value'     => uri_unescape($hub->param('logic')) || '',
     'required'  => 1,
-    'helptip'     => 'Are you a human verification'
+    'helptip'     => 'Question to verify you are a human or bot'
   }]);
   
   $fieldset->add_hidden({

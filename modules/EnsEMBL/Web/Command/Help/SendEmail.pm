@@ -37,7 +37,7 @@ sub process {
   my $logic_value = $hub->param('logic');
   $logic_value =~ s/^\s+|\s+$//g;
 
-  my $error_msg = $logic_value != 9 ? "Are you a human verification failed! Please try again." : "";
+  my $error_msg = $logic_value != 9 ? "You did not answer the arithmetic question correctly! Please try again." : "";
 
   if ($hub->param('submit') eq 'Back' || $logic_value != 9) {
     $url = {

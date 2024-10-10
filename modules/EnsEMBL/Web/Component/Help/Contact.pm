@@ -88,8 +88,9 @@ sub content {
     'type'      => 'String',
     'name'      => 'logic',
     'label'     => 'What is 5 + 4? ',
-    'value'     => '',
+    'value'     => uri_unescape($hub->param('logic')) || '',
     'required'  => 1,
+    'helptip'     => 'Are you a human verification'
   }]);
   
   $fieldset->add_hidden({
@@ -107,6 +108,14 @@ sub content {
     'name'    => 'submit',
     'value'   => 'Send',
   });
+
+  my $warn_element = $self->dom->create_element('div', {
+    'id'          => 'msg',
+    'class'       => 'colour: red',
+    'inner_HTML'  => uri_unescape($hub->param('msg')) || ''
+  })->render;
+
+  $fieldset->add_notes($warn_element);
 
   $_->set_attribute('data-role', 'none') for @{$fieldset->get_elements_by_tag_name([qw(input select textarea)])};
 

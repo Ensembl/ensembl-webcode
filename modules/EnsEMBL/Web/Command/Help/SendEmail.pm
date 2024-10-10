@@ -34,16 +34,17 @@ sub process {
   my $hub     = $self->hub;
   my $url;
 
-  if ($hub->param('logic') != '9') {
-    throw exception('Form validation error', 'Answer to the logical question is wrong');
-  }
+  my $logic_value = $hub->param('logic');
+  $logic_value =~ s/^\s+|\s+$//g;
 
-  if ($hub->param('submit') eq 'Back') {
+  my $error_msg = $logic_value != 9 ? "Are you a human verification failed! Please try again." : "";
 
+  if ($hub->param('submit') eq 'Back' || $logic_value != 9) {
     $url = {
       'type'    => 'Help',
       'action'  => 'Contact',
-      map {$_   => $hub->param($_) || ''} qw(name address subject message attachment)
+      'msg'     => $error_msg,
+      map {$_   => $hub->param($_) || ''} qw(name address subject message attachment logic),
     };
 
   } else {

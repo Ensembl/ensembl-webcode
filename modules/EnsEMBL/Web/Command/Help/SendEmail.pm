@@ -25,7 +25,6 @@ use strict;
 use warnings;
 
 use EnsEMBL::Web::Mailer::Help;
-use EnsEMBL::Web::Exceptions;
 
 use base qw(EnsEMBL::Web::Command);
 

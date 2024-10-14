@@ -33,12 +33,17 @@ sub process {
   my $hub     = $self->hub;
   my $url;
 
-  if ($hub->param('submit') eq 'Back') {
+  my $logic_value = $hub->param('logic');
+  $logic_value =~ s/^\s+|\s+$//g;
 
+  my $error_msg = $logic_value != 9 ? "You did not answer the arithmetic question correctly! Please try again." : "";
+
+  if ($hub->param('submit') eq 'Back' || $logic_value != 9) {
     $url = {
       'type'    => 'Help',
       'action'  => 'Contact',
-      map {$_   => $hub->param($_) || ''} qw(name address subject message attachment)
+      'msg'     => $error_msg,
+      map {$_   => $hub->param($_) || ''} qw(name address subject message attachment logic),
     };
 
   } else {

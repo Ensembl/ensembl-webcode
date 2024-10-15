@@ -101,6 +101,19 @@ sub init_cacheable {
     [ 'variation_legend' ],
     { accumulate => 'yes' }
   );
+
+  my $align_params = $self->hub->referer->{'params'}{'align'}[0];
+  my ($align) = split '--', $align_params;
+  my $align_type = $self->species_defs->multi_hash->{'DATABASE_COMPARA'}{'ALIGNMENTS'}{$align}{'type'};
+  if ($align_type eq 'CACTUS_DB') {
+    my $node = $self->get_node('transcript');
+    my @transcript_tracks = grep { $_->get_data('node_type') eq 'track' } @{$node->get_all_nodes};
+    foreach my $transcript_track (@transcript_tracks) {
+      if ($species ne $self->hub->referer->{'ENSEMBL_SPECIES'}) {
+        $transcript_track->set_data('display', 'off');
+      }
+    }
+  }
 }
 
 sub species_list {

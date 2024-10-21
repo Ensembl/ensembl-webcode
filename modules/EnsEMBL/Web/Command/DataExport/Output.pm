@@ -393,6 +393,20 @@ sub write_alignment {
       print $align_io $alignment;
     }
 
+    if (lc($format) eq 'stockholm') {
+      # In BioPerl 1.6.x, a bug in the Stockholm alignment writer resulted in sequence identifiers running on into
+      # the accession field. This has been fixed by @muffato ( https://github.com/bioperl/bioperl-live/pull/122 ), but
+      # has not yet been deployed. As a stopgap, we modify Stockholm output here to insert the missing space as needed
+      # between the sequence ID and the accession field.
+      my @export_lines = split(/\n/, $export);
+      foreach my $i (0 .. $#export_lines) {
+        if (substr($export_lines[$i], 0, 4) eq '#=GS') {
+          $export_lines[$i] =~ s/^(#=GS \S+)(AC unknown)$/$1 $2/;
+        }
+      }
+      $export = join("\n", @export_lines);
+    }
+
     $result = $self->write_line($export);
   }
   return $result->{'error'} || undef;

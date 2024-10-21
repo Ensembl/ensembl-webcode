@@ -24,7 +24,7 @@ package EnsEMBL::Web::Document::HTML::Compara::GeneTrees;
 
 use strict;
 
-use List::Util qw(min max sum);
+use List::Util qw(min minstr max sum);
 use List::MoreUtils qw(uniq);
 
 use EnsEMBL::Web::Document::Table;
@@ -306,7 +306,7 @@ sub get_html_for_gene_tree_coverage {
     if ($method eq 'PROTEIN_TREES') { 
       $piecharts = $self->get_piecharts_for_species($sp, $counter_raphael_holders);
       $table->add_row({
-      'species' => species_tree_node_label($sp),
+      'species' => $self->species_tree_node_label($sp),
       'piechart_cov' => {
         value => $piecharts->[1],
         class => '_no_export'
@@ -321,7 +321,7 @@ sub get_html_for_gene_tree_coverage {
     else {
       $piecharts = $self->get_piecharts_for_species_ncrna($sp, $counter_raphael_holders);
       $table->add_row({
-      'species' => species_tree_node_label($sp),
+      'species' => $self->species_tree_node_label($sp),
       'piechart_cov' => {
         value => $piecharts->[1],
         class => '_no_export'
@@ -408,7 +408,7 @@ sub get_html_for_tree_size_statistics {
     next unless $ntrees;
 
     $table->add_row({
-        'species' => species_tree_node_label($node),
+        'species' => $self->species_tree_node_label($node),
         'root_perc_trees' => $self->piechart_data([$ntrees, $tot_ntrees-$ntrees], $counter_raphael_holders),
         'root_perc_genes' => $self->piechart_data([$ngenes, $tot_ngenes-$ngenes], $counter_raphael_holders),
         (map {$_ => $node->get_value_for_tag($_)} qw(root_nb_trees root_nb_genes root_min_gene root_max_gene root_min_spec root_max_spec)),
@@ -439,7 +439,7 @@ sub get_html_for_node_statistics {
     my $piecharts = $self->get_piecharts_for_internal_node($node, $counter_raphael_holders);
 
     $table->add_row({
-        'species' => species_tree_node_label($node),
+        'species' => $self->species_tree_node_label($node),
         'piechart' => $piecharts->[0],
         (map {$_ => $node->get_value_for_tag($_)} qw(nb_nodes nb_spec_nodes nb_dup_nodes nb_dubious_nodes)),
         (map {$_ => sprintf('%.1f&nbsp;%%', 100*$node->get_value_for_tag($_))} qw(avg_dupscore avg_dupscore_nondub)),
@@ -451,12 +451,13 @@ sub get_html_for_node_statistics {
 
 sub get_html_for_tree_stats_overview {
   my ($self, $species_tree_root, $counter_raphael_holders, $method) = @_;
-  my $width = $species_tree_root->max_depth * 2 + 4;
-  my $height = scalar(@{$species_tree_root->get_all_leaves});
+  my $node_stats = $self->_recursive_get_node_stats($species_tree_root);
+  my $width = $node_stats->{$species_tree_root->node_id}{max_depth} * 2 + 4;
+  my $height = $node_stats->{$species_tree_root->node_id}{num_leaves};
   my @matrix = map {[(undef) x $width]} 1..$height;
   my $y_pos = 0;
   my $internal_counter = 0;
-  $self->draw_tree(\@matrix, $species_tree_root, \$y_pos, \$internal_counter, $method);
+  $self->draw_tree(\@matrix, $species_tree_root, \$y_pos, \$internal_counter, $method, $node_stats);
 
 # -ii-ii-tt
 #
@@ -480,12 +481,18 @@ sub get_html_for_tree_stats_overview {
 
 
 sub draw_tree {
-  my ($self, $matrix, $node, $next_y, $counter_raphael_holders, $method) = @_;
+  my ($self, $matrix, $node, $next_y, $counter_raphael_holders, $method, $node_stats) = @_;
 
+  # $node_stats->{$b->node_id}{num_leaves} <=> $node_stats->{$a->node_id}{num_leaves}
+  my @ordered_children = sort {
+    $node_stats->{$b->node_id}{num_nodes} <=> $node_stats->{$a->node_id}{num_nodes}
+    || $node_stats->{$b->node_id}{max_depth} <=> $node_stats->{$a->node_id}{max_depth}
+    || $node_stats->{$a->node_id}{min_leaf_label} cmp $node_stats->{$b->node_id}{min_leaf_label}
+  } @{$node->children};
   # Exclude species with no data. This only applies to polyploid genomes
   # for which we use the components in the gene-trees instead of the
   # total genome
-  my @children = grep {$_->get_value_for_tag('nb_nodes') || $_->get_value_for_tag('nb_genes')} @{$node->sorted_children};
+  my @children = grep {$_->get_value_for_tag('nb_nodes') || $_->get_value_for_tag('nb_genes')} @ordered_children;
   my $nchildren = scalar(@children);
 
   my $horiz_branch  = q{<img style="width: 28px; height: 28px;" alt="---" src="/img/compara/ct_hor.png" />};
@@ -496,7 +503,7 @@ sub draw_tree {
   my $half_horiz_branch  = q{<img style="width: 14px; height: 28px;" alt="-" src="/img/compara/ct_half_hor.png" />};
 
   if ($nchildren) {
-    my @subtrees = map {$self->draw_tree($matrix, $_, $next_y, $counter_raphael_holders, $method)} @children;
+    my @subtrees = map {$self->draw_tree($matrix, $_, $next_y, $counter_raphael_holders, $method, $node_stats)} @children;
     my $anchor_x_pos = min(map {$_->[0]} @subtrees)-1;
     my $min_y = min(map {$_->[1]} @subtrees);
     my $max_y = max(map {$_->[1]} @subtrees);
@@ -526,7 +533,7 @@ sub draw_tree {
       $piecharts = $self->get_piecharts_for_species_ncrna($node, $counter_raphael_holders); 
     }
 
-    $matrix->[$y]->[$width-1] = species_tree_node_label($node);
+    $matrix->[$y]->[$width-1] = $self->species_tree_node_label($node);
     $matrix->[$y]->[$width-2] = $piecharts->[0];
     $matrix->[$y]->[$width-3] = $piecharts->[1];
     $matrix->[$y]->[$width-4] = $half_horiz_branch;
@@ -538,15 +545,61 @@ sub draw_tree {
 
 # Helper functions
 
+sub _recursive_get_node_stats {
+  my $self = shift;
+  my $node = shift;
+  my $stats = shift || {};
+
+  if ($node->is_leaf) {
+    $stats->{$node->node_id} = {
+      'max_depth' => 0,
+      'num_leaves' => 1,
+      'num_nodes' => 1,
+      'min_leaf_label' => $self->species_tree_node_label($node),
+    }
+  } else {
+    my @max_depths_of_children;
+    my @num_leaves_in_children;
+    my @num_nodes_in_children;
+    my @min_leaf_labels_of_children;
+    foreach my $child (@{$node->children}) {
+      no warnings 'recursion';
+      $self->_recursive_get_node_stats($child, $stats);
+      push(@max_depths_of_children, $stats->{$child->node_id}{'max_depth'});
+      push(@num_leaves_in_children, $stats->{$child->node_id}{'num_leaves'});
+      push(@num_nodes_in_children, $stats->{$child->node_id}{'num_nodes'});
+      push(@min_leaf_labels_of_children, $stats->{$child->node_id}{'min_leaf_label'});
+    }
+    $stats->{$node->node_id} = {
+      'max_depth' => max(@max_depths_of_children) + 1,
+      'num_leaves' => sum(@num_leaves_in_children),
+      'num_nodes' => sum(@num_nodes_in_children) + 1,
+      'min_leaf_label' => minstr(@min_leaf_labels_of_children),
+    }
+  }
+
+  return $stats;
+}
+
 sub species_tree_node_label {
-    my $species_tree_node = shift;
+    my ($self, $species_tree_node) = @_;
+    my $stn_id = $species_tree_node->node_id;
+
+    # Assumes the tree doesn't change
+    return $self->{_species_tree_node_labels}{$stn_id} if $self->{_species_tree_node_labels}{$stn_id};
+
     my $taxon_alias = $species_tree_node->get_common_name();
     my $scientific_name = $species_tree_node->get_scientific_name();
+    my $node_label;
     if ($taxon_alias) {
-        return sprintf('%s (%s)', $taxon_alias, $scientific_name);
+        $node_label = sprintf('%s (%s)', $taxon_alias, $scientific_name);
     } else {
-        return $scientific_name;
+        $node_label = $scientific_name;
     }
+
+    $self->{_species_tree_node_labels}{$stn_id} = $node_label;
+
+    return $node_label;
 }
 
 

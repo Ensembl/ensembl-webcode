@@ -21,6 +21,7 @@ package EnsEMBL::Web::Component::Info::HomePage;
 
 use strict;
 
+use Bio::EnsEMBL::Registry;
 use EnsEMBL::Web::Document::HTML::HomeSearch;
 use EnsEMBL::Web::Utils::FormatText;
 
@@ -352,13 +353,17 @@ sub funcgen_text {
   my $hub          = $self->hub;
   return unless $hub->database('funcgen');
 
-  my $species_defs = $hub->species_defs;
-  my $sample_data  = $species_defs->SAMPLE_DATA;
-  
-  if ($sample_data->{'REGULATION_PARAM'}) {
-    my $species           = $hub->species;
+  my $species           = $hub->species;
+  my $reg_build_adaptor = Bio::EnsEMBL::Registry->get_adaptor($species, 'Funcgen', 'RegulatoryBuild');
+  my $current_reg_build = $reg_build_adaptor->fetch_current_regulatory_build();
+
+  if ($current_reg_build) {
+    
+    my $species_defs = $hub->species_defs;
     my $species_prod_name = $species_defs->get_config($species, 'SPECIES_PRODUCTION_NAME');
     my $ftp               = $self->ftp_url;
+
+    my $sample_reg_feature = $current_reg_build->get_sample_RegulatoryFeature();
     
     return sprintf('
       <div class="homepage-icon">
@@ -372,8 +377,8 @@ sub funcgen_text {
       
       sprintf(
         $self->{'img_link'},
-        $hub->url({ type => 'Regulation', action => 'Summary', db => 'funcgen', rf => $sample_data->{'REGULATION_PARAM'}, __clear => 1 }),
-        "Go to regulatory feature $sample_data->{'REGULATION_TEXT'}", 'regulation', 'Example regulatory feature'
+        $hub->url({ type => 'Regulation', action => 'Summary', db => 'funcgen', rf => $sample_reg_feature->{'stable_id'}, __clear => 1 }),
+        "Go to regulatory feature $sample_reg_feature->{'stable_id'}", 'regulation', 'Example regulatory feature'
       ),
       
       sprintf($self->{'icon'}, 'info'), $species_defs->ENSEMBL_SITETYPE,

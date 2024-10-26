@@ -83,7 +83,7 @@ sub init_cacheable {
   else {
     $self->modify_configs(
       [ 'transcript_core_ensembl', 'transcript_core_sg' ],
-      { display => 'transcript_label' }
+      { display => 'transcript_nolabel' }
     )
   }
 }

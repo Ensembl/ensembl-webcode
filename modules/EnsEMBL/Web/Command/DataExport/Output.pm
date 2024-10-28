@@ -401,7 +401,7 @@ sub write_alignment {
       my @export_lines = split(/\n/, $export);
       foreach my $i (0 .. $#export_lines) {
         if (substr($export_lines[$i], 0, 4) eq '#=GS') {
-          $export_lines[$i] =~ s/^(#=GS \S+)(AC unknown)$/$1 $2/;
+          $export_lines[$i] =~ s/^(#=GS \S+)(AC \S+)$/$1 $2/;
         }
       }
       $export = join("\n", @export_lines);

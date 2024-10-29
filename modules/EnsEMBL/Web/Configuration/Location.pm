@@ -63,7 +63,7 @@ sub populate_tree {
   $self->create_node('Overview', 'Region overview',
     [qw(
       summary EnsEMBL::Web::Component::Location::Summary
-      nav     EnsEMBL::Web::Component::Location::ViewBottomNav/region
+      nav     EnsEMBL::Web::Component::Location::ViewBottomNav
       top     EnsEMBL::Web::Component::Location::Region
     )],
     { 'availability' => 'slice'}

@@ -271,7 +271,7 @@ sub render_align_bar {
       $config->{'alignslice_legend'}{$colour} = {
         priority => $self->_pos,
         legend   => $legend
-      } if $legend && $self->{container}->coord_system()->version() !~ /(EPO|PECAN)/;
+      } if $legend && $self->{container}->coord_system()->version() !~ /(EPO|PECAN|CACTUS_DB(?!_PW)|CACTUS_HAL(?!_PW))/;
     }
     
     $last_end = $se;
@@ -281,9 +281,9 @@ sub render_align_bar {
     $last_chr = $s2t;
     $last_slice = $s2;
   }
-  
+
   # alignment legend for multiple alignment (show everything)
-  if ($self->{container}->coord_system()->version() =~ /(EPO|PECAN)/) { 
+  if ($self->{container}->coord_system()->version() =~ /(EPO|PECAN|CACTUS_DB(?!_PW)|CACTUS_HAL(?!_PW))/) {
     my $all_legend = [
                    { colour => 'black', title => 'AlignSlice Break; Breakpoint in alignment', legend => 'Breakpoint between chromosomes'},
                    { colour => 'dodgerblue', title => 'AlignSlice Break; Inversion in chromosome', legend => 'Inversion on chromosome'},      

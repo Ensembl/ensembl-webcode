@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2022] EMBL-European Bioinformatics Institute
+Copyright [2016-2024] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ sub init {
 
 sub content {
   my $self = shift;
-
   my $popup_message = $self->{'file'}{'message'} ? $self->dom->create_element('div', {
     'id'        => 'tmp_message',
     'children'  => [{
@@ -72,9 +71,10 @@ sub content {
     }]
   })->render : '';
 
+  my $element_id = !$self->{'file'}{'class'} ? 'announcement-banner' : '';
   my $announcement_banner_message = $self->{'file'}{'banner_message'} ? $self->dom->create_element('div', {
-    'id'          => 'announcement-banner',
-    'class'       => $self->{'file'}{'colour'},
+    'id'          => $element_id,
+    'class'       => $self->{'file'}{'class'}, # add class to override default styles
     'inner_HTML'  => $self->{'file'}{'banner_message'}
   })->render : '';
 
@@ -83,8 +83,6 @@ sub content {
     'popup_message' => $popup_message,
     'announcement_banner_message' => $announcement_banner_message 
   }
-
-
 }
 
 1;

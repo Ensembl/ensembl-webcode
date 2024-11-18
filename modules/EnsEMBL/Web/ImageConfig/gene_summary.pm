@@ -79,10 +79,14 @@ sub init_cacheable {
     $self->modify_configs(
       [$self->_transcript_types], { display => 'off' }
     );
+    $self->modify_configs(
+      [ 'gencode' ],
+      { display => 'transcript_label' }
+    )
   }
   else {
     $self->modify_configs(
-      [ 'transcript_core_ensembl', 'transcript_core_sg' ],
+      [ 'transcript_core_ensembl', 'transcript_core_sg'],
       { display => 'transcript_label' }
     )
   }

@@ -1217,15 +1217,14 @@ sub _summarise_compara_db {
 
   $self->_summarise_generic($db_name, $dbh);
 
+  # Get list of species in the compara db (no longer everything!)
+  my $spp_aref = $dbh->selectcol_arrayref('select name from genome_db');
+
   if ($code eq 'compara_pan_ensembl') {
-    $self->_summarise_pan_compara($dbh);
+    $self->_summarise_pan_compara($dbh, $spp_aref);
   }
  
-  # Get list of species in the compara db (no longer everything!)
-  my $spp_aref = $dbh->selectall_arrayref('select name from genome_db');
-  
-  foreach my $row (@$spp_aref) {
-    my $name = $row->[0]; 
+  foreach my $name (@$spp_aref) {
     $self->db_tree->{$db_name}{'COMPARA_SPECIES'}{$name} = 1;
   }
  
@@ -1971,11 +1970,12 @@ sub _munge_sample_data {
 }
 
 sub _summarise_pan_compara {
-  my ($self, $dbh) = @_;
+  my ($self, $dbh, $prod_names) = @_;
 
   ## Get info about pan-compara species
   my $metadata_db = $self->full_tree->{MULTI}->{databases}->{DATABASE_METADATA};
   my $meta_dbh = $self->db_connect('DATABASE_METADATA', $metadata_db);
+  my $prod_names_str = "('" . join("','", @$prod_names) . "')";
   my $version = $SiteDefs::ENSEMBL_VERSION;
   my $aref = $meta_dbh->selectall_arrayref(
       "select 
@@ -1986,7 +1986,7 @@ sub _summarise_pan_compara {
           o.organism_id = g.organism_id 
           and g.data_release_id = r.data_release_id 
           and g.division_id = d.division_id
-          and g.has_pan_compara = 1
+          and o.name IN $prod_names_str
           and r.ensembl_version = $version"
       );    
   ## Also get info about Archaea from pan-compara itself, for bacteria
@@ -2010,6 +2010,9 @@ sub _summarise_pan_compara {
 
   foreach my $row (@$aref) {
     my ($prod_name, $url, $display_name, $sci_name, $division) = @$row;
+    # In cases where a genome has both a Vertebrate and Non-Vertebrate
+    # core database, the Non-Vertebrate core is used in Pan Compara.
+    next if exists $self->db_tree->{'PAN_COMPARA_LOOKUP'}{$prod_name} && $division eq 'EnsemblVertebrates';
     $division =~ s/Ensembl//;
     my $subdivision;
     if ($division eq 'Bacteria') {

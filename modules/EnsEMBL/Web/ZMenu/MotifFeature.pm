@@ -32,6 +32,13 @@ sub content {
 
   $self->caption('Motif Feature');
   my $id = $hub->param('feature_id');
+  
+  my $species = $hub->species;
+  my $species_defs = $hub->species_defs;
+  my $species_prod_name = $species_defs->get_config($species, 'SPECIES_PRODUCTION_NAME');
+  my $ensembl_version = $species_defs->ENSEMBL_VERSION;
+  my $bm_url = sprintf("https://regulation.ensembl.org/%s/binding_matrix/%s/%s", $ensembl_version, $species_prod_name, $hub->param('binding_matrix_stable_id'));
+  
   $self->add_entry({
                     type        => 'ID',
                     label       => $id, 
@@ -53,9 +60,7 @@ sub content {
 
   $self->add_entry({
                     type        => 'Binding matrix',
-                    label_html  => $hub->param('binding_matrix_stable_id'), 
-                    link        => '#',
-                    link_class  => '_motif',
+                    label_html  => sprintf("<a href=\"%s\" rel=\"external\" >%s</a>", $bm_url, $hub->param('binding_matrix_stable_id')), 
                   });
   ## Split these fields with spaces so they wrap
   my @transcription_factors = split(',', $hub->param('transcription_factors'));

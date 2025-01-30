@@ -17,7 +17,7 @@ limitations under the License.
 
 =cut
 
-package EnsEMBL::Draw::GlyphSet::_gencode;
+package EnsEMBL::Draw::GlyphSet::_gencode_basic;
 
 ### Module for drawing the gencode track inheriting from _transcript.pm, we dont have any web data in the database for gencode. Its a workaround to create a separate track for attribute type gencode.
 

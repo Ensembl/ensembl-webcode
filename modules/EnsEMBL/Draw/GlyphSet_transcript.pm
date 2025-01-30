@@ -38,7 +38,8 @@ sub render_normal                  { $_[0]->render_transcripts(1);           }
 sub render_transcript              { $_[0]->render_transcripts(1);           }
 sub render_transcript_label        { $_[0]->render_transcripts(1);           }
 sub render_transcript_label_coding { $_[0]->render_transcripts(1);           }
-sub render_transcript_gencode_basic{ $_[0]->render_transcripts(1);           }
+sub render_transcript_gencode_basic   { $_[0]->render_transcripts(1);           }
+sub render_transcript_gencode_primary { $_[0]->render_transcripts(1);           }
 sub render_transcript_nolabel      { $_[0]->render_transcripts(0);           }
 sub render_collapsed_label         { $_[0]->render_collapsed(1);             }
 sub render_collapsed_nolabel       { $_[0]->render_collapsed(0);             }

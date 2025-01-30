@@ -470,7 +470,7 @@ sub add_genes {
 
   # Adding gencode basic track, this has been moved from each image config to this generic one
   if (my $gencode_version = $self->species_defs->GENCODE_VERSION || "") {
-    $self->add_track('transcript', 'gencode', "Basic Gene Annotations from $gencode_version", '_gencode', {
+    $self->add_track('transcript', 'gencode_basic', "Basic Gene Annotations from $gencode_version", '_gencode_basic', {
       labelcaption  => "Genes (Basic set from $gencode_version)",
       display       => 'off',
       description   => 'The GENCODE set is the gene set for human and mouse. <a href="/Help/Glossary?id=500" class="popup">GENCODE Basic</a> is a subset of representative transcripts (splice variants).',
@@ -489,6 +489,29 @@ sub add_genes {
         'transcript_label_coding', 'Coding transcripts only (in coding genes)',
       ],
     });
+  }
+
+  # Adding gencode primary track
+  if (my $gencode_version = $self->species_defs->GENCODE_VERSION || "") {
+    $self->add_track('transcript', 'gencode_primary', "Primary Gene Annotations from $gencode_version", '_gencode_primary', {
+      labelcaption  => "Genes (Primary set from $gencode_version)",
+      display       => 'transcript_label',
+      description   => 'The GENCODE set is the gene set for human and mouse. <a href="/Help/Glossary?id=500" class="popup">GENCODE Primary</a> is a subset of representative transcripts (splice variants).',
+      sortable      => 1,
+      colours       => $colours,                                                                                                                                                                                                                                                
+      label_key     => '[biotype]',
+      logic_names   => ['proj_ensembl',  'proj_ncrna', 'proj_havana_ig_gene', 'havana_ig_gene', 'ensembl_havana_ig_gene', 'proj_ensembl_havana_lincrna', 'proj_havana', 'ensembl', 'mt_genbank_import', 'ensembl_havana_lincrna', 'proj_ensembl_havana_ig_gene', 'ncrna', 'assembly_patch_ensembl', 'ensembl_havana_gene', 'ensembl_lincrna', 'proj_ensembl_havana_gene', 'havana'],
+      renderers     =>  [
+        'off',                     'Off',
+        'gene_nolabel',            'No exon structure without labels',
+        'gene_label',              'No exon structure with labels',
+        'transcript_nolabel',      'Expanded without labels',
+        'transcript_label',        'Expanded with labels',
+        'collapsed_nolabel',       'Collapsed without labels',
+        'collapsed_label',         'Collapsed with labels',
+        'transcript_label_coding', 'Coding transcripts only (in coding genes)',
+      ],   
+    });  
   }
   
   # Adding MANE tracks (Only for Humans)
@@ -535,9 +558,9 @@ sub add_genes {
   $self->add_track('information', 'gene_legend', 'Gene Legend', 'gene_legend', { strand => 'r' }) if $flag;
 
   if($self->species_defs->GENCODE_VERSION) {
-    # Disable comprehensive geneset track and enable basic gencode ones
+    # Disable comprehensive geneset track and enable primary gencode ones
     $self->modify_configs(['transcript_core_ensembl'],{ 'display' => 'off' });
-    $self->modify_configs(['gencode'], { 'display' => 'transcript_label' });
+    $self->modify_configs(['gencode_primary'], { 'display' => 'transcript_label' });
 
     # overwriting Genes comprehensive track description to not be the big concatenation of many description (only gencode gene track)
     $self->modify_configs(['transcript_core_ensembl'],{ description => 'The <a class="popup" href="/Help/Glossary?id=487">GENCODE Comprehensive</a> set is the gene set for human and mouse' });

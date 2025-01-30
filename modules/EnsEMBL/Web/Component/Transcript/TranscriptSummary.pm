@@ -248,6 +248,7 @@ sub content {
 
   ## add gencode basic info
   $table->add_row('GENCODE basic gene', qq(This transcript is a member of the <a href="/Help/Glossary?id=500" class="popup">Gencode basic</a> gene set.)) if(@{$transcript->get_all_Attributes('gencode_basic')});
+  $table->add_row('GENCODE primary gene', qq(This transcript is a member of the <a href="/Help/Glossary?id=500" class="popup">Gencode Primary</a> gene set.)) if(@{$transcript->get_all_Attributes('gencode_primary')});
 
   return $table->render;
 }

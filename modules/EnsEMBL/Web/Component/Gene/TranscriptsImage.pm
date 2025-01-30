@@ -61,7 +61,7 @@ sub content {
     my $node = $image_config->get_node(lc $key);
     $node->set('display', 'off');
 
-    $node = $image_config->get_node('gencode');
+    $node = $image_config->get_node('gencode_primary');
     $node->set('display', 'gene_label') if $node && $node->get('display') eq 'off';
   }
 

@@ -56,7 +56,7 @@ sub precache {
         shortlabels => '',
       }
     },
-    gencode => {
+    gencode_basic => {
       loop => ['species','genome'],
       args => {
         logic_names => [qw(
@@ -72,6 +72,23 @@ sub precache {
         only_attrib => "gencode_basic",
         shortlabels => '',
       }
+    },
+    gencode_primary => {
+      loop => ['species','genome'],
+      args => {
+        logic_names => [qw(
+          assembly_patch_ensembl    ensembl      ensembl_havana_gene
+          ensembl_havana_ig_gene    ensembl_havana_lincrna
+          ensembl_lincrna           havana       havana_ig_gene
+          mt_genbank_import         ncrna        proj_ensembl
+          proj_ensembl_havana_gene  proj_ensembl_havana_ig_gene
+          proj_ensembl_havana_lincrna   proj_havana
+          proj_havana_ig_gene       proj_ncrna
+        )],
+        label_key => "[biotype]",
+        only_attrib => "gencode_primary",
+        shortlabels => '', 
+      }   
     },
     MANE_Select => {
       loop => ['species','genome'],
@@ -230,9 +247,10 @@ sub _get_prediction_transcripts {
   my $db_alias = $args->{'db'};
   my @out;
   my $is_gencode_basic = ($args->{'only_attrib'} && $args->{'only_attrib'} eq 'gencode_basic') ? 1 : 0;
+  my $is_gencode_primary = ($args->{'only_attrib'} && $args->{'only_attrib'} eq 'gencode_primary') ? 1 : 0;
 
   foreach my $logic_name (@{$args->{'logic_names'}}) {
-    my $logic_name_with_species = $is_gencode_basic ?  $logic_name.'_'.$args->{'species'} : $logic_name;
+    my $logic_name_with_species = ( $is_gencode_basic || $is_gencode_primary) ?  $logic_name.'_'.$args->{'species'} : $logic_name;
 
     my @t = @{$slice->get_all_PredictionTranscripts($logic_name_with_species,$db_alias)};
     my @g = map { $self->_fake_gene($_) } @t;
@@ -251,7 +269,7 @@ sub _get_genes {
 
   my $analyses_postfix = '';
 
-  if( $only_attrib eq 'gencode_basic' || $only_attrib eq 'MANE_Select' || $only_attrib eq 'MANE_Plus_Clinical'){
+  if( $only_attrib eq 'gencode_primary' || $only_attrib eq 'gencode_basic' || $only_attrib eq 'MANE_Select' || $only_attrib eq 'MANE_Plus_Clinical'){
     $analyses_postfix = '_'. $species; 
   }
 

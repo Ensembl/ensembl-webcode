@@ -68,6 +68,15 @@ sub content {
   my ($align, $target_species, $target_slice_name_range) = split '--', $align_param;
   my $target_slice = $object->get_target_slice;
 
+  ## Check for wrong component in per-component polyploid alignments.
+  my $warning_box = $self->check_for_wrong_genome_component({
+    'cdb'   => $cdb,
+    'align' => $align,
+    'slice' => $slice,
+  });
+  return $warning_box if $warning_box;
+  ##
+
   my ($alert_box, $error) = $self->check_for_align_problems({
                     'align' => $align,
                     'species' => $hub->species_defs->SPECIES_PRODUCTION_NAME,
@@ -338,6 +347,9 @@ sub check_for_missing_species {
   $title .= ' species' if $title;
   return $warnings ? ({'severity' => 'info', 'title' => $title, 'message' => $warnings}) : ();
 }
+
+# Stub for use in divisions with polyploid genomes (e.g. Plants)
+sub check_for_wrong_genome_component {}
 
 sub show_warnings {
   my ($self, $messages) = @_;

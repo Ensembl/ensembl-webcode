@@ -1250,6 +1250,7 @@ sub _summarise_compara_db {
   my $constrained_elements = {};
   my %valid_species = map { $_ => 1 } keys %{$self->full_tree};
   
+  my $cactus_db_found = 0;
   foreach my $row (@$res_aref) { 
     my ($class, $type, $species, $name, $id, $species_set_id) = ($row->[0], uc $row->[1], $row->[2], $row->[3], $row->[4], $row->[5]);
     my $key = 'ALIGNMENTS';
@@ -1262,6 +1263,8 @@ sub _summarise_compara_db {
       $constrained_elements->{$species_set_id} = $id;
     } elsif ($type !~ /EPO_LOW_COVERAGE/ && ($class =~ /tree_alignment/ || $type  =~ /EPO/)) {
       $self->db_tree->{$db_name}{$key}{$id}{'species'}{'ancestral_sequences'} = 1 unless exists $self->db_tree->{$db_name}{$key}{$id};
+    } elsif ($type eq 'CACTUS_DB') {
+      $cactus_db_found = 1;
     }
     
     if ($intra_species{$species_set_id}) {
@@ -1274,6 +1277,19 @@ sub _summarise_compara_db {
     $self->db_tree->{$db_name}{$key}{$id}{'class'}             = $class;
     $self->db_tree->{$db_name}{$key}{$id}{'species_set_id'}    = $species_set_id;
     $self->db_tree->{$db_name}{$key}{$id}{'species'}{$species} = 1;
+  }
+
+  if ($cactus_db_found) {
+    $res_aref = $dbh->selectall_arrayref('
+      select method_link_species_set_id, value
+        from method_link_species_set_tag
+      where tag = "align_slice_track_threshold_data"
+    ');
+
+    foreach my $row (@$res_aref) {
+      my ($alignment_id, $as_track_threshold_json) = ($row->[0], $row->[1]);
+      $self->db_tree->{$db_name}{'ALIGNMENTS'}{$alignment_id}{'as_track_threshold_data'} = from_json($as_track_threshold_json);
+    }
   }
   
   foreach my $species_set_id (keys %$constrained_elements) {

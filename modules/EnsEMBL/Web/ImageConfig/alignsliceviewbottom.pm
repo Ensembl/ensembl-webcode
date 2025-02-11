@@ -102,15 +102,24 @@ sub init_cacheable {
     { accumulate => 'yes' }
   );
 
-  my $align_params = $self->hub->referer->{'params'}{'align'}[0];
-  my ($align) = split '--', $align_params;
-  my $align_type = $self->species_defs->multi_hash->{'DATABASE_COMPARA'}{'ALIGNMENTS'}{$align}{'type'};
-  if ($align_type eq 'CACTUS_DB') {
-    my $node = $self->get_node('transcript');
-    my @transcript_tracks = grep { $_->get_data('node_type') eq 'track' } @{$node->get_all_nodes};
-    foreach my $transcript_track (@transcript_tracks) {
-      if ($species ne $self->hub->referer->{'ENSEMBL_SPECIES'}) {
-        $transcript_track->set_data('display', 'off');
+  my $align_id = $self->hub->get_alignment_id;
+  if ($align_id) {
+    my $align_details = $self->species_defs->multi_hash->{'DATABASE_COMPARA'}->{'ALIGNMENTS'}->{$align_id};
+    if ($align_details->{'type'} eq 'CACTUS_DB' && exists $align_details->{'as_track_threshold_data'}) {
+      my $location_param = $self->hub->referer->{'params'}{'r'}[0];
+
+      my $location_length = 1;  # This should never happen, but if it does, we revert to default behaviour.
+      if ($location_param =~ /^[\w\.\-]+:(\d+)\-(\d+)$/) {  # region pattern from MetaKeyFormat datacheck
+        $location_length = abs($2 - $1) + 1;
+      }
+
+      my $as_track_thresholds = $align_details->{'as_track_threshold_data'};
+      if (exists $as_track_thresholds->{'transcript'} && $location_length >= $as_track_thresholds->{'transcript'}) {
+        $self->modify_configs(['transcript'], { 'display' => 'off' });
+
+        if (exists $as_track_thresholds->{'sequence'} && $location_length >= $as_track_thresholds->{'sequence'}) {
+          $self->modify_configs(['sequence'], { 'display' => 'off' });
+        }
       }
     }
   }

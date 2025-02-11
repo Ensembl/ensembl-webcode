@@ -77,6 +77,10 @@ sub content {
   my %aligned_species = map { $_->{'name'} => 1 } @$slices;
   my $i               = 1;
   my (@images, $html);
+
+  if ($align_details->{'type'} eq 'CACTUS_DB') {
+    $html .= $self->show_scale_dependent_track_info_box($align_details);
+  }
   
   my ($caption_height,$caption_img_offset) = (0,-24);
   my $lookup = $species_defs->prodnames_to_urls_lookup;
@@ -138,6 +142,50 @@ sub content {
 
   $html .=  $alert_box;
   
+  return $html;
+}
+
+sub show_scale_dependent_track_info_box {
+  my ($self, $align_details) = @_;
+
+  my $html;
+  if (exists $align_details->{'as_track_threshold_data'}) {
+    my $r = $self->param('r');
+
+    my $location_length = 1;  # This should never happen, but if it does, we revert to default behaviour.
+    if ($r =~ /^[\w\.\-]+:(\d+)\-(\d+)$/) {  # region pattern from MetaKeyFormat datacheck
+      $location_length = abs($2 - $1) + 1;
+    }
+
+    my $as_track_thresholds = $align_details->{'as_track_threshold_data'};
+    if (exists $as_track_thresholds->{'transcript'} && $location_length >= $as_track_thresholds->{'transcript'}) {
+
+      my @range_vis_info_parts = (
+        sprintf(
+          'gene tracks hidden in regions larger than %d kb',
+          $self->thousandify($as_track_thresholds->{'transcript'}),
+        )
+      );
+
+      if (exists $as_track_thresholds->{'sequence'}) {
+        push(
+          @range_vis_info_parts,
+          sprintf(
+            'contig tracks hidden in regions larger than %d kb',
+            $self->thousandify($as_track_thresholds->{'sequence'}),
+          )
+        );
+      }
+
+      $html .= $self->_info('Scale-dependent alignment track configuration',
+          '<p>Some tracks in this Cactus image alignment are disabled by default at larger scales, with '
+          . join(', and ', @range_vis_info_parts)
+          . '. Tracks hidden in this way can be revealed by zooming in, or by enabling them directly'
+          . ' via "<strong>Configure this page</strong>" or "<strong>Add/remove tracks</strong>".'
+      );
+    }
+  }
+
   return $html;
 }
 

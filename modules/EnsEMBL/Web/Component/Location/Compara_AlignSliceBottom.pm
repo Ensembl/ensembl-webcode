@@ -147,6 +147,7 @@ sub content {
 
 sub show_scale_dependent_track_info_box {
   my ($self, $align_details) = @_;
+  my $species_defs = $self->hub->species_defs;
 
   my $html;
   if (exists $align_details->{'as_track_threshold_data'}) {
@@ -177,11 +178,13 @@ sub show_scale_dependent_track_info_box {
         );
       }
 
+      my $help_id = { $species_defs->multiX('ENSEMBL_HELP') }->{'Location/Compara_Alignments/Image'};
       $html .= $self->_info('Scale-dependent alignment track configuration',
           '<p>Some tracks in this Cactus image alignment are disabled by default at larger scales, with '
           . join(', and ', @range_vis_info_parts)
           . '. Tracks hidden in this way can be revealed by zooming in, or by enabling them directly'
           . ' via "<strong>Configure this page</strong>" or "<strong>Add/remove tracks</strong>".'
+          . sprintf(' For more information, see the <a href="/Help/View?id=%d" class="popup">Alignments (image) help page</a>.', $help_id)
       );
     }
   }

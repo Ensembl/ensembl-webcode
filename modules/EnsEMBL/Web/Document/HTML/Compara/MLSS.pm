@@ -650,7 +650,10 @@ sub fetch_pairwise_input {
     my $mlss_id                       = $mlss->dbID;
     my $num_blocks                    = $mlss->get_value_for_tag('num_blocks');
     my $ref_species                   = $mlss->get_value_for_tag('reference_species');
-    my $non_ref_species               = $mlss->get_value_for_tag('non_reference_species');
+    my $non_ref_species               = $mlss->species_set->size == 1  # self-alignment
+                                      ? $ref_species
+                                      : $mlss->get_value_for_tag('non_reference_species')
+                                      ;
     my $pairwise_params               = $mlss->get_value_for_tag('param');
     my $ref_genome_db                 = $genome_db_adaptor->fetch_by_name_assembly($ref_species) || die "Could not find the GenomeDB '$ref_species' for mlss $mlss_id";
     my $non_ref_genome_db             = $genome_db_adaptor->fetch_by_name_assembly($non_ref_species) || die "Could not find the GenomeDB '$non_ref_species' for mlss $mlss_id";

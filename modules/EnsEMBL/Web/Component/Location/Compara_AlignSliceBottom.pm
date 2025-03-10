@@ -153,9 +153,11 @@ sub show_scale_dependent_track_info_box {
   if (exists $align_details->{'as_track_threshold_data'}) {
     my $r = $self->param('r');
 
-    my $location_length = 1;  # This should never happen, but if it does, we revert to default behaviour.
+    my $location_length;
     if ($r =~ /^[\w\.\-]+:(\d+)\-(\d+)$/) {  # region pattern from MetaKeyFormat datacheck
       $location_length = abs($2 - $1) + 1;
+    } else {
+      $location_length = 1;  # This should never happen, but if it does, we revert to default behaviour.
     }
 
     my $as_track_thresholds = $align_details->{'as_track_threshold_data'};

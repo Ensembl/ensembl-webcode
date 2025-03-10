@@ -580,9 +580,11 @@ sub add_genes {
       if ($align_details->{'type'} eq 'CACTUS_DB' && exists $align_details->{'as_track_threshold_data'}) {
         my $location_param = $self->hub->referer->{'params'}{'r'}[0];
 
-        my $location_length = 1;  # This should never happen, but if it does, we revert to default behaviour.
+        my $location_length;
         if ($location_param =~ /^[\w\.\-]+:(\d+)\-(\d+)$/) {  # region pattern from MetaKeyFormat datacheck
           $location_length = abs($2 - $1) + 1;
+        } else {
+          $location_length = 1;  # This should never happen, but if it does, we revert to default behaviour.
         }
 
         my $as_track_thresholds = $align_details->{'as_track_threshold_data'};

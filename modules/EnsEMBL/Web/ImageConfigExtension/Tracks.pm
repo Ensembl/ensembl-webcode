@@ -562,9 +562,19 @@ sub add_genes {
     $self->modify_configs(['transcript_core_ensembl'],{ 'display' => 'off' });
     $self->modify_configs(['gencode_primary'], { 'display' => 'transcript_label' });
 
-    # ... unless this is an alignslice track in a large-scale CACTUS_DB alignment view,
-    # in which case disable the GENCODE Primary track too.
-    my $align_id = $self->hub->get_alignment_id;
+    # overwriting Genes comprehensive track description to not be the big concatenation of many description (only gencode gene track)
+    $self->modify_configs(['transcript_core_ensembl'],{ description => 'The <a class="popup" href="/Help/Glossary?id=487">GENCODE Comprehensive</a> set is the gene set for human and mouse' });
+  }
+
+  # If this is an alignslice track in a large-scale CACTUS_DB alignment
+  # view, disable selected tracks in order to reduce load times.
+  if ($self->type eq 'alignsliceviewbottom') {
+
+    my $align_id = exists $self->hub->referer->{'params'}{'align'}
+                 ? $self->hub->referer->{'params'}{'align'}[0]
+                 : $self->hub->get_alignment_id
+                 ;
+
     if ($align_id) {
       my $align_details = $self->species_defs->multi_hash->{'DATABASE_COMPARA'}->{'ALIGNMENTS'}->{$align_id};
       if ($align_details->{'type'} eq 'CACTUS_DB' && exists $align_details->{'as_track_threshold_data'}) {
@@ -577,13 +587,22 @@ sub add_genes {
 
         my $as_track_thresholds = $align_details->{'as_track_threshold_data'};
         if (exists $as_track_thresholds->{'transcript'} && $location_length >= $as_track_thresholds->{'transcript'}) {
-          $self->modify_configs(['gencode_primary'], { 'display' => 'off' });
+
+          my $transcript_node_ids = $self->species_defs->get_config($species, 'GENCODE_VERSION')
+                                  ? ['gencode_primary', 'transcript']
+                                  : ['transcript']
+                                  ;
+
+          # At large scales, disable transcript tracks.
+          $self->modify_configs($transcript_node_ids, { 'display' => 'off' });
+
+          if (exists $as_track_thresholds->{'sequence'} && $location_length >= $as_track_thresholds->{'sequence'}) {
+            # At larger scales still, disable sequence tracks.
+            $self->modify_configs(['sequence'], { 'display' => 'off' });
+          }
         }
       }
     }
-
-    # overwriting Genes comprehensive track description to not be the big concatenation of many description (only gencode gene track)
-    $self->modify_configs(['transcript_core_ensembl'],{ description => 'The <a class="popup" href="/Help/Glossary?id=487">GENCODE Comprehensive</a> set is the gene set for human and mouse' });
   }
 
 }

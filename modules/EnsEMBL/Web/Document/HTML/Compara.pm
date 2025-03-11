@@ -333,15 +333,26 @@ sub get_species_info {
     }
   }
 
-  ## Lookup table from species name to genome_db
-  my $genome_db_name_hash = {};
+  ## Lookup table from species name to genome_db stats
+  my $genome_db_stats_hash = {};
   if ($mlss) {
+    my $genome_db_id_2_node_hash = $mlss && $mlss->species_tree && $mlss->species_tree->get_genome_db_id_2_node_hash;
     foreach my $genome_db (@{$mlss->species_set->genome_dbs}) {
+      ## Set coverage stats from species-tree node tag or MLSS tag, as available
+      my $id = $genome_db->dbID;
       my $species_tree_name = $genome_db->name;
-      $genome_db_name_hash->{$species_tree_name} = $genome_db;
+      $genome_db_stats_hash->{$species_tree_name}{'assembly'} = $genome_db->assembly;
+      my @stats = qw(genome_coverage genome_length coding_exon_coverage coding_exon_length);
+      foreach (@stats) {
+        if ($genome_db_id_2_node_hash && exists $genome_db_id_2_node_hash->{$id}
+              && defined $genome_db_id_2_node_hash->{$id}->get_value_for_tag($_)) {
+          $genome_db_stats_hash->{$species_tree_name}{$_} = $genome_db_id_2_node_hash->{$id}->get_value_for_tag($_);
+        } elsif (defined $mlss->get_value_for_tag($_.'_'.$id)) {
+          $genome_db_stats_hash->{$species_tree_name}{$_} = $mlss->get_value_for_tag($_.'_'.$id);
+        }
+      }
     }
   }
-  my $genome_db_id_2_node_hash = $mlss && $mlss->species_tree && $mlss->species_tree->get_genome_db_id_2_node_hash;
 
   ## Now munge information for selected species
   foreach my $sp (@$species_order) {
@@ -357,17 +368,9 @@ sub get_species_info {
 
     if ($mlss) {
       my $prod_name = $hub->species_defs->get_config($sp, 'SPECIES_PRODUCTION_NAME');
-      my $gdb = $genome_db_name_hash->{$prod_name};
-      $info->{$sp}{'assembly'} = $gdb->assembly;
-      ## Add coverage stats
-      my $id = $gdb->dbID;
-      my @stats = qw(genome_coverage genome_length coding_exon_coverage coding_exon_length);
-      foreach (@stats) {
-        if ($genome_db_id_2_node_hash && exists $genome_db_id_2_node_hash->{$id} && defined $genome_db_id_2_node_hash->{$id}->get_value_for_tag($_)) {
-            $info->{$sp}{$_} = $genome_db_id_2_node_hash->{$id}->get_value_for_tag($_);
-        } else {
-            $info->{$sp}{$_} = $mlss->get_value_for_tag($_.'_'.$id);
-        }
+      ## Add assembly name and coverage stats
+      while ( my ($key, $value) = each(%{$genome_db_stats_hash->{$prod_name}}) ) {
+        $info->{$sp}{$key} = $value;
       }
     }
   }

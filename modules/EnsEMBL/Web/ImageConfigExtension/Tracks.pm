@@ -469,7 +469,7 @@ sub add_genes {
   }
 
   # Adding gencode basic track, this has been moved from each image config to this generic one
-  if (my $gencode_version = $self->species_defs->GENCODE_VERSION || "") {
+  if (my $gencode_version = $self->species_defs->get_config($species, 'GENCODE_VERSION') || "") {
     $self->add_track('transcript', 'gencode_basic', "Basic Gene Annotations from $gencode_version", '_gencode_basic', {
       labelcaption  => "Genes (Basic set from $gencode_version)",
       display       => 'off',
@@ -492,7 +492,7 @@ sub add_genes {
   }
 
   # Adding gencode primary track
-  if (my $gencode_version = $self->species_defs->GENCODE_VERSION || "") {
+  if (my $gencode_version = $self->species_defs->get_config($species, 'GENCODE_VERSION') || "") {
     $self->add_track('transcript', 'gencode_primary', "Primary Gene Annotations from $gencode_version", '_gencode_primary', {
       labelcaption  => "Genes (Primary set from $gencode_version)",
       display       => 'transcript_label',
@@ -513,9 +513,9 @@ sub add_genes {
       ],   
     });  
   }
-  
+
   # Adding MANE tracks (Only for Humans)
-  if($self->hub->species_defs->SEPARATE_MANE_TRACKS){
+  if($self->species_defs->get_config($species, 'SEPARATE_MANE_TRACKS')){
     
     # Adding MANE Select track
     $self->add_track('transcript', 'mane_select', "MANE Select Transcripts", '_mane_select', {
@@ -557,13 +557,54 @@ sub add_genes {
   # Need to add the gene menu track here
   $self->add_track('information', 'gene_legend', 'Gene Legend', 'gene_legend', { strand => 'r' }) if $flag;
 
-  if($self->species_defs->GENCODE_VERSION) {
+  if($self->species_defs->get_config($species, 'GENCODE_VERSION')) {
     # Disable comprehensive geneset track and enable primary gencode ones
     $self->modify_configs(['transcript_core_ensembl'],{ 'display' => 'off' });
     $self->modify_configs(['gencode_primary'], { 'display' => 'transcript_label' });
 
     # overwriting Genes comprehensive track description to not be the big concatenation of many description (only gencode gene track)
     $self->modify_configs(['transcript_core_ensembl'],{ description => 'The <a class="popup" href="/Help/Glossary?id=487">GENCODE Comprehensive</a> set is the gene set for human and mouse' });
+  }
+
+  # If this is an alignslice track in a large-scale CACTUS_DB alignment
+  # view, disable selected tracks in order to reduce load times.
+  if ($self->type eq 'alignsliceviewbottom') {
+
+    my $align_id = exists $self->hub->referer->{'params'}{'align'}
+                 ? $self->hub->referer->{'params'}{'align'}[0]
+                 : $self->hub->get_alignment_id
+                 ;
+
+    if ($align_id) {
+      my $align_details = $self->species_defs->multi_hash->{'DATABASE_COMPARA'}->{'ALIGNMENTS'}->{$align_id};
+      if ($align_details->{'type'} eq 'CACTUS_DB' && exists $align_details->{'as_track_threshold_data'}) {
+        my $location_param = $self->hub->referer->{'params'}{'r'}[0];
+
+        my $location_length;
+        if ($location_param =~ /^[\w\.\-]+:(\d+)\-(\d+)$/) {  # region pattern from MetaKeyFormat datacheck
+          $location_length = abs($2 - $1) + 1;
+        } else {
+          $location_length = 1;  # This should never happen, but if it does, we revert to default behaviour.
+        }
+
+        my $as_track_thresholds = $align_details->{'as_track_threshold_data'};
+        if (exists $as_track_thresholds->{'transcript'} && $location_length >= $as_track_thresholds->{'transcript'}) {
+
+          my $transcript_node_ids = $self->species_defs->get_config($species, 'GENCODE_VERSION')
+                                  ? ['gencode_primary', 'transcript']
+                                  : ['transcript']
+                                  ;
+
+          # At large scales, disable transcript tracks.
+          $self->modify_configs($transcript_node_ids, { 'display' => 'off' });
+
+          if (exists $as_track_thresholds->{'sequence'} && $location_length >= $as_track_thresholds->{'sequence'}) {
+            # At larger scales still, disable sequence tracks.
+            $self->modify_configs(['sequence'], { 'display' => 'off' });
+          }
+        }
+      }
+    }
   }
 
 }

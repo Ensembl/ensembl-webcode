@@ -67,7 +67,7 @@ sub content {
       $has_mane_select = 1 if (@{$t->get_all_Attributes('MANE_Select')});
 
       $mane_select = $t->stable_id if $has_mane_select;
-      $mane_select_translation = $t->translation->stable_id if $has_mane_select;
+      $mane_select_translation = $t->translation->stable_id if ($has_mane_select and $t->translation);
     }
 
     foreach my $t (@{$gene->get_all_Transcripts}) {
@@ -76,7 +76,7 @@ sub content {
       $has_mane_plus_clinical = 1 if (@{$t->get_all_Attributes('MANE_Plus_Clinical')});
 
       $mane_plus_clinical = $t->stable_id if $has_mane_plus_clinical;
-      $mane_plus_clinical_translation = $t->translation->stable_id if $has_mane_plus_clinical;
+      $mane_plus_clinical_translation = $t->translation->stable_id if ($has_mane_plus_clinical and $t->translation);
     }
   }
 
@@ -84,19 +84,27 @@ sub content {
     my $mane_select_url = $hub->url({ type => 'Transcript', action => 'Summary', t => $mane_select });
     my $mane_select_link = sprintf('<a href="%s">%s</a>', $mane_select_url, $mane_select);
 
-    my $mane_select_translation_url = $hub->url({ type => 'Transcript', action => 'ProteinSummary', t => $mane_select_translation });
-    my $mane_select_translation_link = sprintf('<a href="%s">%s</a>', $mane_select_translation_url, $mane_select_translation);
+    my $mane_select_translation_link;
 
-    my $mane_description = sprintf('This gene contains MANE Select %s, %s', $mane_select_link, $mane_select_translation_link);
+    if ($mane_select_translation) {
+      my $mane_select_translation_url = $hub->url({ type => 'Transcript', action => 'ProteinSummary', t => $mane_select_translation });
+      $mane_select_translation_link = sprintf('<a href="%s">%s</a>', $mane_select_translation_url, $mane_select_translation);
+    }
+
+    my $mane_description = sprintf('This gene contains MANE Select %s, %s', $mane_select_link, $mane_select_translation_link // 'no translation');
 
     if ($has_mane_plus_clinical) {
       my $mane_plus_clinical_url = $hub->url({ type => 'Transcript', action => 'Summary', t => $mane_plus_clinical });
       my $mane_plus_clinical_link = sprintf('<a href="%s">%s</a>', $mane_plus_clinical_url, $mane_plus_clinical);
       
-      my $mane_plus_clinical_translation_url = $hub->url({ type => 'Transcript', action => 'ProteinSummary', t => $mane_plus_clinical_translation });
-      my $mane_plus_clinical_translation_link = sprintf('<a href="%s">%s</a>', $mane_plus_clinical_translation_url, $mane_plus_clinical_translation);
+      my $mane_plus_clinical_translation_link;
 
-      $mane_description .= sprintf(' and MANE Plus Clinical %s, %s', $mane_plus_clinical_link, $mane_plus_clinical_translation_link);
+      if ($mane_plus_clinical_translation) {
+        my $mane_plus_clinical_translation_url = $hub->url({ type => 'Transcript', action => 'ProteinSummary', t => $mane_plus_clinical_translation });
+        $mane_plus_clinical_translation_link = sprintf('<a href="%s">%s</a>', $mane_plus_clinical_translation_url, $mane_plus_clinical_translation);
+      }
+
+      $mane_description .= sprintf(' and MANE Plus Clinical %s, %s', $mane_plus_clinical_link, $mane_plus_clinical_translation_link // 'no translation');
     }
 
     $table->add_row('MANE', $mane_description);

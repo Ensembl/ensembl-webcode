@@ -43,7 +43,6 @@ our $ENSEMBL_RELEASE_DATE   = 'January 2025'; # As it would appear in the copyri
 ###############################################################################
 ## Default folder locations
 our $ENSEMBL_SERVERROOT   = _get_serverroot(__FILE__);              # Root dir that contains all Ensembl checkouts
-$ENSEMBL_SERVERROOT =~ s!/services/!/public/release/!; # XXX hack during GPFS migration
 our $ENSEMBL_WEBROOT      = "$ENSEMBL_SERVERROOT/ensembl-webcode";  # webcode checkout
 our $ENSEMBL_DOCROOT      = "$ENSEMBL_WEBROOT/htdocs";              # htdocs default path
 ###############################################################################
@@ -213,11 +212,10 @@ our $DEFAULT_SPECIES_URL             = '/i/species/';
 
 ###############################################################################
 ## Genomic data served from files
-our $DATAFILE_ROOT        = defer { $ENSEMBL_SERVERROOT };                                  ## Base path for ro data files
-our $DATAFILE_BASE_PATH   = defer { "$DATAFILE_ROOT/data_files" };                          ## Path to ro data files
-our $COMPARA_HAL_DIR      = defer { "$DATAFILE_BASE_PATH/" };                         ## Path for Compara HAL files
+our $DATAFILE_ROOT        = '/nfs/public/ro/ensweb-data';                                  ## Base path for ro data files
+our $DATAFILE_BASE_PATH   = "$DATAFILE_ROOT/data_files";                          ## Path to ro data files
+our $COMPARA_HAL_DIR      = "$DATAFILE_BASE_PATH/";                         ## Path for Compara HAL files
 ###############################################################################
-
 
 ###############################################################################
 ## External dependencies path

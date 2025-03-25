@@ -69,8 +69,8 @@ sub schedule {
 
   $forker->schedule(
     run_on_start => sub {
-      $verbose && warn qq{bsub -I "perl $libs $Bin/precache.pl --mode=index --index=$i"};
-      qx(bsub -I "perl $libs $Bin/precache.pl --mode=index --index=$i");
+      $verbose && warn qq{srun --time=10:00:00 --mem=8G perl $libs $Bin/precache.pl --mode=index --index=$i};
+      qx(srun --time=10:00:00 --mem=8G perl $libs $Bin/precache.pl --mode=index --index=$i);
       exit $?;
     },
     run_on_finish => sub {

@@ -212,9 +212,9 @@ our $DEFAULT_SPECIES_URL             = '/i/species/';
 
 ###############################################################################
 ## Genomic data served from files
-our $DATAFILE_ROOT        = '/nfs/public/ro/ensweb-data';                                  ## Base path for ro data files
-our $DATAFILE_BASE_PATH   = "$DATAFILE_ROOT/data_files";                          ## Path to ro data files
-our $COMPARA_HAL_DIR      = "$DATAFILE_BASE_PATH/";                         ## Path for Compara HAL files
+our $DATAFILE_ROOT        = defer { $ENSEMBL_SERVERROOT };                                  ## Base path for ro data files
+our $DATAFILE_BASE_PATH   = defer { "$DATAFILE_ROOT/data_files" };                          ## Path to ro data files
+our $COMPARA_HAL_DIR      = defer { "$DATAFILE_BASE_PATH/" };                         ## Path for Compara HAL files
 ###############################################################################
 
 ###############################################################################

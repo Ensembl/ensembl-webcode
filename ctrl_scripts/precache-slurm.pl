@@ -53,7 +53,6 @@ close SPEC;
 die "No jobs in spec" unless $jobs;
 
 my $njobs = @$jobs;
-my $ndone = 0;
 
 # Set up library paths for precache script
 my @lib_dirs;
@@ -68,6 +67,7 @@ my $libs = join(' ', map { "-I $_" } @lib_dirs);
 my %job_ids;
 my %retry_count;
 my %job_resources;  # Track resources per job
+my %completed_jobs; # Track successfully completed jobs
 my $max_retries = 2;
 my $job_file = "$SiteDefs::ENSEMBL_PRECACHE_DIR/running_jobs.json";
 
@@ -77,7 +77,7 @@ my $default_time = 2;
 my $max_mem = 32;
 my $max_time = 8;
 
-# Adjust resource limits for failed jobs
+# Increase resource limits for failed jobs
 sub get_adjusted_resources {
   my ($idx, $state) = @_;
   my $current = $job_resources{$idx} || {mem => $default_mem, time => $default_time};
@@ -113,6 +113,7 @@ if (-f $job_file) {
   %job_ids = %{$data->{jobs} || {}};
   %retry_count = %{$data->{retries} || {}};
   %job_resources = %{$data->{resources} || {}};
+  %completed_jobs = %{$data->{completed} || {}};
 }
 
 # Save current job state to disk
@@ -121,27 +122,27 @@ sub save_status {
   print $fh JSON->new->encode({
     jobs => \%job_ids,
     retries => \%retry_count,
-    resources => \%job_resources
+    resources => \%job_resources,
+    completed => \%completed_jobs
   });
   close $fh;
 }
 
 # Print current progress
 sub print_status {
-  my $running = scalar keys %job_ids;
+  my $done = scalar keys %completed_jobs;
+  my $submitted = scalar keys %job_ids;
   my $failed = scalar grep { $retry_count{$_} >= $max_retries } keys %retry_count;
-  my $submitted = scalar keys %retry_count;
-  printf("Status: %d/%d (%d%%) done, %d running, %d submitted, %d failed\n",
-         $ndone, $njobs, $ndone * 100 / $njobs, $running, $submitted, $failed);
+  printf("Status: %d/%d (%d%%) done, %d submitted, %d failed\n",
+         $done, $njobs, $done * 100 / $njobs, $submitted, $failed);
 }
 
-# Handle job failure and cleanup
+# Resubmit failed jobs
 sub handle_job_failure {
   my ($idx, $job_id, $reason) = @_;
   warn "Job $job_id for index $idx $reason (attempt $retry_count{$idx}/$max_retries)\n";
 
   if ($retry_count{$idx} >= $max_retries) {
-    warn "Max retries reached for index $idx, giving up\n";
     delete $job_ids{$idx};
     delete $job_resources{$idx};
     save_status();
@@ -166,6 +167,7 @@ sub get_job_state {
 sub handle_job {
   my ($idx) = @_;
   return 0 unless defined $idx;
+  return 0 if exists $completed_jobs{$idx};
 
   # Submit new job if not already running
   if (!exists $job_ids{$idx}) {
@@ -210,8 +212,8 @@ sub handle_job {
       delete $job_ids{$idx};
       delete $retry_count{$idx};
       delete $job_resources{$idx};
+      $completed_jobs{$idx} = 1;
       save_status();
-      $ndone++;
       return 0;
     }
     return handle_job_failure($idx, $job_id, "completed with non-zero exit");
@@ -223,7 +225,10 @@ sub handle_job {
 
 # Pick next job to run
 sub get_next_job {
-  return (grep { !exists $job_ids{$_} } 0..$#$jobs)[0];
+  for my $idx (0..$#$jobs) {
+    return $idx if !exists $job_ids{$idx} && !exists $completed_jobs{$idx};
+  }
+  return undef;
 }
 
 # Process all jobs

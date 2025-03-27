@@ -156,7 +156,10 @@ sub get_job_state {
   my ($job_id) = @_;
   my $cmd = "sacct -j $job_id --format=state -n --parsable2 | head -n1";
   chomp(my $state = qx($cmd));
-  return (split '|', $state =~ s/\s+//g)[0];
+  warn $state;
+
+  return 'UNKNOWN' unless $state && $state =~ /\S/;
+  return (split '|', $state =~ s/\s+//g)[0] || 'UNKNOWN';
 }
 
 # Process a single job

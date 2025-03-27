@@ -188,19 +188,24 @@ sub handle_job {
 
   # Check status of running job
   my $job_id = $job_ids{$idx};
-  my $state = get_job_state($job_id);
-
+  #my $state = get_job_state($job_id);
+  chomp(my $state = qx(sacct -j $job_id --format=state -n --parsable2 | head -n1));
+  warn $state;
+  warn 'job is running' if $state =~ /^(PENDING|RUNNING|CONFIGURING)$/;
   return 1 if $state =~ /^(PENDING|RUNNING|CONFIGURING)$/;
 
   # Handle various failure states
   if ($state =~ /^(FAILED|CANCELLED|TIMEOUT|OUT_OF_MEMORY)$/) {
+    warn 'job failed, retrying';
     $job_resources{$idx} = get_adjusted_resources($idx, $state);
     return handle_job_failure($idx, $job_id, "failed with state $state");
   }
 
   # Check exit code
   if ($state eq 'COMPLETED') {
+    warn 'checking exit code';
     if (system("sacct -j $job_id --format=exitcode -n | grep -q '0:0'") == 0) {
+      warn 'job done';
       # Success
       delete $job_ids{$idx};
       delete $retry_count{$idx};

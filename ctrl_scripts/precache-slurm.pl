@@ -250,7 +250,7 @@ sub get_job_state {
   return $state || 'UNKNOWN';
 }
 
-print "Submitting @$jobs precache jobs in $max_submissions\x$max_array_size batches...\n";
+print "Submitting @$jobs precache jobs in $max_submissions x $max_array_size batches...\n";
 
 # Process & monitor all jobs
 while (1) {

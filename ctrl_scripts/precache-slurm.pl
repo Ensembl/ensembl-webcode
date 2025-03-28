@@ -73,6 +73,8 @@ my $jobs;
 close SPEC;
 die "No jobs in spec file" unless $jobs;
 
+my $njobs = scalar @$jobs;
+
 # Set up library paths for precache script
 my @lib_dirs;
 my @plugins = reverse @{$SiteDefs::ENSEMBL_PLUGINS};
@@ -146,7 +148,7 @@ sub print_status {
   my $submitted = scalar keys %job_ids;
   my $failed = scalar grep { $retry_count{$_} >= $max_retries } keys %retry_count;
   printf("Status: %d/%d (%d%%) done, %d submitted, %d failed\n",
-         $done, @$jobs, $done * 100 / @$jobs, $submitted, $failed);
+         $done, $njobs, $done * 100 / $njobs, $submitted, $failed);
 }
 
 # Check error logs for failed jobs
@@ -250,7 +252,7 @@ sub get_job_state {
   return $state || 'UNKNOWN';
 }
 
-print "Submitting @$jobs precache jobs in $max_submissions x $max_array_size batches...\n";
+print "Submitting $njobs precache jobs in $max_submissions x $max_array_size batches...\n";
 
 # Process & monitor all jobs
 while (1) {
@@ -259,7 +261,7 @@ while (1) {
   my $array_size = 0;
   
   # Group consecutive indexes into job arrays
-  for my $idx (0..$#$jobs) {
+  for my $idx (0..$njobs-1) {
     next if exists $job_ids{$idx} || exists $completed_jobs{$idx} || (exists $retry_count{$idx} && $retry_count{$idx} >= $max_retries);
     # Start new array if sequence breaks or max size reached
     if ($last_idx == -1 || $idx != $last_idx + 1 || $array_size >= $max_array_size) {

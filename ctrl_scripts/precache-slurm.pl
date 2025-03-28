@@ -224,7 +224,7 @@ sub submit_job {
     my $cmd = qq{sbatch --parsable --array=$start_idx-$end_idx }.
             qq{--output=$log_dir/slurm-%A_%a.out --error=$log_dir/slurm-%A_%a.err }.
             qq{--time=$resources->{time}:00:00 --mem=$resources->{mem}G }.
-            qq{--wrap="perl $libs $Bin/precache.pl --mode=index --index=\$SLURM_ARRAY_TASK_ID"};
+            qq{--wrap='perl $libs $Bin/precache.pl --mode=index --index=\$SLURM_ARRAY_TASK_ID'};
   
   $verbose && warn "Submitting: $cmd\n";
 

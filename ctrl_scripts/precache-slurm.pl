@@ -184,10 +184,10 @@ sub handle_job_failure {
 # Return current state of a job
 sub get_job_state {
   my ($job_id) = @_;
+  # For array jobs, need to use correct formatting (jobID_arrayID)
   my $cmd = "sacct -j $job_id --format=state -n --parsable2 | head -n1";
   chomp(my $state = qx($cmd));
-  warn $state;
-
+  
   return 'UNKNOWN' unless $state && $state =~ /\S/;
   return (split '|', $state =~ s/\s+//g)[0] || 'UNKNOWN';
 }
@@ -264,14 +264,15 @@ while (1) {
   # Check completion status
   for my $idx (keys %job_ids) {
     my $job_id = $job_ids{$idx};
-    my ($master_id, $task_id) = $job_id =~ /(\d+)_(\d+)/;
     
-    chomp(my $state = qx(sacct -j $master_id --array-tasks=$task_id --format=state -n --parsable2 | head -n1));
+    # Get the state for this specific array task
+    chomp(my $state = qx(sacct -j $job_id --format=state -n --parsable2 | head -n1));
     
     if ($state =~ /^(FAILED|CANCELLED|TIMEOUT|OUT_OF_MEMORY)$/) {
       handle_job_failure($idx, $job_id, "failed with state $state");
     } elsif ($state eq 'COMPLETED') {
-      if (system("sacct -j $master_id --array-tasks=$task_id --format=exitcode -n | grep -q '0:0'") == 0) {
+      # Check exit code for this specific array task
+      if (system("sacct -j $job_id --format=exitcode -n | grep -q '0:0'") == 0) {
         delete $job_ids{$idx};
         delete $retry_count{$idx};
         delete $job_resources{$idx};

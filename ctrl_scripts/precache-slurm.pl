@@ -73,8 +73,6 @@ my $jobs;
 close SPEC;
 die "No jobs in spec file" unless $jobs;
 
-my $njobs = @$jobs;
-
 # Set up library paths for precache script
 my @lib_dirs;
 my @plugins = reverse @{$SiteDefs::ENSEMBL_PLUGINS};
@@ -148,7 +146,7 @@ sub print_status {
   my $submitted = scalar keys %job_ids;
   my $failed = scalar grep { $retry_count{$_} >= $max_retries } keys %retry_count;
   printf("Status: %d/%d (%d%%) done, %d submitted, %d failed\n",
-         $done, $njobs, $done * 100 / $njobs, $submitted, $failed);
+         $done, @$jobs, $done * 100 / @$jobs, $submitted, $failed);
 }
 
 # Check error logs for failed jobs
@@ -251,6 +249,8 @@ sub get_job_state {
   $state =~ s/\s+//g;
   return $state || 'UNKNOWN';
 }
+
+print "Submitting @$jobs precache jobs in $max_submissions\x$max_array_size batches...\n";
 
 # Process & monitor all jobs
 while (1) {

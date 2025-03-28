@@ -21,20 +21,40 @@ my $verbose = 0;
 my $resume = 0;
 
 GetOptions(
-  'l' => \$list, # List available precache types
-  's=s' => \@subparts, # Limit to specific subparts
-  'submissions=i' => \$max_submissions, # Number of concurrent jobarray submissions
-  'submission_size=i' => \$max_array_size, # Number of jobs per jobarray
-  'verbose|v' => \$verbose, # Print each index job command
-  'resume' => \$resume # Resume from previous submission session
+  'l|list' => \$list,
+  's|subparts=s' => \@subparts,
+  'submissions=i' => \$max_submissions,
+  'array_size=i' => \$max_array_size,
+  'verbose|v' => \$verbose,
+  'resume|r' => \$resume,
+  'help|h' => sub { print_usage(); exit 0; }
 );
+
+sub print_usage {
+  print <<USAGE;
+Usage: $0 [options] [types...]
+
+Options:
+  -l, --list              List available precache types
+  -s, --subparts STR      Limit to specific subparts
+  --submissions INT       Max. concurrent job array submissions (default: $max_submissions)
+  --array_size INT        Max. number of jobs in each array (default: $max_array_size)
+  -v, --verbose           Print detailed commands for each job
+  -r, --resume            Resume from previous submission session
+  -h, --help              Print this help message
+USAGE
+}
+
 if ($list) {
   print qx($Bin/precache.pl --mode=list);
   exit 0;
 }
+
+# Prepare for indexing
 my @params;
 push @params, "-s $_" for (@subparts);
 push @params, @ARGV;
+warn @params;
 
 qx($Bin/precache.pl --mode=start @params);
 
@@ -93,13 +113,22 @@ $SIG{INT} = $SIG{TERM} = \&cleanup;
 
 # Load previous job state when resuming
 if ($resume && -f $job_file) {
-  open(my $fh, '<', $job_file) or die $!;
-  my $data = JSON->new->decode(do { local $/; <$fh> });
+  open(my $fh, '<', $job_file) or do {
+    warn "Cannot open job file $job_file: $!";
+    return;
+  };
+  my $data = eval { JSON->new->decode(do { local $/; <$fh> }) };
+  if ($@) {
+    warn "Error parsing job file $job_file: $@";
+    close $fh;
+    return;
+  }
   close $fh;
   %job_ids = %{$data->{jobs} || {}};
   %retry_count = %{$data->{retries} || {}};
   %job_resources = %{$data->{resources} || {}};
   %completed_jobs = %{$data->{completed} || {}};
+  warn "Resumed from previous state with ".(scalar keys %job_ids)." running jobs\n";
 }
 
 # Save current job state to disk
@@ -183,17 +212,6 @@ sub handle_job_failure {
   return submit_job($idx);
 }
 
-# Return current state of a job
-sub get_job_state {
-  my ($job_id) = @_;
-
-  my $cmd = "sacct -j $job_id --format=state -n --parsable2 | head -n1";
-  chomp(my $state = qx($cmd));
-  
-  return 'UNKNOWN' unless $state && $state =~ /\S/;
-  return (split '|', $state =~ s/\s+//g)[0] || 'UNKNOWN';
-}
-
 # Submit a job array
 sub submit_job {
   my ($start_idx, $end_idx) = @_;
@@ -203,18 +221,20 @@ sub submit_job {
   my $array_size = $end_idx - $start_idx + 1;
   my $resources = get_adjusted_resources($start_idx);
   
-  # Submit as job array
   my $cmd = qq{sbatch --parsable } .
             qq{--array=$start_idx-$end_idx } .
             qq{--output=$log_dir/slurm-%A_%a.out } .
             qq{--error=$log_dir/slurm-%A_%a.err } .
             qq{--time=$resources->{time}:00:00 --mem=$resources->{mem}G } .
             qq{--wrap="perl $libs $Bin/precache.pl --mode=index --index=\\$SLURM_ARRAY_TASK_ID"};
-  $verbose && warn $cmd;
+  
+  $verbose && warn "Submitting: $cmd\n";
 
   chomp(my $array_job_id = qx($cmd));
-  die "sbatch failed: $!" if $?;
-  die "Invalid job ID" unless $array_job_id =~ /^\d+$/;
+  if ($?) {
+    warn "sbatch command failed with status $?";
+    return 0;
+  }
 
   # Register submitted jobs for tracking
   for my $idx ($start_idx..$end_idx) {
@@ -223,6 +243,15 @@ sub submit_job {
   }
   save_status();
   return 1;
+}
+
+# Return current state of a job
+sub get_job_state {
+  my ($job_id) = @_;
+  my $cmd = "sacct -j $job_id --format=state -n --parsable2 | head -n1";
+  chomp(my $state = qx($cmd));
+  $state =~ s/\s+//g;
+  return $state || 'UNKNOWN';
 }
 
 # Process & monitor all jobs
@@ -259,7 +288,7 @@ while (1) {
     my $job_id = $job_ids{$idx};
     
     # Get the state of a single job (from job array)
-    chomp(my $state = qx(sacct -j $job_id --format=state -n --parsable2 | head -n1));
+    my $state = get_job_state($job_id);
 
     if ($state =~ /^(FAILED|CANCELLED|TIMEOUT|OUT_OF_MEMORY)$/) {
       handle_job_failure($idx, $job_id, $state);

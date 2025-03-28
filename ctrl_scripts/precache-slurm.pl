@@ -308,7 +308,7 @@ while (1) {
 
   print_status();
   last unless %job_ids || @pending;
-  sleep 10;
+  sleep 30;
 }
 
 print "Doing mode=end...\n";

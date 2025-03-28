@@ -16,7 +16,7 @@ use JSON;
 # Command line options
 my ($list, @subparts);
 my $max_submissions = 5;
-my $max_array_size = 500;
+my $max_array_size = 200;
 my $verbose = 0;
 my $resume = 0;
 

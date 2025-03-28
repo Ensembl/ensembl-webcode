@@ -221,12 +221,10 @@ sub submit_job {
   my $array_size = $end_idx - $start_idx + 1;
   my $resources = get_adjusted_resources($start_idx);
   
-    my $cmd = qq{sbatch --parsable } .
-            qq{--array=$start_idx-$end_idx } .
-            qq{--output=$log_dir/slurm-%A_%a.out } .
-            qq{--error=$log_dir/slurm-%A_%a.err } .
-            qq{--time=$resources->{time}:00:00 --mem=$resources->{mem}G } .
-            qq{--wrap=perl $libs $Bin/precache.pl --mode=index --index='$SLURM_ARRAY_TASK_ID'};
+    my $cmd = qq{sbatch --parsable --array=$start_idx-$end_idx }.
+            qq{--output=$log_dir/slurm-%A_%a.out --error=$log_dir/slurm-%A_%a.err }.
+            qq{--time=$resources->{time}:00:00 --mem=$resources->{mem}G }.
+            qq{--wrap="perl $libs $Bin/precache.pl --mode=index --index=\$SLURM_ARRAY_TASK_ID"};
   
   $verbose && warn "Submitting: $cmd\n";
 

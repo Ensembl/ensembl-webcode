@@ -175,6 +175,7 @@ sub check_job_logs {
 sub get_adjusted_resources {
   my ($idx, $state) = @_;
   my $current = $job_resources{$idx} || {mem => $default_mem, time => $default_time};
+  $state ||= '';
 
   if ($state eq 'OUT_OF_MEMORY') {
     my $mem = $current->{mem} * 2;
@@ -225,7 +226,7 @@ sub submit_job {
             qq{--time=$resources->{time}:00:00 --mem=$resources->{mem}G }.
             qq{--wrap='perl $libs $Bin/precache.pl --mode=index --index=\$SLURM_ARRAY_TASK_ID'};
   
-  $verbose && warn "Submitting: $cmd\n";
+  $verbose && print "Submitting: $cmd\n";
 
   chomp(my $array_job_id = qx($cmd));
   if ($?) {
@@ -310,5 +311,5 @@ while (1) {
 
 print "Doing mode=end...\n";
 qx($Bin/precache.pl --mode=end);
-unlink $job_file;
+system("rm -rf $log_dir") if -d $log_dir;
 1;

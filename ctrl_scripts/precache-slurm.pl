@@ -1,8 +1,5 @@
 #! /usr/bin/env perl
 
-# Script to manage and submit SLURM jobs for generating precaches
-# Handles job submission, monitoring, and automatic failure recovery
-
 use strict;
 use warnings;
 

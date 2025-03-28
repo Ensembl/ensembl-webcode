@@ -13,7 +13,7 @@ use JSON;
 # Command line options
 my ($list, @subparts);
 my $max_submissions = 5;
-my $max_array_size = 200;
+my $max_array_size = 100;
 my $verbose = 0;
 my $resume = 0;
 
@@ -249,7 +249,7 @@ sub get_job_state {
   return $state || 'UNKNOWN';
 }
 
-print "Submitting $njobs precache jobs in $max_submissions x $max_array_size batches...\n";
+print "Submitting $njobs precache jobs in $max_submissions\*$max_array_size batches...\n";
 
 # Process & monitor all jobs
 while (1) {
@@ -275,7 +275,7 @@ while (1) {
   push @pending, [$last_idx - $array_size + 1, $last_idx] if $array_size > 0;
 
   # Submit array jobs up to concurrent submissions limit
-  while (@pending && (scalar keys %job_ids) < $max_submissions) {
+  while (@pending && (scalar keys %job_ids) < ($max_submissions*$max_array_size)) {
     my ($start, $end) = @{shift @pending};
     submit_job($start, $end);
   }

@@ -15,16 +15,18 @@ use JSON;
 
 # Command line options
 my ($list, @subparts);
-my $workers = 10;
+my $max_submissions = 5;
+my $max_array_size = 500;
 my $verbose = 0;
 my $resume = 0;
 
 GetOptions(
-  'l' => \$list,
-  's=s' => \@subparts,
-  'workers=i' => \$workers,
-  'verbose|v' => \$verbose,
-  'resume' => \$resume
+  'l' => \$list, # List available precache types
+  's=s' => \@subparts, # Limit to specific subparts
+  'submissions=i' => \$max_submissions, # Number of concurrent jobarray submissions
+  'submission_size=i' => \$max_array_size, # Number of jobs per jobarray
+  'verbose|v' => \$verbose, # Print each index job command
+  'resume' => \$resume # Resume from previous submission session
 );
 if ($list) {
   print qx($Bin/precache.pl --mode=list);
@@ -66,52 +68,31 @@ my $libs = join(' ', map { "-I $_" } @lib_dirs);
 # Job tracking state
 my %job_ids;
 my %retry_count;
-my %job_resources;  # Track resources per job
-my %completed_jobs; # Track successfully completed jobs
+my %job_resources;
+my %completed_jobs;
 my $max_retries = 2;
+my $log_dir = "$SiteDefs::ENSEMBL_PRECACHE_DIR/logs";
+mkdir $log_dir unless -d $log_dir;
 my $job_file = "$SiteDefs::ENSEMBL_PRECACHE_DIR/running_jobs.json";
 
 # Resource limits (in GB and hours)
 my $default_mem = 8;
-my $default_time = 2;
+my $default_time = 1;
 my $max_mem = 32;
 my $max_time = 8;
 
-# Log directory for job output
-my $log_dir = "$SiteDefs::ENSEMBL_PRECACHE_DIR/logs";
-mkdir $log_dir unless -d $log_dir;
-
-# Increase resource limits for failed jobs
-sub get_adjusted_resources {
-  my ($idx, $state) = @_;
-  my $current = $job_resources{$idx} || {mem => $default_mem, time => $default_time};
-
-  if ($state eq 'OUT_OF_MEMORY') {
-    my $mem = $current->{mem} * 2;
-    $mem = $mem > $max_mem ? $max_mem : $mem;
-    return {%$current, mem => $mem};
-  }
-
-  if ($state eq 'TIMEOUT') {
-    my $time = $current->{time} * 2;
-    $time = $time > $max_time ? $max_time : $time;
-    return {%$current, time => $time};
-  }
-
-  return $current;
-}
-
 # Cancel running jobs on exit
 sub cleanup {
-  warn "Cleaning up...\n";
+  warn "Stopping jobs...\n";
   system("scancel $_") for values %job_ids;
   unlink $job_file;
+  warn "Remember to cleanup $SiteDefs::ENSEMBL_PRECACHE_DIR";
   exit 1;
 }
 $SIG{INT} = $SIG{TERM} = \&cleanup;
 
 # Load previous job state when resuming
-if (-f $job_file) {
+if ($resume && -f $job_file) {
   open(my $fh, '<', $job_file) or die $!;
   my $data = JSON->new->decode(do { local $/; <$fh> });
   close $fh;
@@ -145,7 +126,6 @@ sub print_status {
 # Check error logs for failed jobs
 sub check_job_logs {
   my ($job_id) = @_;
-  # Split array job ID into master_id and task_id
   my ($master_id, $task_id) = $job_id =~ /(\d+)_(\d+)/;
   return unless $master_id && $task_id;
 
@@ -154,22 +134,44 @@ sub check_job_logs {
   
   warn "\nJob array task $task_id (master job $master_id) error log:";
   if (-f $error_file) {
-    warn "\n=== Last 10 lines of stderr ===";
-    system("tail -n 10 $error_file");
+    warn "\n=== First 10 lines of stderr ===";
+    system("head -n 10 $error_file");
   }
   if (-f $output_file) {
-    warn "\n=== Last 10 lines of stdout ===";
-    system("tail -n 10 $output_file");
+    warn "\n=== First 10 lines of stdout ===";
+    system("head -n 10 $output_file");
   }
+}
+
+# Increase resource limits for failed jobs
+sub get_adjusted_resources {
+  my ($idx, $state) = @_;
+  my $current = $job_resources{$idx} || {mem => $default_mem, time => $default_time};
+
+  if ($state eq 'OUT_OF_MEMORY') {
+    my $mem = $current->{mem} * 2;
+    $mem = $mem > $max_mem ? $max_mem : $mem;
+    return {%$current, mem => $mem};
+  }
+
+  if ($state eq 'TIMEOUT') {
+    my $time = $current->{time} * 2;
+    $time = $time > $max_time ? $max_time : $time;
+    return {%$current, time => $time};
+  }
+  return $current;
 }
 
 # Resubmit failed jobs
 sub handle_job_failure {
-  my ($idx, $job_id, $reason) = @_;
-  warn "Job $job_id for index $idx $reason (attempt $retry_count{$idx}/$max_retries)\n";
-  
-  # Add log checking
-  check_job_logs($job_id);
+  my ($idx, $job_id, $state) = @_;
+  warn "Job $job_id-$idx failed with $state (attempt $retry_count{$idx}/$max_retries)\n";
+
+  if ($state eq 'OUT_OF_MEMORY' || $state eq 'TIMEOUT') {
+    $job_resources{$idx} = get_adjusted_resources($idx, $state);
+  } else {
+    check_job_logs($job_id);
+  }
 
   if ($retry_count{$idx} >= $max_retries) {
     delete $job_ids{$idx};
@@ -178,13 +180,13 @@ sub handle_job_failure {
     return 0;
   }
   delete $job_ids{$idx};
-  return handle_job($idx, $idx);
+  return submit_job($idx);
 }
 
 # Return current state of a job
 sub get_job_state {
   my ($job_id) = @_;
-  # For array jobs, need to use correct formatting (jobID_arrayID)
+
   my $cmd = "sacct -j $job_id --format=state -n --parsable2 | head -n1";
   chomp(my $state = qx($cmd));
   
@@ -192,13 +194,14 @@ sub get_job_state {
   return (split '|', $state =~ s/\s+//g)[0] || 'UNKNOWN';
 }
 
-# Process a single job or job array
-sub handle_job {
+# Submit a job array
+sub submit_job {
   my ($start_idx, $end_idx) = @_;
   return 0 unless defined $start_idx;
+  $end_idx ||= $start_idx;
   
   my $array_size = $end_idx - $start_idx + 1;
-  my $resources = {mem => $default_mem, time => $default_time};
+  my $resources = get_adjusted_resources($start_idx);
   
   # Submit as job array
   my $cmd = qq{sbatch --parsable } .
@@ -206,14 +209,14 @@ sub handle_job {
             qq{--output=$log_dir/slurm-%A_%a.out } .
             qq{--error=$log_dir/slurm-%A_%a.err } .
             qq{--time=$resources->{time}:00:00 --mem=$resources->{mem}G } .
-            qq{--wrap="perl $libs $Bin/precache.pl --mode=index --index=\$SLURM_ARRAY_TASK_ID"};
+            qq{--wrap="perl $libs $Bin/precache.pl --mode=index --index=\\$SLURM_ARRAY_TASK_ID"};
   $verbose && warn $cmd;
 
   chomp(my $array_job_id = qx($cmd));
   die "sbatch failed: $!" if $?;
   die "Invalid job ID" unless $array_job_id =~ /^\d+$/;
 
-  # Track array job
+  # Register submitted jobs for tracking
   for my $idx ($start_idx..$end_idx) {
     $job_ids{$idx} = "${array_job_id}_$idx";
     $retry_count{$idx}++;
@@ -222,26 +225,17 @@ sub handle_job {
   return 1;
 }
 
-# Pick next job to run
-sub get_next_job {
-  for my $idx (0..$#$jobs) {
-    return $idx if !exists $job_ids{$idx} && !exists $completed_jobs{$idx};
-  }
-  return undef;
-}
-
-# Process all jobs
+# Process & monitor all jobs
 while (1) {
   my @pending;
   my $last_idx = -1;
   my $array_size = 0;
-
-  # Group consecutive indices for array jobs
+  
+  # Group consecutive indexes into job arrays
   for my $idx (0..$#$jobs) {
-    next if exists $job_ids{$idx} || exists $completed_jobs{$idx};
-    
-    if ($last_idx == -1 || $idx != $last_idx + 1) {
-      # Start new array if sequence breaks
+    next if exists $job_ids{$idx} || exists $completed_jobs{$idx} || (exists $retry_count{$idx} && $retry_count{$idx} >= $max_retries);
+    # Start new array if sequence breaks or max size reached
+    if ($last_idx == -1 || $idx != $last_idx + 1 || $array_size >= $max_array_size) {
       if ($array_size > 0) {
         push @pending, [$last_idx - $array_size + 1, $last_idx];
       }
@@ -251,40 +245,44 @@ while (1) {
     }
     $last_idx = $idx;
   }
-  
   # Add final array group
   push @pending, [$last_idx - $array_size + 1, $last_idx] if $array_size > 0;
 
-  # Submit array jobs up to worker limit
-  while (@pending && (scalar keys %job_ids) < $workers) {
+  # Submit array jobs up to concurrent submissions limit
+  while (@pending && (scalar keys %job_ids) < $max_submissions) {
     my ($start, $end) = @{shift @pending};
-    handle_job($start, $end);
+    submit_job($start, $end);
   }
 
-  # Check completion status
+  # Check state of all submitted jobs
   for my $idx (keys %job_ids) {
     my $job_id = $job_ids{$idx};
     
-    # Get the state for this specific array task
+    # Get the state of a single job (from job array)
     chomp(my $state = qx(sacct -j $job_id --format=state -n --parsable2 | head -n1));
-    
+
     if ($state =~ /^(FAILED|CANCELLED|TIMEOUT|OUT_OF_MEMORY)$/) {
-      handle_job_failure($idx, $job_id, "failed with state $state");
+      handle_job_failure($idx, $job_id, $state);
     } elsif ($state eq 'COMPLETED') {
-      # Check exit code for this specific array task
+      # Check exit code
       if (system("sacct -j $job_id --format=exitcode -n | grep -q '0:0'") == 0) {
+        warn "Job $job_id-$idx completed successfully\n";
         delete $job_ids{$idx};
         delete $retry_count{$idx};
         delete $job_resources{$idx};
         $completed_jobs{$idx} = 1;
         save_status();
+      } else {
+        handle_job_failure($idx, $job_id, "completed with non-zero exit code");
       }
+    } else {
+      warn "Job $job_id-$idx is in state $state\n";
     }
   }
 
   print_status();
   last unless %job_ids || @pending;
-  sleep 30;
+  sleep 10;
 }
 
 warn "doing mode=end...\n";

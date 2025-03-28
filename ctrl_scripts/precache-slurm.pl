@@ -1,7 +1,7 @@
 #! /usr/bin/env perl
 
 # Script to manage and submit SLURM jobs for generating precaches
-# Handles job submission, monitoring, and automatic retry on failure
+# Handles job submission, monitoring, and automatic failure recovery
 
 use strict;
 use warnings;
@@ -54,7 +54,6 @@ if ($list) {
 my @params;
 push @params, "-s $_" for (@subparts);
 push @params, @ARGV;
-warn @params;
 
 qx($Bin/precache.pl --mode=start @params);
 
@@ -64,7 +63,7 @@ if (!@jobs) {
 }
 
 foreach my $j (@jobs) {
-  warn "preparing $j\n";
+  print "Preparing $j\n";
   qx($Bin/precache.pl --mode=prepare $j);
 }
 
@@ -72,7 +71,7 @@ open(SPEC, '<', "$SiteDefs::ENSEMBL_PRECACHE_DIR/spec") or die $!;
 my $jobs;
 { local $/ = undef; $jobs = JSON->new->decode(<SPEC>); }
 close SPEC;
-die "No jobs in spec" unless $jobs;
+die "No jobs in spec file" unless $jobs;
 
 my $njobs = @$jobs;
 
@@ -93,7 +92,7 @@ my %completed_jobs;
 my $max_retries = 2;
 my $log_dir = "$SiteDefs::ENSEMBL_PRECACHE_DIR/logs";
 mkdir $log_dir unless -d $log_dir;
-my $job_file = "$SiteDefs::ENSEMBL_PRECACHE_DIR/running_jobs.json";
+my $job_file = "$SiteDefs::ENSEMBL_PRECACHE_DIR/logs/slurm_jobs_state.json";
 
 # Resource limits (in GB and hours)
 my $default_mem = 8;
@@ -103,10 +102,10 @@ my $max_time = 8;
 
 # Cancel running jobs on exit
 sub cleanup {
-  warn "Stopping jobs...\n";
+  print "Stopping jobs...\n";
   system("scancel $_") for values %job_ids;
   unlink $job_file;
-  warn "Remember to cleanup $SiteDefs::ENSEMBL_PRECACHE_DIR";
+  print "Logs are in $SiteDefs::ENSEMBL_PRECACHE_DIR/logs\n";
   exit 1;
 }
 $SIG{INT} = $SIG{TERM} = \&cleanup;
@@ -128,7 +127,7 @@ if ($resume && -f $job_file) {
   %retry_count = %{$data->{retries} || {}};
   %job_resources = %{$data->{resources} || {}};
   %completed_jobs = %{$data->{completed} || {}};
-  warn "Resumed from previous state with ".(scalar keys %job_ids)." running jobs\n";
+  print "Resumed from previous state with ".(scalar keys %job_ids)." running jobs\n";
 }
 
 # Save current job state to disk
@@ -161,13 +160,13 @@ sub check_job_logs {
   my $error_file = "$log_dir/slurm-${master_id}_${task_id}.err";
   my $output_file = "$log_dir/slurm-${master_id}_${task_id}.out";
   
-  warn "\nJob array task $task_id (master job $master_id) error log:";
+  print "\nJob array task $task_id (master job $master_id) error log:";
   if (-f $error_file) {
-    warn "\n=== First 10 lines of stderr ===";
+    print "\n=== First 10 lines of stderr ===";
     system("head -n 10 $error_file");
   }
   if (-f $output_file) {
-    warn "\n=== First 10 lines of stdout ===";
+    print "\n=== First 10 lines of stdout ===";
     system("head -n 10 $output_file");
   }
 }
@@ -293,7 +292,6 @@ while (1) {
     } elsif ($state eq 'COMPLETED') {
       # Check exit code
       if (system("sacct -j $job_id --format=exitcode -n | grep -q '0:0'") == 0) {
-        warn "Job $job_id-$idx completed successfully\n";
         delete $job_ids{$idx};
         delete $retry_count{$idx};
         delete $job_resources{$idx};
@@ -302,8 +300,6 @@ while (1) {
       } else {
         handle_job_failure($idx, $job_id, "completed with non-zero exit code");
       }
-    } else {
-      warn "Job $job_id-$idx is in state $state\n";
     }
   }
 
@@ -312,7 +308,7 @@ while (1) {
   sleep 10;
 }
 
-warn "doing mode=end...\n";
+print "Doing mode=end...\n";
 qx($Bin/precache.pl --mode=end);
 unlink $job_file;
 1;

@@ -12,11 +12,11 @@ use JSON;
 
 # Command line options
 my ($list, @subparts);
-my $max_submissions = 2;
-my $max_array_size = 100;
+my $max_submissions = 1;
+my $max_array_size = 150;
 my $verbose = 0;
 my $resume = 0;
-# Note: keep max_submissions*max_array_size < 400 to avoid db connection errors
+# Note: keep concurrent jobs (max_submissions*max_array_size) < 300 to avoid db connection errors
 GetOptions(
   'l|list' => \$list,
   's|subparts=s' => \@subparts,

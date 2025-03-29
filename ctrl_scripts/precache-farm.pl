@@ -124,7 +124,7 @@ if ($resume && -f $job_file) {
   %job_resources = %{$data->{resources} || {}};
   %completed_jobs = %{$data->{completed} || {}};
   print "Resumed from previous state with ".(scalar keys %job_ids)." running jobs\n";
-} else if (-d $log_dir) {
+} elsif (-d $log_dir) {
   system("rm -rf $log_dir/*");
 }
 

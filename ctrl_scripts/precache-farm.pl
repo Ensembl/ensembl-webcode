@@ -12,11 +12,11 @@ use JSON;
 
 # Command line options
 my ($list, @subparts);
-my $max_submissions = 1;
-my $max_array_size = 150;
+my $max_submissions = 2;
+my $max_array_size = 75;
 my $verbose = 0;
 my $resume = 0;
-# Note: keep concurrent jobs (max_submissions*max_array_size) < 300 to avoid db connection errors
+# Note: keep concurrent jobs (max_submissions*max_array_size) < 200 to avoid db connection errors
 GetOptions(
   'l|list' => \$list,
   's|subparts=s' => \@subparts,
@@ -36,7 +36,7 @@ Options:
   -s, --subparts STR      Limit to specific subparts
   --submissions INT       Max. concurrent job array submissions (default: $max_submissions)
   --array_size INT        Max. number of jobs in each array (default: $max_array_size)
-  -v, --verbose           Print detailed commands for each job
+  -v, --verbose           Print more details about job submissions
   -r, --resume            Resume from previous submission session
   -h, --help              Print this help message
 USAGE
@@ -89,7 +89,7 @@ my %completed_jobs;
 my $max_retries = 3;
 my $log_dir = "$SiteDefs::ENSEMBL_PRECACHE_DIR/logs";
 mkdir $log_dir unless -d $log_dir;
-my $job_file = "$SiteDefs::ENSEMBL_PRECACHE_DIR/logs/slurm_jobs_state.json";
+my $job_file = "$log_dir/slurm_jobs_state.json";
 
 # Resource limits (in GB and hours)
 my $default_mem = 8;
@@ -101,7 +101,7 @@ my $max_time = 8;
 sub stop_jobs {
   print "Stopping jobs...\n";
   system("scancel $_") for values %job_ids;
-  print "Logs are in $SiteDefs::ENSEMBL_PRECACHE_DIR/logs\n";
+  print "Logs are in $log_dir\n";
   exit 1;
 }
 $SIG{INT} = $SIG{TERM} = \&stop_jobs;
@@ -144,7 +144,7 @@ sub save_status {
 sub print_status {
   my $done = scalar keys %completed_jobs;
   my $submitted = scalar keys %job_ids;
-  my $failed = scalar grep { $retry_count{$_} >= $max_retries } keys %retry_count;
+  my $failed = scalar grep { $retry_count{$_} > $max_retries } keys %retry_count;
   printf("Status: %d/%d (%d%%) done, %d submitted, %d failed\n",
          $done, $njobs, $done * 100 / $njobs, $submitted, $failed);
 }
@@ -196,13 +196,13 @@ sub handle_job_failure {
 
   if ($state eq 'OUT_OF_MEMORY' || $state eq 'TIMEOUT') {
     $job_resources{$idx} = get_adjusted_resources($idx, $state);
-    warn "Increasing resources to $job_resources{$idx}{mem}GB / $job_resources{$idx}{time}h\n";
+    $verbose && print "Increasing resources to $job_resources{$idx}{mem}GB/$job_resources{$idx}{time}h\n";
   } else {
     check_job_logs($job_id);
   }
 
   if ($retry_count{$idx} >= $max_retries) {
-    warn "Giving up on resubmitting job $job_id-$idx\n";
+    $verbose && print "Giving up on resubmitting job $job_id-$idx\n";
     delete $job_ids{$idx};
     delete $job_resources{$idx};
     save_status();
@@ -227,7 +227,6 @@ sub submit_job {
             qq{--wrap='perl $libs $Bin/precache.pl --mode=index --index=\$SLURM_ARRAY_TASK_ID'};
   
   $verbose && print "Submitting: $cmd\n";
-  warn "Submitting job array $start_idx-$end_idx\n";
 
   chomp(my $array_job_id = qx($cmd));
   if ($?) {
@@ -263,7 +262,7 @@ while (1) {
   
   # Group consecutive indexes into job arrays
   for my $idx (0..$njobs-1) {
-    next if exists $job_ids{$idx} || exists $completed_jobs{$idx} || (exists $retry_count{$idx} && $retry_count{$idx} >= $max_retries);
+    next if exists $job_ids{$idx} || exists $completed_jobs{$idx} || exists $retry_count{$idx};
     # Start new array if sequence breaks or max size reached
     if ($last_idx == -1 || $idx != $last_idx + 1 || $array_size >= $max_array_size) {
       if ($array_size > 0) {
@@ -314,5 +313,4 @@ while (1) {
 
 print "Doing mode=end...\n";
 qx($Bin/precache.pl --mode=end);
-#system("rm -rf $log_dir") if -d $log_dir;
 1;

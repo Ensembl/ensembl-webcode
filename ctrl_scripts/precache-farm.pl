@@ -92,8 +92,8 @@ mkdir $log_dir unless -d $log_dir;
 my $job_file = "$log_dir/slurm_jobs_state.json";
 
 # Resource limits (in GB and hours)
-my $default_mem = 8;
-my $default_time = 1;
+my $default_mem = 16;
+my $default_time = 2;
 my $max_mem = 32;
 my $max_time = 8;
 

@@ -100,29 +100,20 @@ sub content {
             $location,
           ]; 
         } else {
-          my $division  = $pan_lookup->{$peptide->genome_db->name}{'division'};
-          my $site      = '';
-          if ($division) {
-            $division = 'www' if $division eq 'vertebrates';
-            $site     =  sprintf('https://%s.ensembl.org', $division);
-          }
           push @$data, [
             $label,
-            sprintf('<a href="%s%s">%s</a>',
-              $site,
+            sprintf('<a href="%s">%s</a>',
               $hub->url({ species => $member_species, type => 'Gene', action => 'Summary', g => $gene->stable_id, r => undef }),
               $gene->stable_id
             ),
-            sprintf('<a href="%s%s">%s</a>',
-              $site,
+            sprintf('<a href="%s">%s</a>',
               $hub->url({ species => $member_species, type => 'Transcript', action => 'ProteinSummary', peptide => $peptide->stable_id, __clear => 1 }),
               $peptide->stable_id
             ),
             sprintf('%d %s', $peptide->seq_length, $unit),
             sprintf('%d %%', $peptide->perc_id),
             sprintf('%d %%', $peptide->perc_cov),
-            sprintf('<a href="%s%s">%s</a>',
-              $site,
+            sprintf('<a href="%s">%s</a>',
               $hub->url({ species => $member_species, type => 'Location', action => 'View', g => $gene->stable_id, r => $location, t => undef }),
               $location
             )

@@ -89,7 +89,7 @@ We provide $last_item for large-scale export in a variety of formats.
 
 <p><img src="/info/data/export_image.png" alt="Export image" title="Export image" /></p>
 
-p>Many images in Ensembl have an export icon at the top-left within the blue bar. This allows you to download images optimised for different purposes, in terms of size, resolution and colour saturation:</p>
+<p>Many images in Ensembl have an export icon at the top-left within the blue bar. This allows you to download images optimised for different purposes, in terms of size, resolution and colour saturation:</p>
 
 <ul>
 <li>PDF file - Standard image as PDF file.</li>
@@ -118,7 +118,7 @@ p>Many images in Ensembl have an export icon at the top-left within the blue bar
 
   unless ($sd->NO_COMPARA) {
     $html .= qq(
-h2 id="exportingcomparativegenomicsdata">Exporting comparative genomics data</h2>
+<h2 id="exportingcomparativegenomicsdata">Exporting comparative genomics data</h2>
 
 <p><img src="/info/data/download_homologues.png" alt="Download homologues" title="Download homologues" /></p>
 

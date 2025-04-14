@@ -35,8 +35,8 @@ sub content {
   my $hub           = $self->hub;
   my $availability  = $self->object->availability;
   my $location      = $hub->url({ type => 'Location',  action => 'Compara' });
-  my $strain_url    = ($self->is_strain) ? "Strain_" : "";
-  my $strain_avail  = ($self->is_strain) ? "strain_" : "";
+  my $strain_url    = ($self->is_strain || $hub->action =~ /^Strain_/) ? "Strain_" : "";
+  my $strain_avail  = ($self->is_strain || $hub->action =~ /^Strain_/) ? "strain_" : "";
 
   my $ortho_image = $strain_avail ? 'strain_ortho.gif' : 'compara_ortho.gif';
   my $para_image  = $strain_avail ? 'strain_para.gif' : 'compara_para.gif';

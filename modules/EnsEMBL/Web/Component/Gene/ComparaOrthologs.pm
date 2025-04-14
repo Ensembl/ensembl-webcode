@@ -227,17 +227,7 @@ sub content {
       my $goc_class  = ($goc_score ne "n/a" && $goc_score >= $orthologue->{goc_threshold}) ? "box-highlight" : "";
       my $wga_class  = ($wgac ne "n/a" && $wgac >= $orthologue->{wga_threshold}) ? "box-highlight" : "";
 
-      my $base_url;
-
-      if ($is_pan) {
-        my $site      = $pan_lookup->{$prodname}{'division'};
-        if ($site ne $hub->species_defs->DIVISION) {
-          $site         = 'www' if $site eq 'vertebrates';
-          $base_url     = "https://$site.ensembl.org";
-        }
-      }
-
-      my $link_url = $base_url.$hub->url({
+      my $link_url = $hub->url({
         species => $species,
         action  => 'Summary',
         g       => $stable_id,

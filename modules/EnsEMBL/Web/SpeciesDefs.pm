@@ -1763,6 +1763,21 @@ sub species_path {
     # as the current species - in that case we don't need the host name bit
     $url =~ s/^http\:\/\/[^\/]+\//\// if $url_hash->{$spsite} =~ /\#\#\#SPECIES\#\#\#/ && substr($spsite, 0, 5) eq substr($cssite, 0, 5);
     $url =~ s/\/$//;
+
+    if (!$url) {
+      my $pan_lookup = $self->multi_val('PAN_COMPARA_LOOKUP') || {};
+      my %rev_lookup = map { $pan_lookup->{$_}{'species_url'} => $_ } keys %{$pan_lookup};
+
+      if (exists $rev_lookup{$species}) {
+        my $prod_name = $rev_lookup{$species};
+        my $site = $pan_lookup->{$prod_name}{'division'};
+        if ($site ne $self->DIVISION) {
+          $site = 'www' if $site eq 'vertebrates';
+          $url = "https://${site}.ensembl.org/${species}";
+        }
+      }
+    }
+
     $url ||= "/$species"; # in case species have not made to the SPECIES_SITE there is a good chance the species name as it is will do  
   }
   

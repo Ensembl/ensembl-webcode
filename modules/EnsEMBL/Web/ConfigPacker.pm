@@ -1349,6 +1349,29 @@ sub _summarise_compara_db {
     $self->db_tree->{$db_name}{$key}{$species1}{$species2} = $valid_species{$species2};
   }             
   
+  # As a workaround to deal with some genomes being in multiple strain-level gene-tree
+  # collections, we need a mapping from such genomes to their preferred clusterset_id.
+  my $res_aref_3 = $dbh->selectall_arrayref('
+    select distinct mlsst.value AS gdb_names, trim(leading "collection-" from ssh.name) AS clusterset_id
+      from method_link_species_set mlss
+        join method_link ml using(method_link_id)
+        join method_link_species_set_tag mlsst using(method_link_species_set_id)
+        join species_set_header ssh using(species_set_id)
+      where ml.type in ("PROTEIN_TREES", "NC_TREES")
+        and mlsst.tag = "prefer_for_genomes";
+  ');
+
+  my %preferred_clusterset_id;
+  foreach my $row (@$res_aref_3) {
+    my @gdb_names = split(' ', $row->[0]);
+    my $clusterset_id = $row->[1];
+    foreach my $gdb_name (@gdb_names) {
+      # Datacheck StrainGeneTreeSpeciesSets ensures that a
+      # genome is mapped to one preferred clusterset_id.
+      $preferred_clusterset_id{$gdb_name} = $clusterset_id;
+    }
+  }
+
   ## Store strain gene-tree collection metadata
   my $sth = $dbh->prepare('
     select distinct gd.name, trim(leading "collection-" from ssh.name), sst.value
@@ -1364,6 +1387,7 @@ sub _summarise_compara_db {
   $sth->execute;
 
   while (my ($sp, $clusterset_id, $strain_type) = $sth->fetchrow_array) {
+    next if exists $preferred_clusterset_id{$sp} && $clusterset_id ne $preferred_clusterset_id{$sp};
     $self->db_tree->{$db_name}{'CLUSTERSETS'}{$sp} = $clusterset_id;
     $self->db_tree->{$db_name}{'STRAIN_TYPES'}{$sp} = $strain_type;
   }

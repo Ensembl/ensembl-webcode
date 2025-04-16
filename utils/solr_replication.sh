@@ -113,8 +113,8 @@ do
   if [[ $stage != "after" ]] ; then
     # Mute oh for these machines, only need to do this for test and before release.
     echo -e "\n$((step+=1)). Mute oh for $server."
-    echo -e "\t ssh ens_adm02@ves-hx2-70"
-    echo -e "\t oh mute-for check@$server 3w"
+    echo -e "\t ssh ens_adm02@wp-np3-32"
+    echo -e "\t oh mute-for check@$server 4w"
     echo -e "\t check that it is showing muted on http://useast.ensembl.org:8000/oh.html"
     
     # before release we do stop both kicker and solr-java at the start
@@ -130,7 +130,7 @@ do
     echo -en "\n$((step+=1)). Disable kicker "
     if [[ $site != "grch37" ]]; then echo -n "and remove indexes "; fi
     echo -e "on $server"
-    echo -e "\t ssh ens_adm02@ves-hx2-70"
+    echo -e "\t ssh ens_adm02@wp-np3-32"
     echo -e "\t ssh -i ~/.ssh/users/tc_ens02 tc_ens02@$server"
     echo -e "\t op stop kicker"
     echo -e "\t op summary #to confirm kicker is stopped"
@@ -146,14 +146,14 @@ do
     echo -e "\t op stop solr-java"
     echo -e "\t op summary #to confirm solr-java is stopped"
     echo -e "\t #Make sure solr-java is still not running by doing 'ps aux | grep java'. If it is, kill the process."
-    echo -e "\t op start solr-java"
-    echo -e "\t exit;"
+#    echo -e "\t op start solr-java"
+#    echo -e "\t exit;"
   fi
 
   # for post release, we need to replicate data first and then switch port at the end
   if [[ $stage != "after" || $new_data != 'y' ]] ; then
     echo -e "\n\t #Edit the controller script and ports for sharding (as ens_adm02)."
-    echo -e "\t ssh ens_adm02@$server"
+#    echo -e "\t ssh ens_adm02@$server"
     echo -e "\t cd /data"
 
     if [[ $release_type == "even" ]] ; then
@@ -166,7 +166,7 @@ do
       echo -e "\t find . -name solrcore.properties -print0 | xargs -0 -n 1 sed -i -e 's/localhost:8000/localhost:9000/g'"
     fi
 
-    echo -e "\t exit;"
+#    echo -e "\t exit;"
   fi
 
   if [[ $stage != "after" ]] ;  then
@@ -199,7 +199,7 @@ if [[ $new_data == "y" ]] ; then
   if [[ $site == "grch37" ]]; then generate_site=$site; else generate_site="ebi"; fi
 
   echo -e "\n $((step+=1)). Replicate data using a script."
-  echo -e "\t ssh ens_adm02@ves-hx2-70"
+  echo -e "\t ssh ens_adm02@wp-np3-32"
   echo -e "\n\t NOTE: Run below in a screen session (screen -S solr-replication)"
   echo -e "\t cd /nfs/public/release/ensweb-software/ensembl-solr/sync"
   echo -e "\t #dry run - should only recognise the servers [${machines_array[@]}] showing message 'NEEDSYNCH'"
@@ -262,7 +262,7 @@ if [[ $stage == "after" || $stage == "before" ]] ; then
     solr_group="hx-host-solr"
     #unmute oh for all the machines (dont forget the test machines as well)
     echo -e "\n $((step+=1)). UnMute Oh for: ${machines_array[@]} ${machines[${site}_test]}"
-    echo -e "\t ssh ens_adm02@ves-hx2-70"
+    echo -e "\t ssh ens_adm02@wp-np3-32"
     echo -e "\t oh unmute check@${machines[${site}_test]}"
     for server in "${machines_array[@]}"
     do
@@ -272,7 +272,7 @@ if [[ $stage == "after" || $stage == "before" ]] ; then
     solr_group="hh-host-solr"
   fi
   echo -e "\n $((step+=1)). Update Oh for changes to ports for Solr machines"
-  echo -e "\t ssh ens_adm02@ves-hx2-70"
+  echo -e "\t ssh ens_adm02@wp-np3-32"
   echo -e "\t vim /nfs/services/ensweb/webteam-utils/config/metagen/config/config-hosts.yaml"
   echo -e "\t search for $solr_group and change solr-port keys to $release_port"
   echo -e "\t regenerate (please 1007)"

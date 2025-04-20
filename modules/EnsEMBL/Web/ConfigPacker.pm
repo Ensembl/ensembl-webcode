@@ -1806,6 +1806,13 @@ sub _munge_meta {
       $self->tree($prod_name)->{'STRAIN_TYPE'} = 'strain';
     }
     
+    ## e114 hack to set mus_musculus_nzohlltj STRAIN_GROUP
+    if (!$SiteDefs::EG_DIVISION
+          && $prod_name eq 'mus_musculus_nzohlltj'
+          && $assembly_name eq 'NZO_HlLtJ_v3') {
+      $self->tree($prod_name)->{'STRAIN_GROUP'} = 'mus_musculus';
+    }
+
     ## Munge genebuild info
     my @A = split '-', $meta_hash->{'genebuild.start_date'}[0];
     

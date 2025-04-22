@@ -224,8 +224,8 @@ sub content {
       my $goc_score  = (defined $orthologue->{'goc_score'} && $orthologue->{'goc_score'} >= 0) ? $orthologue->{'goc_score'} : 'n/a';
       my $wgac       = (defined $orthologue->{'wgac'} && $orthologue->{'wgac'} >= 0) ? $orthologue->{'wgac'} : 'n/a';
       my $confidence = $orthologue->{'highconfidence'} eq '1' ? 'Yes' : $orthologue->{'highconfidence'} eq '0' ? 'No' : 'n/a';
-      my $goc_class  = ($goc_score ne "n/a" && $goc_score >= $orthologue->{goc_threshold}) ? "box-highlight" : "";
-      my $wga_class  = ($wgac ne "n/a" && $wgac >= $orthologue->{wga_threshold}) ? "box-highlight" : "";
+      my $goc_class  = ($goc_score ne "n/a" && defined $orthologue->{goc_threshold} && $goc_score >= $orthologue->{goc_threshold}) ? "box-highlight" : "";
+      my $wga_class  = ($wgac ne "n/a" && defined $orthologue->{wga_threshold} && $wgac >= $orthologue->{wga_threshold}) ? "box-highlight" : "";
 
       my $link_url = $hub->url({
         species => $species,

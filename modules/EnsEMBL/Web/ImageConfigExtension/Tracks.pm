@@ -31,6 +31,8 @@ use List::MoreUtils qw(firstidx);
 
 use EnsEMBL::Web::Utils::Sanitize qw(clean_id);
 
+use EnsEMBL::Web::ImageConfigExtension::Constants qw(logic_names_gencode logic_names_mane);
+
 sub load_tracks {
   ## Loop through core/compara/funcgen/variation like dbs and loads in various database derived tracks
   ## @params List of arguments to be passed on the individual method to add a specific type of track
@@ -477,7 +479,7 @@ sub add_genes {
       sortable      => 1,
       colours       => $colours,
       label_key     => '[biotype]',
-      logic_names   => ['proj_ensembl',  'proj_ncrna', 'proj_havana_ig_gene', 'havana_ig_gene', 'ensembl_havana_ig_gene', 'proj_ensembl_havana_lincrna', 'proj_havana', 'ensembl', 'mt_genbank_import', 'ensembl_havana_lincrna', 'proj_ensembl_havana_ig_gene', 'ncrna', 'assembly_patch_ensembl', 'ensembl_havana_gene', 'ensembl_lincrna', 'proj_ensembl_havana_gene', 'havana'],
+      logic_names   => logic_names_gencode(),
       renderers     =>  [
         'off',                     'Off',
         'gene_nolabel',            'No exon structure without labels',
@@ -500,7 +502,7 @@ sub add_genes {
       sortable      => 1,
       colours       => $colours,                                                                                                                                                                                                                                                
       label_key     => '[biotype]',
-      logic_names   => ['proj_ensembl',  'proj_ncrna', 'proj_havana_ig_gene', 'havana_ig_gene', 'ensembl_havana_ig_gene', 'proj_ensembl_havana_lincrna', 'proj_havana', 'ensembl', 'mt_genbank_import', 'ensembl_havana_lincrna', 'proj_ensembl_havana_ig_gene', 'ncrna', 'assembly_patch_ensembl', 'ensembl_havana_gene', 'ensembl_lincrna', 'proj_ensembl_havana_gene', 'havana'],
+      logic_names   => logic_names_gencode(),
       renderers     =>  [
         'off',                     'Off',
         'gene_nolabel',            'No exon structure without labels',
@@ -526,7 +528,7 @@ sub add_genes {
       sortable      => 1,
       colours       => $colours,
       label_key     => '[biotype]',
-      logic_names   => ['proj_ensembl',  'proj_ncrna', 'proj_havana_ig_gene', 'havana_ig_gene', 'ensembl_havana_ig_gene', 'proj_ensembl_havana_lincrna', 'proj_havana', 'ensembl', 'mt_genbank_import', 'ensembl_havana_lincrna', 'proj_ensembl_havana_ig_gene', 'ncrna', 'assembly_patch_ensembl', 'ensembl_havana_gene', 'ensembl_lincrna', 'proj_ensembl_havana_gene', 'havana', 'ensembl_havana_transcript'],
+      logic_names   => logic_names_mane(),
       renderers     =>  [
         'off',                     'Off',
         'transcript_nolabel',      'Expanded without labels',
@@ -543,7 +545,7 @@ sub add_genes {
       sortable      => 1,
       colours       => $colours,
       label_key     => '[biotype]',
-      logic_names   => ['proj_ensembl',  'proj_ncrna', 'proj_havana_ig_gene', 'havana_ig_gene', 'ensembl_havana_ig_gene', 'proj_ensembl_havana_lincrna', 'proj_havana', 'ensembl', 'mt_genbank_import', 'ensembl_havana_lincrna', 'proj_ensembl_havana_ig_gene', 'ncrna', 'assembly_patch_ensembl', 'ensembl_havana_gene', 'ensembl_lincrna', 'proj_ensembl_havana_gene', 'havana', 'ensembl_havana_transcript'],
+      logic_names   => logic_names_mane(),
       renderers     =>  [
         'off',                     'Off',
         'transcript_nolabel',      'Expanded without labels',

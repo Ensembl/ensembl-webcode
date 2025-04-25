@@ -29,6 +29,7 @@ our $VERSION = 13;
 use JSON;
 use List::Util qw(min max);
 use Bio::EnsEMBL::Gene;
+use EnsEMBL::Web::ImageConfigExtension::Constants qw(logic_names_gencode logic_names_mane);
 
 sub precache {
   return {
@@ -59,15 +60,7 @@ sub precache {
     gencode_basic => {
       loop => ['species','genome'],
       args => {
-        logic_names => [qw(
-          assembly_patch_ensembl    ensembl      ensembl_havana_gene
-          ensembl_havana_ig_gene    ensembl_havana_lincrna
-          ensembl_lincrna           havana       havana_ig_gene
-          mt_genbank_import         ncrna        proj_ensembl
-          proj_ensembl_havana_gene  proj_ensembl_havana_ig_gene
-          proj_ensembl_havana_lincrna   proj_havana
-          proj_havana_ig_gene       proj_ncrna
-        )],
+        logic_names => logic_names_gencode(),
         label_key => "[biotype]",
         only_attrib => "gencode_basic",
         shortlabels => '',
@@ -76,15 +69,7 @@ sub precache {
     gencode_primary => {
       loop => ['species','genome'],
       args => {
-        logic_names => [qw(
-          assembly_patch_ensembl    ensembl      ensembl_havana_gene
-          ensembl_havana_ig_gene    ensembl_havana_lincrna
-          ensembl_lincrna           havana       havana_ig_gene
-          mt_genbank_import         ncrna        proj_ensembl
-          proj_ensembl_havana_gene  proj_ensembl_havana_ig_gene
-          proj_ensembl_havana_lincrna   proj_havana
-          proj_havana_ig_gene       proj_ncrna
-        )],
+        logic_names => logic_names_gencode(),
         label_key => "[biotype]",
         only_attrib => "gencode_primary",
         shortlabels => '', 
@@ -94,15 +79,7 @@ sub precache {
       loop => ['species','genome'],
       args => {
         db => "core",
-        logic_names => [qw(
-          assembly_patch_ensembl    ensembl      ensembl_havana_gene
-          ensembl_havana_ig_gene    ensembl_havana_lincrna
-          ensembl_lincrna           havana       havana_ig_gene
-          mt_genbank_import         ncrna        proj_ensembl
-          proj_ensembl_havana_gene  proj_ensembl_havana_ig_gene
-          proj_ensembl_havana_lincrna   proj_havana
-          proj_havana_ig_gene       proj_ncrna    ensembl_havana_transcript
-        )],
+        logic_names => logic_names_mane(),
         label_key => "[display_label]",
         only_attrib => "MANE_Select",
         shortlabels => '',
@@ -112,15 +89,7 @@ sub precache {
       loop => ['species','genome'],
       args => {
         db => "core",
-        logic_names => [qw(
-          assembly_patch_ensembl    ensembl      ensembl_havana_gene
-          ensembl_havana_ig_gene    ensembl_havana_lincrna
-          ensembl_lincrna           havana       havana_ig_gene
-          mt_genbank_import         ncrna        proj_ensembl
-          proj_ensembl_havana_gene  proj_ensembl_havana_ig_gene
-          proj_ensembl_havana_lincrna   proj_havana
-          proj_havana_ig_gene       proj_ncrna    ensembl_havana_transcript
-        )],
+        logic_names => logic_names_mane(),
         label_key => "[display_label]",
         only_attrib => "MANE_Plus_Clinical",
         shortlabels => '',

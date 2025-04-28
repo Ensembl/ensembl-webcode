@@ -199,6 +199,37 @@ sub GENE_JOIN_TYPES {
   }
 }
 
+sub GENE_TREE_CONSTANTS {
+### Compara lookup for various gene-tree views
+  my ($cdb, $strain, $clusterset_id) = @_;
+
+  my $GENE_TREE_CONSTANTS = {
+    compara_pan_ensembl => {
+      action => 'PanComparaTree',
+      component => 'PanComparaTree',
+    },
+    compara_strain => {
+      action => 'Strain_Compara_Tree',
+      component => 'ComparaTree',
+    },
+    compara => {
+      action => 'Compara_Tree',
+      component => 'ComparaTree',
+    },
+  };
+
+  my $gene_tree_view_key;
+  if ($cdb eq 'compara_pan_ensembl') {
+    $gene_tree_view_key = 'compara_pan_ensembl';
+  } elsif ($strain) {
+    $gene_tree_view_key = 'compara_strain';
+  } else {
+    $gene_tree_view_key = 'compara';
+  }
+
+  return $GENE_TREE_CONSTANTS->{$gene_tree_view_key};
+}
+
 sub ALIGNMENT_FORMATS {
 ### Metadata for alignment export formats
   return (

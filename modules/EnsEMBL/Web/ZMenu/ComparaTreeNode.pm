@@ -26,6 +26,8 @@ use URI::Escape qw(uri_escape);
 use IO::String;
 use Bio::AlignIO;
 
+use EnsEMBL::Web::Constants;
+
 use base qw(EnsEMBL::Web::ZMenu);
 
 sub content {
@@ -33,7 +35,8 @@ sub content {
   my $cdb    = shift || 'compara';
   my $hub    = $self->hub;
   my $object = $self->object;
-  my $strain_tree = $hub->species_defs->get_config($self->hub->species,'RELATED_TAXON') if $hub->param('strain');
+  my $is_strain   = $hub->param('strain');
+  my $strain_tree = $hub->species_defs->get_config($self->hub->species,'RELATED_TAXON') if $is_strain;
   my $tree   = $object->isa('EnsEMBL::Web::Object::GeneTree') ? $object->tree : $object->get_GeneTree($cdb, "", $strain_tree);
   
   die 'No tree for gene' unless $tree;
@@ -165,7 +168,7 @@ sub content {
   
   }
 
-  my $compara_div = $cdb =~/compara_pan_ensembl/ ? 'pan_homology' : ($hub->species_defs->EG_DIVISION || 'multi');
+  my $gene_tree_constants = EnsEMBL::Web::Constants::GENE_TREE_CONSTANTS($cdb, $is_strain, $tree->tree->clusterset_id);
   my $lookup = $hub->species_defs->prodnames_to_urls_lookup;
   if ($is_leaf and $is_supertree) {
 
@@ -177,9 +180,6 @@ sub content {
       });
 
       my $link_gene = $node->{_sub_reference_gene};
-
-      ## Strain trees and other trees are very different!
-      my $action = $hub->param('strain') ? 'Strain_Compara_Tree' : 'Compara_Tree';
 
       my $that_subtree_link;
       if ($tree_stable_id) {
@@ -194,28 +194,10 @@ sub content {
         my $link_gene = $node->{_sub_reference_gene};
         my $species = $lookup->{$link_gene->genome_db->name};
 
-        # This is not the most elegant approach, but it will change the $action only
-        # in Metazoa, and only for non-default protein trees that lack a stable ID.
-        if ($compara_div eq 'metazoa') {
-          require EnsEMBL::Web::Component::Gene::ComparaOrthologs;
-          if (defined $EnsEMBL::Web::Component::Gene::ComparaOrthologs::GENE_TREE_CONSTANTS) {
-            my $gene_tree_constants = $EnsEMBL::Web::Component::Gene::ComparaOrthologs::GENE_TREE_CONSTANTS;
-            if (defined $gene_tree_constants) {
-              my $clusterset_id = $tree->tree->clusterset_id;
-              if (exists $gene_tree_constants->{$clusterset_id}) {
-                my $clusterset_specific_action = $gene_tree_constants->{$clusterset_id}{url_part};
-                if (defined $clusterset_specific_action) {
-                  $action = $clusterset_specific_action;
-                }
-              }
-            }
-          }
-        }
-
         $that_subtree_link = $hub->url({
           species  => $species,
           type     => 'Gene',
-          action   => $action,
+          action   => $gene_tree_constants->{action},
           __clear  => 1,
           g        => $link_gene->stable_id,
         });
@@ -386,36 +368,16 @@ sub content {
     my $gene      = $self->object->Obj;
     my $dxr       = $gene->can('display_xref') ? $gene->display_xref : undef;
     my $gene_name = $hub->species eq 'Multi' ? $hub->param('gt') : $dxr ? $dxr->display_id : $gene->stable_id;
-
-    my $component = 'ComparaTree';
-    if ($compara_div eq 'pan_homology') {
-      $component = 'PanComparaTree';
-    } elsif ($compara_div eq 'metazoa') {
-      require EnsEMBL::Web::Component::Gene::ComparaOrthologs;
-      if (defined $EnsEMBL::Web::Component::Gene::ComparaOrthologs::GENE_TREE_CONSTANTS) {
-        my $gene_tree_constants = $EnsEMBL::Web::Component::Gene::ComparaOrthologs::GENE_TREE_CONSTANTS;
-        if (defined $gene_tree_constants) {
-          my $clusterset_id = $tree->tree->clusterset_id;
-          if (exists $gene_tree_constants->{$clusterset_id}) {
-            my $clusterset_specific_component = $gene_tree_constants->{$clusterset_id}{component};
-            if (defined $clusterset_specific_component) {
-              $component = $clusterset_specific_component;
-            }
-          }
-        }
-      }
-    }
-
     my $params    = {
                       'type'      => 'DataExport',
                       'action'    => 'GeneTree',
                       'cdb'       => $cdb,
                       'data_type' => 'Gene',
-                      'component' => $component,
+                      'component' => $gene_tree_constants->{component},
                       'gene_name' => $gene_name,
                       'align'     => 'tree',
                       'node'      => $node_id,
-                      'strain'    => $hub->param('strain'),
+                      'strain'    => $is_strain,
                     };
 
     $self->add_entry({
@@ -439,6 +401,8 @@ sub content {
 
       # The $compara_div helps to unambiguously identify a gene
       # sharing a stable ID with a gene in another division.
+      my $compara_div = $cdb =~/compara_pan_ensembl/ ? 'pan_homology' : ($hub->species_defs->EG_DIVISION || 'multi');
+
       my $gene_tree_stable_id = $node->tree->stable_id;
       my $gt_id  = defined $gene_tree_stable_id
                  ? $gene_tree_stable_id

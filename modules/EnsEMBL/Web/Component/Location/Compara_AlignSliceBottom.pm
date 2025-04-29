@@ -64,6 +64,7 @@ sub content {
     ));
   }
   
+  my $need_underlying_slices = !$self->has_image || $align_details->{'class'} eq 'GenomicAlignTree.ancestral_alignment';
   my $image_width     = $self->image_width;
   my $slice           = $object->slice;
   my %export_params   = $hub->param('data_type') ? ('data_type' => $hub->param('data_type'), 'component' => $hub->param('data_action'))
@@ -71,6 +72,7 @@ sub content {
   my ($slices)        = $object->get_slices({
                                               'slice' => $slice, 
                                               'align' => $align_params, 
+                                              'image' => !$need_underlying_slices,
                                               'species' => $primary_species,
                                               %export_params
                         });
@@ -136,6 +138,7 @@ sub content {
                                 'species' => $prodname, 
                                 'cdb'     => $self->param('cdb') || 'compara',
                                 'ignore'  => 'ancestral_sequences',
+                                'image'   => !$need_underlying_slices,
                                 });
 
   return $alert_box if $error;

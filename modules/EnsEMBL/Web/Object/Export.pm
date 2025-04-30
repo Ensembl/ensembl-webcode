@@ -513,7 +513,7 @@ sub alignment {
   
   $self->{'alignments_function'} = 'get_SimpleAlign';
   
-  my $alignments = $self->get_alignments({
+  my ($alignments) = $self->get_alignments({
                               'slice' => $self->slice,
                               'align' => $hub->param('align'), 
                               'species' => $hub->species

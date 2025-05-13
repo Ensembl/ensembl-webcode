@@ -105,16 +105,16 @@ sub content {
   my $html;
  
   my $slice = $self->_get_slice($object);   
-  my $align = $hub->get_alignment_id;
-  my $alert = $self->check_for_align_problems({
+  my ($align) = split '--', $hub->get_alignment_id;
+  my ($alert_box, $error) = $self->check_for_align_problems({
                                                 'align'   => $align,
-                                                'species' => $species,
+                                                'species' => $hub->species_defs->SPECIES_PRODUCTION_NAME,
                                                 'slice'   => $slice,
                                                 'ignore'  => 'ancestral_sequences',
                                               });
-  
-  $html .= $alert if $alert;
- 
+  return $alert_box if $error;
+  $html .= $alert_box if $alert_box;
+
   # Get all slices for the gene
   my ($slices, $slice_length) = $self->object->get_slices({
                                     'slice'   => $slice, 
@@ -123,9 +123,11 @@ sub content {
                                 });
   my ($info, @aligned_slices, %non_aligned_slices, %no_variation_slices, $ancestral_seq);
 
+  my $lookup = $species_defs->prodnames_to_urls_lookup;
   foreach my $s (@$slices) {
-    my $other_species_dbs = $species_defs->get_config($s->{'name'}, 'databases');
-    my $name              = $species_defs->species_label($s->{'name'});
+    my $species_url       = $s->{'name'} eq 'ancestral_sequences' ? 'Multi' : $lookup->{$s->{'name'}};
+    my $other_species_dbs = $species_defs->get_config($species_url, 'databases');
+    my $name              = $species_defs->species_label($species_url);
     
     if ($s->{'name'} eq 'ancestral_sequences') {
       $ancestral_seq = $name;

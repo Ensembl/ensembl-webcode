@@ -379,9 +379,9 @@ sub write_alignment {
         $alignment = $data;
       }
       else {
-        $self->object->{'alignments_function'} = 'get_SimpleAlign';
+        $self->object->{'aref_alignments_function'} = '_get_pruned_SimpleAlign';
 
-        ($alignment) = $self->object->get_alignments({
+        $alignment = $self->object->get_alignments({
           'slice'     => $data->slice,
           'align'     => $hub->param('align'),
           'species'   => $hub->species,

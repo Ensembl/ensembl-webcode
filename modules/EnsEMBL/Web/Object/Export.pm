@@ -511,9 +511,9 @@ sub alignment {
   # Nasty hack to link export to the view config for alignments. Eww.
   $hub->get_viewconfig({component => 'Compara_Alignments', type => $hub->type, cache => 1});
   
-  $self->{'alignments_function'} = 'get_SimpleAlign';
+  $self->{'aref_alignments_function'} = '_get_pruned_SimpleAlign';
   
-  my ($alignments) = $self->get_alignments({
+  my $alignments = $self->get_alignments({
                               'slice' => $self->slice,
                               'align' => $hub->param('align'), 
                               'species' => $hub->species

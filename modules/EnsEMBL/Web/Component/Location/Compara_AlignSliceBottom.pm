@@ -82,7 +82,7 @@ sub content {
   if ($align_details->{'type'} eq 'CACTUS_DB') {
     $html .= $self->show_scale_dependent_track_info_box($align_details);
   }
-
+  
   my ($caption_height,$caption_img_offset) = (0,-24);
   my $lookup = $species_defs->prodnames_to_urls_lookup;
   foreach (@$slices) {

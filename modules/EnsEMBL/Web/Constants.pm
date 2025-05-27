@@ -283,6 +283,8 @@ sub NHX_OPTIONS {
     'display_label_composite' => 'Display label composite',
     'simple'                  => 'Simple',
     'phylip'                  => 'PHYLIP',
+    'genome_gene_stable_id'   => 'Genome and gene ID',
+    'genome_product_stable_id' => 'Genome and product ID',
   );
 }
 
@@ -302,6 +304,8 @@ sub NEWICK_OPTIONS {
     'ncbi_taxon'              => 'NCBI taxon',
     'ncbi_name'               => 'NCBI name',
     'phylip'                  => 'PHYLIP',
+    'genome_gene_stable_id'   => 'Genome and gene ID',
+    'genome_product_stable_id' => 'Genome and product ID',
   );
 }
 

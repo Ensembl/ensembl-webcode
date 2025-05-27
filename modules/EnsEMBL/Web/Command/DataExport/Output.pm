@@ -379,7 +379,7 @@ sub write_alignment {
         $alignment = $data;
       }
       else {
-        $self->object->{'aref_alignments_function'} = '_get_pruned_SimpleAlign';
+        $self->object->{'aref_alignments_function'} = '_get_filtered_SimpleAlign';
 
         $alignment = $self->object->get_alignments({
           'slice'     => $data->slice,

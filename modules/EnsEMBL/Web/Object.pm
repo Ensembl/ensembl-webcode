@@ -512,12 +512,15 @@ sub get_alignments {
        $func = $self->{'alignments_function'};
        $is_aref_func = 0;
      } else {
-       # ... and defaulting to aref function '_get_pruned_Slices'.
-       $func = '_get_pruned_Slices';
+       # ... and defaulting to aref function '_get_filtered_Slices'.
+       $func = '_get_filtered_Slices';
        $is_aref_func = 1;
      }
 
-     $as_slices = $is_aref_func ? $align_slice->$func(\@selected_species) : $align_slice->$func(@selected_species);
+     $as_slices = $is_aref_func
+                ? $align_slice->$func(\@selected_species, 'prune_ancestral')
+                : $align_slice->$func(@selected_species)
+                ;
   }
 
   return $as_slices;

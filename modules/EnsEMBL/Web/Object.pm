@@ -411,7 +411,7 @@ sub get_slices {
       slice             => $_,
       underlying_slices => $underlying_slices && $_->can('get_all_underlying_Slices') ? $_->get_all_underlying_Slices : [ $_ ],
       name              => $name,
-      display_name      => $self->get_slice_display_name($species_url),
+      display_name      => $species_url,
       cigar_line        => $cigar_line,
     };
     if ($name =~ /^Ancestral_sequences$/i) {

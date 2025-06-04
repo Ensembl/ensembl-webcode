@@ -14,7 +14,7 @@
 </ul>
 
 <p>
-The <a href="/info/docs/tools/vep/index.html">Variant Effect Predictor</a>
+The <a href="/info/docs/tools/vep/index.html">Ensembl Variant Effect Predictor (VEP)</a>
 tool which appears as an option when you click on <strong>Manage your
 Data</strong> allows you to upload a set of variation data and predict the
 effect of the variants.</p>
@@ -81,15 +81,15 @@ example, a three base pair deletion of nucleotides 12600, 12601, and
     details. These must be relative to genomic or Ensembl transcript
     coordinates. It is possible, although less reliable, to <a
     href="/info/docs/tools/vep/script/vep_other.html#hgvs">use notations relative
-    to RefSeq transcripts</a> in the VEP script.</li>
+    to RefSeq transcripts</a> in the Ensembl VEP script.</li>
     <li>Variant identifiers - these should be e.g. dbSNP rsIDs, or any synonym
     for a variant present in the Ensembl Variation database. See <a
     href="/info/genome/variation/sources_documentation.html">here</a> for a list
     of identifier sources in Ensembl.</li>
 </ul>
 
-<p> When using the web VEP, ensure that you have the correct file format
-selected from the drop-down menu. The VEP script is able to auto-detect the
+<p> When using the web Ensembl VEP, ensure that you have the correct file format
+selected from the drop-down menu. The Ensembl VEP script is able to auto-detect the
 format of the input file. </p>
 
 <h2 id="output">Output format</h2>
@@ -137,8 +137,8 @@ columns are:</p>
 
 <p>Empty values are denoted by '-'. Further fields in the Extra column can be
 added by <a href="/info/docs/tools/vep/script/index.html#plugins">plugins</a> or using <a
-href="/info/docs/tools/vep/script/index.html#custom">custom annotations</a> in the VEP script. Output
-fields can be configured using the --fields flag when running the VEP script.
+href="/info/docs/tools/vep/script/index.html#custom">custom annotations</a> in the Ensembl VEP script. Output
+fields can be configured using the --fields flag when running the Ensembl VEP script.
 </p>
 
 <pre class="code">
@@ -149,7 +149,7 @@ fields can be configured using the --fields flag when running the VEP script.
 22_16084370_G/A  22:16084370 A  -                ENSR00000615113  RegulatoryFeature  REGULATORY_REGION       -    -    -    -    -        -  -
 </pre>
 
-<p> The VEP script will also add a header to the output file. This contains
+<p> The Ensembl VEP script will also add a header to the output file. This contains
 information about the databases connected to, and also a key describing the
 key/value pairs used in the extra column. </p>
 

@@ -105,7 +105,7 @@ Each directory on <a href="$ftp" rel="external">$ftp_domain</a> contains a
     emf       => 'Alignments of resequencing data from the ensembl_compara database',
     gvf       => 'Variation data in GVF format',
     vcf       => 'Variation data in VCF format',
-    vep       => 'Cache files for use with the VEP script',
+    vep       => 'Cache files for use with the Ensembl VEP script',
     funcgen   => 'Regulation data in GFF format',
     coll      => 'Additional regulation data (not in the database)',
     bed       => 'Constrained elements calculated using GERP',
@@ -141,7 +141,7 @@ Each directory on <a href="$ftp" rel="external">$ftp_domain</a> contains a
     push @$columns, (
     { key => 'var2',    title => 'Variation (GVF)',              align => 'center', width => '10%', sort => 'html' },
     { key => 'var4',    title => 'Variation (VCF)',              align => 'center', width => '10%', sort => 'html' },
-    { key => 'var3',    title => 'Variation (VEP)',              align => 'center', width => '10%', sort => 'html' }
+    { key => 'var3',    title => 'Variation (Ensembl VEP)',      align => 'center', width => '10%', sort => 'html' }
     );
   }
 
@@ -222,7 +222,7 @@ Each directory on <a href="$ftp" rel="external">$ftp_domain</a> contains a
       mysql   => sprintf('<a rel="external" title="%s" href="%s/mysql/">MySQL</a>',          $title{'mysql'},  $ftp_base),
       var2    => $has_vcf ? sprintf('<a rel="external" title="%s" href="%s/variation/gvf/%s/">GVF</a>', $title{'gvf'}, $ftp_base, $sp_dir) : '-',
       var4    => $has_vcf ? sprintf('<a rel="external" title="%s" href="%s/variation/vcf/%s/">VCF</a>', $title{'vcf'}, $ftp_base, $sp_dir) : '-',
-      var3    => sprintf('<a rel="external" title="%s" href="%s/variation/indexed_vep_cache/">VEP</a>',    $title{'vep'}, $ftp_base),
+      var3    => sprintf('<a rel="external" title="%s" href="%s/variation/indexed_vep_cache/">Ensembl VEP</a>',    $title{'vep'}, $ftp_base),
       funcgen => $required_lookup->{'funcgen'}{$sp_dir} ? sprintf('<a rel="external" title="%s" href="%s/regulation/%s/">Regulation</a> (GFF)',      $title{'funcgen'}, $ftp_base, $sp_dir) : '-',
       bam     => $databases->{'DATABASE_RNASEQ'}        ? sprintf('<a rel="external" title="%s" href="%s/bamcov/%s/genebuild/">BAM/BigWig</a>',      $title{'bam'},    $ftp_base, $sp_dir) : '-',
       files   => $required_lookup->{'files'}{$sp_dir}   ? sprintf('<a rel="external" title="%s" href="%s/data_files/%s/">Regulation data files</a>', $title{'files'}, $ftp_base, $sp_dir) : '-',

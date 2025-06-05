@@ -427,7 +427,7 @@ sub _get_sequence {
 
   foreach my $slice (@{$config->{'slices'}}) {
     my $seq = shift @s2;
-    $seq->name($lookup->{$slice->{'display_name'}} || $lookup->{$slice->{'name'}});
+    $seq->name($slice->{'display_name'} || $slice->{'name'});
   }
 
   $view->markup($sequence,$markup,$config);
@@ -594,7 +594,7 @@ sub get_slice_table {
     my ($species_url, $display_name);
     if ($species eq 'Ancestral sequences') {
       $species_url = ''; 
-      $display_name = $species;
+      $display_name = $_->{'display_name'};
     }
     else {
       $species_url = $species;
@@ -623,7 +623,7 @@ sub get_slice_table {
         $number_padding = length $end    if length $end    > $number_padding;
       }
       
-      if ($species eq 'Ancestral sequences') {
+      if ($species =~ /^Ancestral sequences/) {
         $table_rows .= $slice->{'_tree'};
         $ancestral_sequences = 1;
       } else {

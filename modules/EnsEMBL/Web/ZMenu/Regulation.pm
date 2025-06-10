@@ -40,21 +40,25 @@ sub content {
   $self->caption($caption);
   
   my $object         = $self->new_object('Regulation', $reg_feature, $self->object->__data);
+
+  my $species = $hub->species;
+  my $species_defs = $hub->species_defs;
+  my $species_prod_name = $species_defs->get_config($species, 'SPECIES_PRODUCTION_NAME');
+  my $ensembl_version = $species_defs->ENSEMBL_VERSION;
+  my $feature_url = sprintf("https://regulation.ensembl.org/%s/regulatory_features/%s/%s", $ensembl_version, $species_prod_name, $object->stable_id);
   
   $self->add_entry({
     type  => 'ID',
-    label => $object->stable_id,
-    link  => $object->get_summary_page_url
+    label_html => sprintf("<a href=\"%s\" rel=\"external\" >%s</a>", $feature_url, $object->stable_id),
   });
 
   if (!($reg_feature->feature_type->name =~ /^EMAR/)  && !($reg_feature->feature_type->name =~ /^CTCF/)) {
     $self->add_entry({
       type  => 'Activity',
-      label => 'Regulatory activity',
-      link  => $object->get_summary_page_url
+      label_html => sprintf("<a href=\"%s\" rel=\"external\" >Regulatory activity</a>", $feature_url),
     });
   }
-    
+ 
   $self->add_entry({
     type  => 'Type',
     label => $object->feature_type->name

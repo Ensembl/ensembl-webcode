@@ -39,14 +39,13 @@ sub get_details {
   return (undef, '<strong>Gene is not in the compara database</strong>') unless $member;
 
   my $strain_tree  = $self->hub->species_defs->get_config($self->hub->species,'RELATED_TAXON') if ($self->hub->is_strain || $self->hub->param('strain') || $self->hub->action =~ /Strain_/);
-  my $species_tree = $object->get_SpeciesTree($cdb, $strain_tree);  
   my $tree = $object->get_GeneTree($cdb,"", $strain_tree);
   return (undef, '<strong>Gene is not in a compara tree</strong>') unless $tree;
 
   my $node = $tree->get_leaf_by_Member($member);
   return (undef, '<strong>Gene is not in the compara tree</strong>') unless $node;
 
-  return ($member, $tree, $node, $species_tree);
+  return ($member, $tree, $node);
 }
 
 sub content_sub_supertree {
@@ -55,13 +54,13 @@ sub content_sub_supertree {
   my $cdb = $self->param('cdb') || 'compara';
   my $object      = $self->object;
   my $is_genetree = $object->isa('EnsEMBL::Web::Object::GeneTree') ? 1 : 0;
-  my ($gene, $member, $tree, $node, $test_tree);
+  my ($gene, $member, $tree, $node);
   if ($is_genetree) {
     $tree   = $object->Obj;
     $member = undef;
   } else {
     $gene = $object;
-    ($member, $tree, $node, $test_tree) = $self->get_details($cdb);
+    ($member, $tree, $node) = $self->get_details($cdb);
   }
   my $html = '';
   my $parent      = $tree->tree->{'_supertree'};
@@ -96,7 +95,7 @@ sub content {
   my $object      = $self->object || $self->hub->core_object('gene');
   my $is_genetree = $object && $object->isa('EnsEMBL::Web::Object::GeneTree') ? 1 : 0;
   my $is_strain   = $hub->is_strain || $hub->param('strain') || $hub->action =~ /Strain_/;
-  my ($gene, $member, $tree, $node, $test_tree);
+  my ($gene, $member, $tree, $node);
 
   my $type   = $self->param('data_type') || $hub->type;
   my $vc = $self->view_config($type);
@@ -106,7 +105,7 @@ sub content {
     $member = undef;
   } else {
     $gene = $object;
-    ($member, $tree, $node, $test_tree) = $self->get_details($cdb);
+    ($member, $tree, $node) = $self->get_details($cdb);
   }
 
   return $tree . $self->genomic_alignment_links($cdb) if $self->param('g') && !$is_genetree && !defined $member;

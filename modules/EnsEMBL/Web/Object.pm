@@ -396,7 +396,6 @@ sub get_slices {
     push @slices, $args->{slice}; # If no alignment selected then we just display the original sequence as in geneseqview
   }
 
-  my $counter = 0;
   foreach (@slices) {
     next unless $_;
 
@@ -414,11 +413,6 @@ sub get_slices {
       display_name      => $species_url,
       cigar_line        => $cigar_line,
     };
-    if ($name =~ /^Ancestral_sequences$/i) {
-      $counter++;
-      $formatted_slices[-1]->{_counter_position} = $counter;
-      $formatted_slices[-1]->{display_name} .= " $counter";
-    }
 
     $length ||= $_->length; # Set the slice length value for the reference slice only
   }

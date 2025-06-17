@@ -427,7 +427,7 @@ sub _get_sequence {
 
   foreach my $slice (@{$config->{'slices'}}) {
     my $seq = shift @s2;
-    $seq->name($lookup->{$slice->{'display_name'}} || $lookup->{$slice->{'name'}});
+    $seq->name($slice->{'display_name'} || $slice->{'name'});
   }
 
   $view->markup($sequence,$markup,$config);
@@ -531,15 +531,11 @@ sub draw_tree {
   #Get cigar lines from each Slice which will be passed to the genetree.pm drawing code
   my $slice_cigar_lines;
 
-  # The nodes should be in the same order as the slices, so we can match
-  # the internal nodes to the ancestral slices
+  # The nodes should be in the same order as the slices
   my @internal_nodes = grep {not $_->is_leaf} @{$restricted_tree->get_all_sorted_genomic_align_nodes};
   foreach my $this_slice (@$slices) {
-    if (lc($this_slice->{name}) eq "ancestral_sequences") {
-      #skip cigar lines for ancestral seqs and transfer the counter_position flag
-      my $ga_node = shift @internal_nodes;
-      $ga_node->{_counter_position} = $this_slice->{_counter_position};
-    } else {
+    if (lc($this_slice->{name}) ne "ancestral_sequences") {
+      #skip cigar lines for ancestral seqs
       push @$slice_cigar_lines, $this_slice->{cigar_line};
     }
   }
@@ -594,7 +590,7 @@ sub get_slice_table {
     my ($species_url, $display_name);
     if ($species eq 'Ancestral sequences') {
       $species_url = ''; 
-      $display_name = $species;
+      $display_name = $_->{'display_name'};
     }
     else {
       $species_url = $species;
@@ -623,7 +619,7 @@ sub get_slice_table {
         $number_padding = length $end    if length $end    > $number_padding;
       }
       
-      if ($species eq 'Ancestral sequences') {
+      if ($species =~ /^Ancestral sequences/) {
         $table_rows .= $slice->{'_tree'};
         $ancestral_sequences = 1;
       } else {

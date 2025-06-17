@@ -388,6 +388,7 @@ sub get_slices {
   my ($self, $args) = @_;
   my (@slices, @formatted_slices, $length);
   my $underlying_slices = !$args->{image}; # Don't get underlying slices for alignment images - they are only needed for text sequence views, and the process is slow.
+  my $lookup = $self->hub->species_defs->prodnames_to_urls_lookup;
 
   if ($args->{align}) {
     push @slices, @{$self->get_alignments($args)};
@@ -395,11 +396,11 @@ sub get_slices {
     push @slices, $args->{slice}; # If no alignment selected then we just display the original sequence as in geneseqview
   }
 
-  my $counter = 0;
   foreach (@slices) {
     next unless $_;
 
     my $name = $_->can('display_Slice_name') ? lc $_->display_Slice_name : $args->{species};
+    my $species_url = $_->can('genome_db') ? $lookup->{$_->genome_db->name} : $args->{species};
 
     my $cigar_line = $_->can('get_cigar_line') ? $_->get_cigar_line : "";
     #Need to change G to X if genetree glyphs are to be rendered correctly
@@ -409,26 +410,9 @@ sub get_slices {
       slice             => $_,
       underlying_slices => $underlying_slices && $_->can('get_all_underlying_Slices') ? $_->get_all_underlying_Slices : [ $_ ],
       name              => $name,
-      display_name      => $self->get_slice_display_name($name, $_),
+      display_name      => $species_url,
       cigar_line        => $cigar_line,
     };
-    if ($name eq 'Ancestral_sequences') {
-      $counter++;
-      my $ga_node = $formatted_slices[-1]->{underlying_slices}->[0]->{_node_in_tree};
-      if ($ga_node) {
-        my $removed_species = $_->{_align_slice}->{_removed_species};
-        # The current slice has to be discarded if it is an ancestral node
-        # that fully maps to hidden species on one of its sides
-        my $c1 = scalar(grep {not $removed_species->{$_->genomic_align_group->genome_db->name} } @{$ga_node->children->[0]->get_all_leaves});
-        my $c2 = scalar(grep {not $removed_species->{$_->genomic_align_group->genome_db->name} } @{$ga_node->children->[1]->get_all_leaves});
-        if ($c1 and $c2) {
-          $formatted_slices[-1]->{_counter_position} = $counter;
-          $formatted_slices[-1]->{display_name} .= " $counter";
-        } else {
-          pop @formatted_slices;
-        }
-      }
-    }
 
     $length ||= $_->length; # Set the slice length value for the reference slice only
   }
@@ -468,7 +452,6 @@ sub get_alignments {
 
   my $target_slice = $self->get_target_slice;
 
-  my $func                    = $self->{'alignments_function'} || 'get_all_Slices';
   my $compara_db              = $hub->database($cdb);
   my $as_adaptor              = $compara_db->get_adaptor('AlignSlice');
   my $mlss_adaptor            = $compara_db->get_adaptor('MethodLinkSpeciesSet');
@@ -507,7 +490,34 @@ sub get_alignments {
 
   $align_slice = $align_slice->sub_AlignSlice($args->{start}, $args->{end}) if $align_slice && $args->{start} && $args->{end};
 
-  return $align_slice ? $align_slice->$func(@selected_species) : [];
+  my $as_slices = [];
+  if ($align_slice) {
+
+     my $func;
+     my $is_aref_func;
+     if ($self->{'aref_alignments_function'}) {
+       # We give preference to 'aref_alignments_function'
+       # because that supports ancestral pruning ...
+       $func = $self->{'aref_alignments_function'};
+       $is_aref_func = 1;
+     } elsif ($self->{'alignments_function'}) {
+       # ... while continuing to support functions specified
+       # via 'alignments_function' (e.g. 'get_all_Slices') ...
+       $func = $self->{'alignments_function'};
+       $is_aref_func = 0;
+     } else {
+       # ... and defaulting to aref function '_get_filtered_Slices'.
+       $func = '_get_filtered_Slices';
+       $is_aref_func = 1;
+     }
+
+     $as_slices = $is_aref_func
+                ? $align_slice->$func(\@selected_species, 'prune_ancestral')
+                : $align_slice->$func(@selected_species)
+                ;
+  }
+
+  return $as_slices;
 }
 
 sub get_align_blocks {

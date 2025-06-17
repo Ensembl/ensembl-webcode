@@ -55,10 +55,10 @@ sub init_form {
   my $form    = $self->SUPER::init_form(@_);
   my %formats = EnsEMBL::Web::Constants::ALIGNMENT_FORMATS;
 
-  $form->get_fieldset('Select species')->remove unless $self->{'is_compara_ortholog'};
+  $form->get_fieldset('Selected species')->remove unless $self->{'is_compara_ortholog'};
 
   $form->add_form_element({
-    'fieldset'  => 'Aligment output',
+    'fieldset'  => 'Alignment output',
     'type'      => 'dropdown',
     'name'      => 'seq',
     'label'     => 'View as cDNA or Protein',
@@ -66,7 +66,7 @@ sub init_form {
   });
 
   $form->add_form_element({
-    'fieldset'  => 'Aligment output',
+    'fieldset'  => 'Alignment output',
     'type'      => 'dropdown',
     'name'      => 'text_format',
     'label'     => 'Output format for sequence alignment',

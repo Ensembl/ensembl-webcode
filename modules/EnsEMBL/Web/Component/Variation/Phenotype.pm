@@ -210,7 +210,7 @@ sub table_data_somatic {
     $classification = qq{$classification};
 
     my $oncogenicity = defined($pf->oncogenicity_classification) ? $pf->oncogenicity_classification : "-";
-    $oncogenicity = qq{<b>$oncogenicity</b>};
+    $oncogenicity = qq{$oncogenicity};
 
     # Review status
     my $stars = "";

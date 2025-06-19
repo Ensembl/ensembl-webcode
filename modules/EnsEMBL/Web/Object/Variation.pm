@@ -861,6 +861,12 @@ sub get_external_data {
   return $self->{'external_data'};
 }
 
+sub get_external_somatic_data {
+  my $self = shift;
+  $self->{'external_somatic_data'} ||= $self->hub->database('variation')->get_PhenotypeFeatureAdaptor->fetch_all_somatic_by_Variation($self->vari);
+  return $self->{'external_somatic_data'};
+}
+
 sub slice {
   my $self = shift;
 

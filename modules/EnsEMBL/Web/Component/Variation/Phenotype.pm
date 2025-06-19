@@ -207,7 +207,7 @@ sub table_data_somatic {
     }
 
     my $classification = defined($pf->somatic_classification) ? $pf->somatic_classification : "-";
-    $classification = qq{<b>$classification</b>};
+    $classification = qq{$classification};
 
     my $oncogenicity = defined($pf->oncogenicity_classification) ? $pf->oncogenicity_classification : "-";
     $oncogenicity = qq{<b>$oncogenicity</b>};

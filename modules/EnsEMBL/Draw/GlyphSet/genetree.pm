@@ -208,10 +208,10 @@ sub _init {
     }
 
     if ( $f->{label} ) {
-      if( $other_gene && $f->{_genes}->{$other_gene} ){
+      if( $other_gene && $other_genome_db_id && $f->{_leaves}->{$other_genome_db_id . '|' . $other_gene} ){
         $bold = 1;
         $label_colour = "ff6666";
-      } elsif( $f->{_genes}->{$current_gene} ){
+      } elsif( $f->{_leaves}->{$current_genome_db_id . '|' . $current_gene} ){
         $label_colour     = 'red';
         $collapsed_colour = 'red';
         $node_colour = 'navyblue';
@@ -731,7 +731,7 @@ sub features {
       $sum_dist += $dist || 0;
       $genome_dbs{$leaf->genome_db->dbID}++;
       $genes{$leaf->gene_member->stable_id}++;
-      $leaves{$leaf->node_id}++;
+      $leaves{$leaf->genome_db->dbID . '|' . $leaf->gene_member->stable_id}++;
     }
     
     $f->{'_collapsed'}          = 1,
@@ -826,6 +826,7 @@ sub features {
       $f->{'_gene'} = $stable_id;
       $f->{'_genes'} ||= {};
       $f->{'_genes'}->{$stable_id}++;
+      $f->{'_leaves'}->{$member->genome_db_id . '|' . $stable_id}++;
       
       my $treefam_link = "http://www.treefam.org/cgi-bin/TFseq.pl?id=$stable_id";
       

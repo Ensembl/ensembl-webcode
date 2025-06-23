@@ -318,7 +318,8 @@ sub content {
         anc_node_ids => $anc_node_ids, # the anc_node_ids parameter only becomes relevant in the Metazoa plugin
         cdb => $cdb,
         stable_id => $stable_id,
-        orthologue => $orthologue
+        orthologue => $orthologue,
+        s1 => $species,
       });
 
       my @homology_type_parts = (glossary_helptip($hub, ucfirst $orthologue_desc, ucfirst "$orthologue_desc orthologues"));
@@ -405,6 +406,7 @@ sub create_gene_tree_links {
 
   my $cdb = $params->{cdb};
   my $stable_id = $params->{stable_id};
+  my $s1 = $params->{s1};
   my $orthologue = $params->{orthologue};
 
   my $hub          = $self->hub;
@@ -414,6 +416,7 @@ sub create_gene_tree_links {
     type   => 'Gene',
     action => $strain_url . ($cdb =~ /pan/ ? 'PanComparaTree' : 'Compara_Tree'),
     g1     => $stable_id,
+    s1     => $s1,
     anc    => $orthologue->{'gene_tree_node_id'},
     r      => undef
   });

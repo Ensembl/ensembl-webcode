@@ -42,6 +42,7 @@ sub content {
   my $species_defs = $hub->species_defs;
   my $gene_id      = $self->object->stable_id;
   my $second_gene  = $hub->param('g1');
+  my $hom_id       = $hub->param('hom_id');
   my $seq          = $hub->param('seq');
   my $text_format  = $hub->param('text_format');
   my (%skipped, $html);
@@ -56,6 +57,7 @@ sub content {
 
   # Remove the homologies with hidden species
   foreach my $homology (@{$homologies}) {
+    next if $hom_id && $homology->dbID != $hom_id;
 
     my $compara_seq_type = $seq eq 'cDNA' ? 'cds' : undef;
     $homology->update_alignment_stats($compara_seq_type);
@@ -211,19 +213,19 @@ sub get_export_data {
   ## Fetch explicitly, as we're probably coming from a DataExport URL
   my $homologies = $self->get_homologies;
   my $second_gene   = $hub->param('g1');
+  my $hom_id        = $hub->param('hom_id');
   my $data          = [];
 
   HOMOLOGY:
   foreach my $homology (@{$homologies}) {
+    next if $hom_id && $homology->dbID != $hom_id;
 
     if ($type && $type eq 'genetree') {
       my $cdb = $hub->param('cdb') || 'compara';
-      foreach my $homology (@{$homologies}) {
-        foreach my $peptide (@{$homology->get_all_Members}) {
-          next unless $peptide->gene_member->stable_id eq $second_gene;
-          push @$data, $homology; 
-          last HOMOLOGY;
-        }
+      foreach my $peptide (@{$homology->get_all_Members}) {
+        next unless $peptide->gene_member->stable_id eq $second_gene;
+        push @$data, $homology;
+        last HOMOLOGY;
       }
     }
     else { ## ...or get alignment
@@ -256,6 +258,7 @@ sub get_export_data {
 sub buttons {
   my $self    = shift;
   my $hub     = $self->hub;
+  return unless $hub->param('g1');
   my $gene    =  $self->object->Obj;
 
   my $dxr  = $gene->can('display_xref') ? $gene->display_xref : undef;

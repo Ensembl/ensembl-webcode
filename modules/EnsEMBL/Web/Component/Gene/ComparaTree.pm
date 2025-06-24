@@ -193,9 +193,12 @@ sub content {
      
   my $lookup = $hub->species_defs->prodnames_to_urls_lookup; 
   foreach my $this_leaf (@$leaves) {
+    # If the 's1' parameter is specified, we need $highlight_species_url to match the species URL
+    # of $gene_to_highlight ... but it's entirely possible the 's1' parameter will not be specified;
+    # in such cases, we must allow for a highlighted gene to be matched by stable ID alone.
     if ($gene_to_highlight
         && $this_leaf->gene_member->stable_id eq $gene_to_highlight
-        && $lookup->{$this_leaf->gene_member->genome_db->name} eq $highlight_species_url) {
+        && (!defined $highlight_species_url || $lookup->{$this_leaf->gene_member->genome_db->name} eq $highlight_species_url)) {
       $highlight_species            = $lookup->{$this_leaf->gene_member->genome_db->name};
       $highlight_species_name       = $this_leaf->gene_member->genome_db->display_name;
       $highlight_genome_db_id       = $this_leaf->gene_member->genome_db_id;

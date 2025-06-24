@@ -717,7 +717,6 @@ sub features {
     my $sum_dist      = 0;
     my %genome_dbs;
     my %genes;
-    my %leaves;
     my %terminals;
 
     my $species_tree_node = $tree->species_tree_node();
@@ -732,7 +731,6 @@ sub features {
       $sum_dist += $dist || 0;
       $genome_dbs{$leaf->genome_db->dbID}++;
       $genes{$leaf->gene_member->stable_id}++;
-      $leaves{$leaf->node_id}++;
       $terminals{$leaf->genome_db->dbID . '|' . $leaf->gene_member->stable_id}++;
     }
     
@@ -748,7 +746,6 @@ sub features {
     $f->{'_height'}             = 12 * log($f->{'_collapsed_count'});
     $f->{'_genome_dbs'}         = \%genome_dbs;
     $f->{'_genes'}              = \%genes;
-    $f->{'_leaves'}             = \%leaves;
     $f->{'_terminals'}          = \%terminals;
     $f->{'label'}               = sprintf '%s: %d homologs', ($node_name, $leaf_count);
 

@@ -25,6 +25,7 @@ no warnings "uninitialized";
 use HTML::Entities qw(encode_entities);
 
 use EnsEMBL::Web::Attributes;
+use EnsEMBL::Web::Utils::Compara qw(orthoset_prod_names);
 
 use parent qw(EnsEMBL::Web::Form);
 
@@ -546,30 +547,38 @@ sub add_species_fieldset {
   my $self          = shift;
   my $hub           = $self->view_config->hub;
   my $species_defs  = $self->view_config->species_defs;
-  my $lookup        = $species_defs->prodnames_to_urls_lookup;
-  my $species;
-  foreach (keys %{$species_defs->multi_hash->{'DATABASE_COMPARA'}{'COMPARA_SPECIES'}}) {
-    my $url = $lookup->{$_};
-    $species->{$_} = {'url' => $url, 'name' => $species_defs->species_label($url)};
+
+  my $function = $hub->referer->{'ENSEMBL_FUNCTION'};
+  my $cdb = $function =~ /pan_compara/ ? 'compara_pan_ensembl' : 'compara';
+
+  my $page_action = $hub->referer->{'ENSEMBL_ACTION'};
+  my $strain = $hub->param('strain') || $hub->action =~ /^Strain_/ || $page_action =~ /^Strain_/;
+
+  my $compara_spp = EnsEMBL::Web::Utils::Compara::orthoset_prod_names($hub, $cdb, $strain);
+
+  my $pan_lookup;
+  my $url_lookup;
+  if ($cdb eq 'compara_pan_ensembl') {
+    $pan_lookup = $species_defs->multi_val('PAN_COMPARA_LOOKUP');
+  } else {
+    $url_lookup = $species_defs->prodnames_to_urls_lookup($cdb);
   }
 
-  foreach (sort { ($species->{$a}{'name'} =~ /^<.*?>(.+)/ ? $1 : $species->{$a}{'name'}) 
-              cmp ($species->{$b}{'name'} =~ /^<.*?>(.+)/ ? $1 : $species->{$b}{'name'}) } keys %$species) { 
-    ## If statement to show/hide strain or main species depending on the view you are on
-    ##  When you are on a main species, do not show strain species 
-    my $url = $species->{$_}{'url'};
-    next if (!$hub->param('strain') && $hub->is_strain($url));
-    ## When you are on a strain species or strain view from main species, show only strain species         
-    next if (($hub->param('strain')  || $hub->is_strain) && !$hub->species_defs->get_config($url, 'RELATED_TAXON'));
-    ## But only show strains from the same group as the current species!
-    next if ($hub->param('strain') && (lc $hub->species_defs->get_config($url, 'RELATED_TAXON')
-                                          ne lc $hub->species_defs->get_config($hub->species, 'RELATED_TAXON')));
+  my $species;
+  foreach (@{$compara_spp}) {
+    $species->{$_} = $cdb eq 'compara_pan_ensembl'
+                   ? $pan_lookup->{$_}{'display_name'}
+                   : $species_defs->species_label($url_lookup->{$_})
+                   ;
+  }
 
-    
+  foreach (sort { ($species->{$a} =~ /^<.*?>(.+)/ ? $1 : $species->{$a})
+              cmp ($species->{$b} =~ /^<.*?>(.+)/ ? $1 : $species->{$b}) } keys %$species) {
+
     $self->add_form_element({
       'fieldset'  => 'Selected species',
       'type'      => 'CheckBox',
-      'label'     => $species->{$_}{'name'},
+      'label'     => $species->{$_},
       'name'      => 'species_'.$_,
       'value'     => 'yes',
     });

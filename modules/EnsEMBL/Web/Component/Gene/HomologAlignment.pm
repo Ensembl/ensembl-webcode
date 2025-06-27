@@ -85,10 +85,13 @@ sub content {
         my $label             = $external_species ? $pan_lookup->{$prodname}{'display_name'} : $species_defs->species_label($member_species);
         my $location       = sprintf '%s:%d-%d', $gene->dnafrag->name, $gene->dnafrag_start, $gene->dnafrag_end;
        
-        if (!$second_gene && $member_species ne $species && $hub->param('species_' .$prodname) eq 'off') {
-          $flag = 0;
-          $skipped{$label}++;
-          next;
+        if (!$second_gene && $member_species ne $species) {
+          my $species_toggle = $hub->param('species_' .$prodname);
+          if (!defined $species_toggle || $species_toggle eq 'off') {
+            $skipped{$label}++ if defined $species_toggle;
+            $flag = 0;
+            next;
+          }
         }
 
         if ($gene->stable_id eq $gene_id) {

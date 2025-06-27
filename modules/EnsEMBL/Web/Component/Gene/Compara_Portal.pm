@@ -35,8 +35,9 @@ sub content {
   my $hub           = $self->hub;
   my $availability  = $self->object->availability;
   my $location      = $hub->url({ type => 'Location',  action => 'Compara' });
-  my $strain_url    = ($self->is_strain || $hub->action =~ /^Strain_/) ? "Strain_" : "";
-  my $strain_avail  = ($self->is_strain || $hub->action =~ /^Strain_/) ? "strain_" : "";
+  my $is_strain_view = $hub->action =~ /^Strain_/;
+  my $strain_url    = $is_strain_view ? "Strain_" : "";
+  my $strain_avail  = $is_strain_view ? "strain_" : "";
 
   my $ortho_image = $strain_avail ? 'strain_ortho.gif' : 'compara_ortho.gif';
   my $para_image  = $strain_avail ? 'strain_para.gif' : 'compara_para.gif';
@@ -49,7 +50,7 @@ sub content {
     { title => 'Families',           img => '80/compara_fam.gif',   url => $availability->{'family'}         ? $hub->url({ action => 'Family'             }) : '' },
   ];
   
-  @$buttons  = grep { $_->{title} !~ /^Families$|^Genomic alignments$/ } @$buttons if($self->is_strain); #remove the one we dont show for strains species
+  @$buttons  = grep { $_->{title} !~ /^Families$|^Genomic alignments$/ } @$buttons if($is_strain_view); #remove the one we dont show for strain views
   my $html  = $self->button_portal($buttons, 'portal-small');
      $html .= qq{<p>More views of comparative genomics data, such as multiple alignments and synteny, are available on the <a href="$location">Location</a> page for this gene.</p>};
 

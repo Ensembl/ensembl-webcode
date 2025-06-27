@@ -28,7 +28,7 @@ use base qw(EnsEMBL::Web::ZMenu);
 sub content {
   my $self        = shift;
   my $hub         = $self->hub;
-  my $strain_url  = $hub->is_strain || $hub->param('strain') ? "Strain_" : "";
+  my $strain_url  = $hub->param('strain') ? "Strain_" : "";
   
   my $align_url = $hub->url({
     type     => 'Gene',

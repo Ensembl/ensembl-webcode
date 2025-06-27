@@ -307,6 +307,25 @@ sub get {
   if($self->variation_db_adaptor($args)) {
     $out->{'has_phenotypes'} = $self->_get_phenotype($args);
   }
+
+  $out->{'has_default_compara'} = $out->{'database:compara'} && (
+    $out->{'has_gene_tree'}
+    || $out->{'has_species_tree'}
+    || $out->{'has_orthologs'}
+    || $out->{'has_paralogs'}
+    || $out->{'has_homoeologs'}
+    || $out->{'has_homologs'}
+    || $out->{'family'}
+    || $out->{'has_alignments'}
+  );
+
+  $out->{'has_strain_compara'} = $out->{'database:compara'} && (
+    $out->{'has_strain_gene_tree'}
+    || $out->{'has_strain_orthologs'}
+    || $out->{'has_strain_paralogs'}
+    || $out->{'has_strain_homoeologs'}
+  );
+
   if($out->{'database:compara_pan_ensembl'} && $self->pancompara_db_adaptor) {
     $out->{'family_pan_ensembl'} = !!$counts->{'families_pan'};
     $out->{'has_gene_tree_pan'} =
@@ -314,6 +333,14 @@ sub get {
     for (qw(alignments_pan paralogs_pan orthologs_pan)) {
       $out->{"has_$_"} = $counts->{$_};
     }
+
+    $out->{'has_pan_compara'} = $out->{'database:compara_pan_ensembl'} && (
+      $out->{'has_gene_tree_pan'}
+      || $out->{'has_orthologs_pan'}
+      || $out->{'has_paralogs_pan'}
+      || $out->{'family_pan_ensembl'}
+      || $out->{'has_alignments_pan'}
+    );
   }
 
   return [$out];

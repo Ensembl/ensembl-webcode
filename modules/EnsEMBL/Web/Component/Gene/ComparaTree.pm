@@ -38,7 +38,8 @@ sub get_details {
   my $member = $object->get_compara_Member({'stable_id' => $object->stable_id, 'cdb' => $cdb});
   return (undef, '<strong>Gene is not in the compara database</strong>') unless $member;
 
-  my $strain_tree  = $self->hub->species_defs->get_config($self->hub->species,'RELATED_TAXON') if ($self->hub->is_strain || $self->hub->param('strain') || $self->hub->action =~ /Strain_/);
+  my $strain_tree = $self->hub->species_defs->get_config($self->hub->species,'RELATED_TAXON') if ($self->hub->param('strain') || $self->hub->action =~ /^Strain_/);
+
   my $tree = $object->get_GeneTree($cdb,"", $strain_tree);
   return (undef, '<strong>Gene is not in a compara tree</strong>') unless $tree;
 
@@ -94,7 +95,7 @@ sub content {
   my $hub         = $self->hub;
   my $object      = $self->object || $self->hub->core_object('gene');
   my $is_genetree = $object && $object->isa('EnsEMBL::Web::Object::GeneTree') ? 1 : 0;
-  my $is_strain   = $hub->is_strain || $hub->param('strain') || $hub->action =~ /Strain_/;
+  my $is_strain_view = $hub->param('strain') || $hub->action =~ /^Strain_/;
   my ($gene, $member, $tree, $node);
 
   my $type   = $self->param('data_type') || $hub->type;
@@ -147,7 +148,7 @@ sub content {
   if (defined $parent) {
 
     if ($vc->get('super_tree') eq 'on' || $self->param('super_tree') eq 'on') {
-      my $super_url = $self->ajax_url('sub_supertree',{ cdb => $cdb, update_panel => undef, strain => $is_strain });
+      my $super_url = $self->ajax_url('sub_supertree',{ cdb => $cdb, update_panel => undef, strain => $is_strain_view });
       $html .= qq(<div class="ajax"><input type="hidden" class="ajax_load" value="$super_url" /></div>);
     } else {
       $html .= $self->_info(
@@ -162,10 +163,18 @@ sub content {
   }
 
   if ($hub->type eq 'Gene') {
-    if ($tree->tree->clusterset_id ne $clusterset_id && !$self->is_strain) {
+    my $obs_clusterset_id = $tree->tree->clusterset_id;
+    my $exp_clusterset_id = $is_strain_view && $clusterset_id eq 'default'
+                          ? $hub->species_defs->get_config($hub->species, 'RELATED_TAXON')
+                          : $clusterset_id
+                          ;
+
+    if ($obs_clusterset_id ne $exp_clusterset_id) {
       $html .= $self->_info('Phylogenetic model selection',
         sprintf(
-          'The phylogenetic model <I>%s</I> is not available for this tree. Showing the default (consensus) tree instead.', $clusterset_id
+          'The phylogenetic model <I>%s</I> is not available for this tree. Showing the <I>%s</I> tree instead.',
+          $exp_clusterset_id,
+          $obs_clusterset_id,
           )
       );
     } elsif ($tree->tree->ref_root_id) {
@@ -275,7 +284,7 @@ sub content {
     image_width     => $image_width,
     slice_number    => '1|1',
     cdb             => $cdb,
-    strain          => $is_strain,
+    strain          => $is_strain_view,
   });
   
   # Keep track of collapsed nodes
@@ -388,7 +397,11 @@ sub content {
       my $collapsed_to_rank = $self->collapsed_nodes($tree, $node, "rank_$rank", $highlight_genome_db_id, $highlight_gene);
       push @rank_options, sprintf qq{<option value="%s" %s>%s</option>\n}, $hub->url({ collapse => $collapsed_to_rank, g1 => $highlight_gene, gtr => $rank }), $rank eq $selected_rank ? 'selected' : '', ucfirst $rank;
     }
-    push @view_links, sprintf qq{<li>Collapse all the nodes at the taxonomic rank <select onchange="Ensembl.redirect(this.value)">%s</select></li>}, join("\n", @rank_options) if(!$self->is_strain);
+    # The ability to collapse by taxonomic rank was not seen as
+    # particularly useful in a strain gene-tree view ( ENSWEB-3037 ).
+    if(!$is_strain_view) {
+      push @view_links, sprintf qq{<li>Collapse all the nodes at the taxonomic rank <select onchange="Ensembl.redirect(this.value)">%s</select></li>}, join("\n", @rank_options);
+    }
   }
 
   $html .= $image->render;

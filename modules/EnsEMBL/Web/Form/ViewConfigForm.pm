@@ -552,7 +552,7 @@ sub add_species_fieldset {
   my $cdb = $function =~ /pan_compara/ ? 'compara_pan_ensembl' : 'compara';
 
   my $page_action = $hub->referer->{'ENSEMBL_ACTION'};
-  my $strain = $hub->param('strain') || $hub->action =~ /^Strain_/ || $page_action =~ /^Strain_/;
+  my $strain = $hub->param('strain') || $page_action =~ /^Strain_/;
 
   my $compara_spp = EnsEMBL::Web::Utils::Compara::orthoset_prod_names($hub, $cdb, $strain);
 

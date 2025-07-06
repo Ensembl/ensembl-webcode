@@ -163,18 +163,10 @@ sub content {
   }
 
   if ($hub->type eq 'Gene') {
-    my $obs_clusterset_id = $tree->tree->clusterset_id;
-    my $exp_clusterset_id = $is_strain_view && $clusterset_id eq 'default'
-                          ? $hub->species_defs->get_config($hub->species, 'RELATED_TAXON')
-                          : $clusterset_id
-                          ;
-
-    if ($obs_clusterset_id ne $exp_clusterset_id) {
+    if ($tree->tree->clusterset_id ne $clusterset_id) {
       $html .= $self->_info('Phylogenetic model selection',
         sprintf(
-          'The phylogenetic model <I>%s</I> is not available for this tree. Showing the <I>%s</I> tree instead.',
-          $exp_clusterset_id,
-          $obs_clusterset_id,
+          'The phylogenetic model <I>%s</I> is not available for this tree. Showing the <I>%s</I> tree instead.', $clusterset_id, $tree->tree->clusterset_id,
           )
       );
     } elsif ($tree->tree->ref_root_id) {

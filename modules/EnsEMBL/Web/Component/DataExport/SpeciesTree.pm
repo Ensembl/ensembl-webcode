@@ -43,7 +43,7 @@ sub content {
                 };
 
   ## Options per format
-  my $fields_by_format = {'PhyloXML' => $self->phyloxml_fields};
+  my $fields_by_format = {'PhyloXML' => []};
 
   ## Create settings form (comes with some default fields - see parent)
   my $form = $self->create_form($settings, $fields_by_format, 1);

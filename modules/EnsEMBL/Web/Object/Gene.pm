@@ -941,14 +941,23 @@ sub get_GeneTree {
   my $compara_db  = shift || 'compara';
   my $whole_tree  = shift;
   my $strain_tree = shift;
-  my $clusterset_id = $strain_tree || $self->hub->param('clusterset_id') || 'default';
+  my $clusterset_id = $self->hub->param('clusterset_id') || $strain_tree || 'default';
+
   my $cache_key  = sprintf('_protein_tree_%s_%s_%s', $compara_db, $clusterset_id, $strain_tree);
 
   if (!$self->{$cache_key}) {  
     my $args = {'stable_id' => $self->stable_id, 'cdb' => $compara_db};
     my $member  = $self->get_compara_Member($args)  || return;
     my $adaptor = $member->adaptor->db->get_adaptor('GeneTree') || return;
-    my $tree    = $adaptor->fetch_all_by_Member($member, -clusterset_id => $clusterset_id)->[0];
+    my $tree    = $adaptor->fetch_default_for_Member($member, $clusterset_id);
+
+    if (!$tree || defined $tree->ref_root_id) {
+      my $consensus_tree = $adaptor->fetch_default_for_Member($member, $strain_tree);
+      if (!$tree || $tree->ref_root_id != $consensus_tree->root_id) {
+        $tree = $consensus_tree;
+      }
+    }
+
     unless ($tree) {
         $tree = $adaptor->fetch_default_for_Member($member);
     }

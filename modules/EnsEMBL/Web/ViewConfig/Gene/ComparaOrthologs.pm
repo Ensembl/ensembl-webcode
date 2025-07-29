@@ -22,6 +22,8 @@ package EnsEMBL::Web::ViewConfig::Gene::ComparaOrthologs;
 use strict;
 use warnings;
 
+use EnsEMBL::Web::Utils::Compara qw(orthoset_prod_names);
+
 use parent qw(EnsEMBL::Web::ViewConfig);
 
 sub _new {
@@ -37,17 +39,17 @@ sub init_cacheable {
   ## Abstract method implementation
   my $self = shift;
   my $hub = $self->hub;
-  my $action = $hub->param('data_action') || $hub->action;
-  foreach (sort $hub->species_defs->valid_species) {
-    ## If statement to show/hide strain or main species depending on the view you are on
-    ##  When you are on a main species, do not show strain species 
-    next if ($action !~ /Strain_/ && $hub->is_strain($_));
-    ## When you are on a strain species or strain view from main species, show only strain species         
-    next if (($action =~ /Strain_/  || $hub->is_strain) && !$hub->species_defs->get_config($_, 'RELATED_TAXON'));
-    ## But only show strains from the same group as the current species!
-    next if ($action =~ /Strain_/ && (lc $hub->species_defs->get_config($_, 'RELATED_TAXON') 
-                                          ne lc $hub->species_defs->get_config($hub->species, 'RELATED_TAXON')));
-    $self->set_default_options({ 'species_' . $hub->species_defs->get_config($_, 'SPECIES_PRODUCTION_NAME') => 'yes' });    
+
+  my $function = $hub->referer->{'ENSEMBL_FUNCTION'};
+  my $cdb = $function =~ /pan_compara/ ? 'compara_pan_ensembl' : 'compara';
+
+  my $page_action = $hub->referer->{'ENSEMBL_ACTION'};
+  my $strain = $hub->param('strain') || $page_action =~ /^Strain_/;
+
+  my $compara_spp = EnsEMBL::Web::Utils::Compara::orthoset_prod_names($hub, $cdb, $strain);
+
+  foreach my $prod_name (sort @{$compara_spp}) {
+    $self->set_default_options({ "species_${prod_name}" => 'yes' });
   }
 
   $self->title('Homologs');

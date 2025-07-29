@@ -1387,9 +1387,28 @@ sub _summarise_compara_db {
   $sth->execute;
 
   while (my ($sp, $clusterset_id, $strain_type) = $sth->fetchrow_array) {
+    $self->db_tree->{$db_name}{'CLUSTERSET_PRODNAMES'}{$clusterset_id}{$sp} = 1;
     next if exists $preferred_clusterset_id{$sp} && $clusterset_id ne $preferred_clusterset_id{$sp};
     $self->db_tree->{$db_name}{'CLUSTERSETS'}{$sp} = $clusterset_id;
     $self->db_tree->{$db_name}{'STRAIN_TYPES'}{$sp} = $strain_type;
+  }
+
+  if (exists $self->db_tree->{$db_name}{'CLUSTERSET_PRODNAMES'}) {
+
+    my $default_oset_spp_aref = $dbh->selectcol_arrayref('
+      select distinct gd.name
+      from method_link_species_set mlss
+        join method_link ml using(method_link_id)
+        join species_set ss using(species_set_id)
+        join species_set_header ssh using(species_set_id)
+        join genome_db gd using(genome_db_id)
+      where ml.type in ("PROTEIN_TREES", "NC_TREES")
+        and trim(leading "collection-" from ssh.name) = "default";
+    ');
+
+    foreach my $sp (@$default_oset_spp_aref) {
+      $self->db_tree->{$db_name}{'CLUSTERSET_PRODNAMES'}{'default'}{$sp} = 1;
+    }
   }
 
   ###################################################################

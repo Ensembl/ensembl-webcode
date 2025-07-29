@@ -155,19 +155,27 @@ sub init_form_non_cacheable {
   my $form  = $self->SUPER::init_form_non_cacheable(@_);
   my %other_clustersets;
 
+  my $page_action = $hub->referer->{'ENSEMBL_ACTION'};
+  my $consensus_clusterset_id = $hub->param('strain') || $page_action =~ /^Strain_/
+                              ? $hub->species_defs->get_config($hub->species, 'RELATED_TAXON')
+                              : 'default'
+                              ;
+
   if($hub->param('g')) {
     my $database           = $hub->database($cdb);
     my $genome_db          = $database->get_GenomeDBAdaptor->fetch_by_name_assembly($hub->species_defs->SPECIES_PRODUCTION_NAME);
 
     my $member             = $database->get_GeneMemberAdaptor->fetch_by_stable_id_GenomeDB($hub->core_params->{'g'}, $genome_db);
     my $adaptor            = $database->get_GeneTreeAdaptor;
-    my $gene_tree          = $adaptor->fetch_default_for_Member($member);
+    my $gene_tree          = $adaptor->fetch_default_for_Member($member, $consensus_clusterset_id);
+    $consensus_clusterset_id = $gene_tree->clusterset_id if $gene_tree->clusterset_id ne $consensus_clusterset_id;
     %other_clustersets     = map { $_->clusterset_id => 1 } @{$adaptor->fetch_all_linked_trees($gene_tree)};
 
-    delete $other_clustersets{'default'};
+    delete $other_clustersets{$consensus_clusterset_id};
   }
 
   if (my $dropdown = $form->get_elements_by_name('clusterset_id')->[0]) {
+    $self->_replace_default_clusterset_id_option($dropdown, $consensus_clusterset_id) if $consensus_clusterset_id ne 'default';
     $dropdown->add_option({ 'value' => $_, 'caption' => $_ }) for sort keys %other_clustersets;
   }
 
@@ -177,6 +185,15 @@ sub init_form_non_cacheable {
 sub _groups {
   ## @private
   return (@{ $_[0]->species_defs->TAXON_ORDER });
+}
+
+sub _replace_default_clusterset_id_option {
+  my ($self, $cset_id_dropdown, $clusterset_id) = @_;
+
+  my $default_option = $cset_id_dropdown->get_elements_by_attribute({'value' => 'default'})->[0];
+  my $cset_id_option = $cset_id_dropdown->dom->create_element('option', {'value' => $clusterset_id, 'inner_HTML' => 'Final (merged) tree'});
+  $default_option->after($cset_id_option);
+  $cset_id_dropdown->remove_option('default');
 }
 
 1;

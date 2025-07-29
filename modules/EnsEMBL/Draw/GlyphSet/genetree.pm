@@ -840,7 +840,22 @@ sub features {
       
       if ($show_exons) {
         my $ref_genetree = $tree->tree;
-        $ref_genetree = $ref_genetree->alternative_trees->{default} if $ref_genetree->ref_root_id;
+
+        if ($ref_genetree->ref_root_id) {
+
+          # If $ref_genetree is a contributing tree, we need to fetch the
+          # corresponding reference tree in order to get exon boundary data.
+          my @matching_ref_genetrees = grep {
+            !$_->ref_root_id && $_->root_id == $ref_genetree->ref_root_id
+          } values %{$ref_genetree->alternative_trees};
+
+          # Gene trees are uniquely identified by their root_id, so there can be at
+          # most one gene tree with a root_id matching $ref_genetree->ref_root_id
+          if (scalar(@matching_ref_genetrees) > 0) {
+            $ref_genetree = $matching_ref_genetrees[0];
+          }
+        }
+
         unless ($ref_genetree->{_exon_boundaries_hash}) {
           my $gtos_adaptor = $tree->adaptor->db->get_GeneTreeObjectStoreAdaptor;
           my $json_string = $gtos_adaptor->fetch_by_GeneTree_and_label($ref_genetree, 'exon_boundaries');

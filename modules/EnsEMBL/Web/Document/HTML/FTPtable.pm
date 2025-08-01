@@ -484,7 +484,7 @@ Also, the same format is used to dump whole-genome multiple alignments
 as well as gene-based multiple alignments and phylogentic trees used
 to infer Ensembl orthologues and paralogues. These files are available
 in the ensembl_compara database which will be found in
-the <a href="[[SPECIESDEFS::ENSEMBL_FTP_URL]]/current_mysql/">mysql
+the <a href="https://ftp.ensembl.org/pub/current_mysql/">mysql
 directory</a>.
 </p>
 </dd>

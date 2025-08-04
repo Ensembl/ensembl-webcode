@@ -778,7 +778,7 @@ sub get_homologies {
     my $hub = $self->hub;
     my $strain_tree = $hub->species_defs->get_config($hub->species,'RELATED_TAXON') if($hub->param('data_action') =~ /strain_/i);
     my $tree = $self->get_GeneTree($compara_db, 1, $strain_tree);
-    $tree = $self->get_basal_gene_tree($compara_db, $tree);
+    $tree = $self->_get_basal_gene_tree($compara_db, $tree);
     $tree->expand_subtrees if $tree->tree_type eq 'supertree';
     my %members_to_keep = map { $_->dbID => 1 } @{$tree->get_all_Members()};
     $tree->release_tree;
@@ -924,7 +924,7 @@ sub get_homologue_alignments {
 
     ## Make sure we use the correct tree
     my $tree = $self->get_GeneTree($compara_db, 1, $strain_tree);
-    $tree = $self->get_basal_gene_tree($compara_db, $tree);
+    $tree = $self->_get_basal_gene_tree($compara_db, $tree);
     $msa = $tree->get_alignment_of_homologues(@params);
     $tree->release_tree;
   }
@@ -959,7 +959,7 @@ sub get_GeneTree {
     if ($parent->tree_type ne 'clusterset') {
 
       # To get the full supertree, we need to get the basal tree.
-      $parent = $self->get_basal_gene_tree($compara_db, $parent);
+      $parent = $self->_get_basal_gene_tree($compara_db, $parent);
 
       my %subtrees;
       my $total_leaves = 0;
@@ -1006,7 +1006,7 @@ sub get_GeneTree {
 
 # Method to fetch the basal gene tree,
 # whose root is linked to the clusterset.
-sub get_basal_gene_tree {
+sub _get_basal_gene_tree {
     my ($self, $compara_db, $next_tree) = @_;
 
     # The basal tree can be a regular tree, a supertree, or even a

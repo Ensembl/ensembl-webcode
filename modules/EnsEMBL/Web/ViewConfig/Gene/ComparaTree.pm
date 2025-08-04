@@ -193,7 +193,7 @@ sub _replace_default_clusterset_id_option {
   my $default_option = $cset_id_dropdown->get_elements_by_attribute({'value' => 'default'})->[0];
   my $cset_id_option = $cset_id_dropdown->dom->create_element('option', {'value' => $clusterset_id, 'inner_HTML' => 'Final (merged) tree'});
   $default_option->after($cset_id_option);
-  $cset_id_dropdown->remove_option('default');
+  $default_option->remove();
 }
 
 1;

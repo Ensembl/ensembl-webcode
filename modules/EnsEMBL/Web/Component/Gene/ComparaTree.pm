@@ -164,12 +164,22 @@ sub content {
   }
 
   if ($hub->type eq 'Gene') {
-    if ($tree->tree->clusterset_id ne $clusterset_id) {
-      $html .= $self->_info('Phylogenetic model selection',
-        sprintf(
-          'The phylogenetic model <i>%s</i> is not available for this tree. Showing the <i>%s</i> tree instead.', $clusterset_id, $tree->tree->clusterset_id,
-          )
-      );
+    my $tree_clusterset_id = $tree->tree->clusterset_id;
+    if ($tree_clusterset_id ne $clusterset_id) {
+      my $strain_clusterset_id = $hub->species_defs->get_config($self->hub->species, 'RELATED_TAXON');
+      # When switching between the respective consensus trees of the default and strain gene-tree view
+      # (e.g. 'default' to 'murinae'), each clusterset_id represents the consensus clusterset for its
+      # respective view, so we skip the model selection info box in such cases.
+      unless ( $strain_clusterset_id
+               && (($clusterset_id eq 'default') && ($tree_clusterset_id eq $strain_clusterset_id) || ($clusterset_id eq $strain_clusterset_id) && ($tree_clusterset_id eq 'default')) ) {
+        $html .= $self->_info('Phylogenetic model selection',
+          sprintf(
+            'The phylogenetic model <i>%s</i> is not available for this tree. Showing the <i>%s</i> tree instead.',
+            $clusterset_id,
+            $tree_clusterset_id,
+            )
+        );
+      }
     } elsif ($tree->tree->ref_root_id) {
 
       my $text = sprintf(

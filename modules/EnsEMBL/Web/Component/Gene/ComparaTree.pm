@@ -187,7 +187,7 @@ sub content {
       );
       my $rank = $tree->tree->get_tagvalue('k_score_rank');
       my $score = $tree->tree->get_tagvalue('k_score');
-      $text .= sprintf('<br/>This tree is the <b>n&deg;%d</b> closest to the final tree, with a K-distance of <b>%f</b>, as computed by <a href="http://molevol.cmima.csic.es/castresana/Ktreedist.html">Ktreedist</a>.', $rank, $score) if $rank;
+      $text .= sprintf('<br/>This tree is the <b>n&deg;%d</b> closest to the final tree, with a K-distance of <b>%f</b>, as computed by <a href="https://www.biologiaevolutiva.org/jcastresana/Ktreedist.html">Ktreedist</a>.', $rank, $score) if $rank;
       $html .= $self->_info('Phylogenetic model selection', $text);
     }
   }

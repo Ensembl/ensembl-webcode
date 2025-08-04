@@ -936,32 +936,46 @@ sub get_homologue_alignments {
 }
 
 
+sub _resolve_clusterset_ids {
+  my ($self, $strain_tree) = @_;
+
+  my $consensus_clusterset_id = $strain_tree || 'default';
+  my $clusterset_id = $self->hub->param('clusterset_id');
+  return [$consensus_clusterset_id, $clusterset_id];
+}
+
+
 sub get_GeneTree {
   my $self        = shift;
   my $compara_db  = shift || 'compara';
   my $whole_tree  = shift;
   my $strain_tree = shift;
-  my $clusterset_id = $self->hub->param('clusterset_id') || $strain_tree || 'default';
+  my ($consensus_clusterset_id, $clusterset_id) = @{$self->_resolve_clusterset_ids($strain_tree)};
 
-  my $cache_key  = sprintf('_protein_tree_%s_%s_%s', $compara_db, $clusterset_id, $strain_tree);
+  my $cache_key  = sprintf('_protein_tree_%s_%s_%s', $compara_db, $clusterset_id, $consensus_clusterset_id);
 
   if (!$self->{$cache_key}) {  
     my $args = {'stable_id' => $self->stable_id, 'cdb' => $compara_db};
     my $member  = $self->get_compara_Member($args)  || return;
     my $adaptor = $member->adaptor->db->get_adaptor('GeneTree') || return;
-    my $tree    = $adaptor->fetch_default_for_Member($member, $clusterset_id);
 
-    if (!$tree || defined $tree->ref_root_id) {
-      my $consensus_tree = $adaptor->fetch_default_for_Member($member, $strain_tree);
-      if (!$tree || $tree->ref_root_id != $consensus_tree->root_id) {
-        $tree = $consensus_tree;
-      }
-    }
+    # We fetch the consensus tree in the first instance. This is typically
+    # the 'default' tree for the current gene-tree view, which is either
+    # the tree we want, or the reference tree of the tree we want.
+    my $tree = $adaptor->fetch_default_for_Member($member, $consensus_clusterset_id);
 
     unless ($tree) {
         $tree = $adaptor->fetch_default_for_Member($member);
     }
     return unless $tree;
+
+    # If an alternative clusterset_id has been specified that
+    # is appropriate to the current gene-tree view, it should
+    # be one of the alternative trees of the consensus tree.
+    if ($clusterset_id && exists $tree->alternative_trees->{$clusterset_id}) {
+      $tree = $tree->alternative_trees->{$clusterset_id};
+    }
+
     return $tree if $whole_tree;
     
     $tree->preload;

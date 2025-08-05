@@ -41,7 +41,7 @@ sub content {
   my $view_config  = $self->view_config;
 
   my $settings = $view_config->form_fields('export');
-  $settings->{'Hidden'} = [qw(align align_type node strain)];
+  $settings->{'Hidden'} = [qw(align align_type clusterset_id node strain)];
 
   ## Add export-specific settings
   my $fields_by_format;
@@ -87,9 +87,9 @@ sub content {
 
     ## Options per format
     $fields_by_format = [{'Tree formats' => {
-                                    'Newick'    => [qw(newick_mode clusterset_id)],
-                                    'NHX'       => [qw(nhx_mode clusterset_id)],
-                                    'Text'      => [qw(scale clusterset_id)],
+                                    'Newick'    => [qw(newick_mode)],
+                                    'NHX'       => [qw(nhx_mode)],
+                                    'Text'      => [qw(scale)],
                                     'OrthoXML'  => [],
                                     'PhyloXML'  => $self->phyloxml_fields, 
                             }}];

@@ -171,7 +171,13 @@ sub content {
       # (e.g. 'default' to 'murinae'), each clusterset_id represents the consensus clusterset for its
       # respective view, so we skip the model selection info box in such cases.
       unless ( $strain_clusterset_id
-               && (($clusterset_id eq 'default') && ($tree_clusterset_id eq $strain_clusterset_id) || ($clusterset_id eq $strain_clusterset_id) && ($tree_clusterset_id eq 'default')) ) {
+               &&
+               (
+                 ($clusterset_id eq 'default' && $tree_clusterset_id eq $strain_clusterset_id)
+                 ||
+                 ($clusterset_id eq $strain_clusterset_id && $tree_clusterset_id eq 'default')
+               )
+             ) {
         $html .= $self->_info('Phylogenetic model selection',
           sprintf(
             'The phylogenetic model <i>%s</i> is not available for this tree. Showing the <i>%s</i> tree instead.',

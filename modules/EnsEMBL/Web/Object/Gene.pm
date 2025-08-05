@@ -778,7 +778,10 @@ sub get_homologies {
     my $hub = $self->hub;
     my $strain_tree = $hub->species_defs->get_config($hub->species,'RELATED_TAXON') if($hub->param('data_action') =~ /strain_/i);
     my $tree = $self->get_GeneTree($compara_db, 1, $strain_tree);
+    $tree = $self->_get_basal_gene_tree($compara_db, $tree);
+    $tree->expand_subtrees if $tree->tree_type eq 'supertree';
     my %members_to_keep = map { $_->dbID => 1 } @{$tree->get_all_Members()};
+    $tree->release_tree;
 
     my @gene_tree_homologies;
     foreach my $homology (@$homologies_array) {
@@ -920,16 +923,9 @@ sub get_homologue_alignments {
     push @params, $species if scalar @$species;
 
     ## Make sure we use the correct tree
-    if ($tree->root->is_supertree) {
-      $msa = $tree->get_alignment_of_homologues(@params);
-    } else {
-      my $supertree = $database->get_GeneTreeAdaptor->fetch_parent_tree($tree);
-      if ($supertree and $supertree->tree_type ne 'clusterset') {
-        $msa = $supertree->get_alignment_of_homologues(@params);
-      } else {
-        $msa = $tree->get_alignment_of_homologues(@params);
-      }
-    }
+    my $tree = $self->get_GeneTree($compara_db, 1, $strain_tree);
+    $tree = $self->_get_basal_gene_tree($compara_db, $tree);
+    $msa = $tree->get_alignment_of_homologues(@params);
     $tree->release_tree;
   }
   return $msa;
@@ -962,13 +958,8 @@ sub get_GeneTree {
     my $parent      = $adaptor->fetch_parent_tree($tree);
     if ($parent->tree_type ne 'clusterset') {
 
-      # To get the full supertree, we need to keep fetching
-      # the next parent up until we reach the clusterset.
-      my $next_parent = $parent;
-      do {
-        $parent = $next_parent;
-        $next_parent = $adaptor->fetch_parent_tree($parent);
-      } until ($next_parent->tree_type eq 'clusterset');
+      # To get the full supertree, we need to get the basal tree.
+      $parent = $self->_get_basal_gene_tree($compara_db, $parent);
 
       my %subtrees;
       my $total_leaves = 0;
@@ -1011,6 +1002,25 @@ sub get_GeneTree {
     }
   }
   return $self->{$cache_key};
+}
+
+# Method to fetch the basal gene tree,
+# whose root is linked to the clusterset.
+sub _get_basal_gene_tree {
+    my ($self, $compara_db, $next_tree) = @_;
+
+    # The basal tree can be a regular tree, a supertree, or even a
+    # supertree of a supertree, so in order to make sure we get it,
+    # we fetch successive parent trees until we reach the clusterset.
+    my $gene_tree_adaptor = $self->database($compara_db)->get_GeneTreeAdaptor();
+    my $curr_tree;
+    do {
+      $curr_tree = $next_tree;
+      $next_tree = $gene_tree_adaptor->fetch_parent_tree($curr_tree);
+    } until ($next_tree->tree_type eq 'clusterset');
+    $next_tree->release_tree;
+
+    return $curr_tree;
 }
 
 sub get_gene_slices {

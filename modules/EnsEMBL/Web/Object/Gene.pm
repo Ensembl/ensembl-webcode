@@ -1014,10 +1014,12 @@ sub _get_basal_gene_tree {
     # we fetch successive parent trees until we reach the clusterset.
     my $gene_tree_adaptor = $self->database($compara_db)->get_GeneTreeAdaptor();
     my $curr_tree;
+    my $i = 0;
     do {
       $curr_tree = $next_tree;
       $next_tree = $gene_tree_adaptor->fetch_parent_tree($curr_tree);
-    } until ($next_tree->tree_type eq 'clusterset');
+      $i += 1;
+    } until ($next_tree->tree_type eq 'clusterset' || $i >= 23);
     $next_tree->release_tree;
 
     return $curr_tree;

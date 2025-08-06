@@ -1019,7 +1019,7 @@ sub _get_basal_gene_tree {
       $curr_tree = $next_tree;
       $next_tree = $gene_tree_adaptor->fetch_parent_tree($curr_tree);
       $i += 1;
-    } until ($next_tree->tree_type eq 'clusterset' || $i >= 23);
+    } until ($next_tree->tree_type eq 'clusterset' || $i >= 23);  # typically $i should not exceed 3, but no harm in allowing plenty of headroom
     $next_tree->release_tree;
 
     return $curr_tree;

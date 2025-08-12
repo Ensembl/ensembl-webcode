@@ -216,6 +216,12 @@ sub predictions_classes {
     'deleterious - low confidence' => 'neutral',
     'tolerated low confidence'     => 'neutral',
     'deleterious low confidence'   => 'neutral',
+
+    # coming from dbNSFP AlphaMissense and ESM1b
+    'ambiguous' => 'ok',
+    'likely pathogenic' => 'bad',
+    'pathogenic' => 'bad',
+    'deleterious' => 'bad',
   };
 }
 
@@ -271,6 +277,11 @@ sub classify_score_prediction {
     'medium'  => 3,
     'low'     => 2,
     'neutral' => 2,
+    'benign' => 2,
+    'ambiguous' => 3,
+    'likely pathogenic' => 4,
+    'pathogenic' => 4,
+    'deleterious' => 4,
   );
 
   my ($rank, $rank_str);

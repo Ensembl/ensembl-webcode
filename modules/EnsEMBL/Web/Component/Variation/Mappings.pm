@@ -235,8 +235,8 @@ sub content {
 
     my $cadd = $self->render_score_prediction($tva->cadd_prediction, $tva->cadd_score);
     my $dbnsfp_revel             = $self->render_score_prediction($tva->dbnsfp_revel_prediction, $tva->dbnsfp_revel_score);
-    my $dbnsfp_meta_lr          = $self->render_score_prediction($tva->dbnsfp_meta_lr_prediction, $tva->dbnsfp_meta_lr_score);
-    my $dbnsfp_mutation_assessor = $self->render_score_prediction($tva->dbnsfp_mutation_assessor_prediction, $tva->dbnsfp_mutation_assessor_score);
+    my $dbnsfp_alphamissense          = $self->render_score_prediction($tva->dbnsfp_alphamissense_prediction, $tva->dbnsfp_alphamissense_score);
+    my $dbnsfp_esm1b = $self->render_score_prediction($tva->dbnsfp_esm1b_prediction, $tva->dbnsfp_esm1b_score);
 
     
     # Allele
@@ -301,15 +301,15 @@ sub content {
       polyphen  => $poly,
       cadd      => $cadd,
       dbnsfp_revel => $dbnsfp_revel,
-      dbnsfp_meta_lr => $dbnsfp_meta_lr,
-      dbnsfp_mutation_assessor => $dbnsfp_mutation_assessor,
+      dbnsfp_alphamissense => $dbnsfp_alphamissense,
+      dbnsfp_esm1b => $dbnsfp_esm1b,
       detail    => $self->ajax_add($self->ajax_url(undef, { t => $trans_name, vf => $vf, allele => $a, update_panel => 1 }).";single_transcript=variation_feature_variation=normal", "${trans_name}_${vf}_${a}"),
     };
     
     push(@rows, $row);
 
     # Column flags
-    foreach my $col ('sift', 'polyphen', 'cadd', 'dbnsfp_revel', 'dbnsfp_meta_lr', 'dbnsfp_mutation_assessor') {
+    foreach my $col ('sift', 'polyphen', 'cadd', 'dbnsfp_revel', 'dbnsfp_alphamissense', 'dbnsfp_esm1b') {
       $column_flags{$col} = 1 if ($row->{$col} && $row->{$col} ne '-');
     }
 
@@ -458,11 +458,11 @@ sub table_columns {
     push @columns, ({ key => 'dbnsfp_revel', title => 'REVEL', sort => 'position_html', align => 'center', help => $glossary->{'REVEL'} })
       if $column_flags->{'dbnsfp_revel'};
 
-    push @columns, ({ key => 'dbnsfp_meta_lr', title => 'MetaLR', sort => 'position_html', align => 'center', help => $glossary->{'MetaLR'} })
-      if $column_flags->{'dbnsfp_meta_lr'};
+    push @columns, ({ key => 'dbnsfp_alphamissense', title => 'AlphaMissense', sort => 'position_html', align => 'center', help => $glossary->{'AlphaMissense'} })
+      if $column_flags->{'dbnsfp_alphamissense'};
 
-    push @columns, ({ key => 'dbnsfp_mutation_assessor', title => 'Mutation Assessor', sort => 'position_html', align => 'center', help => $glossary->{'MutationAssessor'} })
-      if $column_flags->{'dbnsfp_mutation_assessor'};
+    push @columns, ({ key => 'dbnsfp_esm1b', title => 'ESM1b', sort => 'position_html', align => 'center', help => $glossary->{'ESM1b'} })
+      if $column_flags->{'dbnsfp_esm1b'};
   }
 
   push @columns, { key => 'detail', title => 'Detail', sort => 'string' };
@@ -835,6 +835,11 @@ sub render_score_prediction {
     'medium'  => 'ok',
     'low'     => 'good',
     'neutral' => 'good',
+    'benign' => 'good',
+    'ambiguous' => 'ok',
+    'likely pathogenic' => 'bad',
+    'pathogenic' => 'bad',
+    'deleterious' => 'bad',
   );
 
   my %ranks = (
@@ -848,6 +853,11 @@ sub render_score_prediction {
     'medium'  => 3,
     'low'     => 2,
     'neutral' => 2,
+    'benign' => 2,
+    'ambiguous' => 3,
+    'likely pathogenic' => 4,
+    'pathogenic' => 4,
+    'deleterious' => 4,
   );
 
   my ($rank, $rank_str);

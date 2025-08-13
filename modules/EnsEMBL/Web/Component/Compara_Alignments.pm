@@ -290,7 +290,7 @@ sub check_for_missing_species {
       push @skipped, $sp_url unless ($args->{ignore} && $args->{ignore} eq 'ancestral_sequences');
     }
     elsif (defined $slice and !$aligned_species{$_} and $_ ne 'ancestral_sequences') {
-      my $key = $hub->is_strain($sp_url) ? pluralise($species_info->{$sp_url}{strain_type}) : 'species';
+      my $key = $hub->is_strain($sp_url) ? $species_info->{$sp_url}{strain_type} : 'species';
       push @{$missing_hash->{$key}}, $species_info->{$sp_url}{common};
       push @missing, $sp_url;
     }
@@ -320,23 +320,20 @@ sub check_for_missing_species {
     } elsif ($not_missing == $multi_check) {
       $warnings .= sprintf('<p>None of the other species in this set align to %s in this region</p>', $species_defs->SPECIES_DISPLAY_NAME);
     } else {
-      my $str = '';
-      my $strain_count = scalar @{$missing_hash->{'strains'}||[]}; 
-      my $species_count = scalar @{$missing_hash->{'species'}||[]}; 
+      my $str = sprintf '%d ', scalar(@missing);
 
-      if ($strain_count) {
-        my $strain_type = $hub->species_defs->STRAIN_TYPE || 'strain';
-        $strain_type = pluralise($strain_type) if $strain_count > 1;
-        $str .= scalar @{$missing_hash->{'strains'}}." $strain_type";
-        $str .= ' and ' if ($species_count);
+      my @ordered_strain_types = sort { scalar @{$missing_hash->{$b}} <=> scalar @{$missing_hash->{$a}} } keys %$missing_hash;
+
+      if (scalar(@missing) > 1) {
+        @ordered_strain_types = map { pluralise($_) } @ordered_strain_types;
       }
 
-      if ($species_count) {
-        $str .= "$species_count species";
-      }
+      $str .= scalar(@ordered_strain_types) > 1
+           ? join(', ', @ordered_strain_types[0 .. ($#ordered_strain_types-1)]) . ' and ' . $ordered_strain_types[-1]
+           : $ordered_strain_types[0]
+           ;
 
-      $str .= ($strain_count + $species_count) > 1 ? ' have ' : ' has ';
-      
+      $str .= scalar(@missing) > 1 ? ' have ' : ' has ';
 
       $warnings .= sprintf('<p>The following %s no alignment in this region:<ul><li>%s</li></ul></p>',
                                  $str,

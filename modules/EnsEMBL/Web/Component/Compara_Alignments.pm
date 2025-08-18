@@ -322,7 +322,7 @@ sub check_for_missing_species {
     } else {
       my $str = sprintf '%d ', scalar(@missing);
 
-      my @ordered_strain_types = sort { scalar @{$missing_hash->{$b}} <=> scalar @{$missing_hash->{$a}} } keys %$missing_hash;
+      my @ordered_strain_types = sort { scalar @{$missing_hash->{$b}} <=> scalar @{$missing_hash->{$a}} || $a cmp $b } keys %$missing_hash;
 
       if (scalar(@missing) > 1) {
         @ordered_strain_types = map { pluralise($_) } @ordered_strain_types;

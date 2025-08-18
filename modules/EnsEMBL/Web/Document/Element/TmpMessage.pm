@@ -71,10 +71,9 @@ sub content {
     }]
   })->render : '';
 
-  my $element_id = !$self->{'file'}{'class'} ? 'announcement-banner' : '';
   my $announcement_banner_message = $self->{'file'}{'banner_message'} ? $self->dom->create_element('div', {
-    'id'          => $element_id,
-    'class'       => $self->{'file'}{'class'}, # add class to override default styles
+    'id'          => 'announcement-banner',
+    'class'       => $self->{'file'}{'colour'}, # add class to override default styles
     'inner_HTML'  => $self->{'file'}{'banner_message'}
   })->render : '';
 

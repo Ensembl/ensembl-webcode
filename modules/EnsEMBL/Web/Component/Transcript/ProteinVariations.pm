@@ -103,8 +103,8 @@ sub table_content {
       my $polys = classify_sift_polyphen($tva->polyphen_prediction, $tva->polyphen_score);
       my $cadds = classify_score_prediction($tva->cadd_prediction, $tva->cadd_score);
       my $revels = classify_score_prediction($tva->dbnsfp_revel_prediction, $tva->dbnsfp_revel_score);
-      my $meta_lrs = classify_score_prediction($tva->dbnsfp_meta_lr_prediction, $tva->dbnsfp_meta_lr_score);
-      my $mutation_assessors = classify_score_prediction($tva->dbnsfp_mutation_assessor_prediction, $tva->dbnsfp_mutation_assessor_score);
+      my $alphamissenses = classify_score_prediction($tva->dbnsfp_alphamissense_prediction, $tva->dbnsfp_alphamissense_score);
+      my $esm1bs = classify_score_prediction($tva->dbnsfp_esm1b_prediction, $tva->dbnsfp_esm1b_score);
 
       my $row = {
         vf      => $var->{'vf'}->dbID,
@@ -131,12 +131,12 @@ sub table_content {
         revel_sort  => $revels->[0],
         revel_class => $revels->[1],
         revel_value => $revels->[2],
-        meta_lr_sort  => $meta_lrs->[0],
-        meta_lr_class => $meta_lrs->[1],
-        meta_lr_value => $meta_lrs->[2],
-        mutation_assessor_sort  => $mutation_assessors->[0],
-        mutation_assessor_class => $mutation_assessors->[1],
-        mutation_assessor_value => $mutation_assessors->[2],
+        alphamissense_sort  => $alphamissenses->[0],
+        alphamissense_class => $alphamissenses->[1],
+        alphamissense_value => $alphamissenses->[2],
+        esm1b_sort  => $esm1bs->[0],
+        esm1b_class => $esm1bs->[1],
+        esm1b_value => $esm1bs->[2],
       };
       $callback->add_row($row);
       last ROWS if $callback->stand_down;
@@ -159,7 +159,7 @@ sub make_table {
   my @exclude;
   push @exclude,'sift_sort','sift_class','sift_value' unless $sd->{'SIFT'};
   unless($hub->species eq 'Homo_sapiens') {
-    push @exclude,'polyphen_sort','polyphen_class','polyphen_value', 'cadd_sort', 'cadd_class', 'cadd_value', 'revel_sort', 'revel_class', 'revel_value', 'meta_lr_sort', 'meta_lr_class', 'meta_lr_value', 'mutation_assessor_sort', 'mutation_assessor_class', 'mutation_assessor_value';
+    push @exclude,'polyphen_sort','polyphen_class','polyphen_value', 'cadd_sort', 'cadd_class', 'cadd_value', 'revel_sort', 'revel_class', 'revel_value', 'alphamissense_sort', 'alphamissense_class', 'alphamissense_value', 'esm1b_sort', 'esm1b_class', 'esm1b_value';
   }
 
   my @columns = ({
@@ -285,27 +285,27 @@ sub make_table {
     filter_fixed => 1,
     filter_blank_button => 1,
   },{
-    _key => 'meta_lr_sort', _type => 'numeric no_filter unshowable',
-    sort_for => 'meta_lr_value',
+    _key => 'alphamissense_sort', _type => 'numeric no_filter unshowable',
+    sort_for => 'alphamissense_value',
   },{
-    _key => 'meta_lr_class', _type => 'iconic no_filter unshowable',
+    _key => 'alphamissense_class', _type => 'iconic no_filter unshowable',
   },{
-    _key => 'meta_lr_value', _type => 'numeric',
-    label => "MetaLR",
-    helptip => $glossary->{'MetaLR'},
+    _key => 'alphamissense_value', _type => 'numeric',
+    label => "AlphaMissense",
+    helptip => $glossary->{'AlphaMissense'},
     filter_range => [0,1],
     filter_fixed => 1,
     filter_blank_button => 1,
   },{
-    _key => 'mutation_assessor_sort', _type => 'numeric no_filter unshowable',
-    sort_for => 'mutation_assessor_value',
+    _key => 'dbnsfp_esm1b_sort', _type => 'numeric no_filter unshowable',
+    sort_for => 'dbnsfp_esm1b_value',
   },{
-    _key => 'mutation_assessor_class', _type => 'iconic no_filter unshowable',
+    _key => 'dbnsfp_esm1b_class', _type => 'iconic no_filter unshowable',
   },{
-    _key => 'mutation_assessor_value', _type => 'numeric',
-    label => "Mutation Assessor",
-    helptip => $glossary->{'MutationAssessor'},
-    filter_range => [0,1],
+    _key => 'dbnsfp_esm1b_value', _type => 'numeric',
+    label => "ESM1b",
+    helptip => $glossary->{'ESM1b'},
+    filter_range => [-30,10],
     filter_fixed => 1,
     filter_blank_button => 1,
   }
@@ -384,7 +384,7 @@ sub sift_poly_classes {
 
   my $sp_classes = predictions_classes; 
 
-  foreach my $column_name (qw(sift polyphen cadd revel meta_lr mutation_assessor)) {
+  foreach my $column_name (qw(sift polyphen cadd revel alphamissense esm1b)) {
     my $value_column = $table->column("${column_name}_value");
     my $class_column = $table->column("${column_name}_class");
     next unless $value_column and $class_column;
@@ -397,12 +397,12 @@ sub sift_poly_classes {
     # TODO: make decorators accessible to filters. Complexity is that
     # many decorators (including these) are multi-column.
     my $lozenge = qq(<div class="score score_%s score_example">%s</div>);
-    my $left = { sift => 'bad', polyphen => 'good', cadd => 'good', revel => 'good', meta_lr => 'good', mutation_assessor => 'good'}->{$column_name};
-    my $right = { sift => 'good', polyphen => 'bad', cadd => 'bad', revel => 'bad', meta_lr => 'bad', 'mutation_assessor' => 'bad'}->{$column_name};
+    my $left = { sift => 'bad', polyphen => 'good', cadd => 'good', revel => 'good', alphamissense => 'good', esm1b => 'good'}->{$column_name};
+    my $right = { sift => 'good', polyphen => 'bad', cadd => 'bad', revel => 'bad', alphamissense => 'bad', esm1b => 'bad'}->{$column_name};
     $value_column->filter_endpoint_markup(0,sprintf($lozenge,$left,"0"));
     $value_column->filter_endpoint_markup(1,sprintf($lozenge,$right,"1"));
     my $slider_class =
-      { sift => 'redgreen', polyphen => 'greenred', cadd => 'greenred', revel => 'greenred', meta_lr => 'greenred', mutation_assessor => 'greenred' }->{$column_name};
+      { sift => 'redgreen', polyphen => 'greenred', cadd => 'greenred', revel => 'greenred', alphamissense => 'greenred', esm1b => 'greenred' }->{$column_name};
     $value_column->filter_slider_class("newtable_slider_$slider_class");
   }
 

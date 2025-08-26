@@ -225,14 +225,6 @@ sub populate_tree {
     { 'availability'  => 'gene has_gxa' }
   );
 
-  $self->create_node('Regulation', 'Regulation',
-    [qw(
-      regulation EnsEMBL::Web::Component::Gene::RegulationImage
-      features   EnsEMBL::Web::Component::Gene::RegulationTable
-    )],
-    { 'availability' => 'regulation not_patch not_rnaseq' }
-  );
-
   $self->create_node('Matches', 'External references',
     [qw( 
       matches EnsEMBL::Web::Component::Gene::SimilarityMatches 

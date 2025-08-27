@@ -477,54 +477,10 @@ sub render_tables {
   my ($self, $table, $reg_table, $motif_table, $flag) = @_;
 
   my $table_html =  ($table->has_rows && $flag ? '<h2>Gene and Transcript consequences</h2>'.$table->render : '<h3>No Gene or Transcript consequences</h3>').
-                    $self->_render_eqtl_table.
                     ($reg_table->has_rows && $flag ? '<h2>Regulatory feature consequences</h2>'.$reg_table->render : '<h3>No overlap with Ensembl Regulatory features</h3>').
                     ($motif_table->has_rows && $flag ? '<h2>Motif feature consequences</h2>'.$motif_table->render : '<h3>No overlap with Ensembl Motif features</h3>');
                     
   return $table_html;
-}
-
-sub _render_eqtl_table {
-  my $self  = shift;
-  my $hub   = $self->hub;
-
-  my $eqtl_table_html = '';
-
-  if ($hub->species eq 'Homo_sapiens' && (my $rest_url = $hub->species_defs->EQTL_REST_URL)) {
-    # empty table for eQTLs - get populated by JS via REST
-    my @eqtl_columns  = (
-      { key => 'gene_id',    title => 'Gene',                        sort => 'html'    },
-      { key => 'pvalue',     title => 'P-value (-log<sub>10</sub>)', sort => 'numeric',  help => "Nominal p-values of the individual variant-gene pair." },
-      { key => 'beta',       title => 'Effect size',                 sort => 'numeric',  help => "Effect of the alternative allele (ALT) relative to the reference allele (REF) (i.e., the eQTL effect allele is the ALT allele)."},
-      { key => 'qtl_group',  title => 'Tissue',                      sort => 'string'  },
-    );
-
-    # add dummy rows to get pagination working
-    my %dummy_row   = map { $_->{'key'} => 0 } @eqtl_columns;
-    my @dummy_rows  = map {{ %dummy_row }} 0..10;
-
-    # create table
-    my $eqtl_table = $self->new_table(\@eqtl_columns, \@dummy_rows, {
-      data_table => 1, sorting => [ 'pvalue desc' ], data_table_config => {
-        iDisplayLength => 10, 
-        aLengthMenu => [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]]
-      }
-    });
-
-    my $assosiation_url = sprintf('%sassociations/%s?size=1000', $rest_url, $hub->param('v'));
-
-    $eqtl_table_html = sprintf('<div class="hidden _variant_eqtl_table">
-      <input type="hidden" class="panel_type" value="EQTLTable">
-      <input type="hidden" name="eqtl_rest_endpoint" class="js_param" value="%s">
-      <input type="hidden" name="eqtl_gene_url_template" class="js_param" value="%s">
-      <h2>Gene expression correlations</h2>%s<h3 class="_no_data">No Gene expression correlations</h3>
-      </div>',
-      $assosiation_url,
-      $hub->url({'type' => 'Gene', 'action' => 'Regulation', 'g' => '{{geneId}}', 'r' => undef}),
-      $eqtl_table->render
-    );
-  }
-  return $eqtl_table_html;
 }
 
 # Mapping_table

@@ -1184,7 +1184,8 @@ sub add_regulation_features {
     my $mfa = $self->hub->get_adaptor('get_MotifFeatureFileAdaptor', 'funcgen');
     my $file = $mfa->fetch_file;
     if ($file) {
-      my $motif_feats = $reg_regions->append_child($self->create_track_node('fg_motif_features', 'Motif features'), {
+      my $motif_feats_menu = $menu->first_child->after($self->create_menu_node('motif_features', 'Motif features'));
+      $motif_feats_menu->append_child($self->create_track_node('fg_motif_features', 'Motif features'), {
         db          => $key,
         glyphset    => 'fg_motif_features',
         sources     => 'undef',

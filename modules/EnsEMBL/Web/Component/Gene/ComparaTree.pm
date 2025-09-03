@@ -561,14 +561,13 @@ sub collapsed_nodes {
       # See Schoch et al. (2020) NCBI Taxonomy: a comprehensive update on curation, resources and tools.
       # <https://europepmc.org/article/MED/32761142>.
       if ($this_rank eq 'no rank' || $this_rank eq 'clade') {
-        # We traverse the taxonomy upwards until we find a rank, and get
-        # the rank just below instead
+        # We traverse the taxonomy upwards until we find a rank
         while ($this_rank eq 'no rank' || $this_rank eq 'clade') {
           $taxon = $taxon->parent;
           last unless $taxon;
           $this_rank = $taxon->rank;
         }
-        $this_rank = $rank_pos{$this_rank}-1;
+        $this_rank = $rank_pos{$this_rank};
         #warn sprintf("Mapped 'no rank' %s to %s\n", $internal_node->species_tree_node->taxon->name, $rank_order[$this_rank]);
       } else {
         $this_rank = $rank_pos{$this_rank};

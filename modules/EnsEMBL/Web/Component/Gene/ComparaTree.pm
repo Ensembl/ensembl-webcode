@@ -488,7 +488,67 @@ sub collapsed_nodes {
     }
   } elsif ($action =~ /rank_(\w+)/) {
     my $asked_rank = $1;
-    my @rank_order = qw(subspecies species subgenus genus subfamily family superfamily parvorder infraorder suborder order superorder infraclass subclass class superclass subphylum phylum superphylum subkingdom kingdom superkingdom);
+
+    # Rank order info as described in
+    # Schoch et al. (2020) NCBI Taxonomy: a comprehensive update on curation, resources and tools.
+    # <https://europepmc.org/article/MED/32761142>,
+    # with some updates based on NCBI Insights (2024-06-04) Upcoming changes to NCBI Taxonomy classifications.
+    # <https://ncbiinsights.ncbi.nlm.nih.gov/2024/06/04/changes-ncbi-taxonomy-classifications/>
+    # and NCBI Insights (2025-04-25) NCBI Taxonomy updates to virus classification.
+    # <https://ncbiinsights.ncbi.nlm.nih.gov/2025/04/25/ncbi-taxonomy-updates-virus-classification-april-2025/>.
+    my @rank_order = (
+      'isolate',
+      'strain',
+      'serotype',
+      'biotype',
+      'genotype',
+      'serogroup',
+      'pathogroup',
+      'forma',
+      'subvariety',
+      'varietas',
+      'form',
+      'morph',
+      'subspecies',
+      'forma specialis',
+      'special form',
+      'species',
+      'species subgroup',
+      'species group',
+      'subseries',
+      'series',
+      'subsection',
+      'section',
+      'subgenus',
+      'genus',
+      'subtribe',
+      'tribe',
+      'subfamily',
+      'family',
+      'superfamily',
+      'parvorder',
+      'infraorder',
+      'suborder',
+      'order',
+      'superorder',
+      'subcohort',
+      'cohort',
+      'infraclass',
+      'subclass',
+      'class',
+      'superclass',
+      'infraphylum',
+      'subphylum',
+      'phylum',
+      'superphylum',
+      'subkingdom',
+      'kingdom',
+      'domain',
+      'realm',
+      'cellular root',
+      'acellular root',
+    );
+
     my %rank_pos = map {$rank_order[$_] => $_} 0..(scalar(@rank_order)-1);
     my @nodes_to_check = ($tree);
     while (@nodes_to_check) {

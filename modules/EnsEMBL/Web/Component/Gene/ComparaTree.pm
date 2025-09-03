@@ -557,10 +557,13 @@ sub collapsed_nodes {
       next unless $internal_node->species_tree_node;
       my $taxon = $internal_node->species_tree_node->taxon;
       my $this_rank = $taxon->rank;
-      if ($this_rank eq 'no rank') {
+      # Rank 'clade' is assigned to recognised groups without a formal rank.
+      # See Schoch et al. (2020) NCBI Taxonomy: a comprehensive update on curation, resources and tools.
+      # <https://europepmc.org/article/MED/32761142>.
+      if ($this_rank eq 'no rank' || $this_rank eq 'clade') {
         # We traverse the taxonomy upwards until we find a rank, and get
         # the rank just below instead
-        while ($this_rank eq 'no rank') {
+        while ($this_rank eq 'no rank' || $this_rank eq 'clade') {
           $taxon = $taxon->parent;
           last unless $taxon;
           $this_rank = $taxon->rank;

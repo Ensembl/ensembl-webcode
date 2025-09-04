@@ -2048,9 +2048,9 @@ sub _summarise_pan_compara {
           and o.name IN $prod_names_str
           and r.ensembl_version = $version"
       );    
-  ## Also get info about Archaea from pan-compara itself, for bacteria
+  ## Also get info about Archaea from pan-compara itself
   my $archaea = {};
-  if ($SiteDefs::DIVISION && $SiteDefs::DIVISION eq 'bacteria') {
+  if ($SiteDefs::DIVISION) {
     my $bref = $dbh->selectall_arrayref(
           "select 
             g.name from ncbi_taxa_node a 

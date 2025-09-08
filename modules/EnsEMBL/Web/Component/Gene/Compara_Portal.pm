@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2024] EMBL-European Bioinformatics Institute
+Copyright [2016-2025] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -42,12 +42,13 @@ sub content {
   my $ortho_image = $strain_avail ? 'strain_ortho.gif' : 'compara_ortho.gif';
   my $para_image  = $strain_avail ? 'strain_para.gif' : 'compara_para.gif';
 
+  my $family_page_action = $self->_get_compara_family_page_action;
   my $buttons       = [
     { title => 'Genomic alignments', img => '80/compara_align.gif', url => $availability->{'has_alignments'} ? $hub->url({ action => 'Compara_Alignments' }) : '' },
     { title => 'Gene tree',          img => '80/compara_tree.gif',  url => $availability->{'has_'.$strain_avail.'gene_tree'}  ? $hub->url({ action => $strain_url.'Compara_Tree'       }) : '' },
     { title => 'Orthologues',        img => '80/'.$ortho_image, url => $availability->{'has_'.$strain_avail.'orthologs'}  ? $hub->url({ action => $strain_url.'Compara_Ortholog'   }) : '' },
     { title => 'Paralogues',         img => '80/'.$para_image,  url => $availability->{'has_'.$strain_avail.'paralogs'}   ? $hub->url({ action => $strain_url.'Compara_Paralog'    }) : '' },
-    { title => 'Families',           img => '80/compara_fam.gif',   url => $availability->{'family'}         ? $hub->url({ action => 'Family'             }) : '' },
+    { title => 'Families',           img => '80/compara_fam.gif',   url => $availability->{'family'}         ? $hub->url({ action => $family_page_action  }) : '' },
   ];
   
   @$buttons  = grep { $_->{title} !~ /^Families$|^Genomic alignments$/ } @$buttons if($is_strain_view); #remove the one we dont show for strain views
@@ -55,6 +56,10 @@ sub content {
      $html .= qq{<p>More views of comparative genomics data, such as multiple alignments and synteny, are available on the <a href="$location">Location</a> page for this gene.</p>};
 
   return $html;
+}
+
+sub _get_compara_family_page_action {
+    return 'Family';
 }
 
 1;

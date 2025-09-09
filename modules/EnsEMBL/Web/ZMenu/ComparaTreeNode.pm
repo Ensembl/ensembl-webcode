@@ -187,6 +187,7 @@ sub content {
           species  => 'Multi',
           type     => 'GeneTree',
           action   => 'Image',
+          function => $gene_tree_constants->{function},
           __clear  => 1,
           gt       => $tree_stable_id,
         });

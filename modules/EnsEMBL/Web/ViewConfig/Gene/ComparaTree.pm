@@ -75,6 +75,7 @@ sub field_order {
 sub form_fields {
   ## Abstract method implementation
   my $self      = shift;
+  my $hub       = $self->hub;
   my $fields    = {};
   my $function  = $self->{'function'};
 
@@ -112,22 +113,25 @@ sub form_fields {
     'value' => 'on',
   };
 
-  my @groups = $self->hub->param('strain') ? () : $self->_groups; #hide these options for strain view
+  my @groups = $hub->param('strain') ? () : $self->_groups; #hide these options for strain view
 
   if (@groups) {
-    my $taxon_labels = $self->hub->species_defs->TAXON_LABEL;
+    my $species_defs = $hub->species_defs;
+    my $taxon_labels = $species_defs->TAXON_LABEL;
 
-    $fields->{'colouring'} = {
-      'type'    => 'dropdown',
-      'select'  => 'select',
-      'name'    => 'colouring',
-      'label'   => 'Colour tree according to taxonomy',
-      'values'  => [
-        { 'value' => 'none',       'caption' => 'No colouring'  },
-        { 'value' => 'background', 'caption' => 'Background'    },
-        { 'value' => 'foreground', 'caption' => 'Foreground'    }
-      ],
-    };
+    if (grep { $_ ne '0' } (@{ $species_defs->TAXON_GENETREE_BGCOLOUR }, @{ $species_defs->TAXON_GENETREE_FGCOLOUR })) {
+      $fields->{'colouring'} = {
+        'type'    => 'dropdown',
+        'select'  => 'select',
+        'name'    => 'colouring',
+        'label'   => 'Colour tree according to taxonomy',
+        'values'  => [
+          { 'value' => 'none',       'caption' => 'No colouring'  },
+          { 'value' => 'background', 'caption' => 'Background'    },
+          { 'value' => 'foreground', 'caption' => 'Foreground'    }
+        ],
+      };
+    }
 
     foreach my $group (@groups) {
       $fields->{"group_${group}_display"} = {

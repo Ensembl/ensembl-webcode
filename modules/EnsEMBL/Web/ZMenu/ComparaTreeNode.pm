@@ -58,7 +58,7 @@ sub content {
   my %collapsed_ids   = map { $_ => 1 } grep /\d/, split ',', $hub->param('collapse');
   my $leaf_count      = scalar @{$node->get_all_leaves};
   my $is_leaf         = $node->is_leaf;
-  my $is_root         = ($node->root eq $node);
+  my $is_root         = ($node->root->node_id == $node->node_id);
   my $is_supertree    = ($node->tree->tree_type eq 'supertree');
   my $parent_distance = $node->distance_to_parent || 0;
 

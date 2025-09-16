@@ -946,7 +946,7 @@ sub add_synteny {
       species     => $species_2,
       species_hr  => $species_readable,
       caption     => $caption,
-      description => qq{<a href="/info/genome/compara/analyses.html#synteny" class="cp-external">Synteny regions</a> between $self_label and $label},
+      description => qq{<a href="/info/genome/compara/synteny.html" class="cp-external">Synteny regions</a> between $self_label and $label},
       colours     => $colours,
       display     => 'off',
       renderers   => [qw(off Off normal On)],
@@ -970,12 +970,12 @@ sub add_alignments {
   my ($static, $wga_page);
   my $division = $species_defs->EG_DIVISION;
   if ($division) {
-    $wga_page = $static = 'whole_genome_alignment.html';
+    $static = 'whole_genome_alignment.html';
   }
   else {
     $static = 'analyses.html';
-    $wga_page = $static.'#conservation';
   }
+  $wga_page = 'multiple_genome_alignments.html';
 
   foreach my $row (values %{$hashref->{'ALIGNMENTS'}}) {
     next unless $row->{'species'}{$prod_name};
@@ -1007,7 +1007,7 @@ sub add_alignments {
         $description = 'Pairwise alignments';
       }
 
-      $description  = qq{<a href="$static" class="cp-external">$description</a> between $self_label and $other_label};
+      $description  = qq{<a href="/info/genome/compara/$static" class="cp-external">$description</a> between $self_label and $other_label};
       $description .= " $1" if $row->{'name'} =~ /\((on.+)\)/;
 
       $alignments->{$menu_key}{$row->{'id'}} = {
@@ -1043,13 +1043,12 @@ sub add_alignments {
       if ($row->{'conservation_score'}) {
         my ($program) = $hashref->{'CONSERVATION_SCORES'}{$row->{'conservation_score'}}{'type'} =~ /(.+)_CONSERVATION_SCORE/;
 
-        $options{'description'} = sprintf '<a href="/info/genome/compara/%s">%s conservation scores</a> based on the %s', $wga_page, $program, $row->{'name'};
-
         $alignments->{'conservation'}{"$row->{'id'}_scores"} = {
           %options,
           conservation_score => $row->{'conservation_score'},
           name               => "Conservation score for $row->{'name'}",
           caption            => "$n_species way $program scores",
+          description        => sprintf('<a href="/info/genome/compara/conservation_and_constrained.html">%s conservation scores</a> based on the %s', $program, $row->{'name'}),
           order              => sprintf('%12d::%s::%s', 1e12-$n_species*10, $row->{'type'}, $row->{'name'}),
           display            => 'off',
           renderers          => [ 'off', 'Off', 'tiling', 'Tiling array' ],
@@ -1060,6 +1059,7 @@ sub add_alignments {
           constrained_element => $row->{'constrained_element'},
           name                => "Constrained elements for $row->{'name'}",
           caption             => "$n_species way $program elements",
+          description         => sprintf('<a href="/info/genome/compara/conservation_and_constrained.html">%s constrained elements</a> based on the %s', $program, $row->{'name'}),
           order               => sprintf('%12d::%s::%s', 1e12-$n_species*10+1, $row->{'type'}, $row->{'name'}),
           display             => 'off',
           renderers           => [ 'off', 'Off', 'compact', 'On' ],

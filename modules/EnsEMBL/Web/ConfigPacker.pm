@@ -1349,6 +1349,19 @@ sub _summarise_compara_db {
     $self->db_tree->{$db_name}{$key}{$species1}{$species2} = $valid_species{$species2};
   }             
   
+  # We need a mapping of each strain-level
+  # clusterset_id to its strain_type tag.
+  my $res_aref_4 = $dbh->selectall_arrayref('
+    select distinct trim(leading "collection-" from ssh.name), sst.value
+      from species_set_header ssh
+        join method_link_species_set mlss using(species_set_id)
+        join method_link ml using(method_link_id)
+        join species_set_tag sst using(species_set_id)
+      where ml.type in ("PROTEIN_TREES", "NC_TREES")
+        and sst.tag = "strain_type";
+  ');
+  my %cset_id_to_strain_type = map { $_->[0] => $_->[1] } @$res_aref_4;
+
   # As a workaround to deal with some genomes being in multiple strain-level gene-tree
   # collections, we need a mapping from such genomes to their preferred clusterset_id.
   my $res_aref_3 = $dbh->selectall_arrayref('
@@ -1372,43 +1385,26 @@ sub _summarise_compara_db {
     }
   }
 
-  ## Store strain gene-tree collection metadata
+  ## Store gene-tree collection metadata
   my $sth = $dbh->prepare('
-    select distinct gd.name, trim(leading "collection-" from ssh.name), sst.value
+    select distinct gd.name, trim(leading "collection-" from ssh.name)
       from method_link_species_set mlss
         join method_link ml using(method_link_id)
         join species_set ss using(species_set_id)
         join species_set_header ssh using(species_set_id)
-        join species_set_tag sst using(species_set_id)
         join genome_db gd using(genome_db_id)
-      where ml.type in ("PROTEIN_TREES", "NC_TREES")
-        and sst.tag = "strain_type";
+      where ml.type in ("PROTEIN_TREES", "NC_TREES");
   ');
   $sth->execute;
 
-  while (my ($sp, $clusterset_id, $strain_type) = $sth->fetchrow_array) {
+  while (my ($sp, $clusterset_id) = $sth->fetchrow_array) {
     $self->db_tree->{$db_name}{'CLUSTERSET_PRODNAMES'}{$clusterset_id}{$sp} = 1;
+    next if ! exists $cset_id_to_strain_type{$clusterset_id};
     next if exists $preferred_clusterset_id{$sp} && $clusterset_id ne $preferred_clusterset_id{$sp};
+    ## Store strain gene-tree collection metadata
+    my $strain_type = $cset_id_to_strain_type{$clusterset_id};
     $self->db_tree->{$db_name}{'CLUSTERSETS'}{$sp} = $clusterset_id;
     $self->db_tree->{$db_name}{'STRAIN_TYPES'}{$sp} = $strain_type;
-  }
-
-  if (exists $self->db_tree->{$db_name}{'CLUSTERSET_PRODNAMES'}) {
-
-    my $default_oset_spp_aref = $dbh->selectcol_arrayref('
-      select distinct gd.name
-      from method_link_species_set mlss
-        join method_link ml using(method_link_id)
-        join species_set ss using(species_set_id)
-        join species_set_header ssh using(species_set_id)
-        join genome_db gd using(genome_db_id)
-      where ml.type in ("PROTEIN_TREES", "NC_TREES")
-        and trim(leading "collection-" from ssh.name) = "default";
-    ');
-
-    foreach my $sp (@$default_oset_spp_aref) {
-      $self->db_tree->{$db_name}{'CLUSTERSET_PRODNAMES'}{'default'}{$sp} = 1;
-    }
   }
 
   ###################################################################

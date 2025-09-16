@@ -207,14 +207,20 @@ sub GENE_TREE_CONSTANTS {
     compara_pan_ensembl => {
       action => 'PanComparaTree',
       component => 'PanComparaTree',
+      # In Multi gene-tree view, the URL
+      # function signals that the view
+      # is of a Pan Compara gene tree.
+      function => 'pan_compara',
     },
     compara_strain => {
       action => 'Strain_Compara_Tree',
       component => 'ComparaTree',
+      function => undef,
     },
     compara => {
       action => 'Compara_Tree',
       component => 'ComparaTree',
+      function => undef,
     },
   };
 

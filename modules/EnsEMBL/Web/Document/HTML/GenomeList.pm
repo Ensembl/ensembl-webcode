@@ -277,12 +277,17 @@ sub add_genome_groups {
 }
 
 sub get_featured_genomes {
+  my $self = shift;
+
+  my $pig_breed_urls = $self->hub->species_defs->get_config('Sus_scrofa', 'ALL_STRAINS') // [];
+  my $pig_breed_count = scalar(@{$pig_breed_urls});
+  my $pig_breed_text = $pig_breed_count > 0 ? "$pig_breed_count additional breeds" : 'additional breeds';
   return (
            {
             'url'   => 'Sus_scrofa/Info/Breeds/',
             'img'   => 'Sus_scrofa.png',
             'name'  => 'Pig breeds',
-            'more'  => qq(<a href="/Sus_scrofa/" class="nodeco">Pig reference genome</a> and <a href="Sus_scrofa/Info/Breeds/" class="nodeco">20 additional breeds</a>),
+            'more'  => qq(<a href="/Sus_scrofa/" class="nodeco">Pig reference genome</a> and <a href="Sus_scrofa/Info/Breeds/" class="nodeco">${pig_breed_text}</a>),
            },
           );
 }

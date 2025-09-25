@@ -297,12 +297,12 @@ sub make_table {
     filter_fixed => 1,
     filter_blank_button => 1,
   },{
-    _key => 'dbnsfp_esm1b_sort', _type => 'numeric no_filter unshowable',
-    sort_for => 'dbnsfp_esm1b_value',
+    _key => 'esm1b_sort', _type => 'numeric no_filter unshowable',
+    sort_for => 'esm1b_value',
   },{
-    _key => 'dbnsfp_esm1b_class', _type => 'iconic no_filter unshowable',
+    _key => 'esm1b_class', _type => 'iconic no_filter unshowable',
   },{
-    _key => 'dbnsfp_esm1b_value', _type => 'numeric',
+    _key => 'esm1b_value', _type => 'numeric',
     label => "ESM1b",
     helptip => $glossary->{'ESM1b'},
     filter_range => [-30,10],

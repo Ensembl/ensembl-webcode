@@ -1619,8 +1619,22 @@ sub species_label {
       $label = $display;
     }
   }
-  $label = 'Ancestral sequence' unless $label;
-  
+
+  if (!$label) {
+    my $pan_prodname_lookup = $self->multi_val('PAN_COMPARA_PRODNAME_LOOKUP') || {};
+    if (exists $pan_prodname_lookup->{$url} && $pan_prodname_lookup->{$url}) {
+      my $prod_name = $pan_prodname_lookup->{$url};
+      my $pan_lookup = $self->multi_val('PAN_COMPARA_LOOKUP') || {};
+      if (exists $pan_lookup->{$prod_name} && $pan_lookup->{$prod_name}) {
+        $label = $pan_lookup->{$prod_name}{'display_name'};
+      }
+    }
+
+    if (!$label) {
+      $label = 'Ancestral sequence';
+    }
+  }
+
   return $label;
 }
 
@@ -1805,8 +1819,10 @@ sub production_name {
     }
 
 # species name is either has not been registered as an alias, or it comes from a different website, e.g in pan compara
-    my %pan_lookup = $self->multiX('PAN_COMPARA_LOOKUP');
-    my $prod_name  = $pan_lookup{$species} ? $pan_lookup{$species}{'production_name'} : '';
+    my $pan_prodname_lookup = $self->multi_val('PAN_COMPARA_PRODNAME_LOOKUP') || {};
+    if (exists $pan_prodname_lookup->{$species} && $pan_prodname_lookup->{$species}) {
+      return $pan_prodname_lookup->{$species};
+    }
 }
 
 sub verbose_params {

@@ -2073,6 +2073,7 @@ sub _summarise_pan_compara {
     if ($division eq 'Bacteria') {
       $subdivision = 'archaea' if $archaea->{$prod_name};
     }
+    $self->db_tree->{'PAN_COMPARA_PRODNAME_LOOKUP'}{$url} = $prod_name;
     $self->db_tree->{'PAN_COMPARA_LOOKUP'}{$prod_name} = {
                 'species_url'     => $url,
                 'display_name'    => $display_name,

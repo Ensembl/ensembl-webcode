@@ -23,6 +23,7 @@ use strict;
 
 use Bio::EnsEMBL::Registry;
 use EnsEMBL::Web::Document::HTML::HomeSearch;
+use EnsEMBL::Web::Utils::Compara qw(get_sample_gene_tree_action);
 use EnsEMBL::Web::Utils::FormatText;
 
 use parent qw(EnsEMBL::Web::Component::Info);
@@ -243,6 +244,17 @@ sub compara_text {
   my $sample_data  = $species_defs->SAMPLE_DATA;
   my $ftp          = $self->ftp_url;
 
+  my $gene_tree_action = EnsEMBL::Web::Utils::Compara::get_sample_gene_tree_action($hub, 'compara');
+
+  my $gene_tree_text;
+  if ($gene_tree_action) {
+    $gene_tree_text = sprintf(
+      $self->{'img_link'},
+      $hub->url({ type => 'Gene', action => $gene_tree_action, g => $sample_data->{'GENE_PARAM'}, __clear => 1 }),
+      "Go to gene tree for $sample_data->{'GENE_TEXT'}", 'compara', 'Example gene tree'
+    );
+  }
+
   return sprintf('
     <div class="homepage-icon">
       %s
@@ -252,11 +264,7 @@ sub compara_text {
     <p><a href="/info/genome/compara/" class="nodeco">%sMore about comparative analysis</a></p>
     %s',
     
-    sprintf(
-      $self->{'img_link'},
-      $hub->url({ type => 'Gene', action => 'Compara_Tree', g => $sample_data->{'GENE_PARAM'}, __clear => 1 }),
-      "Go to gene tree for $sample_data->{'GENE_TEXT'}", 'compara', 'Example gene tree'
-    ),
+    $gene_tree_text,
     
     sprintf($self->{'icon'}, 'info'),
     

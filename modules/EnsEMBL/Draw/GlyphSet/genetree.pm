@@ -421,13 +421,25 @@ sub _init {
       $txt->{'ptsize'} = 8 if ($bold);
       
       if ($f->{'_gene'}) {
-        $txt->{'href'} = $self->_url({
-          species  => $f->{'_species'},
+
+        my $gene_zmenu_params = {
           type     => 'Gene',
-          action   => 'ComparaTree',
           __clear  => 1,
           g        => $f->{'_gene'}
-        });
+        };
+
+        if (exists $f->{'_gene_zmenu_action'}
+                && $f->{'_gene_zmenu_action'} eq 'ComparaTree_pan_compara') {
+            $gene_zmenu_params->{'action'} = 'ComparaTree_pan_compara';
+            $gene_zmenu_params->{'species'} = 'Multi';
+            $gene_zmenu_params->{'s'} = $f->{'_species'};
+        } else {
+            $gene_zmenu_params->{'action'} = 'ComparaTree',
+            $gene_zmenu_params->{'species'} = $f->{'_species'};
+        }
+
+        $txt->{'href'} = $self->_url($gene_zmenu_params);
+
       } elsif (exists $f->{_subtree}) {
         $txt->{'href'} = $node_href;
       } elsif ($f->{'_gat'}) {
@@ -828,6 +840,18 @@ sub features {
       $f->{'_genes'}->{$stable_id}++;
       $f->{'_terminals'}->{$member->genome_db_id . '|' . $stable_id}++;
       
+      if (my $member_gdb = $member->genome_db) {
+        my $member_gdb_name = $member_gdb->name;
+        if (exists $pan_lookup->{$member_gdb_name}
+              && exists $pan_lookup->{$member_gdb_name}{'division'}
+              && $pan_lookup->{$member_gdb_name}{'division'} eq 'vertebrates'
+              && !$species_defs->valid_species($pan_lookup->{$member_gdb_name}{'species_url'})) {
+          $f->{'_gene_zmenu_action'} = 'ComparaTree_pan_compara';
+        } else {
+          $f->{'_gene_zmenu_action'} = 'ComparaTree';
+        }
+      }
+
       my $treefam_link = "http://www.treefam.org/cgi-bin/TFseq.pl?id=$stable_id";
       
       $f->{'label'} = "$stable_id, $f->{'_species_label'}";

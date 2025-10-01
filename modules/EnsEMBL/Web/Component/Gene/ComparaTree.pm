@@ -560,15 +560,21 @@ sub collapsed_nodes {
       # Rank 'clade' is assigned to recognised groups without a formal rank.
       # See Schoch et al. (2020) NCBI Taxonomy: a comprehensive update on curation, resources and tools.
       # <https://europepmc.org/article/MED/32761142>.
-      my $i = 0;
       if ($this_rank eq 'no rank' || $this_rank eq 'clade') {
         # We traverse the taxonomy upwards until we find a rank
+        my $i = 0;
+        # We short-circuit the traversal if the number of steps exceeds the depth cutoff.
+        # This cutoff must be greater than the maximum depth of the NCBI Taxonomy (~40),
+        # with some headroom so we don't short-circuit a genuine lineage of unranked taxa.
+        # The Hardy–Ramanujan number (1729) was chosen because it is a very interesting
+        # number that happens to satisfy these criteria.
+        my $depth_cutoff = 1729;
         do {
           $taxon = $taxon->parent;
           last unless $taxon;
           $this_rank = $taxon->rank;
           $i += 1;
-        } while (($this_rank eq 'no rank' || $this_rank eq 'clade') && $i < 1729);
+        } while (($this_rank eq 'no rank' || $this_rank eq 'clade') && $i < $depth_cutoff);
         $this_rank = $rank_pos{$this_rank};
         #warn sprintf("Mapped 'no rank' %s to %s\n", $internal_node->species_tree_node->taxon->name, $rank_order[$this_rank]);
       } else {

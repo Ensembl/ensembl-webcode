@@ -496,6 +496,10 @@ sub collapsed_nodes {
     # <https://ncbiinsights.ncbi.nlm.nih.gov/2024/06/04/changes-ncbi-taxonomy-classifications/>
     # and NCBI Insights (2025-04-25) NCBI Taxonomy updates to virus classification.
     # <https://ncbiinsights.ncbi.nlm.nih.gov/2025/04/25/ncbi-taxonomy-updates-virus-classification-april-2025/>.
+    # Note that a handful of taxonomic lineages have ranks inconsistent with this ordering
+    # (e.g. taxon 200324 of rank 'forma specialis' has parent taxon 860303 of rank 'varietas').
+    # As of release 116, all such cases are below the species level, and species is the lowest taxonomic
+    # rank in the collapse-by-rank dropdown, so these inconsistencies should not be an issue in practice.
     my @rank_order = (
       'isolate',
       'strain',

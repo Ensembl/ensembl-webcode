@@ -19,7 +19,7 @@ limitations under the License.
 
 package EnsEMBL::Web::Controller::Psychic;
 
-### Psychic search - tries to guess where the user wanted to go 
+### Psychic search - tries to guess where the user wanted to go
 ### based on analysis of the search string!
 
 use strict;
@@ -37,6 +37,34 @@ sub process {
   } else {
     $self->psychic;
   }
+}
+
+my $do_redirect = 1;
+sub enable_redir {
+    $do_redirect = 1;
+}
+sub disable_redir {
+    $do_redirect = 0;
+}
+
+sub psy_redir {
+    my $self = shift;
+    my $url = shift;
+
+    if ($do_redirect) {
+        # warn "Psychic redirecting to $url";
+        return $self->redirect($url);
+    } else {
+        # warn "Psychic not redirecting to $url";
+        return $url;
+    }
+}
+
+sub psychic_no_redir {
+    disable_redir();
+    my $url = psychic(@_);
+    enable_redir();
+    return $url;
 }
 
 sub psychic {
@@ -68,9 +96,9 @@ sub psychic {
   push @extra,"facet_feature_type=Documentation" if $species eq 'help';
   $species = undef if $dest_site =~ /_all/ or $species eq 'help';
 
-  return $self->redirect("//www.ebi.ac.uk/ebisearch/search.ebi?db=allebi&query=$query")  if $dest_site eq 'ebi';
-  return $self->redirect("//www.sanger.ac.uk/search?db=allsanger&t=$query")              if $dest_site eq 'sanger';
-  return $self->redirect("//www.ensemblgenomes.org/search/eg/$query")                    if $dest_site eq 'ensembl_genomes';
+  return $self->psy_redir("//www.ebi.ac.uk/ebisearch/search.ebi?db=allebi&query=$query")  if $dest_site eq 'ebi';
+  return $self->psy_redir("//www.sanger.ac.uk/search?db=allsanger&t=$query")              if $dest_site eq 'sanger';
+  return $self->psy_redir("//www.ensemblgenomes.org/search/eg/$query")                    if $dest_site eq 'ensembl_genomes';
 
   my $extra = '';
   if(@extra) {
@@ -90,7 +118,7 @@ sub psychic {
     }
   } elsif ($site_type eq 'vega') {
     $url  = "/Multi/Search/Results?species=all&idx=All&q=$query";
-    $site = '//www.ensembl.org'; 
+    $site = '//www.ensembl.org';
   }
 
   my $flag = 0;
@@ -104,7 +132,7 @@ sub psychic {
       $query_without_species =~ s/^ //;
       $query_species = $sp;
     }
-  }  
+  }
 
   my $species_path = $species_defs->species_path($species) || "/$species";
 
@@ -113,7 +141,7 @@ sub psychic {
 
     if ($query =~ /^rs\d+$/) {
 
-      return $self->redirect($site.$hub->url({
+      return $self->psy_redir($site.$hub->url({
         'species'   => $species || $query_species,
         'type'      => 'Variation',
         'action'    => 'Explore',
@@ -140,7 +168,7 @@ sub psychic {
       $index_t = 'Sequence';
       $flag = $1;
     }
- 
+
     ## match any of the following:
     if ($jump_query =~ /^\s*([-\.\w]+)[:]/i ) {
     #using core api to return location value (see perl documentation for core to see the available combination)
@@ -228,7 +256,7 @@ sub psychic {
       if (defined $variant){
         my $variant_name = $variant->name();
         $flag  = 1;
-        return $self->redirect($site.$hub->url({
+        return $self->psy_redir($site.$hub->url({
           'species'   => 'human',
           'type'      => 'Variation',
           'action'    => 'Explore',
@@ -248,7 +276,7 @@ sub psychic {
      if (defined $variant){
        my $variant_name = $variant->name();
        $flag  = 1;
-       return $self->redirect($site.$hub->url({
+       return $self->psy_redir($site.$hub->url({
          'species'   => 'human',
          'type'      => 'Variation',
          'action'    => 'Explore',
@@ -279,7 +307,7 @@ sub psychic {
     $url .= join(";",map {; "$_=".$hub->param($_) } @params).$extra;
   }
 
-  $self->redirect($site . $url);
+  $self->psy_redir($site . $url);
 }
 
 sub psychic_gene_location {
@@ -289,7 +317,7 @@ sub psychic_gene_location {
   my $adaptor = $hub->get_adaptor('get_GeneAdaptor', $hub->param('db'));
   my $gene    = $adaptor->fetch_by_stable_id($query) || $adaptor->fetch_by_display_label($query);
   my $url;
-  
+
   if ($gene) {
     $url = $hub->url({
       %{$hub->multi_params(0)},
@@ -299,7 +327,7 @@ sub psychic_gene_location {
     });
   } else {
     $url = $hub->referer->{'absolute_url'};
-    
+
     $hub->session->set_record_data({
       type     => 'message',
       function => '_warning',
@@ -308,8 +336,8 @@ sub psychic_gene_location {
     });
     $hub->session->store_records;
   }
-  
-  $self->redirect($url);
+
+  $self->psy_redir($url);
 }
 
 sub escaped_url {

@@ -488,7 +488,71 @@ sub collapsed_nodes {
     }
   } elsif ($action =~ /rank_(\w+)/) {
     my $asked_rank = $1;
-    my @rank_order = qw(subspecies species subgenus genus subfamily family superfamily parvorder infraorder suborder order superorder infraclass subclass class superclass subphylum phylum superphylum subkingdom kingdom superkingdom);
+
+    # Rank order info as described in
+    # Schoch et al. (2020) NCBI Taxonomy: a comprehensive update on curation, resources and tools.
+    # <https://europepmc.org/article/MED/32761142>,
+    # with some updates based on NCBI Insights (2024-06-04) Upcoming changes to NCBI Taxonomy classifications.
+    # <https://ncbiinsights.ncbi.nlm.nih.gov/2024/06/04/changes-ncbi-taxonomy-classifications/>
+    # and NCBI Insights (2025-04-25) NCBI Taxonomy updates to virus classification.
+    # <https://ncbiinsights.ncbi.nlm.nih.gov/2025/04/25/ncbi-taxonomy-updates-virus-classification-april-2025/>.
+    # Note that a handful of taxonomic lineages have ranks inconsistent with this ordering
+    # (e.g. taxon 200324 of rank 'forma specialis' has parent taxon 860303 of rank 'varietas').
+    # As of release 116, all such cases are below the species level, and species is the lowest taxonomic
+    # rank in the collapse-by-rank dropdown, so these inconsistencies should not be an issue in practice.
+    my @rank_order = (
+      'isolate',
+      'strain',
+      'serotype',
+      'biotype',
+      'genotype',
+      'serogroup',
+      'pathogroup',
+      'forma',
+      'subvariety',
+      'varietas',
+      'form',
+      'morph',
+      'subspecies',
+      'forma specialis',
+      'special form',
+      'species',
+      'species subgroup',
+      'species group',
+      'subseries',
+      'series',
+      'subsection',
+      'section',
+      'subgenus',
+      'genus',
+      'subtribe',
+      'tribe',
+      'subfamily',
+      'family',
+      'superfamily',
+      'parvorder',
+      'infraorder',
+      'suborder',
+      'order',
+      'superorder',
+      'subcohort',
+      'cohort',
+      'infraclass',
+      'subclass',
+      'class',
+      'superclass',
+      'infraphylum',
+      'subphylum',
+      'phylum',
+      'superphylum',
+      'subkingdom',
+      'kingdom',
+      'domain',
+      'realm',
+      'cellular root',
+      'acellular root',
+    );
+
     my %rank_pos = map {$rank_order[$_] => $_} 0..(scalar(@rank_order)-1);
     my @nodes_to_check = ($tree);
     while (@nodes_to_check) {
@@ -497,15 +561,25 @@ sub collapsed_nodes {
       next unless $internal_node->species_tree_node;
       my $taxon = $internal_node->species_tree_node->taxon;
       my $this_rank = $taxon->rank;
-      if ($this_rank eq 'no rank') {
-        # We traverse the taxonomy upwards until we find a rank, and get
-        # the rank just below instead
-        while ($this_rank eq 'no rank') {
+      # Rank 'clade' is assigned to recognised groups without a formal rank.
+      # See Schoch et al. (2020) NCBI Taxonomy: a comprehensive update on curation, resources and tools.
+      # <https://europepmc.org/article/MED/32761142>.
+      if ($this_rank eq 'no rank' || $this_rank eq 'clade') {
+        # We traverse the taxonomy upwards until we find a rank
+        my $i = 0;
+        # We short-circuit the traversal if the number of steps exceeds the depth cutoff.
+        # This cutoff must be greater than the maximum depth of the NCBI Taxonomy (~40),
+        # with some headroom so we don't short-circuit a genuine lineage of unranked taxa.
+        # The Hardy–Ramanujan number (1729) was chosen because it is a very interesting
+        # number that happens to satisfy these criteria.
+        my $depth_cutoff = 1729;
+        do {
           $taxon = $taxon->parent;
           last unless $taxon;
           $this_rank = $taxon->rank;
-        }
-        $this_rank = $rank_pos{$this_rank}-1;
+          $i += 1;
+        } while (($this_rank eq 'no rank' || $this_rank eq 'clade') && $i < $depth_cutoff);
+        $this_rank = $rank_pos{$this_rank};
         #warn sprintf("Mapped 'no rank' %s to %s\n", $internal_node->species_tree_node->taxon->name, $rank_order[$this_rank]);
       } else {
         $this_rank = $rank_pos{$this_rank};

@@ -57,14 +57,14 @@ Alternatively, you can use a MySQL client program to query the database directly
   <li><a href="http://dev.mysql.com/downloads/mysql/">MySQL command line client</a> (available from the MySQL server distribution)</li>
   <li><a href="http://dev.mysql.com/downloads/workbench/">MySQL workbench</a></li>
   <li><a href="http://dev.mysql.com/downloads/shell/">MySQL shell</a></li>
-  <li><a href="https://www.sequelpro.com/">SequelPro</a> (macOS only)</li>
+  <li><a href="https://sequel-ace.com/">SequelAce</a> (macOS only)</li>
 </ul>
 
 <p>
 However this does require knowledge of the complex <a href="/info/docs/api/">database
 schemas</a> used by Ensembl, so we only recommend it if you are unable
-to install our API (e.g. if you have no access to Perl). Also note
-that direct MySQL queries on the database are not suited to retrieve
+to install our API (e.g. if you have no access to Perl).<br/>
+Also note that direct MySQL queries on the database are not suited to retrieve
 sequences; to retrieve sequences please use the Perl API.
 </p>
 
@@ -72,11 +72,10 @@ sequences; to retrieve sequences please use the Perl API.
 
 <p>
 For <strong>BioMart</strong> access, we strongly recommend that you
-use the <a href="/Multi/martview">martview web interface</a>, as the
-mart databases contain very many tables of denormalised data. Data can
-also be retrieved from BioMart programmatically, using
-the <a href="http://www.biomart.org/martservice.html">Mart XML-based
-webservice</a>.
+use the <a href="/biomart/martview">martview web interface</a>, as the
+mart databases contain very many tables of denormalised data.</br>
+Data can also be retrieved from BioMart programmatically.<br/>
+For more details, please see <a href="/info/data/biomart/index.html#biomartdoc">BioMart R package, RESTful access and API</a>.
 </p> 
 
 <h2>Summary of servers and ports</h2>
@@ -140,7 +139,7 @@ corresponding ports will also need to be allowed.
 <td class="left">From Ensembl <strong>48</strong> onwards only</td>
 </tr>
 
-<tr class="bg1">
+<tr class="bg2">
 <td>ensembldb.ensembl.org</td>
 <td>anonymous</td>
 <td class="center">-</td>

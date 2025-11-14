@@ -88,7 +88,7 @@ sub _psychic {
 
   return "//www.ebi.ac.uk/ebisearch/search.ebi?db=allebi&query=$query"  if $dest_site eq 'ebi';
   return "//www.sanger.ac.uk/search?db=allsanger&t=$query"              if $dest_site eq 'sanger';
-  return "//www.ensemblgenomes.org/search/?query=$query"                if $dest_site eq 'ensembl_genomes';
+  return "//www.ensemblgenomes.org/search/eg/$query"                    if $dest_site eq 'ensembl_genomes';
 
   my $extra = '';
   if(@extra) {

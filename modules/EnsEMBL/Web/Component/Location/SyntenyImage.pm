@@ -37,6 +37,7 @@ sub content {
   my $hub     = $self->hub;
   my $object  = $self->object || $self->hub->core_object('location');
   my $species = $hub->species;
+  my $this_prodname = $hub->species_defs->get_config($species, 'SPECIES_PRODUCTION_NAME');
   my %synteny = $hub->species_defs->multi('DATABASE_COMPARA', 'SYNTENY');
   my $other   = $self->hub->otherspecies; 
   my $other_prodname = $hub->species_defs->get_config($other, 'SPECIES_PRODUCTION_NAME');
@@ -44,7 +45,7 @@ sub content {
   my %chr_1   = map { $_, 1 } @{$hub->species_defs->ENSEMBL_CHROMOSOMES || []};
   my %chr_2   = map { $_, 1 } @{$hub->species_defs->get_config($other, 'ENSEMBL_CHROMOSOMES') || []};
   
-  unless ($synteny{$other_prodname}) {
+  unless ($synteny{$this_prodname}{$other_prodname}) {
     $hub->problem('fatal', "Can't display synteny",  "There is no synteny data for these two species ($species and $other)");
     return undef;
   }
@@ -52,23 +53,19 @@ sub content {
   my $ka         = $hub->get_adaptor('get_KaryotypeBandAdaptor', 'core', $species);
   my $ka2        = $hub->get_adaptor('get_KaryotypeBandAdaptor', 'core', $other);
   my $compara_db = $hub->database('compara');
-  my $raw_data   = $object->chromosome->get_all_compara_Syntenies($other, undef, $compara_db);   
   my $chr_length = $object->chromosome->length;
-  my $other_chr;
 
-  OUTER:
-  foreach my $synteny_region (@$raw_data) {
-    foreach my $dfr (@{$synteny_region->get_all_DnaFragRegions}) {
-      # Check if any of the synteny regions map to a chromosome in the other species
-      if ($dfr->dnafrag->genome_db->name eq $other_prodname && $chr_2{$dfr->dnafrag->name}) {
-        $other_chr = 1;
-        last OUTER;
-      }
-    }
+  my $genome_dba = $compara_db->get_GenomeDBAdaptor();
+  my @synteny_gdbs = ($genome_dba->fetch_by_name_assembly($this_prodname));
+  if ($other_prodname ne $this_prodname) {
+    push(@synteny_gdbs, $genome_dba->fetch_by_name_assembly($other_prodname));
   }
 
+  my $mlss = $compara_db->get_MethodLinkSpeciesSetAdaptor->fetch_by_method_link_type_GenomeDBs('SYNTENY', \@synteny_gdbs);
+  my $raw_data = $compara_db->get_SyntenyRegionAdaptor->fetch_all_by_MethodLinkSpeciesSet_Slice($mlss, $object->chromosome);
+
   my $image_html;
-  if ($chr_1{$chr} && $other_chr) {
+  if (scalar(@$raw_data) > 0) {
 
     my ($localgenes, $offset) = $object->get_synteny_local_genes;
     my $loc = (@$localgenes ? $localgenes->[0]->start + $object->seq_region_start : 1); # Jump loc to the location of the genes

@@ -181,6 +181,8 @@ sub content {
     $button_set{'view'} = 1;
   }
  
+  $html .= $self->_show_unannotated_paralogs_info_panel($strain_url);
+
   $html .= $table->render;
  
   return $html;
@@ -257,6 +259,8 @@ sub species_tree_node_label {
         return $scientific_name;
     }
 }
+
+sub _show_unannotated_paralogs_info_panel {}  # stub method for use in plugins
 
 1;
 

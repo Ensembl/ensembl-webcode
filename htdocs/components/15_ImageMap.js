@@ -289,7 +289,7 @@ Ensembl.Panel.ImageMap = Ensembl.Panel.Content.extend({
         $.each(this.coords, function (i) { c[rect[i]] = parseInt(this, 10); });
       }
       
-      panel.areas.push(c);
+      panel.areas.unshift(c);
       
       if (this.klass.drag || this.klass.vdrag) {
         // r = [ '#drag', image number, species number, species name, region, start, end, strand ]

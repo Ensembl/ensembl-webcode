@@ -607,6 +607,7 @@ sub draw_chromosome {
   
   my %coords;
   
+  my $highlight_z_index = 1;
   foreach my $box (@$highlights) {
     my $vc_start  = $box->{'start'} * $scale + $v_offset;
     my $vc_end    = $box->{'end'}   * $scale + $v_offset;
@@ -622,6 +623,7 @@ sub draw_chromosome {
     $self->push($self->Rect({
       'x'             => $vc_start,
       'y'             => $h_offset + $box->{'side'} * ($wid+4),
+      'z'             => $highlight_z_index,
       'width'         => $vc_end - $vc_start,
       'height'        => $wid,
       'colour'        => $box->{'col'},
@@ -632,6 +634,7 @@ sub draw_chromosome {
       'href'          => $box->{'href'},
       'zmenu'         => $box->{'zmenu'}
     }));
+    $highlight_z_index += 1;
     
     if ($box->{'marked'}==1 || $box->{'marked'}==-1) {
       $self->push($self->Rect({

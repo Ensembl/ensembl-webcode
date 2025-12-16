@@ -99,7 +99,7 @@ sub content {
     $image_html = $image->render;
   }
   else {
-    $image_html = $self->info_panel("Unassembled chromosomes", "<p>No image can be drawn, because the syntenous species has no assembled chromosomes.</p>");
+    $image_html = $self->info_panel("Unavailable synteny regions", "<p>No image can be drawn, because this chromosome lacks synteny regions with the selected species.</p>");
   }
   my $chr_form = $self->chromosome_form('Vsynteny');
 

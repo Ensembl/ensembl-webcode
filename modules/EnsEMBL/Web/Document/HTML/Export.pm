@@ -42,7 +42,7 @@ sub render {
     push @services, qq(the <a href="$rest">REST API</a>);
   }
   if ($sd->HAS_API_DOCS) {
-    push @services, qq(the <a href="info/data/mysql.html">MySQL server</a>);
+    push @services, qq(the <a href="/info/data/mysql.html">MySQL server</a>);
   }
   my $ftp = $sd->ENSEMBL_FTP_URL;
   if ($ftp) {

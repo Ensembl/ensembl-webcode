@@ -44,6 +44,12 @@ sub content {
   my $is_ncrna       = ( ref $biotype eq 'Bio::EnsEMBL::Biotype' ? $biotype->biotype_group =~ /noncoding$/ : $biotype =~ /RNA/ );
   my $strain_url     = $hub->action =~ /^Strain_/ ? 'Strain_' : '';
   my %paralogue_list = %{$self->object->get_homology_matches('ENSEMBL_PARALOGUES', 'paralog|gene_split', undef, $cdb)};
+  my $html;
+
+  my $strain_tree = $hub->species_defs->get_config($hub->species,'RELATED_TAXON') if $strain_url;
+  if ($self->object->has_unannotated_paralogs($cdb, $strain_tree)) {
+    $html .= $self->_show_unannotated_paralogs_info_panel();
+  }
 
   return '<p>No paralogues have been identified for this gene</p>' unless keys %paralogue_list;
 
@@ -175,14 +181,11 @@ sub content {
   }
   
   my $table = $self->new_table($columns, \@rows, { data_table => 1 });
-  my $html;
   
   if ($alignview && keys %paralogue_list) {
     $button_set{'view'} = 1;
   }
  
-  $html .= $self->_show_unannotated_paralogs_info_panel($strain_url);
-
   $html .= $table->render;
  
   return $html;

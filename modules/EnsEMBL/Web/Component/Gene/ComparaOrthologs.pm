@@ -519,7 +519,7 @@ sub get_no_ortho_species_html {
   my $html = '';
 
   # Species will be easier to find if we sort them by display name.
-  foreach (sort {lc $species_not_shown->{$a} cmp lc $species_not_shown->{$b}} keys %$species_not_shown) {
+  foreach (sort {lc $self->strip_HTML($species_not_shown->{$a}) cmp lc $self->strip_HTML($species_not_shown->{$b}) } keys %$species_not_shown) {
     my $class = $sets_by_species->{$_} ? sprintf(' class="%s"',  join(' ', @{$sets_by_species->{$_}})) : '';
     $html .= sprintf '<li%s>%s</li>', $class, $species_not_shown->{$_};
   }

@@ -46,8 +46,10 @@ sub content {
   
   ## Mandatory search box
   my $sci_name = $species_defs->SPECIES_SCIENTIFIC_NAME;
-  ## Allow for species like C.elegans that don't have a common name
-  if ($species_defs->USE_COMMON_NAMES && $sci_name ne $display_name) {
+  ## Allow for species like C.intestinalis that don't have a common name
+  if ($species_defs->USE_COMMON_NAMES
+      && $sci_name ne $display_name
+      && $display_name !~ /^[A-Z]\.\s*[-A-Za-z]+$/) {
     $display_name .= " ($sci_name)"; 
   }
   my $html = sprintf '<div class="round-box tinted-box unbordered"><h2>Search %s</h2>%s</div>', 

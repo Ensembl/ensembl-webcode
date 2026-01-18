@@ -45,7 +45,8 @@ sub common_name {
 
 sub combine_names {
   my ($self, $common_name, $sci_name) = @_;
-  if ($sci_name eq $common_name) {
+  if ($sci_name eq $common_name
+          || $common_name =~ /^[A-Z]\.\s*[-A-Za-z]+$/) {  # e.g. 'C.intestinalis'
       return "<em>$sci_name</em>";
   } else {
       return "$common_name (<em>$sci_name</em>)";

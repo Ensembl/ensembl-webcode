@@ -591,7 +591,9 @@ sub species_tree_node_label {
     my $taxon_alias = $species_tree_node->get_common_name();
     my $scientific_name = $species_tree_node->get_scientific_name();
     my $node_label;
-    if ($taxon_alias) {
+    if ($self->hub->species_defs->USE_COMMON_NAMES
+            && $taxon_alias
+            && $taxon_alias !~ /^[A-Z]\.\s*[-A-Za-z]+$/) {  # e.g. 'C.intestinalis'
         $node_label = sprintf('%s (%s)', $taxon_alias, $scientific_name);
     } else {
         $node_label = $scientific_name;

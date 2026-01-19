@@ -688,7 +688,7 @@ sub freqs {
     my $pop_obj = $allele_obj->population;  
     
     # no population, add to special data structure
-    if(!defined($pop_obj) || (defined($pop_obj) && ($pop_obj->size == 1 || !defined($allele_obj->frequency)))) {
+    if(!defined($pop_obj) || (defined($pop_obj) && (($pop_obj->size == 1 && $pop_obj->name !~ /^PRJEB93975/) || !defined($allele_obj->frequency)))) {
       next unless $allele_obj->subsnp_handle();
       push @{$data{no_pop}{$allele_obj->subsnp_handle}{$allele_obj->subsnp}}, $allele_obj->allele;
       next;
@@ -721,7 +721,7 @@ sub freqs {
     my $pop_obj = $pop_gt_obj->population; 
     
     # no population, add to special data structure
-    if(!defined($pop_obj) || (defined($pop_obj) && ($pop_obj->size == 1 || !defined($pop_gt_obj->frequency)))) {
+    if(!defined($pop_obj) || (defined($pop_obj) && (($pop_obj->size == 1 && $pop_obj->name !~ /^PRJEB93975/) || !defined($pop_gt_obj->frequency)))) {
       next unless $pop_gt_obj->subsnp_handle();
       push @{$data{no_pop}{$pop_gt_obj->subsnp_handle}{$pop_gt_obj->subsnp}}, @{$pop_gt_obj->genotype};
       next;

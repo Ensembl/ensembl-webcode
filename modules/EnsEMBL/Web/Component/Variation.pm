@@ -77,7 +77,7 @@ sub pop_url {
   elsif ($pop_name =~ /^ExAC/i) {
     $pop_url = $hub->get_ExtURL('EXAC_POP');
   }
-  elsif ($pop_name =~ /^PRJ([A-Z]{2})\d+/i) {
+  elsif ($pop_name =~ /^PRJ([A-Z]{2})\d+/i && $pop_name !~ /^PRJEB93975/) {
     $pop_url = $hub->get_ExtURL('EVA_STUDY').$pop_name;
   }
   else {

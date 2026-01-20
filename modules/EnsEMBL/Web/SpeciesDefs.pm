@@ -1606,7 +1606,7 @@ sub species_label {
       ## Known species, so create label accordingly
       my $sci    = $self->get_config($url, 'SPECIES_SCIENTIFIC_NAME');
       $sci = sprintf '<i>%s</i>', $sci unless $no_formatting;
-      if ($display =~ /\./) {
+      if ($display =~ /^[A-Z]\.\s*[-A-Za-z]+$/) {
         $label = $sci;
       }
       else {

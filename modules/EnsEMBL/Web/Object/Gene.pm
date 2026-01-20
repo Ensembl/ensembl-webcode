@@ -1048,6 +1048,8 @@ sub _get_basal_gene_tree {
     return $curr_tree;
 }
 
+sub has_unannotated_paralogs {}  # stub method for use in plugins
+
 sub get_gene_slices {
   my ($self, $master_config, @slice_configs) = @_;
   foreach my $array (@slice_configs) { 

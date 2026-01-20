@@ -462,12 +462,14 @@ sub species_sets {
       $no_ortho = 1;
     }  
 
-    my $taxon_group     = $species_defs->get_config($species, 'SPECIES_GROUP');
+    my $taxon_group = $species_defs->get_config($species, 'SPECIES_GROUP');
+    if ($is_pan || !$taxon_group) {
+      $pan_info = $species_defs->multi_val('PAN_COMPARA_LOOKUP') if (!%{$pan_info});
+      $taxon_group = $pan_info->{$_}{'subdivision'} || $pan_info->{$_}{'division'} || 'Undefined';
+    }
+
     my @compara_groups  = $set_mappings ? @{$set_mappings->{$taxon_group}||[]}
                                         : ($taxon_group);
-    if ($is_pan) {
-      @compara_groups = ($pan_info->{$_}{'subdivision'} || $pan_info->{$_}{'division'});
-    }
     my $sets = [];
 
     foreach my $ss_name ('all', @compara_groups) {

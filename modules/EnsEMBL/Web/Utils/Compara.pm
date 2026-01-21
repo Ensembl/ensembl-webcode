@@ -92,6 +92,50 @@ sub _get_strain_orthoset_prod_names {
 }
 
 
+sub filtered_orthologue_prod_names {
+  my ($hub, $compara_db, $strain) = @_;
+  my @filtered_sets  = split /\s*,\s*/, $hub->param('filtered_sets');
+  my @species_params = grep { /^species_/ } $hub->param;
+  my $is_pan         = $compara_db =~ /pan/;
+  my $pan_info       = $is_pan ? $hub->species_defs->multi_val('PAN_COMPARA_LOOKUP') : {};
+  my $lookup         = $hub->species_defs->prodnames_to_urls_lookup($compara_db);
+
+  my $species_group_2_species_set = species_set_mapping();
+
+  my $orthoset_prod_names = orthoset_prod_names($hub, $compara_db, $strain);
+
+  my $species = [];
+  foreach my $prodname (@{$orthoset_prod_names}) {
+    next unless (scalar(@species_params) == 0 || $hub->param("species_${prodname}") eq 'yes');
+
+    if($filtered_sets[0] eq 'all'){
+      push @$species, $prodname;
+    } else {
+      my $group = $hub->species_defs->get_config($lookup->{$prodname}, 'SPECIES_GROUP');
+
+      my $species_set_names;
+      if ($is_pan) {
+        # The Pan Compara species-set breakdown is done by division/subdivision.
+        $species_set_names = [$pan_info->{$prodname}{'subdivision'} || $pan_info->{$prodname}{'division'}];
+      } else {
+        # Take the homologue species-set name from the Vertebrates mapping. If not defined, fall
+        # back to group name, which in Non-Vertebrate sites is the same as the species-set name.
+        $species_set_names = $species_group_2_species_set->{$group} // [$group];
+      }
+
+      foreach my $set (@{$species_set_names}){
+        if (grep(/$set/,@filtered_sets)){
+          push @{$species}, $prodname;
+          last;
+        }
+      }
+    }
+  }
+
+  return $species;
+}
+
+
 sub get_sample_gene_tree_action {
   ## Get sample gene-tree action.
   ## Returns undef if no gene tree is found for the sample gene, so
@@ -168,6 +212,9 @@ sub orthoset_prod_names {
 
   return $orthoset_prod_names;
 }
+
+
+sub species_set_mapping {}  # stub method for use in plugins
 
 
 1;

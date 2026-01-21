@@ -32,6 +32,7 @@ use strict;
 
 use EnsEMBL::Web::Constants; 
 use Bio::EnsEMBL::Compara::Homology;
+use EnsEMBL::Web::Utils::Compara qw(filtered_orthologue_prod_names);
 
 use Time::HiRes qw(time);
 
@@ -873,52 +874,16 @@ sub get_homologue_alignments {
   my $type        = shift || 'ENSEMBL_ORTHOLOGUES';
   my $database    = $self->database($compara_db);
   my $hub         = $self->hub;
-  my $strain_tree = $hub->species_defs->get_config($hub->species,'RELATED_TAXON') if($hub->param('data_action') =~ /strain_/i);
-  my @filtered_sets =  split /\s*,\s*/, $hub->param('filtered_sets');
+  my $strain      = $hub->param('data_action') =~ /strain_/i ? 1 : 0;
+  my $strain_tree = $hub->species_defs->get_config($hub->species,'RELATED_TAXON') if $strain;
   my $msa;
-
-  my $species_group_2_species_set = {
-      Primates          => ['primates', 'placental'],
-      Euarchontoglires  => ['rodents', 'placental'],
-      Laurasiatheria    => ['laurasia', 'placental'],
-      Afrotheria        => ['placental'],
-      Xenarthra         => ['placental'],
-      Aves              => ['sauria'],
-      Sauropsida        => ['sauria'],
-      Actinopterygii    => ['fish']
-  };
 
   if ($database) {  
     my $args = {'stable_id' => $self->stable_id, 'cdb' => $compara_db};
     my $member  = $self->get_compara_Member($args);
     my $tree    = $self->get_GeneTree($compara_db, 1, $strain_tree);
     my @params  = ($member, $type);
-    my $species = [];
-    my $compara_spp = $hub->species_defs->multi_hash->{'DATABASE_COMPARA'}{'COMPARA_SPECIES'};
-    my $lookup  = $hub->species_defs->prodnames_to_urls_lookup;
-    foreach (grep { /species_/ } $hub->param) {
-      (my $prodname = $_) =~ s/species_//;
-
-      if ($compara_spp->{$prodname} && $hub->param($_) eq 'yes'){
-
-        if($filtered_sets[0] eq 'all'){
-          push @$species, $prodname;
-        } else {
-
-          my $group = $hub->species_defs->get_config($lookup->{$prodname}, 'SPECIES_GROUP');
-          
-          foreach my $set (@{$species_group_2_species_set->{$group}}){
-                
-                if (grep(/$set/,@filtered_sets)){
-                    push @$species, $prodname;
-                    last;
-                }
-
-          }
-        }
-      }
-
-    }
+    my $species = EnsEMBL::Web::Utils::Compara::filtered_orthologue_prod_names($hub, $compara_db, $strain);
     #warn "@@@ SPECIES @$species";
     push @params, $species if scalar @$species;
 

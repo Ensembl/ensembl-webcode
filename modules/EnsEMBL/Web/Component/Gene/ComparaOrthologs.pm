@@ -23,7 +23,7 @@ use strict;
 
 use HTML::Entities qw(encode_entities);
 
-use EnsEMBL::Web::Utils::Compara qw(orthoset_prod_names);
+use EnsEMBL::Web::Utils::Compara qw(filtered_orthologue_prod_names orthoset_prod_names);
 use EnsEMBL::Web::Utils::FormatText qw(glossary_helptip get_glossary_entry pluralise);
 
 use base qw(EnsEMBL::Web::Component::Gene);
@@ -566,27 +566,11 @@ sub get_export_data {
       ($homologies) = $object->get_homologies('ENSEMBL_ORTHOLOGUES', undef, $cdb);
     }
 
-    my %ok_species;
-
-    if($self->param('cdb') eq 'compara_pan_ensembl'){
-      my @orthologues = (
-        $object->get_homology_matches('ENSEMBL_ORTHOLOGUES', undef, undef, $self->param('cdb')), 
-      );
-      foreach my $homology_type (@orthologues) {
-        foreach my $species (keys %$homology_type) {
-          $ok_species{lc($species)} = 1;
-        }
-      }
-    }
-    foreach (grep { /species_/ } $self->param) {
-      (my $sp = $_) =~ s/species_//;
-      $ok_species{$sp} = 1 if $self->param($_) eq 'yes';      
-    }
+    my $strain = $hub->param('data_action') =~ /strain_/i ? 1 : 0;
+    my %ok_species = map { $_ => 1 } @{EnsEMBL::Web::Utils::Compara::filtered_orthologue_prod_names($hub, $cdb, $strain)};
 
     if (keys %ok_species) {
-      # It's the lower case species url name which is passed through the data export URL
-      my $lookup = $hub->species_defs->prodnames_to_urls_lookup($cdb);
-      return [grep {$ok_species{lc($lookup->{$_->get_all_Members->[1]->genome_db->name})}} @$homologies];
+      return [grep {$ok_species{$_->get_all_Members->[1]->genome_db->name}} @$homologies];
     }
     else {
       return $homologies;
@@ -615,6 +599,14 @@ sub buttons {
       'gene_name'     => $name,
       'cdb'           => $hub->function =~ /pan_compara/ ? 'compara_pan_ensembl' : 'compara'
     };
+
+    # Pass species parameters so they can
+    # be used to filter the exported data.
+    foreach my $param_name ($self->param) {
+      if ($param_name =~ /^species_/) {
+        $params->{$param_name} = $self->param($param_name);
+      }
+    }
 
     push @buttons, {
                     'url'     => $hub->url($params),

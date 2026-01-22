@@ -101,19 +101,55 @@ sub _init {
   my $highlights_main = { $chr => [] };
   my $CANSEE_OTHER = $config->{'other_species_installed'};
 
+  # When working with a synteny dataset such as the Hsap synteny, we need to be able to distinguish
+  # between the main and other synteny regions, even if both are from the same genome. Moreover, we
+  # may encounter synteny pairs between two regions on the same chromosome in the same genome. In
+  # such cases, the Compara API may return the same synteny pair twice, without distinction between
+  # the two syntenic regions. To help make sense of all this, we generate a synteny region key for
+  # each region of the main chromosome that is in a synteny pair, so that we can then sort the
+  # synteny regions in order to 'thread' them along the main chromosome.
+  my %syntenies_by_main_region;
   foreach my $synteny_region (@$synteny_data) {
-    my ($main_dfr, $other_dfr);
+    my ($dfr1, $dfr2) = @{$synteny_region->get_all_DnaFragRegions};
 
-    foreach my $dfr (@{$synteny_region->get_all_DnaFragRegions}) {
-      if (lc($self_production_name) eq lc($dfr->dnafrag->genome_db->name) and $dfr->dnafrag->genome_db->name eq $other_production_name) {
-        $main_dfr = $dfr;
-        $other_dfr = $dfr;
-      } elsif ($dfr->dnafrag->genome_db->name eq $other_production_name) {
-        $other_dfr = $dfr;
-      } else {
-        $main_dfr = $dfr;
-      }
+    if (lc($dfr1->dnafrag->genome_db->name) eq lc($self_production_name) && $dfr1->dnafrag->name eq $chr) {
+
+      my $dfr1_synteny_region_key = join(
+        ':',
+        $synteny_region->dbID,
+        $dfr1->dnafrag->dbID,
+        $dfr1->dnafrag_start,
+        $dfr1->dnafrag_end,
+        $dfr1->dnafrag_strand,
+      );
+
+      $syntenies_by_main_region{$dfr1_synteny_region_key} = [$dfr1_synteny_region_key, $dfr1, $dfr2];
     }
+
+    if (lc($dfr2->dnafrag->genome_db->name) eq lc($self_production_name) && $dfr2->dnafrag->name eq $chr) {
+
+      my $dfr2_synteny_region_key = join(
+        ':',
+        $synteny_region->dbID,
+        $dfr2->dnafrag->dbID,
+        $dfr2->dnafrag_start,
+        $dfr2->dnafrag_end,
+        $dfr2->dnafrag_strand,
+      );
+
+      $syntenies_by_main_region{$dfr2_synteny_region_key} = [$dfr2_synteny_region_key, $dfr2, $dfr1];
+    }
+  }
+
+  my @synteny_regions = sort {
+    $a->[1]->dnafrag_start <=> $b->[1]->dnafrag_start
+    || $b->[1]->dnafrag_end <=> $a->[1]->dnafrag_end
+    || $b->[1]->dnafrag_strand <=> $a->[1]->dnafrag_strand
+    || $a->[0] cmp $b->[0]
+  } values %syntenies_by_main_region;
+
+  foreach my $synteny_region (@synteny_regions) {
+    my ($synteny_region_key, $main_dfr, $other_dfr) = @$synteny_region;
     
     my $other_chr = $other_dfr->dnafrag->name;
     
@@ -148,7 +184,7 @@ sub _init {
     });
     
     push @{$highlights_main->{$chr}}, {
-      'id'     => $synteny_region->dbID,
+      'id'     => $synteny_region_key,
       'start'  => $main_dfr->dnafrag_start,
       'end'    => $main_dfr->dnafrag_end,
       'col'    => $COL,
@@ -173,7 +209,7 @@ sub _init {
       
       push @{$highlights_secondary->{$other_chr}}, {
         'rel_ori' => $main_dfr->dnafrag_strand * $other_dfr->dnafrag_strand,
-        'id'      => $synteny_region->dbID,
+        'id'      => $synteny_region_key,
         'start'   => $other_dfr->dnafrag_start,
         'end'     => $other_dfr->dnafrag_end,
         'col'     => $COL,

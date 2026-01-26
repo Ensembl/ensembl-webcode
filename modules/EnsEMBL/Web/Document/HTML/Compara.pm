@@ -436,7 +436,7 @@ sub draw_pairwise_alignment_list {
     my ($self, $species) = @_;
 
     my $hub  = $self->hub;
-    my ($data, $synt_methods) = $self->pairwise_mlss_data( ['TRANSLATED_BLAT_NET','BLASTZ_NET', 'LASTZ_NET', 'ATAC', 'SYNTENY'] );
+    my ($data, $synt_methods) = $self->pairwise_mlss_data( ['TRANSLATED_BLAT_NET','BLASTZ_NET', 'LASTZ_NET', 'ATAC', 'CACTUS_HAL_PW', 'SYNTENY'] );
 
     ## Do some munging
     my ($species_order, $info) = $self->get_species_info([keys %$data], 1);
@@ -487,11 +487,17 @@ sub draw_pairwise_alignment_list {
                 if ($Bio::EnsEMBL::Compara::Method::PLAIN_TEXT_DESCRIPTIONS{$method}) {
                     $method = $Bio::EnsEMBL::Compara::Method::PLAIN_TEXT_DESCRIPTIONS{$method};
                 }
+
+                my $stats_field = $method ne 'Cactus (restricted)'  # statistics unavailable for Cactus (restricted) alignments
+                                ? qq{<a href="/info/genome/compara/mlss.html?mlss=$mlss_id">stats</a>}
+                                : '&nbsp;'
+                                ;
+
                 $astr .= qq{<tr>
 <td style="padding:0px 10px 0px 0px;text-align:right;">&nbsp;</td>
 <td style="padding:0px 10px 0px 0px;text-align:right;widht:20px">$method |</td>
 <td style="padding:0px 10px 0px 0px;text-align:left;width:60px;">$sample_location</td>
-<td style="padding:0px 10px 0px 0px;text-align:left;width:40px;"><a href="/info/genome/compara/mlss.html?mlss=$mlss_id">stats</a></td><tr>};
+<td style="padding:0px 10px 0px 0px;text-align:left;width:40px;">$stats_field</td><tr>};
             }
             $astr .= qq{</table>};
             my $self_desc = $sp eq $other ? ' [self-alignment]' : '';

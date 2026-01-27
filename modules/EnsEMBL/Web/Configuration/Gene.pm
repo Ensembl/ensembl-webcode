@@ -144,24 +144,24 @@ sub populate_tree {
 
     my $strain_ol_node = $self->create_node('Strain_Compara_Ortholog', 'Orthologues',
       [qw( orthologues EnsEMBL::Web::Component::Gene::ComparaOrthologs )],
-      { 'availability' => 'gene database:compara core has_strain_orthologs', 'concise' => 'Orthologues' }
+      { 'availability' => 'gene database:compara core has_strain_gene_tree has_strain_orthologs', 'concise' => 'Orthologues' }
     );
 
     $strain_ol_node->append($self->create_subnode('Strain_Compara_Ortholog/Alignment', 'Orthologue alignment',
       [qw( alignment EnsEMBL::Web::Component::Gene::HomologAlignment )],
-      { 'availability'  => 'gene database:compara core has_strain_orthologs', 'no_menu_entry' => 1 }
+      { 'availability'  => 'gene database:compara core has_strain_gene_tree has_strain_orthologs', 'no_menu_entry' => 1 }
     ));
 
     $strain_compara_menu->append($strain_ol_node);
     
     my $strain_pl_node = $self->create_node('Strain_Compara_Paralog', 'Paralogues',
       [qw(paralogues EnsEMBL::Web::Component::Gene::ComparaParalogs)],
-      { 'availability' => 'gene database:compara core has_strain_paralogs', 'concise' => 'Paralogues' }
+      { 'availability' => 'gene database:compara core has_strain_gene_tree has_strain_paralogs', 'concise' => 'Paralogues' }
     );
     
     $strain_pl_node->append($self->create_subnode('Strain_Compara_Paralog/Alignment', 'Paralogue alignment',
       [qw( alignment EnsEMBL::Web::Component::Gene::HomologAlignment )],
-      { 'availability' => 'gene database:compara core has_strain_paralogs', 'no_menu_entry' => 1 }
+      { 'availability' => 'gene database:compara core has_strain_gene_tree has_strain_paralogs', 'no_menu_entry' => 1 }
     ));
     
     $strain_compara_menu->append($strain_pl_node);  

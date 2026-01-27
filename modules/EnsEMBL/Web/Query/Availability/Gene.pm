@@ -319,9 +319,8 @@ sub get {
     || $out->{'has_alignments'}
   );
 
-  $out->{'has_strain_compara'} = $out->{'database:compara'} && (
-    $out->{'has_strain_gene_tree'}
-    || $out->{'has_strain_orthologs'}
+  $out->{'has_strain_compara'} = $out->{'database:compara'} && $out->{'has_strain_gene_tree'} && (
+    $out->{'has_strain_orthologs'}
     || $out->{'has_strain_paralogs'}
     || $out->{'has_strain_homoeologs'}
   );

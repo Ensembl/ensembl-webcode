@@ -64,6 +64,7 @@ sub json_fetch_species {
     my ($s)  = grep /--$alignment->{'target_name'}$/, keys %{$alignment->{'species'}};
     my ($sp, $target) = split '--', $s;
     my $url = $url_lookup->{$sp};
+    my $target_url = $url . '--' . $target;
 
     # Check for alignment availability in the region
     next if !$hub->get_adaptor('get_GenomicAlignBlockAdaptor', 'compara')->_has_alignment_for_region($alignment->{id}, $prodname, $chr, $start, $end, $sp, $target);
@@ -73,7 +74,7 @@ sub json_fetch_species {
     $available_species{$s} = $species_defs->species_label($url, 1) . (grep($target eq $_, @$chromosomes) ? ' chromosome' : '') . " $target - $type";
     my $tmp = {};
     $tmp->{scientific_name} = $sp;
-    $tmp->{key} = $sp;
+    $tmp->{key} = $target_url;
     if (grep($target eq $_, @$chromosomes)) {
       $tmp->{display_name} = 'Chromosome ' . "$target";
       $tmp->{assembly_target} = $target;

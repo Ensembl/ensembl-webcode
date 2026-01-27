@@ -112,6 +112,7 @@ sub multi {
     join(':',$_->[0],$_->[1]->seq_region_name,$_->[1]->start,$_->[1]->end)
   } map { [$_->{'species'},$_->{'slice'}] } @$all_slices);
 
+  my $intra_species_key = "$prodname--$chr";
   foreach my $db (@{$self->species_defs->compara_like_databases || []}) {
     next unless exists $multi_hash->{$db}; 
 
@@ -119,9 +120,11 @@ sub multi {
 
       next unless $methods->{$_->{'type'}};
       next unless $_->{'class'} =~ /pairwise_alignment/;
-      next unless $_->{'species'}{$prodname} || $_->{'species'}{"$prodname--$chr"};
+      next unless $_->{'species'}{$prodname} || $_->{'species'}{$intra_species_key};
 
       my %align = %$_; # Make a copy for modification
+
+      my $align_species_size = scalar keys %{$align{'species'}};
 
       $i = $p;
       foreach (@slices) {
@@ -129,7 +132,36 @@ sub multi {
         my $check_prodname  = $self->species_defs->get_config($check_species, 'SPECIES_PRODUCTION_NAME');
         my $check_key       = $check_chr ? $check_prodname.'--'.$check_chr : $check_prodname;
 
-        if ($align{'species'}{$check_key}) {
+        # Pairwise alignment 'species' hashes represent the pair of aligned genomes/regions.
+        # For inter-species alignments, hash keys are production names
+        # (e.g. '{"homo_sapiens" => 1, "pan_troglodytes" => 1}').
+        # For intra-species alignments, the hash keys are formed by concatenating
+        # the production name with the name of the relevant chromosome
+        # (e.g. '{"homo_sapiens--17" => 1, "homo_sapiens--3" => 1}').
+        # For intra-species alignments between regions of the same chromosome,
+        # the 'species' hash has only one key (e.g. '{"homo_sapiens--17" => 1}').
+        my $match_found = 0;
+        if ($check_prodname eq $prodname) {  # intra-species alignment
+
+          if ($align{'species'}{$check_key}
+                &&
+                (
+                  # intra-species alignment of different chromosomes
+                  ($align_species_size == 2 && $check_key ne $intra_species_key)
+                  ||
+                  # intra-species alignment between regions of the same chromosome
+                  ($align_species_size == 1 && $check_key eq $intra_species_key)
+                )
+             ) {
+            $match_found = 1;
+          }
+        } else {  # inter-species alignment
+          if ($align{'species'}{$check_prodname}) {
+            $match_found = 1;
+          }
+        }
+
+        if ($match_found) {
           $align{'order'} = $i;
           $align{'ori'}   = $_->{'strand'};
           $align{'gene'}  = $_->{'g'};

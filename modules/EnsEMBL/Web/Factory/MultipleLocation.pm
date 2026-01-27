@@ -21,6 +21,7 @@ package EnsEMBL::Web::Factory::MultipleLocation;
 
 use strict;
 
+use List::Util qw(max);
 use POSIX qw(floor);
 
 use Bio::EnsEMBL::Registry;
@@ -137,6 +138,38 @@ sub createObjects {
     $invalid = 1;
   }
   
+  # In within-species region comparison, the secondary
+  # region may be provided by the 'align' parameter.
+  my $align_param = $self->param('align');
+  if ($align_param && $align_param =~ /^(?<mlss_id>[0-9]+)--(?<species_url>.+)--(?<region>(?<chr>[^:]+).*)$/) {
+    my $next_input_id = max(keys %inputs) + 1;
+    $inputs{$next_input_id} = {
+      's'   => $+{'species_url'},
+      'r'   => $+{'region'},
+      'chr' => $+{'chr'},
+    };
+    $chr_flag = 1;
+  }
+
+  # With inputs having been gathered in various ways, we
+  # iterate over them to set the 'is_primary' flag.
+  while (my ($id, $input) = each %inputs) {
+    if ($id == 0) {
+      $input->{'is_primary'} = 1;
+    } else {
+      $input->{'is_primary'} = 0;
+      # While we are working with a non-primary region, we may as
+      # well ensure that the 'chr' parameter is set as appropriate.
+      if ($input->{'s'} eq $self->species
+          && !$input->{'chr'}
+          && exists $input->{'r'}
+          && $input->{'r'} =~ /^(?<region>(?<chr>[^:]+).*)$/) {
+        $input->{'chr'} = $+{'chr'};
+        $chr_flag = 1;
+      }
+    }
+  }
+
   $inputs{$action_id}->{'action'} = $self->param('action') if $inputs{$action_id};
   
   # If we had bad parameters, redirect to remove them from the url.
@@ -190,6 +223,7 @@ sub createObjects {
       slice         => $slice->expand($padding->{flank5}, $padding->{flank3}),
       species       => $species,
       target        => $inputs{$_}->{'chr'},
+      is_primary    => $inputs{$_}->{'is_primary'},
       species_check => $species eq $hub->species ? join('--', grep $_, $species, $inputs{$_}->{'chr'}) : $species,
       name          => $slice->seq_region_name,
       short_name    => $object->chr_short_name($slice, $species),
@@ -474,6 +508,10 @@ sub change_primary_species {
   
   my $old_species = $inputs->{0}->{'s'};
   my $old_chr = [ split(/:/,$inputs->{0}->{'r'}) ]->[0];
+
+  # We need to update the 'is_primary' attributes of the old and new primary species.
+  $inputs->{$id}->{'is_primary'} = 1;
+  $inputs->{0}->{'is_primary'} = 0;
   
   $inputs->{$id}->{'r'} =~ s/:-?1$//; # Remove strand parameter for the new primary species
   

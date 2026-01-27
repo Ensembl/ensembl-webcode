@@ -1586,6 +1586,7 @@ sub multi_locations {
       species       => $self->species,
       target        => $slice->seq_region_name,
       species_check => $self->species,
+      is_primary    => 1,
       name          => $slice->seq_region_name,
       short_name    => $self->chr_short_name,
       start         => $slice->start,

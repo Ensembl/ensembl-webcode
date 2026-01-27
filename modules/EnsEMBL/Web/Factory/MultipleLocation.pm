@@ -219,6 +219,17 @@ sub createObjects {
 
     # Get image left and right padding
     my $padding = $hub->create_padded_region();
+
+    if ($slice->start - $padding->{flank5} < 1) {
+      $padding->{flank5} = $slice->start - 1;
+      delete $padding->{r};  # clipping 'flank5' invalidates 'r'
+    }
+
+    if ($slice->end + $padding->{flank3} > $slice->seq_region_length) {
+      $padding->{flank3} = $slice->seq_region_length - $slice->end;
+      delete $padding->{r};  # clipping 'flank3' invalidates 'r'
+    }
+
     push @slices, {
       slice         => $slice->expand($padding->{flank5}, $padding->{flank3}),
       species       => $species,

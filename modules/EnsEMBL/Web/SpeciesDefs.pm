@@ -1784,10 +1784,46 @@ sub species_path {
 
       if (exists $rev_lookup{$species}) {
         my $prod_name = $rev_lookup{$species};
-        my $site = $pan_lookup->{$prod_name}{'division'};
-        if ($site ne $self->DIVISION) {
-          $site = 'www' if $site eq 'vertebrates';
-          $url = "https://${site}.ensembl.org/${species}";
+        my $this_site_division = $self->DIVISION;
+        my $species_division = $pan_lookup->{$prod_name}{'division'};
+
+        if ($species_division ne $this_site_division) {
+
+          # The ENSEMBL_SERVERNAME will not always have a server prefix.
+          # This is expected for live Ensembl sites and external sites (e.g. Gramene).
+          # In such cases, the URL will refer to the live site of the species division.
+          my $server_prefix;
+          if ($SiteDefs::ENSEMBL_SERVERNAME =~ /^(.+)-${this_site_division}\.ensembl\.org$/) {
+            $server_prefix = $1;
+          }
+
+          if ($species_division eq 'vertebrates') {
+
+            if ($server_prefix) {
+
+              # If prefix of this server matches the expected format of an
+              # archive, we assume the Vertebrates site is an archive.
+              if ($server_prefix =~ /^[A-Za-z]{3}[0-9]{4}$/) {
+                $server_prefix = "${server_prefix}.archive";
+              }  # else { We preserve the prefix as-is. }
+
+            } else {
+              # By default, we link to the live Ensembl Vertebrates site.
+              $server_prefix = 'www';
+            }
+
+          } else {
+
+            if ($server_prefix) {
+              # This may be an NV archive site or staging site etc.
+              $server_prefix = "${server_prefix}-${species_division}";
+            } else {
+              # By default, we link to the live NV site.
+              $server_prefix = $species_division;
+            }
+          }
+
+          $url = "https://${server_prefix}.ensembl.org/${species}";
         }
       }
     }

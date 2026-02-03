@@ -70,7 +70,7 @@ sub content {
       
       $pop->{'Label'} = $pop->{'Name'};
 
-      if ($pop->{'Size'} == 1) {
+      if ($pop->{'Size'} == 1 && $pop->{'Name'} !~ /^PRJEB93975/) {
         $other_sample = 1;
         $other_sample_data{$pop_id} = 1;
       }

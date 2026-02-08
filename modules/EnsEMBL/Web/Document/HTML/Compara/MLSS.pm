@@ -211,10 +211,23 @@ some being recent and almost identical, others being much older and indicators o
       @order   = @tblat_order;
       $params  = $tblat_parameters;
     } else {
+
+      if ($type eq 'LastZ' && !$blastz_parameters->{'Q'}) {
+        my $fh = open IN, $hub->species_defs->ENSEMBL_SERVERROOT . "/public-plugins/ensembl/htdocs/info/genome/compara/default.matrix";
+        my $v = "<pre>Default:\n";
+        while (<IN>) {
+          $v .= $_;
+        }
+        $v .= '</pre>';
+        $blastz_parameters->{'Q'} = $v;
+      }
+
       $options = $blastz_options;
       @order   = @blastz_order;
       $params  = $blastz_parameters;
     }
+
+    @order = grep { exists $params->{$_} && defined $params->{$_} } @order;
 
     push @$rows, { param => "$options->{$_} ($_)", value => $params->{$_} || ($_ eq 'Q' ? 'Default' : '') } for @order;
 
@@ -247,8 +260,8 @@ some being recent and almost identical, others being much older and indicators o
         $value_1 = $ref_dna_collection_config->{$param}     || '';
         $value_2 = $non_ref_dna_collection_config->{$param} || '';
       } else {
-        $value_1 = $self->thousandify($ref_dna_collection_config->{$param})     || 0;
-        $value_2 = $self->thousandify($non_ref_dna_collection_config->{$param}) || 0;
+        $value_1 = $self->thousandify($ref_dna_collection_config->{$param})     // '';
+        $value_2 = $self->thousandify($non_ref_dna_collection_config->{$param}) // '';
       }
       
       push @rows, { param => $header, value_ref => $value_1, value_nonref => $value_2 };
@@ -740,17 +753,6 @@ sub fetch_pairwise_input {
         } else {
           $blastz_parameters->{'other'} .= $param;
         }
-      }
-      ## Set default matrix
-      unless ($blastz_parameters->{'Q'}) {
-        my $fh    = open IN, $hub->species_defs->ENSEMBL_SERVERROOT . "/public-plugins/ensembl/htdocs/info/genome/compara/default.matrix";
-        my $v  = '<pre>Default:
-';
-        while (<IN>) {
-          $v .= $_;
-        }
-        $v .= '</pre>';
-        $blastz_parameters->{'Q'} = $v;
       }
     }
   

@@ -27,6 +27,7 @@ use warnings;
 use Mail::Mailer;
 use MIME::Base64 qw(encode_base64);
 use EnsEMBL::Web::Exceptions;
+use Email::Address::XS qw(parse_email_addresses split_address);
 
 sub new {
   my ($class, $hub, $data) = @_;
@@ -83,34 +84,23 @@ sub mail_server :lvalue { $_[0]->{'mail_server'}; }
 sub base_url    :lvalue { $_[0]->{'base_url'};    }
 sub site_name   :lvalue { $_[0]->{'site_name'};   }
 
-sub send {
-  my $self = shift;
 
-  my @months      = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
-  my @week_days   = qw(Sun Mon Tue Wed Thu Fri Sat Sun);
-  my ($sec, $min, $hour, $day, $month, $year, $wday) = gmtime;
-  $year          += 1900;
-  my $time_string = sprintf '%s, %s %s %s %02d:%02d:%02d +0000', $week_days[$wday], $day, $months[$month], $year, $hour, $min, $sec;
+# Send a mail with an attachment
+sub send_attachment {
+    my $self = shift;
+    my $mailer = shift;
+    my $valid_params = shift;
 
-  my $mailer;
-  my $return    = 1;
-
-  if ($self->{'attachment'}) {
     ## Message with attached file
     my $boundary;
     my @chars=('a'..'z','A'..'Z','0'..'9','_');
     for (1..10) {
       $boundary .= $chars[rand @chars];
     }
-    $mailer      = Mail::Mailer->new();
+
     try {
       $mailer->open({
-        'To'       => $self->{'to'},
-        'From'     => $self->{'from'},
-        'Reply-To' => $self->{'reply'},
-        'Subject'  => $self->{'subject'},
-        'X-URL'    => $self->{'base_url'},
-        'Date'     => $time_string,
+              %$valid_params,
         'Content-type' => qq(multipart/mixed; boundary="$boundary"),
       });
       binmode($mailer,':utf8');
@@ -144,32 +134,118 @@ Content-Disposition: attachment; filename="$file_name"
 
       $mailer->close;
     } catch {
-      $return = 0;
       warn $self->log_message($time_string, $_);
+      return 0;
     };
-  }
-  else {
-    ## Simple text message
-    $mailer      = Mail::Mailer->new('smtp', 'Server' => $self->{'mail_server'});
+    return 1;
+}
+
+
+# Send a simple text message
+sub send_plain {
+    my $self = shift;
+    my $mailer = shift;
+    my $valid_params = shift;
 
     try {
       $mailer->open({
-        'To'       => $self->{'to'},
-        'From'     => $self->{'from'},
-        'Reply-To' => $self->{'reply'},
-        'Subject'  => $self->{'subject'},
-        'X-URL'    => $self->{'base_url'},
-        'Date'     => $time_string
+        %$valid_params
       });
 
       print $mailer $self->{'message'};
       $mailer->close;
     } catch {
-      $return = 0;
       warn $self->log_message($time_string, $_);
       warn 'MAILER ERROR: '.$_;
+      return 0;
     };
+    return 1;
+}
+
+
+
+sub send {
+  my $self = shift;
+
+  my %valid_params;
+
+  # validate parameters
+  #        'To'       => $self->{'to'},
+  #        'From'     => $self->{'from'},
+  #        'Reply-To' => $self->{'reply'},
+  #        'Subject'  => $self->{'subject'},
+  #        'X-URL'    => $self->{'base_url'},
+
+  my @addresses = parse_email_addresses($self->{'to'});
+  if (@addresses != 1) {
+      warn "EnsEMBL/Web/Mailer: Illegal To: addr: '$self->{'to'}'";
+      return 0;
   }
+  my $helpdesk_mail = $addresses[0];
+  my ($user, $host) = split_address($string_address);
+  if (! %host =~ /(ebi\.ac\.uk|ensembl\.org)$/) {
+      warn "EnsEMBL/Web/Mailer: Rcpt addr not within EBI: '$self->{'to'}'";
+      return 0;
+  }
+
+  $valid_params{'To'} = $helpdesk_mail;
+
+  @addresses = parse_email_addresses($self->{'from'});
+  if (@addresses != 1) {
+      warn "EnsEMBL/Web/Mailer: Illegal From: addr: '$self->{'from'}'";
+      return 0;
+  }
+  my $from_mail = $addresses[0];
+
+  $valid_params{'From'} = $from_mail;
+
+
+  $valid_params{'Reply-To'} = undef;
+
+  if ($self->{'Reply-To'}) {
+      @addresses = parse_email_addresses($self->{'reply'});
+      if (@addresses != 1) {
+          warn "EnsEMBL/Web/Mailer: Illegal Reply-To: addr: '$self->{'reply'}'";
+          return 0;
+      }
+      $valid_params{'Reply-To'} = $addresses[0];
+  }
+
+
+  if ($self->{'subject'}) {
+      if (! $self->{'subject'} =~ /^[A-Za-z _+=*!-]{1,200}$/) {
+          warn "EnsEMBL/Web/Mailer: Subject has weird characters: '$self->{'subject'}'";
+          return 0;
+      }
+      $valid_params{'Subject'} = $self->{'subject'};;
+  }
+
+  if ($self->{'base_url'}) {
+      if (! $self->{'base_url'} =~ m{^http(s)?://[A-Za-z0-9.-/]+$}){
+          warn "EnsEMBL/Web/Mailer: Unexpected URL: '$self->{'base_url'}'";
+          return 0;
+      }
+      $valid_params{'X-URL'} = $self->{'base_url'};
+  }
+
+  my @months      = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+  my @week_days   = qw(Sun Mon Tue Wed Thu Fri Sat Sun);
+  my ($sec, $min, $hour, $day, $month, $year, $wday) = gmtime;
+  $year          += 1900;
+  my $time_string = sprintf '%s, %s %s %s %02d:%02d:%02d +0000', $week_days[$wday], $day, $months[$month], $year, $hour, $min, $sec;
+
+  $valid_params{'Date'} = $time_string;
+
+  my $mailer = Mail::Mailer->new('smtp', 'Server' => $self->{'mail_server'});
+  my $return = 1;
+
+  if ($self->{'attachment'}) {
+      $return = $self->send_attachment($mailer, \%valid_params);
+  }
+  else {
+      $return = $self->send_plain($mailer, \%valid_params);
+  }
+
   return $return;
 }
 

@@ -67,7 +67,7 @@ sub email_footer {
     $footer .= sprintf "%s Privacy Statement: %s\n\n", $self->site_name, $self->hub->species_defs->GDPR_POLICY_URL;
   }
 
-  $footer .= "http://".$self->hub->species_defs->ENSEMBL_SERVERNAME."\n\n";;
+  $footer .= "http://".$self->hub->species_defs->ENSEMBL_SERVERNAME."\n\n";
 
   my $address = $self->hub->species_defs->SITE_OWNER_ADDRESS;
   $footer .= "$address\n\n" if $address;
@@ -176,7 +176,7 @@ sub send {
       warn "EnsEMBL/Web/Mailer: Illegal To: addr: '$self->{'to'}'";
       return 0;
   }
-  my $helpdesk_mail = $addresses[0]->address();;
+  my $helpdesk_mail = $addresses[0]->address();
   my ($user, $host) = split_address($helpdesk_mail);
   if ($host !~ /(ebi\.ac\.uk|ensembl\.org)$/) {
       warn "EnsEMBL/Web/Mailer: Rcpt addr not within EBI: '$self->{'to'}'";
@@ -189,7 +189,7 @@ sub send {
       warn "EnsEMBL/Web/Mailer: Illegal From: addr: '$self->{'from'}'";
       return 0;
   }
-  my $from_mail = $addresses[0]->address();;
+  my $from_mail = $addresses[0]->address();
   $valid_params{'From'} = $from_mail;
 
   $valid_params{'Reply-To'} = undef;
@@ -199,7 +199,7 @@ sub send {
           warn "EnsEMBL/Web/Mailer: Illegal Reply-To: addr: '$self->{'reply'}'";
           return 0;
       }
-      $valid_params{'Reply-To'} = $addresses[0]->address();;
+      $valid_params{'Reply-To'} = $addresses[0]->address();
   }
 
 

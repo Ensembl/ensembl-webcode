@@ -28,6 +28,8 @@ use Mail::Mailer;
 use MIME::Base64 qw(encode_base64);
 use EnsEMBL::Web::Exceptions;
 use Email::Address::XS qw(parse_email_addresses split_address);
+use Encode 'decode';
+use feature 'unicode_strings';
 
 sub new {
   my ($class, $hub, $data) = @_;
@@ -103,12 +105,11 @@ sub send_attachment {
               %$valid_params,
         'Content-type' => qq(multipart/mixed; boundary="$boundary"),
       });
-      binmode($mailer,':utf8');
 
       print {$mailer} "This is a multi-part message in MIME format.
 
 --$boundary
-Content-Type: text/plain; chartset=UTF-8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
 ";
@@ -134,7 +135,7 @@ Content-Disposition: attachment; filename="$file_name"
 
       $mailer->close;
     } catch {
-      warn $self->log_message($time_string, $_);
+      warn $self->log_message($valid_params->{'Date'}, $_);
       return 0;
     };
     return 1;
@@ -148,15 +149,14 @@ sub send_plain {
     my $valid_params = shift;
 
     try {
-      $mailer->open({
-        %$valid_params
-      });
+      $mailer->open(
+        $valid_params
+      );
 
       print $mailer $self->{'message'};
       $mailer->close;
     } catch {
-      warn $self->log_message($time_string, $_);
-      warn 'MAILER ERROR: '.$_;
+      warn $self->log_message($valid_params->{'Date'}, $_);
       return 0;
     };
     return 1;
@@ -169,25 +169,19 @@ sub send {
 
   my %valid_params;
 
-  # validate parameters
-  #        'To'       => $self->{'to'},
-  #        'From'     => $self->{'from'},
-  #        'Reply-To' => $self->{'reply'},
-  #        'Subject'  => $self->{'subject'},
-  #        'X-URL'    => $self->{'base_url'},
+  # First validate user-supplied data
 
   my @addresses = parse_email_addresses($self->{'to'});
   if (@addresses != 1) {
       warn "EnsEMBL/Web/Mailer: Illegal To: addr: '$self->{'to'}'";
       return 0;
   }
-  my $helpdesk_mail = $addresses[0];
-  my ($user, $host) = split_address($string_address);
-  if (! %host =~ /(ebi\.ac\.uk|ensembl\.org)$/) {
+  my $helpdesk_mail = $addresses[0]->address();;
+  my ($user, $host) = split_address($helpdesk_mail);
+  if ($host !~ /(ebi\.ac\.uk|ensembl\.org)$/) {
       warn "EnsEMBL/Web/Mailer: Rcpt addr not within EBI: '$self->{'to'}'";
       return 0;
   }
-
   $valid_params{'To'} = $helpdesk_mail;
 
   @addresses = parse_email_addresses($self->{'from'});
@@ -195,33 +189,31 @@ sub send {
       warn "EnsEMBL/Web/Mailer: Illegal From: addr: '$self->{'from'}'";
       return 0;
   }
-  my $from_mail = $addresses[0];
-
+  my $from_mail = $addresses[0]->address();;
   $valid_params{'From'} = $from_mail;
 
-
   $valid_params{'Reply-To'} = undef;
-
-  if ($self->{'Reply-To'}) {
+  if ($self->{'reply'}) {
       @addresses = parse_email_addresses($self->{'reply'});
       if (@addresses != 1) {
           warn "EnsEMBL/Web/Mailer: Illegal Reply-To: addr: '$self->{'reply'}'";
           return 0;
       }
-      $valid_params{'Reply-To'} = $addresses[0];
+      $valid_params{'Reply-To'} = $addresses[0]->address();;
   }
 
 
   if ($self->{'subject'}) {
-      if (! $self->{'subject'} =~ /^[A-Za-z _+=*!-]{1,200}$/) {
+      $self->{'subject'} = decode("UTF-8", $self->{'subject'});
+      if ($self->{'subject'} !~ /\A[[:punct:]\w ]{1,200}\Z/s) {
           warn "EnsEMBL/Web/Mailer: Subject has weird characters: '$self->{'subject'}'";
           return 0;
       }
-      $valid_params{'Subject'} = $self->{'subject'};;
+      $valid_params{'Subject'} = $self->{'subject'};
   }
 
   if ($self->{'base_url'}) {
-      if (! $self->{'base_url'} =~ m{^http(s)?://[A-Za-z0-9.-/]+$}){
+      if ($self->{'base_url'} !~ m{^http(s)?://[A-Za-z0-9.-/]+$}){
           warn "EnsEMBL/Web/Mailer: Unexpected URL: '$self->{'base_url'}'";
           return 0;
       }
@@ -239,7 +231,16 @@ sub send {
   my $mailer = Mail::Mailer->new('smtp', 'Server' => $self->{'mail_server'});
   my $return = 1;
 
+
   if ($self->{'attachment'}) {
+      # Make sure we have valid UTF8
+      my $attachment_name = decode("UTF-8", $self->{'attachment'});
+      $attachment_name =~ /^([\w &.+-]+)/;
+      if (! defined $1) {
+          warn $self->log_message($valid_params{'Date'}, "Invalid file name for attachment: '$attachment_name'");
+          return 0;
+      }
+      $self->{'attachment'} = $1;
       $return = $self->send_attachment($mailer, \%valid_params);
   }
   else {

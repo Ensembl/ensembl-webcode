@@ -585,7 +585,7 @@ Ensembl.Panel.ZMenu = Ensembl.Panel.extend({
     extra   = extra   || '';
 
     if (error === true) {
-      extra = this.row('<p>Still loading data... <a class="refresh-zmenu"> Please click here to refresh </a> this menu. </p> <p>If you think this is an error, or you have any questions, please <a href="/Help/Contact" class="popup">contact our HelpDesk team</a>.</p>') + extra;
+      extra = this.row('<p>Still loading data... <a class="refresh-zmenu"> Please click here to refresh </a> this menu. </p> <p>If you think this is an error, or you have any questions, please <a href="mailto:[[SPECIESDEFS::ENSEMBL_HELPDESK_EMAIL]]">contact our HelpDesk team</a>.</p>') + extra;
     }
     else if (link === true && this.href) {
       title = this.title ? this.title.split('; ')[0] : caption;

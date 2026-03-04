@@ -96,10 +96,10 @@ sub get_redirect_uri {
     }
   }
 
-  ## Redirect to contact form
-  if ($uri =~ m|^/contact\?$|) {
-    return '/Help/Contact';
-  }
+#  ## Redirect to contact form
+#  if ($uri =~ m|^/contact\?$|) {
+#    return '/Help/Contact';
+#  }
 
   ## Fix URL for V/SV Explore pages
   if ($uri =~ m|Variation/Summary|) {

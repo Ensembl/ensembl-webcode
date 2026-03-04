@@ -373,7 +373,7 @@ The following types of data dumps are available on the FTP site.
 <dt class="bg2">FASTA</dt>
 <dd class="bg2">FASTA sequence databases of Ensembl gene, transcript and protein
 model predictions. Since the
-<a href="http://www.bioperl.org/wiki/FASTA_sequence_format"
+<a href="https://en.wikipedia.org/wiki/FASTA_format"
 rel="external">FASTA format</a> does not permit sequence annotation,
 these database files are mainly intended for use with local sequence
 similarity search algorithms. Each directory has a README file with a
@@ -512,7 +512,7 @@ the "README" files in the GVF directory.</dd>
 <dt class="bg1">VCF (variation data)</dt>
 <dd class="bg1">VCF (Variant Call Format) is a text file format containing meta-information lines, a header
 line, and then data lines each containing information about a position in the genome. This file format can also contain genotype information on samples for each position.
-More details about the format and its specifications are available <a href="http://www.1000genomes.org/wiki/Analysis/Variant%20Call%20Format/vcf-variant-call-format-version-41">here</a>.</dd>
+More details about the format and its specifications are available <a href="https://samtools.github.io/hts-specs/VCFv4.1.pdf">here</a>.</dd>
 
 
 <dt class="bg2">VEP (variation data)</dt>

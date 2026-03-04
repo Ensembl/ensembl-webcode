@@ -497,7 +497,7 @@ sub transcript_table {
     }
   }
 
-  my $title = encode_entities('<a href="/info/genome/genebuild/transcript_quality_tags.html" target="_blank">Tags</a>');
+  my $title = encode_entities('<a href="https://www.ensembl.org/info/genome/genebuild/transcript_quality_tags.html" target="_blank">Tags</a>');
   push @columns, { key => 'flags', sort => 'html', label => 'Flags', title => $title, class => '_ht'};
 
   ## Transcript order: biotype => canonical => CCDS => length

@@ -32,7 +32,6 @@ sub content {
   my $species_path = $hub->species_path($species);
   my $phy_link     = $hub->get_ExtURL('PHYLOMEDB', $stable_id);
   my $dyo_link     = $hub->get_ExtURL('GENOMICUSSYNTENY', $stable_id);
-  my $treefam_link = $hub->get_ExtURL('TREEFAMSEQ', $stable_id);
   my $ens_tran     = $object->Obj->canonical_transcript; # Link to protein sequence for cannonical or longest translation
   my $ens_prot;
   
@@ -95,16 +94,6 @@ sub content {
       link     => $dyo_link,
       external => 1,
       position => 12
-    });
-  }
-  
-  if ($treefam_link) {
-    $self->add_entry({
-      type     => 'TreeFam',
-      label    => 'Gene in TreeFam',
-      link     => $treefam_link,
-      external => 1,
-      position => 13
     });
   }
 }

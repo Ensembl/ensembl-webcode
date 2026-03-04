@@ -852,11 +852,7 @@ sub features {
         }
       }
 
-      my $treefam_link = "http://www.treefam.org/cgi-bin/TFseq.pl?id=$stable_id";
-      
       $f->{'label'} = "$stable_id, $f->{'_species_label'}";
-      
-      push @{$f->{'_link'}}, { text => 'View in TreeFam', href => $treefam_link };
       
       $f->{'_location'}   = "$chr_name:$chr_start-$chr_end";
       $f->{'_length'}     = $chr_end - $chr_start;

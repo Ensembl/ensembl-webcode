@@ -57,7 +57,7 @@ sub content {
   }
 
   $html .= qq(
-    <p>If you think this is an error, or you have any questions, please <a href="/Help/Contact" class="popup">contact our HelpDesk team</a>.</p>
+    <p>If you think this is an error, or you have any questions, please <a href="mailto:$SiteDefs::ENSEMBL_HELPDESK_EMAIL">contact our HelpDesk team</a>.</p>
 );
   return $html;
 }

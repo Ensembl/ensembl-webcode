@@ -27,6 +27,9 @@ use warnings;
 use Mail::Mailer;
 use MIME::Base64 qw(encode_base64);
 use EnsEMBL::Web::Exceptions;
+use Email::Address::XS qw(parse_email_addresses split_address);
+use Encode 'decode';
+use feature 'unicode_strings';
 
 sub new {
   my ($class, $hub, $data) = @_;
@@ -64,7 +67,7 @@ sub email_footer {
     $footer .= sprintf "%s Privacy Statement: %s\n\n", $self->site_name, $self->hub->species_defs->GDPR_POLICY_URL;
   }
 
-  $footer .= "http://".$self->hub->species_defs->ENSEMBL_SERVERNAME."\n\n";;
+  $footer .= "http://".$self->hub->species_defs->ENSEMBL_SERVERNAME."\n\n";
 
   my $address = $self->hub->species_defs->SITE_OWNER_ADDRESS;
   $footer .= "$address\n\n" if $address;
@@ -83,42 +86,30 @@ sub mail_server :lvalue { $_[0]->{'mail_server'}; }
 sub base_url    :lvalue { $_[0]->{'base_url'};    }
 sub site_name   :lvalue { $_[0]->{'site_name'};   }
 
-sub send {
-  my $self = shift;
 
-  my @months      = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
-  my @week_days   = qw(Sun Mon Tue Wed Thu Fri Sat Sun);
-  my ($sec, $min, $hour, $day, $month, $year, $wday) = gmtime;
-  $year          += 1900;
-  my $time_string = sprintf '%s, %s %s %s %02d:%02d:%02d +0000', $week_days[$wday], $day, $months[$month], $year, $hour, $min, $sec;
+# Send a mail with an attachment
+sub send_attachment {
+    my $self = shift;
+    my $mailer = shift;
+    my $valid_params = shift;
 
-  my $mailer;
-  my $return    = 1;
-
-  if ($self->{'attachment'}) {
     ## Message with attached file
     my $boundary;
     my @chars=('a'..'z','A'..'Z','0'..'9','_');
     for (1..10) {
       $boundary .= $chars[rand @chars];
     }
-    $mailer      = Mail::Mailer->new();
+
     try {
       $mailer->open({
-        'To'       => $self->{'to'},
-        'From'     => $self->{'from'},
-        'Reply-To' => $self->{'reply'},
-        'Subject'  => $self->{'subject'},
-        'X-URL'    => $self->{'base_url'},
-        'Date'     => $time_string,
+              %$valid_params,
         'Content-type' => qq(multipart/mixed; boundary="$boundary"),
       });
-      binmode($mailer,':utf8');
 
       print {$mailer} "This is a multi-part message in MIME format.
 
 --$boundary
-Content-Type: text/plain; chartset=UTF-8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
 ";
@@ -144,32 +135,118 @@ Content-Disposition: attachment; filename="$file_name"
 
       $mailer->close;
     } catch {
-      $return = 0;
-      warn $self->log_message($time_string, $_);
+      warn $self->log_message($valid_params->{'Date'}, $_);
+      return 0;
     };
-  }
-  else {
-    ## Simple text message
-    $mailer      = Mail::Mailer->new('smtp', 'Server' => $self->{'mail_server'});
+    return 1;
+}
+
+
+# Send a simple text message
+sub send_plain {
+    my $self = shift;
+    my $mailer = shift;
+    my $valid_params = shift;
 
     try {
-      $mailer->open({
-        'To'       => $self->{'to'},
-        'From'     => $self->{'from'},
-        'Reply-To' => $self->{'reply'},
-        'Subject'  => $self->{'subject'},
-        'X-URL'    => $self->{'base_url'},
-        'Date'     => $time_string
-      });
+      $mailer->open(
+        $valid_params
+      );
 
       print $mailer $self->{'message'};
       $mailer->close;
     } catch {
-      $return = 0;
-      warn $self->log_message($time_string, $_);
-      warn 'MAILER ERROR: '.$_;
+      warn $self->log_message($valid_params->{'Date'}, $_);
+      return 0;
     };
+    return 1;
+}
+
+
+
+sub send {
+  my $self = shift;
+
+  my %valid_params;
+
+  # First validate user-supplied data
+
+  my @addresses = parse_email_addresses($self->{'to'});
+  if (@addresses != 1) {
+      warn "EnsEMBL/Web/Mailer: Illegal To: addr: '$self->{'to'}'";
+      return 0;
   }
+  my $helpdesk_mail = $addresses[0]->address();
+  my ($user, $host) = split_address($helpdesk_mail);
+  if ($host !~ /(ebi\.ac\.uk|ensembl\.org)$/) {
+      warn "EnsEMBL/Web/Mailer: Rcpt addr not within EBI: '$self->{'to'}'";
+      return 0;
+  }
+  $valid_params{'To'} = $helpdesk_mail;
+
+  @addresses = parse_email_addresses($self->{'from'});
+  if (@addresses != 1) {
+      warn "EnsEMBL/Web/Mailer: Illegal From: addr: '$self->{'from'}'";
+      return 0;
+  }
+  my $from_mail = $addresses[0]->address();
+  $valid_params{'From'} = $from_mail;
+
+  $valid_params{'Reply-To'} = undef;
+  if ($self->{'reply'}) {
+      @addresses = parse_email_addresses($self->{'reply'});
+      if (@addresses != 1) {
+          warn "EnsEMBL/Web/Mailer: Illegal Reply-To: addr: '$self->{'reply'}'";
+          return 0;
+      }
+      $valid_params{'Reply-To'} = $addresses[0]->address();
+  }
+
+
+  if ($self->{'subject'}) {
+      $self->{'subject'} = decode("UTF-8", $self->{'subject'});
+      if ($self->{'subject'} !~ /\A[[:punct:]\w ]{1,200}\Z/s) {
+          warn "EnsEMBL/Web/Mailer: Subject has weird characters: '$self->{'subject'}'";
+          return 0;
+      }
+      $valid_params{'Subject'} = $self->{'subject'};
+  }
+
+  if ($self->{'base_url'}) {
+      if ($self->{'base_url'} !~ m{^http(s)?://[A-Za-z0-9.-/]+$}){
+          warn "EnsEMBL/Web/Mailer: Unexpected URL: '$self->{'base_url'}'";
+          return 0;
+      }
+      $valid_params{'X-URL'} = $self->{'base_url'};
+  }
+
+  my @months      = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+  my @week_days   = qw(Sun Mon Tue Wed Thu Fri Sat Sun);
+  my ($sec, $min, $hour, $day, $month, $year, $wday) = gmtime;
+  $year          += 1900;
+  my $time_string = sprintf '%s, %s %s %s %02d:%02d:%02d +0000', $week_days[$wday], $day, $months[$month], $year, $hour, $min, $sec;
+
+  $valid_params{'Date'} = $time_string;
+
+  my $mailer = Mail::Mailer->new('smtp', 'Server' => $self->{'mail_server'});
+  my $return = 1;
+
+
+  if ($self->{'attachment'}) {
+      # Make sure we have valid UTF8
+      my $attachment_name = decode("UTF-8", $self->{'attachment'});
+      $attachment_name =~ /^([\w &.+-]+)/;
+      if (! defined $1) {
+          warn $self->log_message($valid_params{'Date'}, "Invalid file name for attachment: '$attachment_name'");
+          return 0;
+      }
+      $self->{'attachment'} = $1;
+      $return = $self->send_attachment($mailer, \%valid_params);
+  }
+  else {
+      $return = $self->send_plain($mailer, \%valid_params);
+  }
+
   return $return;
 }
 

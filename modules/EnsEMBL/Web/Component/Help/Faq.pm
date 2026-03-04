@@ -114,7 +114,7 @@ sub content {
   }
   if (! $just_faq) {
     $html .= qq(<hr /><p style="margin-top:1em">If you have any other questions about Ensembl, please do not hesitate to 
-<a href="/Help/Contact" class="popup">contact our HelpDesk</a>. You may also like to subscribe to the 
+<a href="mailto:$SiteDefs::ENSEMBL_HELPDESK_EMAIL">contact our HelpDesk</a>. You may also like to subscribe to the 
 <a href="//www.ensembl.org/info/about/contact/mailing.html" class="cp-external">developers' mailing list</a>.</p>);
   }
   return $html;

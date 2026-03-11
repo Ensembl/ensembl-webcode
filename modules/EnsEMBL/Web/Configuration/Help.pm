@@ -53,8 +53,6 @@ sub populate_tree {
   $topic_menu->append($self->create_node('Movie',    'Video Tutorials',            [qw(movie    EnsEMBL::Web::Component::Help::Movie)]));
   $topic_menu->append($self->create_node('Glossary', 'Glossary',                   [qw(glossary EnsEMBL::Web::Component::Help::Glossary)]));
 
-  $self->create_node('Contact', 'Contact HelpDesk', [qw(contact EnsEMBL::Web::Component::Help::Contact)]);
-
   ## Add "invisible" nodes used by interface but not displayed in navigation
   $self->create_node('Preview',         '', [qw(preview EnsEMBL::Web::Component::Help::Preview)]);
   $self->create_node('MovieFeedback',   '', [qw(preview EnsEMBL::Web::Component::Help::MovieFeedback)]);

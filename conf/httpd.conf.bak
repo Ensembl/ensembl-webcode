@@ -68,13 +68,6 @@ LoadModule proxy_module modules/mod_proxy.so
 <IfModule !proxy_http_module>
 LoadModule proxy_http_module modules/mod_proxy_http.so
 </IfModule>
-# enabling this module seems to make httpd seg fault on start up. It's
-# not used anyway in the config, so it's commented out like the lines
-# that would otherwise need it.
-# jgt 20231212
-# <IfModule !ssl_module>
-# LoadModule ssl_module modules/mod_ssl.so
-# </IfModule>
 
 <IfModule mod_headers.c>
    Header set Cache-Control "no-cache"
@@ -113,8 +106,6 @@ SecDataDir /tmp
 # End rate limiting
 
 RewriteEngine On
-#SSLProxyEngine On
-#ProxyRemote "https" "http://hx-wwwcache.ebi.ac.uk:3128"
 ### ParaSite ###
 RewriteRule  ^/contact.html /info/index.html [R]
 RewriteRule ^/info/access/ftp/.* /ftp.html [R]
@@ -125,22 +116,8 @@ RewriteRule ^/workshops$ /workshop [R]
 RewriteRule ^/jbrowse/browser/(.*)$ /jbrowse/index.html?data=/jbrowse-data/$1/data [QSA,R]
 ProxyPass /ontology-lookup http://www.ebi.ac.uk/ols/api/
 # Use next for staging and current for live
-# ProxyPass /jbrowse-data https://ftp.ebi.ac.uk/pub/databases/wormbase/parasite/web_data/jbrowse/releases/current/
-# Alias /jbrowse-data /nfs/ftp/pub/databases/wormbase/parasite/web_data/jbrowse/releases/release-19/
-# RewriteRule ^/jbrowse-data/(.*) https://ftp.ebi.ac.uk/pub/databases/wormbase/parasite/web_data/jbrowse/releases/release-19/$1
-
-# this section sets up jbrowse to read its data files from the EBI FTP site, rather than from an
-# NFS mount of the FTP area. The other config is to make sure the ".jsonz" files don't get doubly
-# compressed by, in this config, mod_deflate. See https://jbrowse.org/docs/compression.html for
-# information about configuring Apache.
-# jgt 2024-01-19
-ProxyPass /jbrowse-data/ http://ftp.ebi.ac.uk/pub/databases/wormbase/parasite/web_data/jbrowse/releases/release-19/
-<LocationMatch (?i)\.(jsonz|txtz)$>
-  Header set Content-Encoding gzip
-</LocationMatch>
-SetEnvIfNoCase Request_URI "\.(jsonz|txtz)$" no-gzip dont-vary
-
-
+#ProxyPass /jbrowse-data https://ftp.ebi.ac.uk/pub/databases/wormbase/parasite/web_data/jbrowse/releases/current/
+Alias /jbrowse-data /nfs/ftp/pub/databases/wormbase/parasite/web_data/jbrowse/releases/release-19/
 ###
 
 # Biomart incomplete URI
@@ -578,12 +555,10 @@ BrowserMatch "JDK/1\.0" force-response-1.0
   PerlHandler EnsEMBL::Web::Apache::Static
 </LocationMatch>
 
-# removed to allow a ProxyPass directive to send requests for data to the EBI FTP server
-# jgt 2024-01-19
-# <LocationMatch /jbrowse-data>
-#  SetHandler perl-script
-#  PerlHandler EnsEMBL::Web::Apache::Static
-# </LocationMatch>
+<LocationMatch /jbrowse-data>
+ SetHandler perl-script
+ PerlHandler EnsEMBL::Web::Apache::Static  
+</LocationMatch>
 
 #<Directory $ServerRoot>
 #  AllowOverride None

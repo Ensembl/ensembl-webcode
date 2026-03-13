@@ -1,6 +1,7 @@
 biomart-perl
 /cbuild/*
 /.cbuild-*
+/cbuild.working/
 !/cbuild/README.txt
 /conf/started
 /conf/Plugins.pm

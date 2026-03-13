@@ -281,6 +281,12 @@ sub has_pdbe_analysis {
 
 sub has_afdb_analysis {
   my $self = shift;
+  # use Data::Dumper; warn Dumper($self->get_db);
+  # use Data::Dumper; warn Dumper("============");
+  # use Data::Dumper; warn Dumper($self->table_info($self->get_db, 'protein_feature')->{'analyses'}{'alphafold'});
+  # use Data::Dumper; warn Dumper("============");
+  # use Data::Dumper; warn Dumper($self->table_info($self->get_db, 'protein_feature'));
+  # use Data::Dumper; warn Dumper($self->get_db, 'protein_feature');
   return ($self->table_info($self->get_db, 'protein_feature')->{'analyses'}{'alphafold'}) ? 1 : 0;
 }
 

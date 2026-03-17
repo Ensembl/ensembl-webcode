@@ -275,30 +275,6 @@ sub content {
         label => $node->tree->stable_id,
         order => 1
        });
-
-      # Link to TreeFam Tree
-      my $tree_tagvalues  = $tree->get_tagvalue_hash;
-      my $treefam_tree = 
-        $tree_tagvalues->{'treefam_id'}          || 
-        $tree_tagvalues->{'part_treefam_id'}     || 
-        $tree_tagvalues->{'cont_treefam_id'}     || 
-        undef;
-      
-      if (defined $treefam_tree) {
-        foreach my $treefam_id (split ';', $treefam_tree) {
-          my $treefam_link = $hub->get_ExtURL('TREEFAMTREE', $treefam_id);
-          
-          if ($treefam_link) {
-            $self->add_entry({
-              type     => 'Maps to TreeFam',
-              label    => $treefam_id,
-              link     => $treefam_link,
-              external => 1,
-              order    => 6
-            });
-          }
-        }
-      }
     }
     
     # Gene count

@@ -234,7 +234,7 @@ sub content_panel {
     code        => 'main',
     caption     => $node->data->{'full_caption'} || $node->data->{'concise'} || $node->data->{'caption'},
     omit_header => $controller->page_type eq 'Popup' ? 1 : 0,
-    help        => { $hub->species_defs->multiX('ENSEMBL_HELP') }->{join '/', map $hub->$_ || (), qw(type action function)},
+    help        => { $hub->species_defs->multiX('ENSEMBL_HELP') }->{join '/', map $hub->$_ || (), qw(type action function)} || ($hub->type eq 'Variation' && $hub->action eq 'Sample' ? 172 : undef),
   );
   
   my $panel          = $self->new_panel('Navigation', $controller, %params);

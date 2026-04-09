@@ -11,7 +11,6 @@ requires 'DB_File';
 requires 'DBD::mysql';
 requires 'DBI';
 requires 'Digest::MD5';
-requires 'Email::Address::XS';
 requires 'File::Spec::Functions';
 requires 'GD::Simple';
 requires 'Hash::Merge';

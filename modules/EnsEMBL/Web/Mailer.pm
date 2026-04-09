@@ -179,7 +179,7 @@ sub _parse_email_addresses {
       }
   }
 
-  return $addresses[0]->address();
+  return $addresses[0]->address;
 }
 
 sub send {
@@ -211,7 +211,7 @@ sub send {
   }
 
   if ($self->{'base_url'}) {
-      if ($self->{'base_url'} !~ m{^http(s)?://[A-Za-z0-9.-/]+$}){
+      if ($self->{'base_url'} !~ m{^http(s)?://[A-Za-z0-9.\-/]+$}){
           warn "EnsEMBL/Web/Mailer: Unexpected URL: '$self->{'base_url'}'";
           return 0;
       }

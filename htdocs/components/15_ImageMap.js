@@ -289,10 +289,10 @@ Ensembl.Panel.ImageMap = Ensembl.Panel.Content.extend({
         $.each(this.coords, function (i) { c[rect[i]] = parseInt(this, 10); });
       }
       
-      if (this.klass.drag || this.klass.vdrag) {
-        panel.areas.push(c);
-      } else {
+      if (panel.id == 'SyntenyImage' && !(this.klass.drag || this.klass.vdrag)) {
         panel.areas.unshift(c);
+      } else {
+        panel.areas.push(c);
       }
       
       if (this.klass.drag || this.klass.vdrag) {

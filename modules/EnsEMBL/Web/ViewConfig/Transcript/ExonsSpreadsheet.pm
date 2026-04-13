@@ -30,13 +30,17 @@ sub init_cacheable {
 
   $self->SUPER::init_cacheable;
 
+  my $default_snp_display_option = $self->hub->species_defs->databases->{'DATABASE_VARIATION'}
+                                 ? 'exon'
+                                 : 'off';
+
   $self->set_default_options({
     'sscon'           => 25,
     'flanking'        => 50,
     'fullseq'         => 'off',
     'exons_only'      => 'off',
     'line_numbering'  => 'off',
-    'snp_display'     => 'exon',
+    'snp_display'     => $default_snp_display_option,
   });
 
   $self->title('Exons');
@@ -45,7 +49,9 @@ sub init_cacheable {
 sub field_order {
   ## Abstract method implementation
   my @out = (qw(flanking display_width sscon fullseq exons_only line_numbering), $_[0]->variation_fields);
-  unless(grep { $_ eq 'consequence_filter' } @out) {
+
+  if ($_[0]->hub->species_defs->databases->{'DATABASE_VARIATION'}
+      && !(grep { $_ eq 'consequence_filter' } @out)) {
     push @out,'consequence_filter';
   }
   return @out;

@@ -25,9 +25,9 @@ use strict;
 use warnings;
 
 use Mail::Mailer;
+use Mail::Address;
 use MIME::Base64 qw(encode_base64);
 use EnsEMBL::Web::Exceptions;
-use Email::Address::XS qw(parse_email_addresses split_address);
 use Encode 'decode';
 use feature 'unicode_strings';
 
@@ -162,7 +162,25 @@ sub send_plain {
     return 1;
 }
 
+sub _parse_email_addresses {
+  my ($address_string, $type) = @_;
 
+  my @addresses = Mail::Address->parse($address_string);
+  if (@addresses != 1) {
+      warn "EnsEMBL/Web/Mailer: Illegal $type: addr: '$address_string'";
+      return 0;
+  }
+
+  if ($type eq 'To') {
+      my $host = $addresses[0]->host;
+      if ($host !~ /(ebi\.ac\.uk|ensembl\.org)$/) {
+          warn "EnsEMBL/Web/Mailer: Rcpt addr not within EBI: '$address_string'";
+          return 0;
+      }
+  }
+
+  return $addresses[0]->address;
+}
 
 sub send {
   my $self = shift;
@@ -171,35 +189,15 @@ sub send {
 
   # First validate user-supplied data
 
-  my @addresses = parse_email_addresses($self->{'to'});
-  if (@addresses != 1) {
-      warn "EnsEMBL/Web/Mailer: Illegal To: addr: '$self->{'to'}'";
-      return 0;
-  }
-  my $helpdesk_mail = $addresses[0]->address();
-  my ($user, $host) = split_address($helpdesk_mail);
-  if ($host !~ /(ebi\.ac\.uk|ensembl\.org)$/) {
-      warn "EnsEMBL/Web/Mailer: Rcpt addr not within EBI: '$self->{'to'}'";
-      return 0;
-  }
+  my $helpdesk_mail = _parse_email_addresses($self->{'to'}, 'To');
   $valid_params{'To'} = $helpdesk_mail;
 
-  @addresses = parse_email_addresses($self->{'from'});
-  if (@addresses != 1) {
-      warn "EnsEMBL/Web/Mailer: Illegal From: addr: '$self->{'from'}'";
-      return 0;
-  }
-  my $from_mail = $addresses[0]->address();
+  my $from_mail = _parse_email_addresses($self->{'from'}, 'From');
   $valid_params{'From'} = $from_mail;
 
   $valid_params{'Reply-To'} = undef;
   if ($self->{'reply'}) {
-      @addresses = parse_email_addresses($self->{'reply'});
-      if (@addresses != 1) {
-          warn "EnsEMBL/Web/Mailer: Illegal Reply-To: addr: '$self->{'reply'}'";
-          return 0;
-      }
-      $valid_params{'Reply-To'} = $addresses[0]->address();
+      $valid_params{'Reply-To'} = _parse_email_addresses($self->{'reply'}, 'Reply-To');
   }
 
 
@@ -213,7 +211,7 @@ sub send {
   }
 
   if ($self->{'base_url'}) {
-      if ($self->{'base_url'} !~ m{^http(s)?://[A-Za-z0-9.-/]+$}){
+      if ($self->{'base_url'} !~ m{^http(s)?://[A-Za-z0-9.\-/]+$}){
           warn "EnsEMBL/Web/Mailer: Unexpected URL: '$self->{'base_url'}'";
           return 0;
       }

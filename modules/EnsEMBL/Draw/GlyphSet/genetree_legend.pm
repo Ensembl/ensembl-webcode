@@ -33,6 +33,7 @@ sub render_normal {
   my $container          = $self->{'container'};
   my $other_gene         = $self->{'highlights'}[5];
   my $highlight_ancestor = $self->{'highlights'}[6];
+  my $low_coverage_species = $self->{'highlights'}[9] || {};
   my $cafe               = $container->isa('Bio::EnsEMBL::Compara::CAFEGeneFamilyNode');
   my $gat                = $container->isa('Bio::EnsEMBL::Compara::GenomicAlignTree');
   my @nodes;
@@ -94,10 +95,10 @@ sub render_normal {
   }
 
   #Labels for high and low coverage species
-  if ($gat) {
+  if ($gat && scalar keys %{$low_coverage_species} > 0) {
     $self->add_vgroup_to_legend([
-      { legend => 'high quality assembly',  colour => 'black', text => 'SpeciesName' },
-      { legend => 'low quality assembly',   colour => 'brown', text => 'SpeciesName' },
+      { legend => 'EPO aligned assembly',  colour => 'black', text => 'SpeciesName' },
+      { legend => 'EPO-Extended aligned assembly',   colour => 'brown', text => 'SpeciesName' },
      ], 'Species', {
         style => 'text',
      });

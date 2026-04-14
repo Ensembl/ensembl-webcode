@@ -97,8 +97,8 @@ sub render_normal {
   #Labels for high and low coverage species
   if ($gat && scalar keys %{$low_coverage_species} > 0) {
     $self->add_vgroup_to_legend([
-      { legend => 'EPO aligned assembly',  colour => 'black', text => 'SpeciesName' },
-      { legend => 'EPO-Extended aligned assembly',   colour => 'brown', text => 'SpeciesName' },
+      { legend => 'EPO assembly',  colour => 'black', text => 'SpeciesName' },
+      { legend => 'EPO-Extended assembly',   colour => 'brown', text => 'SpeciesName' },
      ], 'Species', {
         style => 'text',
      });

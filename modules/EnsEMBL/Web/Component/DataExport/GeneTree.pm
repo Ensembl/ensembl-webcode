@@ -36,6 +36,7 @@ sub _init {
 sub content {
   my $self  = shift;
   my $hub   = $self->hub;
+  my $cdb   = $hub->param('cdb') || 'compara';
 
   ## Get user's current settings
   my $view_config  = $self->view_config;
@@ -53,6 +54,9 @@ sub content {
     my $newick_values = [];
 
     my %nhx = EnsEMBL::Web::Constants::NHX_OPTIONS;
+
+    delete $nhx{'transcript_id'} if ($cdb eq 'compara_pan_ensembl');
+
     foreach my $k (sort {lc($a) cmp lc($b)} keys %nhx) {
       push @$nhx_values, {'value' => $k, 'caption' => $nhx{$k}};
     }  

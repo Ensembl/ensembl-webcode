@@ -300,8 +300,10 @@ sub fixup_alignslice {
 
                     my $i = $i0;
                     my $next_i0;
+                    my $loop_limit = 10_000;
                     while ($i < $num_target_intervals
-                           && $target_u_slice_intervals[$i]->{'start'} <= $query_u_slice_interval->{'end'}) {
+                           && $target_u_slice_intervals[$i]->{'start'} <= $query_u_slice_interval->{'end'}
+                           && $i < $loop_limit) {
                       my $target_u_slice_interval = $target_u_slice_intervals[$i];
 
                       my $unclipped_overlap = min($query_u_slice_interval->{'end'}, $target_u_slice_interval->{'end'})

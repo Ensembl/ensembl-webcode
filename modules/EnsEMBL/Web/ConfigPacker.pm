@@ -1261,7 +1261,7 @@ sub _summarise_compara_db {
     } elsif ($class =~ /constrained_element/ || $type =~ /CONSTRAINED_ELEMENT/) {
       $key = 'CONSTRAINED_ELEMENTS';
       $constrained_elements->{$species_set_id} = $id;
-    } elsif ($type !~ /EPO_LOW_COVERAGE/ && ($class =~ /tree_alignment/ || $type  =~ /EPO/)) {
+    } elsif ($type !~ /(EPO_EXTENDED|EPO_LOW_COVERAGE)/ && ($class =~ /tree_alignment/ || $type  =~ /EPO/)) {
       $self->db_tree->{$db_name}{$key}{$id}{'species'}{'ancestral_sequences'} = 1 unless exists $self->db_tree->{$db_name}{$key}{$id};
     } elsif ($type eq 'CACTUS_DB') {
       $cactus_db_found = 1;

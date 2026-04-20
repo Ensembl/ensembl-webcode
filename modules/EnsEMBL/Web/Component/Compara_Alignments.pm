@@ -107,7 +107,7 @@ sub content {
   my $num_groups = 0;
   my $is_overlap = 0; #whether any of the groups overlaps one another (would need target_slice_table)
   my $groups;
-  my $is_low_coverage_species = 0; #is this species part of the low coverage set in the EPO_LOW_COVERAGE alignments
+  my $is_low_coverage_species = 0; #is this species part of the low coverage set in the EPO_EXTENDED/EPO_LOW_COVERAGE alignments
 
   #method_link_species_set class and type
   my $method_class = $hub->species_defs->multi_hash->{'DATABASE_COMPARA'}{'ALIGNMENTS'}{$align}{'class'} if ($align);
@@ -117,8 +117,8 @@ sub content {
   if ($align) {
       $align_blocks = $object->get_align_blocks($slice, $align, $cdb);
 
-      #find out if this species is low_coverage and the alignment is EPO_LOW_COVERAGE
-      if ($method_type =~ /EPO_LOW_COVERAGE/ && @$align_blocks) {
+      #find out if this species is low_coverage and the alignment is EPO_EXTENDED/EPO_LOW_COVERAGE
+      if ($method_type =~ /(EPO_EXTENDED|EPO_LOW_COVERAGE)/ && @$align_blocks) {
           # The species is not low-coverage if it's been used in one of the EPO alignments
           $is_low_coverage_species = !scalar( grep {($_->{type} eq 'EPO') && $_->{species}->{$object->species}}
                                               values %{$hub->species_defs->multi_hash->{'DATABASE_COMPARA'}{'ALIGNMENTS'}}
@@ -537,7 +537,7 @@ sub draw_tree {
     }
   }
 
-  #Get low coverage species from the EPO_LOW_COVERAGE species set
+  #Get low coverage species from the EPO_EXTENDED/EPO_LOW_COVERAGE species set
   my $low_coverage_species = {};
   if ($class =~ /GenomicAlignTree.tree_alignment/) {
     $low_coverage_species = _get_low_coverage_genome_db_sets($method_link_species_set);
@@ -653,8 +653,8 @@ sub _get_target_slice_table {
   my $other_species;
   my $lookup = $hub->species_defs->prodnames_to_urls_lookup;
 
-  #Find the mapping reference species for EPO_LOW_COVERAGE alignments to distinguish the overlapping blocks
-  if ($type =~ /EPO_LOW_COVERAGE/ && $is_low_coverage_species) {
+  #Find the mapping reference species for EPO_EXTENDED/EPO_LOW_COVERAGE alignments to distinguish the overlapping blocks
+  if ($type =~ /(EPO_EXTENDED|EPO_LOW_COVERAGE)/ && $is_low_coverage_species) {
     
     my $gdba = $compara_db->get_adaptor('GenomeDB');
     my $main_species = $gdba->fetch_by_name_assembly($ref_species);
@@ -706,7 +706,7 @@ sub _get_target_slice_table {
     my ($ref_start, $ref_end, $non_ref_start, $non_ref_end);
     if ($class =~ /pairwise/) { 
       ($ref_start, $ref_end, $non_ref_start, $non_ref_end, $non_ref_ga) = $self->object->get_start_end_of_slice($gab_group);
-    } elsif ($type =~ /EPO_LOW_COVERAGE/ && $is_low_coverage_species) {
+    } elsif ($type =~ /(EPO_EXTENDED|EPO_LOW_COVERAGE)/ && $is_low_coverage_species) {
       ($ref_start, $ref_end, $non_ref_start, $non_ref_end, $non_ref_ga, $num_species) = $self->object->get_start_end_of_slice($gab_group, $other_species);
     } elsif ($type eq 'CACTUS_DB' && $other_species) {
       ($ref_start, $ref_end, $non_ref_start, $non_ref_end, $non_ref_ga, $num_species) = $self->object->get_start_end_of_slice($gab_group, $other_species);
@@ -745,7 +745,7 @@ sub _get_target_slice_table {
                              r      => $ref_string,
                             });
 
-    #Other species - ref species used for mapping (EPO_LOW_COVERAGE), loading via MAF (CACTUS_DB) or non_ref species (pairwise)
+    #Other species - ref species used for mapping (EPO_EXTENDED/EPO_LOW_COVERAGE), loading via MAF (CACTUS_DB) or non_ref species (pairwise)
     my ($other_string, $other_link);
     if ($other_species) {
       $other_string = $non_ref_ga->dnafrag->name.":".$non_ref_start."-".$non_ref_end;
@@ -784,13 +784,33 @@ sub _get_target_slice_table {
 
 }
 
-#Find the set of low coverage species (genome_dbs) from the EPO_LOW_COVERAGE set (high + low coverage)
-#This could be improved by having a direct link between the EPO_LOW_COVERAGE and the corresponding high coverage EPO set
+#Find the set of low coverage species (genome_dbs) from the EPO_EXTENDED/EPO_LOW_COVERAGE set (high + low coverage)
 sub _get_low_coverage_genome_db_sets {
   my ($mlss) = @_;
   my $found_high_mlss;
   my $low_coverage_species_set;
   my $high_coverage_species_set;
+
+  # If this alignment MLSS has a 'base_mlss_id' tag, we can take the
+  # genome_db_id values in the current MLSS that are not in the base MLSS.
+  my $high_cov_mlss_id = $mlss->get_value_for_tag('base_mlss_id');
+  if ($high_cov_mlss_id) {
+    my $high_cov_mlss = $mlss->adaptor->fetch_by_dbID($high_cov_mlss_id);
+
+    if ($high_cov_mlss) {
+      my %high_cov_gdb_id_set = map { $_->dbID => 1 } @{$high_cov_mlss->species_set->genome_dbs};
+
+      my $low_cov_gdb_id_set;
+      foreach my $mlss_gdb (@{$mlss->species_set->genome_dbs}) {
+        my $mlss_gdb_id = $mlss_gdb->dbID;
+        if (! exists $high_cov_gdb_id_set{$mlss_gdb_id}) {
+          $low_cov_gdb_id_set->{$mlss_gdb_id} = 1;
+        }
+      }
+
+      return $low_cov_gdb_id_set;
+    }
+  }
 
   #Fetch all the high coverage EPO method_link_species_sets
   my $high_coverage_mlsss = $mlss->adaptor->fetch_all_by_method_link_type("EPO");

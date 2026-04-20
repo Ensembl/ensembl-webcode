@@ -1554,6 +1554,7 @@ sub get_genetic_variations {
 sub get_transcript_variations {
   my ($self,$vf_cache) = @_;
 
+  return [] unless $self->hub->species_defs->databases->{'DATABASE_VARIATION'};
   my $tvs = $self->__data->{'tv_cache'} ||= $self->get_adaptor('get_TranscriptVariationAdaptor', 'variation')->fetch_all_by_Transcripts_with_constraint([ $self->Obj ], undef, 1);
 
   # Most VFs will be in slice for transcript, so cache them.

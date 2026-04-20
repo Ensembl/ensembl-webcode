@@ -141,7 +141,9 @@ sub createObjects {
   # In within-species region comparison, the secondary
   # region may be provided by the 'align' parameter.
   my $align_param = $self->param('align');
-  if ($align_param && $align_param =~ /^(?<mlss_id>[0-9]+)--(?<species_url>.+)--(?<region>(?<chr>[^:]+).*)$/) {
+  if ($align_param
+      && $align_param =~ /^(?<mlss_id>[0-9]+)--(?<species_url>.+)--(?<region>(?<chr>[^:]+)[0-9]+-[0-9]+)$/
+      && scalar keys %inputs == 1) {
     my $next_input_id = max(keys %inputs) + 1;
     $inputs{$next_input_id} = {
       's'   => $+{'species_url'},

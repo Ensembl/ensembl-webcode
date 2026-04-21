@@ -52,7 +52,7 @@ sub parse_publication_list {
     if ($line =~ m#<li>([A-Z]{3})(/*)(\d+)#) {
       my ($source, $separator, $id) = ($1, $2, $3);
       my $pub_content = get_publication_by_id($rest, $source, $id, $hub);
-      $line =~ s/$source$separator$id/$pub_content/;
+      $line =~ s/$source$separator$id/$pub_content/ if $pub_content;
     }
     $converted .= $line."\n";
   }
@@ -155,7 +155,14 @@ sub _get_publications {
   my ($rest, $endpoint, $hub, $format) = @_;
   my $response = $rest->fetch($endpoint);
   
-  return ($response->{'resultList'}{'result'} || []); 
+  my $publications = [];
+  if (ref($response) eq 'HASH'
+      && exists $response->{'resultList'}
+      && exists $response->{'resultList'}{'result'}) {
+    $publications = $response->{'resultList'}{'result'};
+  }
+
+  return $publications;
 }
 
 1;

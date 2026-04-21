@@ -1503,7 +1503,7 @@ sub _summarise_compara_alignments {
   my $where = '';
   $where = "WHERE ".join(' AND ',@where) if(@where);
   $q = sprintf('
-    select genomic_align_block_id, ga.method_link_species_set_id, ga.dnafrag_start, ga.dnafrag_end, ga.dnafrag_id
+    select distinct genomic_align_block_id, ga.method_link_species_set_id, ga.dnafrag_start, ga.dnafrag_end, ga.dnafrag_id
       from genomic_align ga_ref join dnafrag using (dnafrag_id) join genomic_align ga using (genomic_align_block_id)
       %s
       order by genomic_align_block_id, ga.dnafrag_id',

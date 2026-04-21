@@ -180,10 +180,14 @@ sub fixup_alignslice {
         ass_start => $ass->start,
         ass_end => $ass->end
       };
-      # We need the distinct_Slice_name only in cases where it's different from the display_Slice_name,
-      # such as for an AlignSlice::Slice on a polyploid subgenome component (e.g. 'triticum_aestivum_A').
-      if ($ass->can('distinct_Slice_name') and $ass->distinct_Slice_name ne $ass->display_Slice_name) {
-        $data->{$key}{'ass_distinct_slice_name'} = $ass->distinct_Slice_name;
+
+      # We may need the underlying slice attributes in the 'pre_generate' phase if an
+      # AlignSlice view has multiple AlignSlice::Slice objects from the same genome.
+      # Method AlignSlice::Slice::get_all_Slice_Mapper_pairs is a way to get these.
+      if ($ass->can('get_all_Slice_Mapper_pairs')) {
+        $data->{$key}{'underlying_slice_metadata'} = [
+          map { $self->_get_slice_name_parts($_->{'slice'}) } @{$ass->get_all_Slice_Mapper_pairs()}
+        ];
       }
     }
   } elsif($self->phase eq 'pre_generate') {
@@ -199,33 +203,193 @@ sub fixup_alignslice {
         $mlssa->fetch_by_dbID($data->{$key}{'mlss'}),
         'expanded','restrict'
       );
-      # try an exact match first then match except for start/end (which we fix)
-      foreach my $approx ((0,1)) {
-        foreach my $sl (@{$as->get_all_Slices}) {
-          my $ass_coord_match = $sl->coord_system->version eq $data->{$key}{'ass_coord'};
-          my $ass_slice_match = exists $data->{$key}{'ass_distinct_slice_name'}
-                              ? $sl->distinct_Slice_name eq $data->{$key}{'ass_distinct_slice_name'}
-                              : $sl->genome_db->name eq $data->{$key}{'ass_species'}
-                              ;
 
-          if($ass_coord_match and $ass_slice_match) {
-            if($sl->start == $data->{$key}{'ass_start'} and
-               $sl->end   == $data->{$key}{'ass_end'}) {
-              $data->{$key} = $sl;
-              return;
-            }
-            next unless $approx;
-            # yuk, yuk, yuk! Need a way of serialising/deserialising AlSlSl
-            $sl->{'start'} = $data->{$key}{'ass_start'};
-            $sl->{'end'} = $data->{$key}{'ass_end'};
-            $data->{$key} = $sl;
-            return;
+      # At this point, '$data->{$key}' contains the metadata of the query AlignSlice (AS) slice
+      # object stored at the 'pre_process' phase, and we need to match it to the most appropriate
+      # target AS slice in '$as', the freshly fetched AlignSlice object. We assume that the query
+      # and target AlignSlice objects are essentially equivalent, but we do not assume that they
+      # are identical (see ENSWEB-6115).
+
+      # FILTER 1: we keep only AS slices that are in the relevant genome.
+      my @as_slices = grep { $_->genome_db->name eq $data->{$key}{'ass_species'} } @{$as->get_all_Slices};
+
+      my $chosen_as_slice;
+      if (scalar(@as_slices)) {
+
+        if (scalar(@as_slices) == 1 || !exists $data->{$key}{'underlying_slice_metadata'}) {
+          # We take the first candidate AlignSlice::Slice if the AlignSlice contains only one AS Slice
+          # object in the same genome as 'ass_species', or if no 'underlying_slice_metadata' is available
+          # to help us distinguish between multiple matching AS Slice objects in 'ass_species'.
+          $chosen_as_slice = $as_slices[0];
+        } else {
+          my $query_u_slice_recs = $data->{$key}{'underlying_slice_metadata'};
+
+          my %query_u_slice_intervals;
+          my $query_u_slice_total_length = 0;
+          foreach my $query_u_slice_rec (@{$query_u_slice_recs}) {
+            my ($cs_name, $cs_version, $seq_region_name, $start, $end, $strand) = @{$query_u_slice_rec};
+            my $query_u_region_key = join(':', ($cs_name, $cs_version, $seq_region_name, $strand));
+            push(@{$query_u_slice_intervals{$query_u_region_key}}, {'start' => $start, 'end' => $end});
+            $query_u_slice_total_length += ($end - $start + 1);
           }
+
+          if (scalar keys %query_u_slice_intervals) {
+
+            my %target_u_slice_intervals_by_idx;
+            my %target_u_slice_total_lengths_by_idx;
+            for(my $idx = 0; $idx < scalar(@as_slices); $idx++) {
+              my $as_slice = $as_slices[$idx];
+
+              my %target_u_slice_intervals;
+              my $target_u_slice_total_length = 0;
+              foreach my $slice_mapper_pair (@{$as_slice->get_all_Slice_Mapper_pairs()}) {
+                my $u_slice = $slice_mapper_pair->{'slice'};
+                my ($cs_name, $cs_version, $seq_region_name, $start, $end, $strand) = @{$self->_get_slice_name_parts($u_slice)};
+                my $u_region_key = join(':', ($cs_name, $cs_version, $seq_region_name, $strand));
+                if (exists $query_u_slice_intervals{$u_region_key}) {
+                  push(@{$target_u_slice_intervals{$u_region_key}}, {'start' => $start, 'end' => $end});
+                  $target_u_slice_total_length += ($end - $start + 1);
+                }
+              }
+
+              if (scalar keys %target_u_slice_intervals) {
+                $target_u_slice_total_lengths_by_idx{$idx} = $target_u_slice_total_length;
+                $target_u_slice_intervals_by_idx{$idx} = \%target_u_slice_intervals;
+              }
+            }
+
+            # FILTER 2: we keep only AS slices that have at least one underlying slice on the same
+            # strand and assembly sequence as one of the underlying slices of the query AS slice.
+            my @rel_idxs = keys %target_u_slice_intervals_by_idx;
+
+            if (scalar(@rel_idxs) == 1) {
+              # If there is only one remaining candidate AS slice, we can take that.
+              @as_slices = @as_slices[@rel_idxs];
+            } else {
+              # To identify the best matching AS slice(s), we will calculate
+              # the Jaccard statistic of the intervals of the underlying slices
+              # of the query AS slice against those of each target AS slice.
+
+              my @query_u_region_keys = keys %query_u_slice_intervals;
+              foreach my $u_region_key (@query_u_region_keys) {
+                $query_u_slice_intervals{$u_region_key} = [
+                  sort {
+                    $a->{'start'} <=> $b->{'start'}
+                    || $a->{'end'} <=> $b->{'end'}
+                  } @{$query_u_slice_intervals{$u_region_key}}
+                ];
+              }
+
+              my %as_slices_by_jaccard;
+              foreach my $rel_idx (@rel_idxs) {
+                my $target_u_slice_total_length = $target_u_slice_total_lengths_by_idx{$rel_idx};
+                my $target_u_slice_intervals = $target_u_slice_intervals_by_idx{$rel_idx};
+
+                my $total_overlap_length = 0;
+                while (my ($u_region_key, $u_region_intervals) = each %{$target_u_slice_intervals}) {
+                  my $query_u_slice_intervals = $query_u_slice_intervals{$u_region_key};
+
+                  my @target_u_slice_intervals = sort {
+                    $a->{'start'} <=> $b->{'start'}
+                    || $a->{'end'} <=> $b->{'end'}
+                  } @{$u_region_intervals};
+
+                  my $i0 = 0;
+                  my $num_target_intervals = scalar(@target_u_slice_intervals);
+                  foreach my $query_u_slice_interval (@{$query_u_slice_intervals}) {
+
+                    my $i = $i0;
+                    my $next_i0;
+                    my $loop_limit = 10_000;
+                    while ($i < $num_target_intervals
+                           && $target_u_slice_intervals[$i]->{'start'} <= $query_u_slice_interval->{'end'}
+                           && $i < $loop_limit) {
+                      my $target_u_slice_interval = $target_u_slice_intervals[$i];
+
+                      my $unclipped_overlap = min($query_u_slice_interval->{'end'}, $target_u_slice_interval->{'end'})
+                                              - max($query_u_slice_interval->{'start'}, $target_u_slice_interval->{'start'})
+                                              + 1;
+
+                      my $region_overlap_length = max(0, $unclipped_overlap);
+                      $total_overlap_length += $region_overlap_length;
+
+                      if ($region_overlap_length > 0 && !defined $next_i0) {
+                        $next_i0 = $i;
+                      }
+
+                      $i += 1;
+                    }
+
+                    $i0 = defined $next_i0 ? $next_i0 : $i;
+
+                    if ($i0 >= $num_target_intervals) {
+                      last;
+                    }
+                  }
+                }
+
+                my $jaccard_stat = $self->_get_jaccard_stat(
+                    $query_u_slice_total_length,
+                    $target_u_slice_total_length,
+                    $total_overlap_length,
+                );
+
+                if ($jaccard_stat > 0.0) {
+                  push(@{$as_slices_by_jaccard{$jaccard_stat}}, $as_slices[$rel_idx]);
+                }
+              }
+
+              if (scalar keys %as_slices_by_jaccard) {
+                # FILTER 3: we keep only AS slices that have the maximum Jaccard statistic.
+                my $max_jaccard = max keys %as_slices_by_jaccard;
+                @as_slices = @{$as_slices_by_jaccard{$max_jaccard}};
+              }
+            }
+          }
+
+          # We take the first remaining candidate AlignSlice::Slice at this point.
+          # In the best-case scenario, we have whittled down the set of AS slices to one best candidate.
+          # In the worst-case scenario, we arbitrarily take the first matching AS Slice object in 'ass_species'.
+          $chosen_as_slice = $as_slices[0];
         }
+
+      } else {
+        die "AlignSlice::Slice not found";
       }
-      die "AlignSlice::Slice not found";
+
+      $data->{$key} = $chosen_as_slice;
     }
   }
+}
+
+
+sub _get_jaccard_stat {
+    # Method to compute interval Jaccard statistic (Favorov et al. 2012 <https://doi.org/10.1371/journal.pcbi.1002529>,
+    # cited in Quinlan et al. 2026 <https://github.com/arq5x/bedtools2/blob/master/docs/content/tools/jaccard.rst>).
+    my ($self,$query_length,$target_length,$overlap_length) = @_;
+
+    my $numerator = $overlap_length;
+    my $union_minus_intersection = $query_length + $target_length - $overlap_length;
+    my $jaccard_stat = $union_minus_intersection ? $overlap_length / $union_minus_intersection : 0.0;
+
+    return $jaccard_stat;
+}
+
+sub _get_slice_name_parts {
+  # Method to fetch parts of Bio::EnsEMBL::Slice name.
+  # There is a Bio::EnsEMBL::Slice::name method that
+  # returns all this info in a single string, but then
+  # we would have to split the name into parts again.
+  my ($self,$slice) = @_;
+  my $coord_system = $slice->coord_system;
+  return [
+    ($coord_system->name // ''),
+    ($coord_system->version // ''),
+    $slice->seq_region_name,
+    $slice->start,
+    $slice->end,
+    $slice->strand,
+  ];
 }
 
 sub _is_align_slice {

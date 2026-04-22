@@ -475,7 +475,7 @@ sub add_genes {
     $self->add_track('transcript', 'gencode_basic', "Basic Gene Annotations from $gencode_version", '_gencode_basic', {
       labelcaption  => "Genes (Basic set from $gencode_version)",
       display       => 'off',
-      description   => 'The GENCODE set is the gene set for human and mouse. <a href="/Help/Glossary?id=500" class="popup">GENCODE Basic</a> is a subset of representative transcripts (splice variants).',
+      description   => 'The GENCODE set is the gene set for human and mouse. <a href="/glossary/ENSGLOSSARY_0000020" class="popup">GENCODE Basic</a> is a subset of representative transcripts (splice variants).',
       sortable      => 1,
       colours       => $colours,
       label_key     => '[biotype]',
@@ -498,7 +498,7 @@ sub add_genes {
     $self->add_track('transcript', 'gencode_primary', "Primary Gene Annotations from $gencode_version", '_gencode_primary', {
       labelcaption  => "Genes (Primary set from $gencode_version)",
       display       => 'transcript_label',
-      description   => 'The GENCODE set is the gene set for human and mouse. <a href="/Help/Glossary?id=500" class="popup">GENCODE Primary</a> is a subset of representative transcripts (splice variants).',
+      description   => 'The GENCODE set is the gene set for human and mouse. <a href="https://www.gencodegenes.org/pages/gencode_primary/" class="popup">GENCODE Primary</a> is a subset of representative transcripts (splice variants).',
       sortable      => 1,
       colours       => $colours,                                                                                                                                                                                                                                                
       label_key     => '[biotype]',
@@ -565,7 +565,7 @@ sub add_genes {
     $self->modify_configs(['gencode_primary'], { 'display' => 'transcript_label' });
 
     # overwriting Genes comprehensive track description to not be the big concatenation of many description (only gencode gene track)
-    $self->modify_configs(['transcript_core_ensembl'],{ description => 'The <a class="popup" href="/Help/Glossary?id=487">GENCODE Comprehensive</a> set is the gene set for human and mouse' });
+    $self->modify_configs(['transcript_core_ensembl'],{ description => 'The <a class="popup" href="/glossary/ENSGLOSSARY_0000376">GENCODE Comprehensive</a> set is the gene set for human and mouse' });
   }
 }
 

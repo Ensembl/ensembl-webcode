@@ -128,9 +128,25 @@ sub _wikipedia_link {
   my $self = shift;
   my $species = $self->hub->species_defs->SPECIES_SCIENTIFIC_NAME;
   $species =~ s/ /_/g;;
+
+  # Species with faulty links to be overwritten:
+  my %special_wiki = (
+    'Anas_platyrhynchos_domesticus' => 'https://en.wikipedia.org/wiki/Mallard',
+    'Bos_indicus_x_Bos_taurus'      => 'https://en.wikipedia.org/wiki/Bos',
+    'Cervus_hanglu_yarkandensis'    => 'https://en.wikipedia.org/wiki/Central_Asian_red_deer',
+    'Gymnocanthus_tricuspis'        => 'https://en.wikipedia.org/wiki/Arctic_staghorn_sculpin',
+    'Gallus_gallus'                 => 'https://en.wikipedia.org/wiki/Red_junglefowl',
+    'Malurus_cyaneus_samueli'       => 'https://en.wikipedia.org/wiki/Superb_fairywren',
+    'Marmota_marmota_marmota'       => 'https://en.wikipedia.org/wiki/Alpine_marmot',
+    'Sus_scrofa'                    => 'https://en.wikipedia.org/wiki/Pig',
+    'Sus_scrofa_domesticus'         => 'https://en.wikipedia.org/wiki/Pig',
+  );
+
+  my $wiki_url = $special_wiki{$species} || "https://en.wikipedia.org/wiki/$species";
+ 
   my $html = qq(<h2>More information</h2>
 <p>General information about this species can be found in 
-<a href="http://en.wikipedia.org/wiki/$species" rel="external">Wikipedia</a>.
+<a href="$wiki_url" rel="external">Wikipedia</a>.
 </p>); 
 
   return $html;

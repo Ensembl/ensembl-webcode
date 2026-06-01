@@ -120,7 +120,8 @@ sub content {
       #find out if this species is low_coverage and the alignment is EPO_EXTENDED/EPO_LOW_COVERAGE
       if ($method_type =~ /(EPO_EXTENDED|EPO_LOW_COVERAGE)/ && @$align_blocks) {
           # The species is not low-coverage if it's been used in one of the EPO alignments
-          $is_low_coverage_species = !scalar( grep {($_->{type} eq 'EPO') && $_->{species}->{$object->species}}
+          my $prod_name = $hub->species_defs->get_config($object->species, 'SPECIES_PRODUCTION_NAME');
+          $is_low_coverage_species = !scalar( grep {($_->{type} eq 'EPO') && $_->{species}->{$prod_name}}
                                               values %{$hub->species_defs->multi_hash->{'DATABASE_COMPARA'}{'ALIGNMENTS'}}
                                             );
       } elsif ($target_slice && $method_type eq 'CACTUS_DB') {

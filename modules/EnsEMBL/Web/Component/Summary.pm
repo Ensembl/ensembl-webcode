@@ -277,6 +277,7 @@ sub transcript_table {
 
   my $gencode_desc    = qq(A subset of the GENCODE transcript set, containing only 5' and 3' complete transcripts at protein-coding genes.);
   my $gencode_primary_desc = qq(GENCODE Primary represents a minimal set that contains MANE Select, MANE Plus Clinical and Ensembl Canonical transcripts and transcripts containing any conserved exons and common alternative splicing events (including exons skips) that are absent from the MANE and Ensembl Canonical transcripts for protein-coding genes. Other biotypes will have the GENCODE Primary flag added to the Ensembl Canonical transcript and for lncRNA genes only this will be the transcripts with the longest genomic span.);
+  my $ens_canon_extended_desc = qq(Not part of the MANE transcript set but a version of a MANE Select or MANE Plus Clinical transcripts with maximal 3’ and/or 5’ UTR extension.);
 
   my $version     = $object->version ? ".".$object->version : "";
   my $transcript  = $page_type eq 'transcript' ? $object->stable_id : $hub->param('t');
@@ -311,7 +312,7 @@ sub transcript_table {
         $trans_attribs->{$trans->stable_id}{$attrib_type} = [$attrib->name, $attrib->value];
       }
       elsif ($attrib_type eq 'ens_canon_extended') {
-        $trans_attribs->{$trans->stable_id}{'ens_canon_extended'} = [$attrib->name, $attrib->description];
+        $trans_attribs->{$trans->stable_id}{'ens_canon_extended'} = [$attrib->name, $ens_canon_extended_desc];
       }
       else {
         $trans_attribs->{$trans->stable_id}{$attrib_type} = $attrib->value;

@@ -277,6 +277,7 @@ sub transcript_table {
 
   my $gencode_desc    = qq(A subset of the GENCODE transcript set, containing only 5' and 3' complete transcripts at protein-coding genes.);
   my $gencode_primary_desc = qq(GENCODE Primary represents a minimal set that contains MANE Select, MANE Plus Clinical and Ensembl Canonical transcripts and transcripts containing any conserved exons and common alternative splicing events (including exons skips) that are absent from the MANE and Ensembl Canonical transcripts for protein-coding genes. Other biotypes will have the GENCODE Primary flag added to the Ensembl Canonical transcript and for lncRNA genes only this will be the transcripts with the longest genomic span.);
+  my $ens_canon_extended_desc = qq(Not part of the MANE transcript set but a version of a MANE Select or MANE Plus Clinical transcripts with maximal 3’ and/or 5’ UTR extension.);
 
   my $version     = $object->version ? ".".$object->version : "";
   my $transcript  = $page_type eq 'transcript' ? $object->stable_id : $hub->param('t');
@@ -291,7 +292,7 @@ sub transcript_table {
     MANE_Plus_Clinical   => 'MANE Plus Clinical');
 
   my $trans_attribs = {};
-  my @attrib_types = ('is_canonical','gencode_primary','gencode_basic','appris','TSL','CDS_start_NF','CDS_end_NF');
+  my @attrib_types = ('is_canonical','ens_canon_extended','gencode_primary','gencode_basic','appris','TSL','CDS_start_NF','CDS_end_NF');
   push(@attrib_types, keys %MANE_attrib_codes);
 
   foreach my $trans (@$transcripts) {
@@ -309,6 +310,9 @@ sub transcript_table {
       }
       elsif ($MANE_attrib_codes{$attrib_type}) {
         $trans_attribs->{$trans->stable_id}{$attrib_type} = [$attrib->name, $attrib->value];
+      }
+      elsif ($attrib_type eq 'ens_canon_extended') {
+        $trans_attribs->{$trans->stable_id}{'ens_canon_extended'} = [$attrib->name, $ens_canon_extended_desc];
       }
       else {
         $trans_attribs->{$trans->stable_id}{$attrib_type} = $attrib->value;
@@ -398,7 +402,7 @@ sub transcript_table {
       }
     }
 
-    # Flag order: is_canonical, MANE_select, MANE_plus_clinical, gencode_basic, appris, TSL, CDS_start_NF, CDS_end_NF
+    # Flag order: is_canonical, MANE_select, MANE_plus_clinical, ens_canon_extended, gencode_basic, appris, TSL, CDS_start_NF, CDS_end_NF
     my $refseq_url;
     if ($trans_attribs->{$tsi}) {
       if ($trans_attribs->{$tsi}{'is_canonical'}) {
@@ -412,6 +416,11 @@ sub transcript_table {
           my $flagtip = helptip($mane_name, get_glossary_entry($hub, $MANE_attrib_codes{$MANE_attrib_code}));
           $MANE_attrib_code eq  'MANE_Select'? unshift @flags, $flagtip : push @flags, $flagtip;
         }
+      }
+
+      if ($trans_attribs->{$tsi}{'ens_canon_extended'}) {
+        my ($name, $description) = @{$trans_attribs->{$tsi}{'ens_canon_extended'}};
+        push @flags, helptip("Ensembl Canonical Extended", $description);
       }
 
       if ($sub_type eq 'GRCh37') {
@@ -466,6 +475,7 @@ sub transcript_table {
       translation => $protein_url ? sprintf '<a href="%s" title="View protein">%s</a>', $protein_url, $translation_ver : '-',
       biotype     => $self->colour_biotype($biotype_text, $_),
       is_canonical  => $trans_attribs->{$tsi}{'is_canonical'} || $trans_attribs->{$tsi}{'MANE_Select'}? 1 : 0,
+      is_extended  => $trans_attribs->{$tsi}{'ens_canon_extended'}? 1 : 0,
       ccds        => $ccds,
       %extras,
       has_ccds    => $ccds eq '-' ? 0 : 1,
@@ -500,9 +510,10 @@ sub transcript_table {
   my $title = encode_entities('<a href="https://www.ensembl.org/info/genome/genebuild/transcript_quality_tags.html" target="_blank">Tags</a>');
   push @columns, { key => 'flags', sort => 'html', label => 'Flags', title => $title, class => '_ht'};
 
-  ## Transcript order: biotype => canonical => CCDS => length
+  ## Transcript ordering criteria: biotype => canonical => extended => CCDS => length
   while (my ($k,$v) = each (%biotype_rows)) {
     my @subsorted = sort {$b->{'is_canonical'} cmp $a->{'is_canonical'}
+                          || $b->{'is_extended'} cmp $a->{'is_extended'}
                           || $b->{'has_ccds'} cmp $a->{'has_ccds'}
                           || $b->{'bp_length'} <=> $a->{'bp_length'}} @$v;
     $biotype_rows{$k} = \@subsorted;

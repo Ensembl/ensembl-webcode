@@ -94,6 +94,11 @@ sub content {
     $table->add_row('MANE', $mane_description_text);
   }
 
+  ## add Ensembl Canonical Extended info
+  if(@{$transcript->get_all_Attributes('ens_canon_extended')}){
+    $table->add_row('Ensembl Canonical Extended', qq(Not part of the MANE transcript set but a version of a MANE Select or MANE Plus Clinical transcripts with maximal 3’ and/or 5’ UTR extension.));
+  }
+
   ## add Uniprot info
   if (scalar @Uniprot) {
     my %T = map { $_->primary_id => 1 } @Uniprot;

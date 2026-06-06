@@ -131,7 +131,7 @@ sub _wikipedia_link {
 
   # Species with faulty links to be overwritten:
   my %special_wiki = (
-    'Anas_platyrhynchos_domesticus' => 'https://en.wikipedia.org/wiki/Mallard',
+    'Anas_platyrhynchos_platyrhynchos' => 'https://en.wikipedia.org/wiki/Mallard',
     'Bos_indicus_x_Bos_taurus'      => 'https://en.wikipedia.org/wiki/Bos',
     'Cervus_hanglu_yarkandensis'    => 'https://en.wikipedia.org/wiki/Central_Asian_red_deer',
     'Gymnocanthus_tricuspis'        => 'https://en.wikipedia.org/wiki/Arctic_staghorn_sculpin',

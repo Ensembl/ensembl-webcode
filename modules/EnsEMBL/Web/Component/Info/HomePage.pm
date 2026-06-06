@@ -174,6 +174,9 @@ sub assembly_text {
 );
   }
 
+  # Insert link to image credits page
+  $html .= '<h3 class="light top-margin">Image Credits</h3><p><a href="/info/about/image_credits.html">Credits for species images</a></p>';
+
   return $html;
 }
 

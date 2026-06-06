@@ -238,8 +238,7 @@ sub add_external_browsers {
       if ($chr) { 
           $url = $hub->get_ExtURL('EGB_NCBI', { ACCESSION => $browsers{'ACCESSION'}, CHR => $chr, START => $start, END => $end });
         } else {
-          my $taxid = $species_defs->get_config($hub->species, 'TAXONOMY_ID'); 
-          $url = "http://www.ncbi.nlm.nih.gov/mapview/map_search.cgi?taxid=$taxid";
+          $url = sprintf("https://www.ncbi.nlm.nih.gov/gdv/browser/genome/?id=%s", $browsers{'ACCESSION'});
         }
         
         $self->get_other_browsers_menu->append($self->create_node('NCBI_DB', 'NCBI', [], { url => $url, raw => 1, external => 1 }));

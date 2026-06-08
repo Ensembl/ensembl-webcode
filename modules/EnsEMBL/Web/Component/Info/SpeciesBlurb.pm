@@ -134,6 +134,7 @@ sub _wikipedia_link {
     'Anas_platyrhynchos_platyrhynchos' => 'https://en.wikipedia.org/wiki/Mallard',
     'Bos_indicus_x_Bos_taurus'      => 'https://en.wikipedia.org/wiki/Bos',
     'Cervus_hanglu_yarkandensis'    => 'https://en.wikipedia.org/wiki/Central_Asian_red_deer',
+    'Cottoperca_gobio'              => 'https://en.wikipedia.org/wiki/Cottoperca',
     'Gymnocanthus_tricuspis'        => 'https://en.wikipedia.org/wiki/Arctic_staghorn_sculpin',
     'Gallus_gallus'                 => 'https://en.wikipedia.org/wiki/Red_junglefowl',
     'Malurus_cyaneus_samueli'       => 'https://en.wikipedia.org/wiki/Superb_fairywren',

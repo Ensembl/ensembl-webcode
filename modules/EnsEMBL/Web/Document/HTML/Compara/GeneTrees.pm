@@ -49,17 +49,29 @@ sub format_gene_tree_stats {
   my $page       = $self->hub->param('page');
   return unless $compara_db;
 
-  my $mlss_adaptor    = $compara_db->get_adaptor('MethodLinkSpeciesSet');
-  my $all_mlsss       = $mlss_adaptor->fetch_all_by_method_link_type($method);
-  # Give preference to default gene-tree collection(s), if available.
-  my @default_mlsss   = grep { $_->species_set->name  =~ /^(collection-)?default$/ } @$all_mlsss;
-  $all_mlsss          = \@default_mlsss if (@default_mlsss);
-  # Take the largest relevant gene-tree collection.
-  my ($mlss)          = sort {$b->species_set->size <=> $a->species_set->size} @$all_mlsss;
-  return unless $mlss;
+  my $species_tree;
+  my $mlss_ids_by_method_type = $self->hub->species_defs->multi_hash->{'DATABASE_COMPARA'}{'GENE_TREE_STATS_MLSS_IDS'} || {};
+  if (exists $mlss_ids_by_method_type->{$method} && $mlss_ids_by_method_type->{$method}) {
+    # If a pre-selected gene-tree collection is available,
+    # we get that gene-tree collection's species tree.
+    my $mlss_id = $mlss_ids_by_method_type->{$method};
+    my $species_tree_adaptor = $compara_db->get_adaptor('SpeciesTree');
+    # We fetch the 'default' species tree of the gene-tree collection, as
+    # opposed to other kinds of gene tree (e.g. 'cafe', 'full_species_tree').
+    $species_tree = $species_tree_adaptor->fetch_by_method_link_species_set_id_label($mlss_id, 'default');
+  } else {
+    # If a gene-tree collection has not been pre-selected, select it now.
+    my $mlss_adaptor    = $compara_db->get_adaptor('MethodLinkSpeciesSet');
+    my $all_mlsss       = $mlss_adaptor->fetch_all_by_method_link_type($method);
+    # Give preference to default gene-tree collection(s), if available.
+    my @default_mlsss   = grep { $_->species_set->name  =~ /^(collection-)?default$/ } @$all_mlsss;
+    $all_mlsss          = \@default_mlsss if (@default_mlsss);
+    # Take the largest relevant gene-tree collection.
+    my ($mlss)          = sort {$b->species_set->size <=> $a->species_set->size} @$all_mlsss;
+    $species_tree       = $mlss->species_tree if $mlss;
+  }
 
-  my $species_tree_adaptor = $compara_db->get_adaptor('SpeciesTree');
-  my $species_tree = $mlss->species_tree;
+  return unless $species_tree;
 
   # Reads the species set that are defined in the database (if any)
   my $ordered_species = $hub->order_species_by_clade($species_tree->root->get_all_leaves);

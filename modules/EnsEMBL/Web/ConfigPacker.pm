@@ -1207,6 +1207,69 @@ sub _build_compara_mlss {
   $dest->{'MLSS_IDS'} = \%mlss;
 }
 
+sub _build_gene_tree_stats_mlss {
+  my ($self,$dbh,$dest) = @_;
+
+  # Take the default gene-tree collection, if available.
+  # Otherwise, take the largest gene-tree collection.
+  my $sql = q(
+    select method_link_species_set_id
+      from method_link_species_set mlss
+      join method_link ml
+        using (method_link_id)
+      join species_set_header ssh
+        using (species_set_id)
+      where ml.type = ?
+      order by field(ssh.name, "collection-default", "default") desc, ssh.size desc
+      limit 1
+  );
+
+  my %gene_tree_stats_mlss_ids;
+  foreach my $method_type ('PROTEIN_TREES', 'NC_TREES') {
+    my ($row) = $dbh->selectrow_arrayref($sql, undef, $method_type);
+    if ($row) {
+      $gene_tree_stats_mlss_ids{$method_type} = $row->[0];
+    }
+  }
+
+  $dest->{'GENE_TREE_STATS_MLSS_IDS'} = \%gene_tree_stats_mlss_ids;
+}
+
+sub _build_homology_mlss_tags {
+  my ($self,$dbh,$dest) = @_;
+
+  # Homology MLSS tags may be stored in the method_link_species_set_attr
+  # or method_link_species_set_tag tables. It just so happens that all
+  # the tags we are currently interested in are to be found in the
+  # method_link_species_set_attr table.
+  my $sth = $dbh->prepare(q(
+    select method_link_species_set_id,
+           goc_quality_threshold,
+           wga_quality_threshold
+      from method_link_species_set
+      join method_link
+        using (method_link_id)
+      join method_link_species_set_attr
+        using (method_link_species_set_id)
+      where goc_quality_threshold is not null
+        or wga_quality_threshold is not null
+  ));
+  $sth->execute;
+  my %hom_mlss_tags;
+  while (my ($mlss_id, $goc_threshold, $wga_threshold) = $sth->fetchrow_array) {
+    $hom_mlss_tags{$mlss_id} = {};
+
+    if (defined $goc_threshold) {
+      $hom_mlss_tags{$mlss_id}{goc_quality_threshold} = $goc_threshold;
+    }
+
+    if (defined $wga_threshold) {
+      $hom_mlss_tags{$mlss_id}{wga_quality_threshold} = $wga_threshold;
+    }
+  }
+  $dest->{'HOMOLOGY_MLSS_TAGS'} = \%hom_mlss_tags;
+}
+
 sub _summarise_compara_db {
   my ($self, $code, $db_name) = @_;
  
@@ -1244,7 +1307,7 @@ sub _summarise_compara_db {
       where mlss.method_link_id = ml.method_link_id and
         mlss.species_set_id = ss.species_set_id and 
         ss.genome_db_id = gd.genome_db_id and
-        (ml.class like "GenomicAlign%" or ml.class like "%.constrained_element" or ml.class = "ConservationScore.conservation_score")
+        (ml.class like "GenomicAlign%" or ml.class like "%.constrained_element" or ml.class = "ConservationScore.conservation_score" or ml.class = "SyntenyRegion.synteny")
   ');
   
   my $constrained_elements = {};
@@ -1265,6 +1328,9 @@ sub _summarise_compara_db {
       $self->db_tree->{$db_name}{$key}{$id}{'species'}{'ancestral_sequences'} = 1 unless exists $self->db_tree->{$db_name}{$key}{$id};
     } elsif ($type eq 'CACTUS_DB') {
       $cactus_db_found = 1;
+    } elsif ($class eq 'SyntenyRegion.synteny' || $type eq 'SYNTENY') {
+      $key  = 'SYNTENIES';
+      $name = 'Synteny';
     }
     
     if ($intra_species{$species_set_id}) {
@@ -1412,6 +1478,8 @@ sub _summarise_compara_db {
 
   $self->_build_compara_default_aligns($dbh,$self->db_tree->{$db_name});
   $self->_build_compara_mlss($dbh,$self->db_tree->{$db_name});
+  $self->_build_gene_tree_stats_mlss($dbh,$self->db_tree->{$db_name});
+  $self->_build_homology_mlss_tags($dbh,$self->db_tree->{$db_name});
 
   ##
   ###################################################################

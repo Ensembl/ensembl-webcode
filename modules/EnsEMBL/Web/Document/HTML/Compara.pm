@@ -27,6 +27,7 @@ use strict;
 use List::Util qw(uniqstr);
 use Math::Round;
 use EnsEMBL::Web::Document::Table;
+use Bio::EnsEMBL::Compara::Method;
 use Bio::EnsEMBL::Compara::Utils::SpeciesTree;
 
 use base qw(EnsEMBL::Web::Document::HTML);
@@ -96,12 +97,12 @@ sub format_wga_table {
     return $self->error_message('No Compara databse', '<p>No Compara database is configured on this site.</p>' );
   }
 
-  my @all_mlss;
-  foreach my $method_link_type (qw(PECAN EPO EPO_LOW_COVERAGE CACTUS_HAL CACTUS_DB)) {
-    push @all_mlss, sort {$a->dbID <=> $b->dbID} @{ $compara_db->get_adaptor('MethodLinkSpeciesSet')->fetch_all_by_method_link_type($method_link_type) };
-  }
+  my $species_defs = $self->hub->species_defs;
+  my $alignments = $species_defs->multi_hash->{'DATABASE_COMPARA'}->{'ALIGNMENTS'} || {};
+  my %wga_method_type_set = map { $_ => 1 } qw(PECAN EPO EPO_EXTENDED CACTUS_HAL CACTUS_DB);
+  my @all_mlss_ids = sort {$a <=> $b} grep { exists $wga_method_type_set{$alignments->{$_}{'type'}} } keys %{$alignments};
 
-  unless (@all_mlss) {
+  unless (@all_mlss_ids) {
     return $self->error_message('No alignments found', qq{<p>This Compara database doesn't contain any multiple-genome alignments.</p>}, 'info');
   }
 
@@ -111,10 +112,13 @@ sub format_wga_table {
     { key => 'method' , title => 'Method used', },
   ], [], {data_table => 1, exportable => 1, id => 'all_multiple_alignments'});
 
-  foreach my $mlss (@all_mlss) {
-    my $name = $mlss->name;
-    my $genomes = join(", ", sort map {$_->display_name} @{$mlss->species_set->genome_dbs});
-    my $method_link_type = $mlss->method->type;
+  my $url_lookup = $species_defs->prodnames_to_urls_lookup;
+  foreach my $mlss_id (@all_mlss_ids) {
+    my $alignment = $alignments->{$mlss_id};
+    my $name = $alignment->{'name'};
+    my @gdb_names = grep { $_ ne 'ancestral_sequences' } keys %{$alignment->{'species'}};
+    my $genomes = join(", ", sort map { $species_defs->get_config($url_lookup->{$_}, 'SPECIES_DISPLAY_NAME') } @gdb_names);
+    my $method_link_type = $alignment->{'type'};
     # Remove the method name, trying first the type
     $name =~ s/\s+$method_link_type$//i;
     # And then the display name if there is one
@@ -122,7 +126,7 @@ sub format_wga_table {
         $method_link_type = $Bio::EnsEMBL::Compara::Method::PLAIN_TEXT_DESCRIPTIONS{$method_link_type};
         $name =~ s/\s+$method_link_type$//i;
     }
-    my $url = sprintf(q{<a href="/info/genome/compara/mlss.html?mlss=%d">%s</a>}, $mlss->dbID, $name);
+    my $url = sprintf(q{<a href="/info/genome/compara/mlss.html?mlss=%d">%s</a>}, $mlss_id, $name);
     $table->add_row({
       'name'    => $url,
       'genomes' => $genomes,
@@ -220,28 +224,34 @@ sub pairwise_mlss_data {
 
   my $mlss_adaptor    = $compara_db->get_adaptor('MethodLinkSpeciesSet');
 
+  my $species_defs = $self->hub->species_defs;
+  my $alignments = $species_defs->multi_hash->{'DATABASE_COMPARA'}->{'ALIGNMENTS'} // {};
+  my $syntenies = $species_defs->multi_hash->{'DATABASE_COMPARA'}->{'SYNTENIES'} // {};
+  my %pairwise_mlss_conf = (%{$alignments}, %{$syntenies});
+  my @pairwise_mlss_ids = sort {$a <=> $b} keys %pairwise_mlss_conf;
+
   my %data;
-  my %synt_methods;
+  # We can obtain the set of synteny methods from the available synteny datasets.
+  my %obs_synt_method_set = map { $_->{'type'} => 1 } values %{$syntenies};
+  my %synt_methods = map { $_ => 1 } grep { exists $obs_synt_method_set{$_} } @$methods;
 
   ## Munge all the necessary information
+  my %req_method_set = map { $_ => 1 } @$methods;
   my $lookup = $self->hub->species_defs->prodnames_to_urls_lookup;
-  foreach my $method (@{$methods||[]}) {
-    my $mlss_sets  = $mlss_adaptor->fetch_all_by_method_link_type($method);
-    if (@$mlss_sets and ($mlss_sets->[0]->method->class =~ /SyntenyRegion.synteny/)) {
-      $synt_methods{$method} = 1;
-    }
+  foreach my $mlss_id (@pairwise_mlss_ids) {
+    my $pairwise_mlss = $pairwise_mlss_conf{$mlss_id};
+    my $method = $pairwise_mlss->{'type'};
+    next if (!exists $req_method_set{$method});
 
-    foreach my $mlss (@$mlss_sets) {
-      my ($gdb1, $gdb2) = @{$mlss->species_set->genome_dbs};
-      my $name1 = $lookup->{$gdb1->name};
-      if ($gdb2) {
-        my $name2 = $lookup->{$gdb2->name};
-        push @{$data{$name1}->{$name2}}, [$method, $mlss->dbID];
-        push @{$data{$name2}->{$name1}}, [$method, $mlss->dbID];
-      } else {
-        # Self alignment
-        push @{$data{$name1}->{$name1}}, [$method, $mlss->dbID];
-      }
+    my ($gdb1_name, $gdb2_name) = keys %{$pairwise_mlss->{'species'}};
+    my $name1 = $lookup->{$gdb1_name};
+    if ($gdb2_name) {
+      my $name2 = $lookup->{$gdb2_name};
+      push @{$data{$name1}->{$name2}}, [$method, $mlss_id];
+      push @{$data{$name2}->{$name1}}, [$method, $mlss_id];
+    } else {
+      # Self alignment
+      push @{$data{$name1}->{$name1}}, [$method, $mlss_id];
     }
   }
   return (\%data, \%synt_methods);

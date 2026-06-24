@@ -821,15 +821,21 @@ sub fetch_homology_species_hash {
   my $homology_description = shift;
   my $compara_db           = shift || 'compara';
   my $name_lookup          = {};
+  my $db_key;
   if ($compara_db =~ /pan/) {
     my $pan_info = $self->hub->species_defs->multi_val('PAN_COMPARA_LOOKUP');
     foreach (keys %$pan_info) {
       $name_lookup->{$_} = $pan_info->{$_}{'species_url'};
     }
+    $db_key = 'DATABASE_COMPARA_PAN_ENSEMBL';
   }
   else {
     $name_lookup = $self->hub->species_defs->prodnames_to_urls_lookup;
+    $db_key = 'DATABASE_COMPARA';
   }
+
+  my $hom_mlss_tags = $self->hub->species_defs->multi_hash->{$db_key}->{'HOMOLOGY_MLSS_TAGS'} // {};
+
   my ($homologies, $classification, $query_member) = $self->get_homologies($homology_source, $homology_description, $compara_db);
   my %homologues;
 
@@ -847,9 +853,18 @@ sub fetch_homology_species_hash {
         $target_member  = $gene_member;
         $dnds_ratio     = $homology->dnds_ratio; 
         $goc_score      = $homology->goc_score;
-        $goc_threshold  = $homology->method_link_species_set->get_value_for_tag('goc_quality_threshold');        
+
+        my $mlss_id = $homology->method_link_species_set_id;
+        if (exists $hom_mlss_tags->{$mlss_id} && exists $hom_mlss_tags->{$mlss_id}{'goc_quality_threshold'}) {
+          $goc_threshold = $hom_mlss_tags->{$mlss_id}{'goc_quality_threshold'};
+        }
+
         $wgac           = $homology->wga_coverage;
-        $wga_threshold  = $homology->method_link_species_set->get_value_for_tag('wga_quality_threshold');
+
+        if (exists $hom_mlss_tags->{$mlss_id} && exists $hom_mlss_tags->{$mlss_id}{'wga_quality_threshold'}) {
+          $wga_threshold = $hom_mlss_tags->{$mlss_id}{'wga_quality_threshold'};
+        }
+
         $highconfidence = $homology->is_high_confidence;
       }      
     }

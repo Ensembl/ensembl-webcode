@@ -1307,7 +1307,7 @@ sub _summarise_compara_db {
       where mlss.method_link_id = ml.method_link_id and
         mlss.species_set_id = ss.species_set_id and 
         ss.genome_db_id = gd.genome_db_id and
-        (ml.class like "GenomicAlign%" or ml.class like "%.constrained_element" or ml.class = "ConservationScore.conservation_score")
+        (ml.class like "GenomicAlign%" or ml.class like "%.constrained_element" or ml.class = "ConservationScore.conservation_score" or ml.class = "SyntenyRegion.synteny")
   ');
   
   my $constrained_elements = {};
@@ -1328,6 +1328,9 @@ sub _summarise_compara_db {
       $self->db_tree->{$db_name}{$key}{$id}{'species'}{'ancestral_sequences'} = 1 unless exists $self->db_tree->{$db_name}{$key}{$id};
     } elsif ($type eq 'CACTUS_DB') {
       $cactus_db_found = 1;
+    } elsif ($class eq 'SyntenyRegion.synteny' || $type eq 'SYNTENY') {
+      $key  = 'SYNTENIES';
+      $name = 'Synteny';
     }
     
     if ($intra_species{$species_set_id}) {

@@ -27,6 +27,7 @@ use strict;
 use List::Util qw(uniqstr);
 use Math::Round;
 use EnsEMBL::Web::Document::Table;
+use Bio::EnsEMBL::Compara::Method;
 use Bio::EnsEMBL::Compara::Utils::SpeciesTree;
 
 use base qw(EnsEMBL::Web::Document::HTML);
@@ -220,28 +221,34 @@ sub pairwise_mlss_data {
 
   my $mlss_adaptor    = $compara_db->get_adaptor('MethodLinkSpeciesSet');
 
+  my $species_defs = $self->hub->species_defs;
+  my $alignments = $species_defs->multi_hash->{'DATABASE_COMPARA'}->{'ALIGNMENTS'} // {};
+  my $syntenies = $species_defs->multi_hash->{'DATABASE_COMPARA'}->{'SYNTENIES'} // {};
+  my %pairwise_mlss_conf = (%{$alignments}, %{$syntenies});
+  my @pairwise_mlss_ids = sort {$a <=> $b} keys %pairwise_mlss_conf;
+
   my %data;
-  my %synt_methods;
+  # We can obtain the set of synteny methods from the available synteny datasets.
+  my %obs_synt_method_set = map { $_->{'type'} => 1 } values %{$syntenies};
+  my %synt_methods = map { $_ => 1 } grep { exists $obs_synt_method_set{$_} } @$methods;
 
   ## Munge all the necessary information
+  my %req_method_set = map { $_ => 1 } @$methods;
   my $lookup = $self->hub->species_defs->prodnames_to_urls_lookup;
-  foreach my $method (@{$methods||[]}) {
-    my $mlss_sets  = $mlss_adaptor->fetch_all_by_method_link_type($method);
-    if (@$mlss_sets and ($mlss_sets->[0]->method->class =~ /SyntenyRegion.synteny/)) {
-      $synt_methods{$method} = 1;
-    }
+  foreach my $mlss_id (@pairwise_mlss_ids) {
+    my $pairwise_mlss = $pairwise_mlss_conf{$mlss_id};
+    my $method = $pairwise_mlss->{'type'};
+    next if (!exists $req_method_set{$method});
 
-    foreach my $mlss (@$mlss_sets) {
-      my ($gdb1, $gdb2) = @{$mlss->species_set->genome_dbs};
-      my $name1 = $lookup->{$gdb1->name};
-      if ($gdb2) {
-        my $name2 = $lookup->{$gdb2->name};
-        push @{$data{$name1}->{$name2}}, [$method, $mlss->dbID];
-        push @{$data{$name2}->{$name1}}, [$method, $mlss->dbID];
-      } else {
-        # Self alignment
-        push @{$data{$name1}->{$name1}}, [$method, $mlss->dbID];
-      }
+    my ($gdb1_name, $gdb2_name) = keys %{$pairwise_mlss->{'species'}};
+    my $name1 = $lookup->{$gdb1_name};
+    if ($gdb2_name) {
+      my $name2 = $lookup->{$gdb2_name};
+      push @{$data{$name1}->{$name2}}, [$method, $mlss_id];
+      push @{$data{$name2}->{$name1}}, [$method, $mlss_id];
+    } else {
+      # Self alignment
+      push @{$data{$name1}->{$name1}}, [$method, $mlss_id];
     }
   }
   return (\%data, \%synt_methods);

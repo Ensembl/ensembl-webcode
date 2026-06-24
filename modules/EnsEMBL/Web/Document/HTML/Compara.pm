@@ -97,12 +97,12 @@ sub format_wga_table {
     return $self->error_message('No Compara databse', '<p>No Compara database is configured on this site.</p>' );
   }
 
-  my @all_mlss;
-  foreach my $method_link_type (qw(PECAN EPO EPO_LOW_COVERAGE CACTUS_HAL CACTUS_DB)) {
-    push @all_mlss, sort {$a->dbID <=> $b->dbID} @{ $compara_db->get_adaptor('MethodLinkSpeciesSet')->fetch_all_by_method_link_type($method_link_type) };
-  }
+  my $species_defs = $self->hub->species_defs;
+  my $alignments = $species_defs->multi_hash->{'DATABASE_COMPARA'}->{'ALIGNMENTS'} || {};
+  my %wga_method_type_set = map { $_ => 1 } qw(PECAN EPO EPO_EXTENDED CACTUS_HAL CACTUS_DB);
+  my @all_mlss_ids = sort {$a <=> $b} grep { exists $wga_method_type_set{$alignments->{$_}{'type'}} } keys %{$alignments};
 
-  unless (@all_mlss) {
+  unless (@all_mlss_ids) {
     return $self->error_message('No alignments found', qq{<p>This Compara database doesn't contain any multiple-genome alignments.</p>}, 'info');
   }
 
@@ -112,10 +112,13 @@ sub format_wga_table {
     { key => 'method' , title => 'Method used', },
   ], [], {data_table => 1, exportable => 1, id => 'all_multiple_alignments'});
 
-  foreach my $mlss (@all_mlss) {
-    my $name = $mlss->name;
-    my $genomes = join(", ", sort map {$_->display_name} @{$mlss->species_set->genome_dbs});
-    my $method_link_type = $mlss->method->type;
+  my $url_lookup = $species_defs->prodnames_to_urls_lookup;
+  foreach my $mlss_id (@all_mlss_ids) {
+    my $alignment = $alignments->{$mlss_id};
+    my $name = $alignment->{'name'};
+    my @gdb_names = grep { $_ ne 'ancestral_sequences' } keys %{$alignment->{'species'}};
+    my $genomes = join(", ", sort map { $species_defs->get_config($url_lookup->{$_}, 'SPECIES_DISPLAY_NAME') } @gdb_names);
+    my $method_link_type = $alignment->{'type'};
     # Remove the method name, trying first the type
     $name =~ s/\s+$method_link_type$//i;
     # And then the display name if there is one
@@ -123,7 +126,7 @@ sub format_wga_table {
         $method_link_type = $Bio::EnsEMBL::Compara::Method::PLAIN_TEXT_DESCRIPTIONS{$method_link_type};
         $name =~ s/\s+$method_link_type$//i;
     }
-    my $url = sprintf(q{<a href="/info/genome/compara/mlss.html?mlss=%d">%s</a>}, $mlss->dbID, $name);
+    my $url = sprintf(q{<a href="/info/genome/compara/mlss.html?mlss=%d">%s</a>}, $mlss_id, $name);
     $table->add_row({
       'name'    => $url,
       'genomes' => $genomes,

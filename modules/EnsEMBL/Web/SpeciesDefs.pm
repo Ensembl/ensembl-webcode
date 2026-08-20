@@ -1789,11 +1789,15 @@ sub species_path {
 
         if ($species_division ne $this_site_division) {
 
-          # The ENSEMBL_SERVERNAME will not always have a server prefix.
-          # This is expected for live Ensembl sites and external sites (e.g. Gramene).
-          # In such cases, the URL will refer to the live site of the species division.
           my $server_prefix;
-          if ($SiteDefs::ENSEMBL_SERVERNAME =~ /^(.+)-${this_site_division}\.ensembl\.org$/) {
+          if ($SiteDefs::ENSEMBL_SERVERNAME =~ /\.ensembl\.org$/
+              && $SiteDefs::ARCHIVE_VERSION eq 'Jun2026'
+              && $SiteDefs::ENSEMBL_VERSION eq '116') {
+            $server_prefix = $SiteDefs::ARCHIVE_VERSION;  # a special case for a special release
+          } elsif ($SiteDefs::ENSEMBL_SERVERNAME =~ /^(.+)-${this_site_division}\.ensembl\.org$/) {
+            # The ENSEMBL_SERVERNAME will not always have a server prefix.
+            # This is expected for live Ensembl sites and external sites (e.g. Gramene).
+            # In such cases, the URL will refer to the live site of the species division.
             $server_prefix = $1;
           }
 

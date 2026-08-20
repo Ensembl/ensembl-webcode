@@ -26,6 +26,7 @@ no warnings qw(uninitialized);
 use base qw(EnsEMBL::Web::ConfigPacker_base);
 
 use EnsEMBL::Web::File::Utils::URL qw(read_file);
+use EnsEMBL::Web::Utils::Compara qw(_fetch_intraspecies_constraints _summarise_compara_alignment_data);
 
 use JSON qw(from_json);
 use URI::Escape;
@@ -1292,10 +1293,7 @@ sub _summarise_compara_db {
   }
  
   # See if there are any intraspecies alignments (ie a self compara)
-  my $intra_species_aref = $dbh->selectall_arrayref($self->_intraspecies_sql);
-  
-  my (%intra_species, %intra_species_constraints);
-  $intra_species{$_->[0]}{$_->[1]} = 1 for @$intra_species_aref;
+  my %intra_species_constraints = %{ EnsEMBL::Web::Utils::Compara::_fetch_intraspecies_constraints($dbh) };
 
   # look at all the multiple alignments
   ## We've done the DB hash...So lets get on with the multiple alignment hash;
@@ -1331,10 +1329,6 @@ sub _summarise_compara_db {
     } elsif ($class eq 'SyntenyRegion.synteny' || $type eq 'SYNTENY') {
       $key  = 'SYNTENIES';
       $name = 'Synteny';
-    }
-    
-    if ($intra_species{$species_set_id}) {
-      $intra_species_constraints{$species}{$_} = 1 for keys %{$intra_species{$species_set_id}};
     }
     
     $self->db_tree->{$db_name}{$key}{$id}{'id'}                = $id;
@@ -1487,7 +1481,7 @@ sub _summarise_compara_db {
   $dbh->disconnect;
 }
 
-sub _intraspecies_sql {
+sub _intraspecies_sql {  # not in use as of 2026-07
   return qq(
     select mls.species_set_id, mls.method_link_species_set_id, count(*) as count
       from method_link_species_set as mls, 
@@ -1516,178 +1510,13 @@ sub _homologies_sql {
 
 sub _summarise_compara_alignments {
   my ($self, $dbh, $db_name, $constraint) = @_;
-  return unless keys %{$constraint||{}};
-
-  my $lookup_species              = join ',', map $dbh->quote($_), sort keys %$constraint;
-  my @method_link_species_set_ids = map keys %$_, values %$constraint;
-  
-  # get details of seq_regions in the database
-  my $q = '
-    select df.dnafrag_id, df.name, df.coord_system_name, gdb.name
-      from dnafrag df, genome_db gdb
-      where df.genome_db_id = gdb.genome_db_id
-  ';
-  
-  $q .= " and gdb.name in ($lookup_species)", if $lookup_species;
-  
-  my $sth = $dbh->prepare($q);
-  my $rv  = $sth->execute || die $sth->errstr;
-  
-  my %genomic_regions;
-  
-  while (my ($dnafrag_id, $sr, $coord_system, $species) = $sth->fetchrow_array) {
-    $species =~ s/ /_/;
-    
-    $genomic_regions{$dnafrag_id} = {
-      species      => $species,
-      seq_region   => $sr,
-      coord_system => $coord_system,
-    };
+  my $alignment_summary = EnsEMBL::Web::Utils::Compara::_summarise_compara_alignment_data($dbh, $db_name, $constraint);
+  while (my ($key, $value) = each %{$alignment_summary}) {
+    $self->db_tree->{$db_name}{$key} = $value;
   }
-
-  # get details of methods in the database -
-  $q = '
-    select mlss.method_link_species_set_id, ml.type, ml.class, mlss.name
-      from method_link_species_set mlss, method_link ml
-      where mlss.method_link_id = ml.method_link_id
-  ';
-  
-  $sth = $dbh->prepare($q);
-  $rv  = $sth->execute || die $sth->errstr;
-  my (%methods, %names, %classes);
-  
-  while (my ($mlss, $type, $class, $name) = $sth->fetchrow_array) {
-    $methods{$mlss} = $type;
-    $names{$mlss}   = $name;
-    $classes{$mlss} = $class;
-  }
-  
-  # get details of alignments
-  my @where;
-  if(@method_link_species_set_ids) {
-    my $mlss = join(',',@method_link_species_set_ids);
-    push @where,"ga_ref.method_link_species_set_id in ($mlss)";
-  }
-  my $where = '';
-  $where = "WHERE ".join(' AND ',@where) if(@where);
-  $q = sprintf('
-    select distinct genomic_align_block_id, ga.method_link_species_set_id, ga.dnafrag_start, ga.dnafrag_end, ga.dnafrag_id
-      from genomic_align ga_ref join dnafrag using (dnafrag_id) join genomic_align ga using (genomic_align_block_id)
-      %s
-      order by genomic_align_block_id, ga.dnafrag_id',
-      $where
-  );
-  
-  $sth = $dbh->prepare($q);
-  $rv  = $sth->execute || die $sth->errstr;
-      
-  # parse the data
-  my (%config, @seen_ids, $prev_id, $prev_df_id, $prev_comparison, $prev_method, $prev_start, $prev_end, $prev_sr, $prev_species, $prev_coord_sys);
-  
-  while (my ($gabid, $mlss_id, $start, $end, $df_id) = $sth->fetchrow_array) {
-    my $id = $gabid . $mlss_id;
-    
-    if ($id eq $prev_id) {
-      my $this_method    = $methods{$mlss_id};
-      my $this_sr        = $genomic_regions{$df_id}->{'seq_region'};
-      my $this_species   = $genomic_regions{$df_id}->{'species'};
-      my $this_coord_sys = $genomic_regions{$df_id}->{'coord_system'};
-      my $comparison     = "$this_sr:$prev_sr";
-      my $coords         = "$this_coord_sys:$prev_coord_sys";
-      
-      $config{$this_method}{$this_species}{$prev_species}{$comparison}{'coord_systems'}  = "$coords";  # add a record of the coord systems used (might be needed for zebrafish ?)
-      $config{$this_method}{$this_species}{$prev_species}{$comparison}{'source_name'}    = "$this_sr"; # add names of compared regions
-      $config{$this_method}{$this_species}{$prev_species}{$comparison}{'source_species'} = "$this_species";
-      $config{$this_method}{$this_species}{$prev_species}{$comparison}{'target_name'}    = "$prev_sr";
-      $config{$this_method}{$this_species}{$prev_species}{$comparison}{'target_species'} = "$prev_species";
-      $config{$this_method}{$this_species}{$prev_species}{$comparison}{'mlss_id'}        = "$mlss_id";
-      
-      $self->_get_regions(\%config, $this_method, $comparison, $this_species, $prev_species, $start, $prev_start, 'start'); # look for smallest start in this comparison
-      $self->_get_regions(\%config, $this_method, $comparison, $this_species, $prev_species, $end,   $prev_end,   'end');   # look for largest ends in this comparison
-    } else {
-      $prev_id        = $id;
-      $prev_df_id     = $df_id;
-      $prev_start     = $start;
-      $prev_end       = $end;
-      $prev_sr        = $genomic_regions{$df_id}->{'seq_region'};
-      $prev_species   = $genomic_regions{$df_id}->{'species'};
-      $prev_coord_sys = $genomic_regions{$df_id}->{'coord_system'};
-    }        
-  }
-  
-  # add reciprocal entries for each comparison
-  foreach my $method (keys %config) {
-    foreach my $p_species (keys %{$config{$method}}) {
-      foreach my $s_species (keys %{$config{$method}{$p_species}}) {                                                
-        foreach my $comp (keys %{$config{$method}{$p_species}{$s_species}}) {
-          my $revcomp = join ':', reverse(split ':', $comp);
-          
-          if (!exists $config{$method}{$s_species}{$p_species}{$revcomp}) {
-            my $coords = $config{$method}{$p_species}{$s_species}{$comp}{'coord_systems'};
-            my ($a,$b) = split ':', $coords;
-            
-            $coords = "$b:$a";
-            
-            my $record = {
-              source_name    => $config{$method}{$p_species}{$s_species}{$comp}{'target_name'},
-              source_species => $config{$method}{$p_species}{$s_species}{$comp}{'target_species'},
-              source_start   => $config{$method}{$p_species}{$s_species}{$comp}{'target_start'},
-              source_end     => $config{$method}{$p_species}{$s_species}{$comp}{'target_end'},
-              target_name    => $config{$method}{$p_species}{$s_species}{$comp}{'source_name'},
-              target_species => $config{$method}{$p_species}{$s_species}{$comp}{'source_species'},
-              target_start   => $config{$method}{$p_species}{$s_species}{$comp}{'source_start'},
-              target_end     => $config{$method}{$p_species}{$s_species}{$comp}{'source_end'},
-              mlss_id        => $config{$method}{$p_species}{$s_species}{$comp}{'mlss_id'},
-              coord_systems  => $coords,
-            };
-            
-            $config{$method}{$s_species}{$p_species}{$revcomp} = $record;
-          }
-        }
-      }
-    }
-  }
-
-  # get a summary of the regions present
-  my $region_summary;
-  foreach my $method (keys %config) {
-    foreach my $p_species (keys %{$config{$method}}) {
-      foreach my $s_species (keys %{$config{$method}{$p_species}}) {                                                
-        foreach my $comp (keys %{$config{$method}{$p_species}{$s_species}}) {
-          my $target_name  = $config{$method}{$p_species}{$s_species}{$comp}{'target_name'};
-          my $source_name  = $config{$method}{$p_species}{$s_species}{$comp}{'source_name'};
-          my $source_start = $config{$method}{$p_species}{$s_species}{$comp}{'source_start'};
-          my $source_end   = $config{$method}{$p_species}{$s_species}{$comp}{'source_end'};
-          my $mlss_id      = $config{$method}{$p_species}{$s_species}{$comp}{'mlss_id'};
-          my $name         = $names{$mlss_id};
-          my ($homologue)  = grep $_ != $mlss_id, @method_link_species_set_ids;
-          
-          push @{$region_summary->{$p_species}{$source_name}}, {
-            species     => {"$s_species--$target_name" => 1, "$p_species--$source_name" => 1 },
-            target_name => $target_name,
-            start       => $source_start,
-            end         => $source_end,
-            id          => $mlss_id,
-            name        => $name,
-            type        => $method,
-            class       => $classes{$mlss_id},
-            homologue   => $methods{$homologue}
-          };
-        }
-      }
-    }
-  }
-  
-  my $key = $constraint ? 'INTRA_SPECIES_ALIGNMENTS' : 'ALIGNMENTS';
-  
-  foreach my $method (keys %config) {
-    $self->db_tree->{$db_name}{$key}{$method} = $config{$method};
-  }
-  
-  $self->db_tree->{$db_name}{$key}{'REGION_SUMMARY'} = $region_summary;
 }
 
-sub _get_regions {
+sub _get_regions {  # not in use as of 2026-07
   #compare regions to get the smallest start and largest end
   my $self = shift;
   my ($config,$method,$comparison,$species1,$species2,$location1,$location2,$condition) = @_;
@@ -1710,7 +1539,7 @@ sub _get_regions {
   }
 }
 
-sub _comp_se {
+sub _comp_se {  # not in use as of 2026-07
 # compare start (less than) or end (greater than) regions depending on condition
   my $self = shift;
   my ($condition, $location1, $location2) = @_;
